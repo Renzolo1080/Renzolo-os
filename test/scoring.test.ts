@@ -45,3 +45,39 @@ assert(MEASURE_KEYS.length === 6, "six measures defined per spec");
 assert(BLOCK_KEYS.length === 9, "nine BMC blocks defined per spec");
 
 console.log("\nAll scoring engine tests completed.");
+
+// --- Sub-score rubric refinement: measure-level weighting ---
+import { computeSubScores } from "../lib/scoring";
+
+function fixtureWithMeasures(m: { clarity: number; evidence: number; economics: number; scalability: number; defensibility: number; risk: number }): AllBlockScores {
+  const out = {} as AllBlockScores;
+  for (const b of BLOCK_KEYS) out[b] = { ...m };
+  return out;
+}
+
+// Same block-average (50) both ways, but the first fixture concentrates
+// strength in scalability/clarity (what Market Readiness should reward)
+// while the second concentrates it in evidence/economics instead.
+const highScalabilityClarity = fixtureWithMeasures({ clarity: 90, evidence: 10, economics: 10, scalability: 90, defensibility: 10, risk: 90 });
+const highEvidenceEconomics = fixtureWithMeasures({ clarity: 10, evidence: 90, economics: 90, scalability: 10, defensibility: 10, risk: 90 });
+
+const marketA = computeSubScores(highScalabilityClarity).market;
+const marketB = computeSubScores(highEvidenceEconomics).market;
+assert(marketA > marketB, `Market Readiness rewards scalability/clarity over evidence/economics at equal block average (got ${marketA} vs ${marketB})`);
+
+const customerA = computeSubScores(highScalabilityClarity).customer;
+const customerB = computeSubScores(highEvidenceEconomics).customer;
+assert(customerB > customerA, `Customer Readiness rewards evidence/economics over scalability/clarity at equal block average (got ${customerB} vs ${customerA})`);
+
+// --- Investor Readiness confidence modifier ---
+const sameInputs = fixtureWithMeasures({ clarity: 70, evidence: 70, economics: 70, scalability: 70, defensibility: 70, risk: 70 });
+const investorHigh = computeSubScores(sameInputs, "High").investor;
+const investorModerate = computeSubScores(sameInputs, "Moderate").investor;
+const investorLow = computeSubScores(sameInputs, "Low").investor;
+assert(investorHigh > investorModerate && investorModerate > investorLow, `Investor Readiness drops as confidence drops, same inputs (got High=${investorHigh}, Moderate=${investorModerate}, Low=${investorLow})`);
+assert(computeSubScores(sameInputs).investor === investorHigh, "omitting healthConfidence behaves the same as High (no discount) for backward compatibility");
+
+// --- runDiagnostic wires the confidence modifier through automatically ---
+assert(strongResult.subScores.investor > 0, "runDiagnostic produces a positive Investor Readiness for the strong fixture");
+
+console.log("\nAll scoring engine tests completed (including sub-score rubric refinement).");

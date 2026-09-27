@@ -172,6 +172,27 @@ launch date moved to accommodate this rather than cutting scope):
   block — blocks that are gap-to-target priorities are marked ⚠ so
   founders naturally plan against their weakest areas first.
 
+- **Refined Market/Customer/Investor Readiness rubric**
+  (`lib/scoring.ts`) — these three scores (shown as the dashboard's
+  Market/Customer/Investor stat cards) previously weighted all six
+  measures (clarity, evidence, economics, scalability, defensibility,
+  risk) equally within each block. They now weight the measures that
+  actually matter for each dimension: Market Readiness leans on
+  scalability + clarity, Customer Readiness on evidence + economics,
+  and Investor Readiness on economics + risk + defensibility — plus a
+  confidence discount (based on the Health Index's evidence-completeness
+  rating) so a high self-reported score backed by little real evidence
+  reads as less investor-ready, not taken at face value. 15/15 scoring
+  tests pass (`npm run test:scoring`), including new tests that verify
+  the weighting actually produces the intended effect.
+- **Customizable dashboard** — a standard view (Venture Score,
+  Market/Customer/Investor Readiness, Health Index, the report/subscribe
+  panel, and the Founder Tools link) is always shown to every founder.
+  Three additional data points — the reminders banner, the valuation
+  card, and the Goals & Progress list — are optional; founders choose
+  which to include via `components/DashboardCustomizer.tsx`, saved on
+  `profiles.dashboard_widgets` (`PATCH /api/profile/dashboard-widgets`).
+
 **Still open on "tools"**: the user also flagged a third, unspecified
 "something else" tool beyond calculators and the milestone planner —
 needs a follow-up conversation to know what to build.

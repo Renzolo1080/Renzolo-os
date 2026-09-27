@@ -109,28 +109,78 @@ export function computeVentureScore(blockScores: Record<BlockKey, number>): Vent
   return { score, tier };
 }
 
-const SUBSCORE_WEIGHTS: Record<keyof SubScores, Partial<Record<BlockKey, number>>> = {
-  market: { customerSegments: 0.35, channels: 0.35, valueProposition: 0.3 },
-  customer: { customerSegments: 0.3, customerRelationships: 0.4, revenueStreams: 0.3 },
-  investor: { revenueStreams: 0.3, costStructure: 0.25, keyResources: 0.2, keyPartnerships: 0.25 },
+/** Sub-score rubric — Keep Manual (same convention as everything else in
+ * this file): a documented, deliberately reasoned starting point, not a
+ * finished calibration. Each of the three readiness dimensions weights
+ * BOTH which blocks matter (blockWeights) AND which of the six measures
+ * within those blocks matter most for that dimension (measureWeights) —
+ * a market case should hinge on clarity/scalability, a customer case on
+ * evidence/economics, and an investor case on economics/risk/
+ * defensibility, rather than treating all six measures as equally
+ * relevant to all three readiness types. */
+interface SubScoreRubric {
+  blockWeights: Partial<Record<BlockKey, number>>;
+  measureWeights: Partial<Record<MeasureKey, number>>;
+}
+
+const SUBSCORE_RUBRICS: Record<keyof SubScores, SubScoreRubric> = {
+  market: {
+    blockWeights: { customerSegments: 0.35, channels: 0.35, valueProposition: 0.3 },
+    measureWeights: { scalability: 0.35, clarity: 0.35, evidence: 0.075, economics: 0.075, defensibility: 0.075, risk: 0.075 },
+  },
+  customer: {
+    blockWeights: { customerSegments: 0.3, customerRelationships: 0.4, revenueStreams: 0.3 },
+    measureWeights: { evidence: 0.35, economics: 0.35, clarity: 0.075, scalability: 0.075, defensibility: 0.075, risk: 0.075 },
+  },
+  investor: {
+    blockWeights: { revenueStreams: 0.3, costStructure: 0.25, keyResources: 0.2, keyPartnerships: 0.25 },
+    measureWeights: { economics: 0.3, risk: 0.25, defensibility: 0.25, clarity: 0.0667, evidence: 0.0667, scalability: 0.0666 },
+  },
 };
 
-function weightedBlockAverage(blockScores: Record<BlockKey, number>, weights: Partial<Record<BlockKey, number>>): number {
+/** A funder discounts unverified claims — a high self-reported Investor
+ * Readiness score backed by little real evidence should read lower, not
+ * be taken at face value. Keep Manual: a reasoned starting multiplier,
+ * not a calibrated one. */
+const INVESTOR_CONFIDENCE_MULTIPLIER: Record<HealthIndexResult["confidence"], number> = {
+  High: 1.0,
+  Moderate: 0.9,
+  Low: 0.75,
+};
+
+function weightedMeasureScore(measures: BlockMeasureScores, weights: Partial<Record<MeasureKey, number>>): number {
   let total = 0;
   let weightSum = 0;
-  for (const [block, weight] of Object.entries(weights) as [BlockKey, number][]) {
-    total += (blockScores[block] ?? 0) * weight;
+  for (const [measure, weight] of Object.entries(weights) as [MeasureKey, number][]) {
+    total += clamp(measures[measure] ?? 0) * weight;
+    weightSum += weight;
+  }
+  return weightSum > 0 ? total / weightSum : 0;
+}
+
+function weightedRubricScore(all: AllBlockScores, rubric: SubScoreRubric): number {
+  let total = 0;
+  let weightSum = 0;
+  for (const [block, weight] of Object.entries(rubric.blockWeights) as [BlockKey, number][]) {
+    total += weightedMeasureScore(all[block], rubric.measureWeights) * weight;
     weightSum += weight;
   }
   return weightSum > 0 ? Math.round((total / weightSum) * 10) / 10 : 0;
 }
 
-export function computeSubScores(blockScores: Record<BlockKey, number>): SubScores {
-  return {
-    market: weightedBlockAverage(blockScores, SUBSCORE_WEIGHTS.market),
-    customer: weightedBlockAverage(blockScores, SUBSCORE_WEIGHTS.customer),
-    investor: weightedBlockAverage(blockScores, SUBSCORE_WEIGHTS.investor),
-  };
+/** healthConfidence is optional so this stays backward-compatible for any
+ * caller that only has block scores on hand, but runDiagnostic always
+ * supplies it — the confidence modifier only ever applies to Investor
+ * Readiness (see INVESTOR_CONFIDENCE_MULTIPLIER above), never to Market
+ * or Customer Readiness. */
+export function computeSubScores(all: AllBlockScores, healthConfidence?: HealthIndexResult["confidence"]): SubScores {
+  const market = weightedRubricScore(all, SUBSCORE_RUBRICS.market);
+  const customer = weightedRubricScore(all, SUBSCORE_RUBRICS.customer);
+  let investor = weightedRubricScore(all, SUBSCORE_RUBRICS.investor);
+  if (healthConfidence) {
+    investor = Math.round(investor * INVESTOR_CONFIDENCE_MULTIPLIER[healthConfidence] * 10) / 10;
+  }
+  return { market, customer, investor };
 }
 
 export function computeHealthIndex(
@@ -162,10 +212,11 @@ export function computeGaps(all: AllBlockScores, blockScores: Record<BlockKey, n
 
 export function runDiagnostic(all: AllBlockScores, evidenceUploadedByBlock: Record<BlockKey, boolean>): DiagnosticResult {
   const blockScores = computeAllBlockScores(all);
+  const healthIndex = computeHealthIndex(all, blockScores, evidenceUploadedByBlock);
   return {
     ventureScore: computeVentureScore(blockScores),
-    subScores: computeSubScores(blockScores),
-    healthIndex: computeHealthIndex(all, blockScores, evidenceUploadedByBlock),
+    subScores: computeSubScores(all, healthIndex.confidence),
+    healthIndex,
     blockScores,
     gaps: computeGaps(all, blockScores),
   };

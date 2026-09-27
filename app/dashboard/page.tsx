@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
 import { GoalProgressRow } from "@/components/GoalProgressRow";
+import { DashboardCustomizer } from "@/components/DashboardCustomizer";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 
 export default async function DashboardPage() {
@@ -10,6 +11,12 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  const { data: profile } = await supabase.from("profiles").select("dashboard_widgets").eq("id", user.id).single();
+  const widgets: string[] = profile?.dashboard_widgets ?? ["reminders", "valuation", "goalsProgress"];
+  const showReminders = widgets.includes("reminders");
+  const showValuation = widgets.includes("valuation");
+  const showGoalsProgress = widgets.includes("goalsProgress");
 
   const { data: latestScore } = await supabase
     .from("scores")
@@ -25,7 +32,8 @@ export default async function DashboardPage() {
     .eq("founder_id", user.id)
     .maybeSingle();
 
-  const { data: blockResponses } = latestScore
+  const needsBlockResponses = latestScore && (showReminders || showGoalsProgress);
+  const { data: blockResponses } = needsBlockResponses
     ? await supabase
         .from("block_responses")
         .select("id, block_key, goal_target, target_date, progress_status")
@@ -54,7 +62,9 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {(overdueGoals.length > 0 || dueSoonGoals.length > 0) && (
+          <DashboardCustomizer initialWidgets={widgets} />
+
+          {showReminders && (overdueGoals.length > 0 || dueSoonGoals.length > 0) && (
             <div className="rounded border border-gold bg-cream p-4 text-sm">
               {overdueGoals.length > 0 && (
                 <p className="text-red-700 font-semibold">
@@ -69,6 +79,7 @@ export default async function DashboardPage() {
             </div>
           )}
 
+          {/* Standard view — always shown */}
           <div className="rounded border p-6">
             <p className="text-sm text-ink-soft">Venture Score</p>
             <p className="text-4xl font-bold text-navy">
@@ -91,7 +102,7 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          {latestScore.valuation_low != null && latestScore.valuation_high != null && (
+          {showValuation && latestScore.valuation_low != null && latestScore.valuation_high != null && (
             <div className="rounded border p-6 bg-navy text-white">
               <p className="text-sm text-cream/80">Estimated Venture Value</p>
               <p className="text-3xl font-bold">
@@ -106,7 +117,7 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          {blockResponses && blockResponses.length > 0 && (
+          {showGoalsProgress && blockResponses && blockResponses.length > 0 && (
             <div className="rounded border p-4">
               <p className="font-semibold text-navy mb-1">Goals & Progress</p>
               <p className="text-xs text-ink-soft mb-2">
@@ -128,6 +139,7 @@ export default async function DashboardPage() {
             </div>
           )}
 
+          {/* Standard view — always shown */}
           {subscription?.status === "active" ? (
             <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} />
           ) : (

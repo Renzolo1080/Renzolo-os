@@ -14,6 +14,11 @@ create table profiles (
   country text,
   venture_stage text,
   industry text,
+  -- Which OPTIONAL dashboard widgets this founder has chosen to show,
+  -- beyond the standard view (Venture Score, sub-scores, Health Index,
+  -- report/subscribe, and the Founder Tools link, which are never
+  -- optional). Valid values: 'reminders', 'valuation', 'goalsProgress'.
+  dashboard_widgets jsonb not null default '["reminders","valuation","goalsProgress"]'::jsonb,
   created_at timestamptz not null default now()
 );
 
