@@ -267,13 +267,53 @@ approach extends cleanly into a proper regional tier lookup for the
 subscription checkout too. Not yet built because the actual non-Africa
 numbers aren't decided yet — that's a pricing decision, not a code gap.
 
-## Future: cohort/partner accelerator programs
+## Future: cohort/partner accelerator programs (scoped, not yet built)
 
-The founder also wants to use this OS to support group/cohort training
+The founder wants to use this OS to support group/cohort training
 accelerators and supplier-development/readiness programs run with
 partners (e.g. NCMSDC, SASDC, TIN Ventures UK) — a genuinely separate,
-multi-tenant feature area (partner/program admins, cohort-level
-reporting, how founders get associated with a cohort) from everything
-built so far, which is entirely single-founder-facing. Scoping
-questions were asked back in the conversation; nothing has been built
-for this yet pending those answers.
+multi-tenant feature area from everything built so far, which is
+entirely single-founder-facing. Decided: this is scoped now, in this
+document, but deliberately built as the first major post-launch
+feature rather than folded into the current push — so it doesn't
+further delay Oct or the core consumer product, but nothing built
+between now and then should conflict with the design below.
+
+**How a founder joins a cohort**: a partner gets a unique invite
+link/code; any founder who registers through it is automatically
+tagged to that partner's cohort at signup — no manual per-founder work
+by the partner needed for open enrollment.
+
+**What a partner admin sees** (all three requested):
+- A cohort-level aggregate dashboard — average Venture Score across the
+  cohort, the most common weak blocks/gaps, and completion rates (how
+  many invited founders have actually finished an assessment).
+- Individual founder detail — drill into any one founder's score,
+  report, and progress, similar to what `/advisor` shows today.
+- Exportable reports — cohort progress as a spreadsheet/PDF a partner
+  can hand to their own funders or board.
+
+**Planned data model** (not yet added to `supabase/schema.sql` — this
+is the design, applied when the feature is actually built):
+- A `partners` table (id, name, invite_code, contact info) — one row
+  per partner organization (NCMSDC, SASDC, etc.).
+- A `cohorts` table (id, partner_id, name, invite_code, created_at) —
+  a partner can run more than one cohort/program over time (e.g. a 2026
+  Spring cohort and a 2026 Fall cohort), each with its own invite link.
+- `profiles.cohort_id` (nullable) — set automatically when a founder
+  registers through a cohort's invite link; a founder with no
+  `cohort_id` is just a regular self-serve subscriber, unaffected by any
+  of this.
+- A `partner_admin` role (extending the existing `user_role` enum
+  alongside `founder`/`advisor`/`admin`) with `profiles.partner_id`
+  identifying which partner organization they administer — scoped by
+  RLS to only see cohorts and founders under their own `partner_id`,
+  the same ownership-scoping pattern used everywhere else in this
+  schema (assessments, milestones, recommendations, etc.).
+- A new `/partner` section (mirroring `/advisor`'s structure) for the
+  aggregate dashboard, founder drill-down, and CSV/PDF export.
+
+This preserves everything already built: a `cohort_id` is purely
+additive on `profiles`, and every founder-facing feature (dashboard,
+assessment, tools, reports) works identically whether or not a founder
+came through a cohort.
