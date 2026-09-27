@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReviewButton } from "@/components/ReviewButton";
 import { ScheduleButton } from "@/components/ScheduleButton";
+import { QAToggle } from "@/components/QAToggle";
 
 export default async function AdvisorQueuePage() {
   const supabase = createClient();
@@ -33,8 +34,11 @@ export default async function AdvisorQueuePage() {
     <main className="min-h-screen px-6 py-10 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold text-navy mb-2">Advisor Review Queue</h1>
       <p className="text-sm text-ink-soft mb-6">
-        Reports awaiting review before release to the founder. Target turnaround: 24–36 hours.
+        Reports flagged for review are quality-assurance only — founders already have their report; this is
+        not a gate. Target turnaround when flagged: 24–36 hours.
       </p>
+
+      {profile.role === "admin" && <QAToggle />}
 
       {!pendingReports || pendingReports.length === 0 ? (
         <p>Nothing pending review right now.</p>

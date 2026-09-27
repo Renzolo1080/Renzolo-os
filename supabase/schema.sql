@@ -25,6 +25,10 @@ create table assessments (
   industry text,
   geography text,
   time_horizon text,
+  business_type text,
+  employee_count text,
+  years_in_business text,
+  annual_revenue text,
   created_at timestamptz not null default now(),
   submitted_at timestamptz,
   scored_at timestamptz
@@ -200,3 +204,29 @@ create policy "advisor_sessions: founder can insert own" on advisor_sessions for
   with check (founder_id = auth.uid());
 create policy "advisor_sessions: staff can update" on advisor_sessions for update
   using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+
+-- Singleton settings row admins can flip at runtime (no redeploy needed).
+-- qa_review_enabled controls whether EVERY new report is queued for a
+-- human advisor to read before advisor_reviewed flips true — turn it on
+-- during a pilot/testing phase, off once volume makes 100% human review
+-- infeasible. Regardless of this flag, a Low-confidence report (thin
+-- self-reported evidence) is always queued for review — see the
+-- requiresReview logic in app/api/report/route.ts. Report delivery to
+-- the founder is never gated on this either way (Keep Manual note: the
+-- toggle changes the QA workflow, never what the founder receives).
+create table app_settings (
+  id boolean primary key default true,
+  qa_review_enabled boolean not null default true,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references profiles(id),
+  constraint app_settings_singleton check (id)
+);
+
+insert into app_settings (id, qa_review_enabled) values (true, true);
+
+alter table app_settings enable row level security;
+
+create policy "app_settings: admin can select" on app_settings for select
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'));
+create policy "app_settings: admin can update" on app_settings for update
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'));

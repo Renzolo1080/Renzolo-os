@@ -11,7 +11,8 @@ interface BlockSubmission {
 }
 
 /** POST /api/score
- * Body: { ventureStage, industry, geography, timeHorizon, blocks: Record<BlockKey, BlockSubmission> }
+ * Body: { ventureStage, industry, geography, timeHorizon, businessType, employeeCount,
+ *          yearsInBusiness, annualRevenue, blocks: Record<BlockKey, BlockSubmission> }
  * Saves the full 9-block assessment and computes the Venture Score,
  * sub-scores, and Health Index in one pass — this is the "Launch MVP"
  * shortcut (self-assessment produces the six measures directly); advisor
@@ -42,6 +43,10 @@ export async function POST(req: NextRequest) {
       industry: body.industry,
       geography: body.geography,
       time_horizon: body.timeHorizon,
+      business_type: body.businessType,
+      employee_count: body.employeeCount,
+      years_in_business: body.yearsInBusiness,
+      annual_revenue: body.annualRevenue,
       submitted_at: new Date().toISOString(),
       scored_at: new Date().toISOString(),
     })

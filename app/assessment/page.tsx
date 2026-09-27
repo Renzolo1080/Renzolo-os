@@ -16,7 +16,16 @@ const emptyAnswer = (): BlockAnswer => ({
 export default function AssessmentPage() {
   const router = useRouter();
   const [step, setStep] = useState(0); // 0 = context, 1..9 = blocks
-  const [context, setContext] = useState({ ventureStage: "", industry: "", geography: "", timeHorizon: "" });
+  const [context, setContext] = useState({
+    ventureStage: "",
+    industry: "",
+    geography: "",
+    timeHorizon: "",
+    businessType: "",
+    employeeCount: "",
+    yearsInBusiness: "",
+    annualRevenue: "",
+  });
   const [answers, setAnswers] = useState<Record<BlockKey, BlockAnswer>>(
     () => Object.fromEntries(BLOCK_PROMPTS.map((b) => [b.key, emptyAnswer()])) as Record<BlockKey, BlockAnswer>
   );
@@ -77,6 +86,64 @@ export default function AssessmentPage() {
             value={context.timeHorizon}
             onChange={(e) => setContext({ ...context, timeHorizon: e.target.value })}
           />
+
+          <p className="text-sm text-ink-soft pt-2">
+            A few more details so your report — and any market comparisons in it — reflect a business like
+            yours, not a generic one.
+          </p>
+
+          <select
+            className="w-full rounded border px-3 py-2"
+            value={context.businessType}
+            onChange={(e) => setContext({ ...context, businessType: e.target.value })}
+          >
+            <option value="">Business type</option>
+            <option value="Sole proprietorship / informal">Sole proprietorship / informal</option>
+            <option value="Registered small business / LLC">Registered small business / LLC</option>
+            <option value="Cooperative">Cooperative</option>
+            <option value="Corporation">Corporation</option>
+            <option value="Nonprofit / social enterprise">Nonprofit / social enterprise</option>
+          </select>
+
+          <select
+            className="w-full rounded border px-3 py-2"
+            value={context.yearsInBusiness}
+            onChange={(e) => setContext({ ...context, yearsInBusiness: e.target.value })}
+          >
+            <option value="">Years in business</option>
+            <option value="Pre-launch / idea stage">Pre-launch / idea stage</option>
+            <option value="Less than 1 year">Less than 1 year</option>
+            <option value="1-3 years">1-3 years</option>
+            <option value="3-5 years">3-5 years</option>
+            <option value="5+ years">5+ years</option>
+          </select>
+
+          <select
+            className="w-full rounded border px-3 py-2"
+            value={context.employeeCount}
+            onChange={(e) => setContext({ ...context, employeeCount: e.target.value })}
+          >
+            <option value="">Team size</option>
+            <option value="Just me">Just me</option>
+            <option value="2-5 employees">2-5 employees</option>
+            <option value="6-20 employees">6-20 employees</option>
+            <option value="21-50 employees">21-50 employees</option>
+            <option value="50+ employees">50+ employees</option>
+          </select>
+
+          <select
+            className="w-full rounded border px-3 py-2"
+            value={context.annualRevenue}
+            onChange={(e) => setContext({ ...context, annualRevenue: e.target.value })}
+          >
+            <option value="">Annual revenue</option>
+            <option value="Pre-revenue">Pre-revenue</option>
+            <option value="Under $10k">Under $10k</option>
+            <option value="$10k-$50k">$10k-$50k</option>
+            <option value="$50k-$250k">$50k-$250k</option>
+            <option value="$250k-$1M">$250k-$1M</option>
+            <option value="$1M+">$1M+</option>
+          </select>
         </div>
       ) : (
         <BlockStep

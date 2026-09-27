@@ -42,7 +42,27 @@ and session scheduling.
 - Advisor Review Queue (`app/advisor`) — two sections: pending report
   reviews (with overdue flagging against the SLA) and paid sessions
   awaiting scheduling. `components/ReviewButton.tsx` and
-  `components/ScheduleButton.tsx` drive the two actions.
+  `components/ScheduleButton.tsx` drive the two actions. Admins
+  additionally see a live QA toggle (`components/QAToggle.tsx`,
+  `app/api/admin/qa-setting`) that turns mandatory human review on or
+  off for all new reports without a redeploy — on for a pilot/testing
+  phase, off once volume makes 100% review infeasible. A Low-confidence
+  report is queued for review either way, regardless of the toggle
+  (the logic lives in `app/api/report/route.ts`), since that's exactly
+  the case where thin self-reported evidence most needs a human check.
+- Assessment context now also captures business type, years in
+  business, team size, and annual revenue (`app/assessment/page.tsx`
+  step 0, stored on `assessments`) — these, plus the founder's own
+  current-state/future-state/goal answers for each of the 9 blocks, feed
+  the AI report so its market-comparison language is grounded in this
+  founder's actual business, not a generic one. `lib/anthropic.ts` also
+  now uses Anthropic's server-side web search tool to pull 2-4 current,
+  cited data points (e.g. CAC/LTV or margin benchmarks, comparable
+  market size) relevant to the founder's specific industry, location,
+  and stage, rather than relying only on the model's training data. Web
+  search is billed separately by Anthropic (~$10 per 1,000 searches, on
+  top of normal token cost) — worth watching as report volume grows;
+  each report is capped at 4 searches.
 - Flutterwave subscription + advisor-session checkout and webhook
   (`app/api/billing/*`, `app/api/advisor-session/*`, `lib/flutterwave.ts`)
   — covers cards and mobile money (M-Pesa, etc.) in one integration.
@@ -112,3 +132,17 @@ runs the app behind it.
   alert instead of redirecting to Flutterwave's hosted checkout page —
   left as a next step to wire up once a live Flutterwave account and
   redirect URL exist.
+- **Market valuation, richer dashboard, reminders/progress tracking**:
+  not yet built — see the "What's next" note below.
+
+
+## What's next: a more sophisticated assessment tool
+
+The founder asked for a bigger version of this product: a market
+valuation for the venture, a fuller dashboard, tools, reminders, and
+progress tracking against the goals/dates a founder sets in each BMC
+block. That's a substantial addition on top of this Launch MVP (new
+valuation methodology, new scheduled/notification infrastructure, and a
+goal-tracking data model), so it's being scoped deliberately rather than
+built ad hoc — see the conversation for the specific direction agreed
+before this gets built out.
