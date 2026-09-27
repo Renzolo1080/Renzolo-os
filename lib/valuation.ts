@@ -16,15 +16,18 @@
  *    stated annual revenue bucket times an industry-agnostic multiple
  *    range, widened or narrowed by overall Venture Score tier.
  *
- * IMPORTANT — Keep Manual (same convention as lib/scoring.ts): the base
- * caps and multiple ranges below are a documented, deliberately
- * conservative starting point for African MSME/early-stage ventures —
- * NOT a calibrated, market-validated model. This is a directional
- * estimate for the founder's own planning, never a formal valuation,
- * appraisal, or investment/financial advice, and the UI must say so
- * every time this number is shown. Treat these constants as an explicit
- * pending decision for advisor/finance sign-off before launch, exactly
- * like the scoring weights.
+ * APPROVED by the founder for launch: the methodology (qualitative for
+ * pre-revenue, revenue-multiple once there's revenue) and the specific
+ * base caps / multiple ranges below are signed off as the initial
+ * launch rubric — a documented, deliberately conservative starting
+ * point for African MSME/early-stage ventures, not a market-validated
+ * model, but no longer a pending decision. Still open to revision as
+ * real pilot data comes in, same as the rest of this codebase's
+ * calibration practice. This is a directional estimate for the
+ * founder's own planning, never a formal valuation, appraisal, or
+ * investment/financial advice, and the UI must say so every time this
+ * number is shown — that disclaimer requirement doesn't change with
+ * approval of the underlying numbers.
  */
 
 import { BLOCK_KEYS, type BlockKey } from "./scoring";
@@ -40,8 +43,9 @@ export interface ValuationResult {
 }
 
 /** Representative midpoint (USD) for each annual-revenue bucket offered
- * in app/assessment/page.tsx. Keep Manual — a rough placeholder, not a
- * researched figure, especially for the open-ended "$1M+" bucket. */
+ * in app/assessment/page.tsx. Approved for launch (see file header); a
+ * deliberately rough figure, especially for the open-ended "$1M+"
+ * bucket, and still open to revision as real data comes in. */
 const REVENUE_BUCKET_MIDPOINT: Record<string, number> = {
   "Pre-revenue": 0,
   "Under $10k": 5_000,
@@ -57,8 +61,9 @@ export function revenueBucketMidpoint(bucket: string | null | undefined): number
 }
 
 /** Revenue multiple range by Venture Score tier — wider and higher for
- * more "ready" ventures, narrow and conservative for earlier ones. Keep
- * Manual: a documented starting point, not a benchmarked figure. */
+ * more "ready" ventures, narrow and conservative for earlier ones.
+ * Approved for launch (see file header): a documented starting point,
+ * not a benchmarked figure, still open to revision as real data comes in. */
 const MULTIPLE_BY_TIER: Record<string, { low: number; high: number }> = {
   "Concept Stage": { low: 0.3, high: 0.6 },
   "Early Stage": { low: 0.5, high: 1.0 },
@@ -69,7 +74,7 @@ const MULTIPLE_BY_TIER: Record<string, { low: number; high: number }> = {
 
 /** Base cap (USD) each of the five Berkus-style factors can contribute
  * at a perfect (100/100) score. Deliberately modest and MSME-scaled
- * rather than US venture-scale ($500k/factor) — Keep Manual. */
+ * rather than US venture-scale ($500k/factor). Approved for launch. */
 const QUALITATIVE_FACTOR_CAP = 20_000;
 
 interface QualitativeFactor {

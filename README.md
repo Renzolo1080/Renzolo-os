@@ -116,24 +116,37 @@ runs the app behind it.
    `FLUTTERWAVE_ANNUAL_PLAN_ID`. The advisor session is one-time, so it
    needs no Payment Plan — just the price below.
 
-## Known placeholders that need real decisions before launch
+## Approved for launch vs. still-open decisions
 
+**Approved by the founder:**
+- **Market/Customer/Investor Readiness rubric** (`lib/scoring.ts`,
+  `SUBSCORE_RUBRICS`) — the measure-level weighting and Investor
+  Readiness confidence discount are final for launch.
+- **Valuation methodology and constants** (`lib/valuation.ts`) — the
+  qualitative/revenue-multiple approach and its base caps/multiple
+  ranges are final for launch. Still always shown with the "not a
+  formal valuation" disclaimer regardless of approval — that's a
+  permanent product decision, not a pending one.
+- **Paid 1:1 advisor session pricing, African market** — $30 USD,
+  reduced from the original $49 specifically for accessibility in the
+  African MSME/early-stage market this product targets. Applied via
+  geography-based pricing (`lib/geo.ts`, `isAfricanCountry`,
+  13/13 unit tests via `npm run test:geo`): a founder whose profile
+  country is in Africa (or hasn't set one yet — see the file for why
+  that defaults to Africa, not away from it) gets $30; a founder outside
+  Africa falls back to $49, which remains an unapproved placeholder —
+  a real decision only if/when this product expands beyond Africa.
+
+**Still open, needs a real decision before launch:**
 - **Subscription pricing** (`app/api/billing/checkout/route.ts`):
   currently a placeholder $9/mo, $90/yr. Not approved — the Phase 1 spec
   explicitly leaves this pending validation.
-- **Advisor session pricing** (`app/api/advisor-session/checkout/route.ts`,
-  `ADVISOR_SESSION_PRICE`): currently a placeholder $49 one-time. Same
-  status as the subscription pricing above — not yet approved.
-- **Scoring weights** (`lib/scoring.ts`): documented starting rubric,
-  flagged in-code as "Keep Manual" — needs advisor calibration against
-  real pilot data.
+- **Non-African advisor session pricing** ($49 placeholder, see above).
 - **Advisor session redirect** (`components/ReportPanel.tsx`): the
   "Book a 1:1 Advisor Session" button currently shows a placeholder
   alert instead of redirecting to Flutterwave's hosted checkout page —
   left as a next step to wire up once a live Flutterwave account and
   redirect URL exist.
-- **Market valuation, richer dashboard, reminders/progress tracking**:
-  not yet built — see the "What's next" note below.
 
 
 ## The sophisticated version: valuation, goals, reminders, and tools

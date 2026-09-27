@@ -109,15 +109,16 @@ export function computeVentureScore(blockScores: Record<BlockKey, number>): Vent
   return { score, tier };
 }
 
-/** Sub-score rubric — Keep Manual (same convention as everything else in
- * this file): a documented, deliberately reasoned starting point, not a
- * finished calibration. Each of the three readiness dimensions weights
- * BOTH which blocks matter (blockWeights) AND which of the six measures
- * within those blocks matter most for that dimension (measureWeights) —
- * a market case should hinge on clarity/scalability, a customer case on
- * evidence/economics, and an investor case on economics/risk/
- * defensibility, rather than treating all six measures as equally
- * relevant to all three readiness types. */
+/** Sub-score rubric — APPROVED by the founder for launch (unlike the
+ * venture-tier thresholds and block weights elsewhere in this file,
+ * which remain Keep Manual pending real pilot data). Each of the three
+ * readiness dimensions weights BOTH which blocks matter (blockWeights)
+ * AND which of the six measures within those blocks matter most for
+ * that dimension (measureWeights) — a market case hinges on clarity/
+ * scalability, a customer case on evidence/economics, and an investor
+ * case on economics/risk/defensibility, rather than treating all six
+ * measures as equally relevant to all three readiness types. Still open
+ * to revision as real pilot data comes in, but not pending sign-off. */
 interface SubScoreRubric {
   blockWeights: Partial<Record<BlockKey, number>>;
   measureWeights: Partial<Record<MeasureKey, number>>;
