@@ -233,3 +233,47 @@ launch date moved to accommodate this rather than cutting scope):
   `## Recommended Next Steps`) specifically so this extraction is
   reliable — if the model ever omits that heading, extraction just
   yields zero recommendations rather than blocking report delivery.
+
+## Marketing funnel: the 60-Second Readiness Quiz
+
+A new, much shorter public quiz (`/quiz`, `lib/quiz.ts`, 17/17 unit
+tests via `npm run test:quiz`) sits one step ahead of the free
+Readiness Snapshot, specifically for social media/website traffic:
+3 quick scored questions (paying customers, a documented growth plan,
+known unit economics), plus a "biggest challenge" and funding-urgency
+question used only to personalize the result message — not scored.
+Deliberately much coarser than the real scoring engine on purpose (see
+the file header for why they're kept separate). Every result ends with
+the same primary CTA — the free Snapshot — so the quiz always feeds the
+existing funnel rather than creating a separate one; a founder who
+scores well also gets a secondary "skip ahead to registration" option.
+Leads land in a new `quiz_leads` table (same anyone-can-insert /
+staff-can-read RLS pattern as `snapshot_leads`), kept as a separate
+table on purpose since it's an earlier, coarser funnel stage. Linked
+from the homepage alongside the existing Snapshot CTA.
+
+## Regional pricing: a real risk worth deciding on
+
+The subscription checkout (`app/api/billing/checkout/route.ts`) still
+has one flat placeholder price for every founder, regardless of
+country. If US/UK/Caribbean pricing ends up different from the
+Africa-accessible price (likely, given very different willingness-to-
+pay in those markets), that flat price is both an anchoring risk (a
+low public price is hard to raise later) and an arbitrage risk (anyone,
+anywhere, could sign up at the lower price). `lib/geo.ts`
+(`isAfricanCountry`) already solves exactly this for the $30 advisor
+session — the moment real US/UK/Caribbean numbers are decided, the same
+approach extends cleanly into a proper regional tier lookup for the
+subscription checkout too. Not yet built because the actual non-Africa
+numbers aren't decided yet — that's a pricing decision, not a code gap.
+
+## Future: cohort/partner accelerator programs
+
+The founder also wants to use this OS to support group/cohort training
+accelerators and supplier-development/readiness programs run with
+partners (e.g. NCMSDC, SASDC, TIN Ventures UK) — a genuinely separate,
+multi-tenant feature area (partner/program admins, cohort-level
+reporting, how founders get associated with a cohort) from everything
+built so far, which is entirely single-founder-facing. Scoping
+questions were asked back in the conversation; nothing has been built
+for this yet pending those answers.

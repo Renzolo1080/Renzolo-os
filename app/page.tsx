@@ -8,7 +8,10 @@ export default function HomePage() {
         Founder Readiness Assessment — know your Venture Score, your gaps, and
         your next 90 days, in one sitting.
       </p>
-      <div className="mt-8 flex gap-4">
+      <div className="mt-8 flex flex-wrap justify-center gap-4">
+        <a href="/quiz" className="rounded bg-gold px-6 py-3 text-white font-semibold">
+          Take the 60-Second Readiness Quiz
+        </a>
         <a href="/snapshot" className="rounded bg-navy px-6 py-3 text-white font-semibold">
           Start Free Readiness Snapshot
         </a>

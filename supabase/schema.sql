@@ -303,3 +303,27 @@ alter table recommendations enable row level security;
 
 create policy "recommendations: via assessment ownership" on recommendations for all
   using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));
+
+-- 60-Second Readiness Quiz leads (marketing lead-gen for social
+-- media/website — see lib/quiz.ts). Deliberately separate from
+-- snapshot_leads: the quiz is a much shorter, coarser qualifying tool
+-- one step earlier in the funnel (quiz -> free Snapshot -> full
+-- Assessment + subscription), not a second copy of the real product.
+create table quiz_leads (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  full_name text,
+  answers jsonb not null,
+  challenge text,
+  urgency text,
+  score numeric not null,
+  tier text not null,
+  converted_to_user_id uuid references profiles(id),
+  created_at timestamptz not null default now()
+);
+
+alter table quiz_leads enable row level security;
+
+create policy "quiz_leads: anyone can insert" on quiz_leads for insert with check (true);
+create policy "quiz_leads: staff can read" on quiz_leads for select
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
