@@ -13,18 +13,28 @@ export default function RegisterPage() {
     e.preventDefault();
     setStatus("loading");
     setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
-    });
-    if (error) {
-      setError(error.message);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
+      });
+      if (error) {
+        setError(error.message);
+        setStatus("error");
+        return;
+      }
+      setStatus("sent");
+    } catch (err) {
+      console.error("Registration failed:", err);
+      setError(
+        err instanceof Error
+          ? `Couldn't reach the signup service: ${err.message}`
+          : "Couldn't reach the signup service. Please try again."
+      );
       setStatus("error");
-      return;
     }
-    setStatus("sent");
   }
 
   if (status === "sent") {
