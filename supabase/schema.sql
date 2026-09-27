@@ -169,3 +169,34 @@ create policy "snapshot_leads: staff can read" on snapshot_leads for select
 -- Advisors/admins need to update reports (mark reviewed), not just read them.
 create policy "reports: staff can update" on reports for update
   using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+
+-- Paid 1:1 Advisor Coaching Session upsell — separate from the base
+-- subscription. The AI Diagnostic Report is delivered instantly (see
+-- app/api/report/route.ts); this is an optional add-on a founder can buy
+-- after seeing their report, not a gate on receiving it. Scheduling
+-- itself stays manual (Keep Manual) for launch — an advisor follows up
+-- to actually put time on the calendar once a session is paid for.
+create type advisor_session_status as enum ('requested', 'scheduled', 'completed', 'canceled');
+
+create table advisor_sessions (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  report_id uuid references reports(id),
+  status advisor_session_status not null default 'requested',
+  price numeric not null,
+  currency text not null default 'USD',
+  flutterwave_tx_ref text,
+  advisor_id uuid references profiles(id),
+  scheduled_at timestamptz,
+  notes text,
+  created_at timestamptz not null default now()
+);
+
+alter table advisor_sessions enable row level security;
+
+create policy "advisor_sessions: self or staff" on advisor_sessions for select
+  using (founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+create policy "advisor_sessions: founder can insert own" on advisor_sessions for insert
+  with check (founder_id = auth.uid());
+create policy "advisor_sessions: staff can update" on advisor_sessions for update
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));

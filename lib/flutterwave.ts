@@ -8,46 +8,57 @@ export function getFlutterwaveClient() {
   return new Flutterwave(process.env.FLUTTERWAVE_PUBLIC_KEY!, process.env.FLUTTERWAVE_SECRET_KEY!);
 }
 
+export type FlutterwaveProduct = "subscription" | "advisor_session";
+
 export interface CheckoutParams {
+  product: FlutterwaveProduct;
   founderId: string;
   email: string;
   name: string;
-  interval: "monthly" | "annual";
-  amount: number; // in the smallest sensible unit for the chosen currency
-  currency: string; // e.g. "USD", "KES", "ZAR", "NGN"
+  amount: number;
+  currency: string;
   redirectUrl: string;
+  /** Only meaningful for product: "subscription". */
+  interval?: "monthly" | "annual";
 }
 
-/** Initiates a Flutterwave standard checkout for a subscription payment.
- * The actual "subscribe monthly/annually" recurrence is implemented with
- * Flutterwave Payment Plans — see the Flutterwave dashboard/API docs to
- * create the two plan IDs (monthly, annual) once the account is live,
- * then set them as env vars and reference them here. */
+/** Initiates a Flutterwave standard checkout. tx_ref encodes the product
+ * type so the webhook (app/api/billing/webhook/route.ts) knows whether a
+ * completed charge should activate a subscription or mark a 1:1 advisor
+ * session as paid — two different downstream effects, one payment API. */
 export async function initiateCheckout(params: CheckoutParams) {
   const flw = getFlutterwaveClient();
-  const tx_ref = `renzolo-${params.founderId}-${Date.now()}`;
-  const payload = {
+  const tx_ref = `renzolo-${params.product}-${params.founderId}-${Date.now()}`;
+  const payload: Record<string, unknown> = {
     tx_ref,
     amount: params.amount,
     currency: params.currency,
     redirect_url: params.redirectUrl,
     customer: { email: params.email, name: params.name },
     customizations: {
-      title: "RENZOLO OS Subscription",
-      description: `${params.interval === "monthly" ? "Monthly" : "Annual"} plan`,
+      title: params.product === "subscription" ? "RENZOLO OS Subscription" : "RENZOLO OS — 1:1 Advisor Session",
+      description:
+        params.product === "subscription"
+          ? `${params.interval === "monthly" ? "Monthly" : "Annual"} plan`
+          : "One-time paid coaching session with an advisor",
     },
-    payment_plan: params.interval === "monthly" ? process.env.FLUTTERWAVE_MONTHLY_PLAN_ID : process.env.FLUTTERWAVE_ANNUAL_PLAN_ID,
   };
-  // NOTE: this SDK call needs live FLUTTERWAVE_SECRET_KEY / network access to
-  // Flutterwave's API to actually run — it will throw in any environment
-  // that blocks outbound calls to api.flutterwave.com (see README).
-  return flw.Charge.card ? { tx_ref, payload } : { tx_ref, payload };
+  if (params.product === "subscription" && params.interval) {
+    payload.payment_plan = params.interval === "monthly" ? process.env.FLUTTERWAVE_MONTHLY_PLAN_ID : process.env.FLUTTERWAVE_ANNUAL_PLAN_ID;
+  }
+  // NOTE: this SDK call needs a live FLUTTERWAVE_SECRET_KEY and network
+  // access to api.flutterwave.com to actually run.
+  return { tx_ref, payload };
 }
 
-/** Verifies a Flutterwave webhook signature. Flutterwave sends the value
- * you configured as the webhook's "secret hash" back in the
- * `verif-hash` header — compare it, don't just trust the payload. */
 export function verifyWebhookSignature(headerHash: string | null): boolean {
   const expected = process.env.FLUTTERWAVE_WEBHOOK_SECRET_HASH;
   return !!expected && !!headerHash && headerHash === expected;
+}
+
+/** Parses a tx_ref of the form renzolo-<product>-<founderId>-<timestamp>. */
+export function parseTxRef(txRef: string): { product: FlutterwaveProduct; founderId: string } | null {
+  const match = /^renzolo-(subscription|advisor_session)-(.+)-\d+$/.exec(txRef ?? "");
+  if (!match) return null;
+  return { product: match[1] as FlutterwaveProduct, founderId: match[2] };
 }

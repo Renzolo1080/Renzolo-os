@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { verifyWebhookSignature } from "@/lib/flutterwave";
+import { verifyWebhookSignature, parseTxRef } from "@/lib/flutterwave";
 
 /** POST /api/billing/webhook — Flutterwave calls this on payment events.
- * Verifies the `verif-hash` header against FLUTTERWAVE_WEBHOOK_SECRET_HASH
- * before trusting the payload, per Flutterwave's webhook security model. */
+ * One webhook, two possible effects, disambiguated by the tx_ref prefix
+ * (see lib/flutterwave.ts parseTxRef): a "subscription" charge activates
+ * the founder's subscription; an "advisor_session" charge marks that
+ * paid 1:1 session request ready for an advisor to schedule. */
 export async function POST(req: NextRequest) {
   const signature = req.headers.get("verif-hash");
   if (!verifyWebhookSignature(signature)) {
@@ -15,11 +17,11 @@ export async function POST(req: NextRequest) {
   const supabase = createAdminClient();
 
   if (event.event === "charge.completed" && event.data?.status === "successful") {
-    const founderId = extractFounderId(event.data.tx_ref);
-    if (founderId) {
+    const parsed = parseTxRef(event.data.tx_ref);
+    if (parsed?.product === "subscription") {
       await supabase.from("subscriptions").upsert(
         {
-          founder_id: founderId,
+          founder_id: parsed.founderId,
           status: "active",
           flutterwave_customer_id: event.data.customer?.id?.toString(),
           current_period_end: null, // set from the plan's next-billing-date field once live
@@ -27,14 +29,13 @@ export async function POST(req: NextRequest) {
         },
         { onConflict: "founder_id" }
       );
+    } else if (parsed?.product === "advisor_session") {
+      await supabase
+        .from("advisor_sessions")
+        .update({ status: "requested" }) // stays "requested" (now paid) until an advisor sets scheduled_at
+        .eq("flutterwave_tx_ref", event.data.tx_ref);
     }
   }
 
   return NextResponse.json({ received: true });
-}
-
-function extractFounderId(txRef: string): string | null {
-  // tx_ref format: renzolo-<founderId>-<timestamp>, set in lib/flutterwave.ts
-  const match = /^renzolo-(.+)-\d+$/.exec(txRef ?? "");
-  return match ? match[1] : null;
 }

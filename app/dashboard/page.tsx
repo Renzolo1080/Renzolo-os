@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { ReportPanel } from "@/components/ReportPanel";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -58,12 +59,7 @@ export default async function DashboardPage() {
           </div>
 
           {subscription?.status === "active" ? (
-            <a
-              href={`/api/report`}
-              className="rounded bg-gold px-5 py-3 text-white font-semibold inline-block"
-            >
-              Get My Full Diagnostic Report
-            </a>
+            <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} />
           ) : (
             <div className="rounded border p-6 bg-cream">
               <p className="mb-3 font-semibold">Unlock your full Diagnostic Report, Growth Navigator plan, and Readiness Passport.</p>

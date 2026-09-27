@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReviewButton } from "@/components/ReviewButton";
+import { ScheduleButton } from "@/components/ScheduleButton";
 
 export default async function AdvisorQueuePage() {
   const supabase = createClient();
@@ -19,6 +20,12 @@ export default async function AdvisorQueuePage() {
     .select("*, assessments(founder_id, venture_stage, industry, profiles(full_name))")
     .eq("advisor_reviewed", false)
     .order("review_due_by", { ascending: true });
+
+  const { data: pendingSessions } = await supabase
+    .from("advisor_sessions")
+    .select("*, profiles!advisor_sessions_founder_id_fkey(full_name)")
+    .eq("status", "requested")
+    .order("created_at", { ascending: true });
 
   const now = Date.now();
 
@@ -57,6 +64,33 @@ export default async function AdvisorQueuePage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      <h2 className="text-xl font-bold text-navy mt-12 mb-2">Paid 1:1 Advisor Sessions — Awaiting Scheduling</h2>
+      <p className="text-sm text-ink-soft mb-6">
+        Founders who purchased a paid 1:1 session. Coordinate the actual time by email or call, then mark it
+        scheduled here — this queue does not book calendar time automatically (Keep Manual for launch).
+      </p>
+
+      {!pendingSessions || pendingSessions.length === 0 ? (
+        <p>No paid sessions awaiting scheduling.</p>
+      ) : (
+        <div className="space-y-4">
+          {pendingSessions.map((s: any) => (
+            <div key={s.id} className="rounded border p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold">{s.profiles?.full_name ?? "Unknown founder"}</p>
+                  <p className="text-sm text-ink-soft">
+                    {s.currency} {s.price} · requested {new Date(s.created_at).toLocaleString()}
+                  </p>
+                  {s.report_id && <p className="text-xs text-ink-soft mt-1">Linked report: {s.report_id}</p>}
+                </div>
+                <ScheduleButton sessionId={s.id} />
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </main>

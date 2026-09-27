@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
 
   const result = await initiateCheckout({
+    product: "subscription",
     founderId: user.id,
     email: user.email!,
     name: profile?.full_name ?? user.email!,

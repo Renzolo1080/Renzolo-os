@@ -8,9 +8,12 @@ const SLA_MAX_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MAX_HOURS ?? 36);
 /** POST /api/report { assessmentId, scoreId }
  * Gated behind an active subscription (Registered/paid entitlement — see
  * the Phase 1 spec's entitlement table). Generates the AI Diagnostic
- * Report, then queues it for advisor review with a due-by timestamp set
- * from the SLA env vars rather than releasing it to the founder
- * immediately — advisor review stays a human step (Keep Manual). */
+ * Report and returns it in THIS response — delivery to the founder is
+ * instant, not held for review. `review_due_by` (24-36h by default,
+ * ADVISOR_REVIEW_SLA_* env vars) drives a background quality-assurance
+ * pass an advisor does afterward (see /advisor), and also backs the
+ * paid 1:1 Advisor Session upsell (app/api/advisor-session/checkout) —
+ * it is not a gate on this response. */
 export async function POST(req: NextRequest) {
   const supabase = createClient();
   const {
@@ -68,6 +71,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     report,
-    message: `Your Diagnostic Report has been drafted and is queued for advisor review (target turnaround: ${SLA_MIN_HOURS}-${SLA_MAX_HOURS} hours).`,
+    message: `Here's your Diagnostic Report. An advisor will review it in the background within ${SLA_MIN_HOURS}-${SLA_MAX_HOURS} hours as quality assurance — you don't need to wait for that.`,
   });
 }
