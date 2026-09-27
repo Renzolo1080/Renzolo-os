@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { runDiagnostic, BLOCK_KEYS, type AllBlockScores, type BlockKey } from "@/lib/scoring";
+import { computeValuation } from "@/lib/valuation";
 
 interface BlockSubmission {
   currentState: string;
   futureState: string;
   goalTarget: string;
+  targetDate: string;
   evidenceUploaded: boolean;
   measures: { clarity: number; evidence: number; economics: number; scalability: number; defensibility: number; risk: number };
 }
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest) {
     current_state: blocks[key].currentState,
     future_state: blocks[key].futureState,
     goal_target: blocks[key].goalTarget,
+    target_date: blocks[key].targetDate || null,
     evidence_uploaded: blocks[key].evidenceUploaded,
     measures: blocks[key].measures,
   }));
@@ -78,6 +81,12 @@ export async function POST(req: NextRequest) {
   }
   const diagnostic = runDiagnostic(all, evidenceByBlock);
 
+  const valuation = computeValuation({
+    ventureTier: diagnostic.ventureScore.tier,
+    annualRevenue: body.annualRevenue,
+    blockScores: diagnostic.blockScores,
+  });
+
   const { data: scoreRow, error: scoreError } = await supabase
     .from("scores")
     .insert({
@@ -92,11 +101,15 @@ export async function POST(req: NextRequest) {
       evidence_completeness: diagnostic.healthIndex.evidenceCompleteness,
       block_scores: diagnostic.blockScores,
       gaps: diagnostic.gaps,
+      valuation_low: valuation.low,
+      valuation_high: valuation.high,
+      valuation_method: valuation.method,
+      valuation_basis: valuation.basis,
     })
     .select()
     .single();
 
   if (scoreError) return NextResponse.json({ error: scoreError.message }, { status: 500 });
 
-  return NextResponse.json({ assessmentId: assessment.id, scoreId: scoreRow.id, diagnostic });
+  return NextResponse.json({ assessmentId: assessment.id, scoreId: scoreRow.id, diagnostic, valuation });
 }

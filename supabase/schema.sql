@@ -37,6 +37,8 @@ create table assessments (
 -- One row per BMC block per assessment. `measures` holds the six 0-100
 -- scores (clarity, evidence, economics, scalability, defensibility, risk)
 -- as JSON so the scoring engine (lib/scoring.ts) can consume it directly.
+create type goal_progress_status as enum ('not_started', 'on_track', 'at_risk', 'behind', 'done');
+
 create table block_responses (
   id uuid primary key default gen_random_uuid(),
   assessment_id uuid not null references assessments(id) on delete cascade,
@@ -44,6 +46,13 @@ create table block_responses (
   current_state text,
   future_state text,
   goal_target text,
+  -- Structured target date for the founder's goal_target text above —
+  -- separate from the free-text description so reminders/progress
+  -- tracking have something to actually compute against.
+  target_date date,
+  progress_status goal_progress_status not null default 'not_started',
+  progress_note text,
+  progress_updated_at timestamptz,
   evidence_uploaded boolean not null default false,
   measures jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now(),
@@ -73,6 +82,14 @@ create table scores (
   evidence_completeness numeric not null,
   block_scores jsonb not null,
   gaps jsonb not null,
+  -- Instant valuation estimate (lib/valuation.ts) — a directional range,
+  -- never a formal appraisal. valuation_method is 'qualitative' or
+  -- 'revenue_multiple'; valuation_basis is the human-readable explanation
+  -- shown alongside the range so it's never presented as an opaque number.
+  valuation_low numeric,
+  valuation_high numeric,
+  valuation_method text,
+  valuation_basis text,
   created_at timestamptz not null default now()
 );
 

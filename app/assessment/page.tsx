@@ -9,6 +9,7 @@ const emptyAnswer = (): BlockAnswer => ({
   currentState: "",
   futureState: "",
   goalTarget: "",
+  targetDate: "",
   evidenceUploaded: false,
   measures: { clarity: 50, evidence: 50, economics: 50, scalability: 50, defensibility: 50, risk: 50 },
 });

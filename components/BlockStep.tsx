@@ -5,6 +5,7 @@ export interface BlockAnswer {
   currentState: string;
   futureState: string;
   goalTarget: string;
+  targetDate: string;
   evidenceUploaded: boolean;
   measures: { clarity: number; evidence: number; economics: number; scalability: number; defensibility: number; risk: number };
 }
@@ -53,6 +54,17 @@ export function BlockStep({
         value={answer.goalTarget}
         onChange={(e) => onChange({ ...answer, goalTarget: e.target.value })}
       />
+
+      <label className="block text-sm font-medium">Target date for this goal</label>
+      <input
+        type="date"
+        className="w-full rounded border px-3 py-2"
+        value={answer.targetDate}
+        onChange={(e) => onChange({ ...answer, targetDate: e.target.value })}
+      />
+      <p className="text-xs text-ink-soft -mt-2">
+        Powers your dashboard's progress reminders — it won't be shared or scored.
+      </p>
 
       <label className="flex items-center gap-2 text-sm">
         <input

@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
+import { GoalProgressRow } from "@/components/GoalProgressRow";
+import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -23,6 +25,22 @@ export default async function DashboardPage() {
     .eq("founder_id", user.id)
     .maybeSingle();
 
+  const { data: blockResponses } = latestScore
+    ? await supabase
+        .from("block_responses")
+        .select("id, block_key, goal_target, target_date, progress_status")
+        .eq("assessment_id", latestScore.assessment_id)
+    : { data: null };
+
+  const now = Date.now();
+  const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+  const withDates = (blockResponses ?? []).filter((b) => b.target_date && b.progress_status !== "done");
+  const overdueGoals = withDates.filter((b) => new Date(b.target_date!).getTime() < now);
+  const dueSoonGoals = withDates.filter((b) => {
+    const t = new Date(b.target_date!).getTime();
+    return t >= now && t - now <= TWO_WEEKS_MS;
+  });
+
   return (
     <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-navy mb-6">Your Dashboard</h1>
@@ -36,6 +54,21 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-6">
+          {(overdueGoals.length > 0 || dueSoonGoals.length > 0) && (
+            <div className="rounded border border-gold bg-cream p-4 text-sm">
+              {overdueGoals.length > 0 && (
+                <p className="text-red-700 font-semibold">
+                  {overdueGoals.length} goal{overdueGoals.length > 1 ? "s" : ""} overdue.
+                </p>
+              )}
+              {dueSoonGoals.length > 0 && (
+                <p className="text-navy">
+                  {dueSoonGoals.length} goal{dueSoonGoals.length > 1 ? "s" : ""} due in the next 14 days.
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="rounded border p-6">
             <p className="text-sm text-ink-soft">Venture Score</p>
             <p className="text-4xl font-bold text-navy">
@@ -58,6 +91,43 @@ export default async function DashboardPage() {
             </p>
           </div>
 
+          {latestScore.valuation_low != null && latestScore.valuation_high != null && (
+            <div className="rounded border p-6 bg-navy text-white">
+              <p className="text-sm text-cream/80">Estimated Venture Value</p>
+              <p className="text-3xl font-bold">
+                ${Number(latestScore.valuation_low).toLocaleString()} – ${Number(latestScore.valuation_high).toLocaleString()}
+              </p>
+              <p className="text-xs text-cream/70 mt-2">{latestScore.valuation_basis}</p>
+              <p className="text-xs text-cream/70 mt-2 italic">
+                Directional estimate for your own planning, not a formal valuation, appraisal, or investment
+                advice. Consult a qualified professional before relying on this for funding, a sale, or any
+                legal purpose.
+              </p>
+            </div>
+          )}
+
+          {blockResponses && blockResponses.length > 0 && (
+            <div className="rounded border p-4">
+              <p className="font-semibold text-navy mb-1">Goals & Progress</p>
+              <p className="text-xs text-ink-soft mb-2">
+                Your own targets and dates from the assessment — update status any time.
+              </p>
+              <div>
+                {blockResponses.map((b) => (
+                  <GoalProgressRow
+                    key={b.id}
+                    blockResponseId={b.id}
+                    label={BLOCK_LABELS[b.block_key as BlockKey] ?? b.block_key}
+                    goalTarget={b.goal_target ?? ""}
+                    targetDate={b.target_date}
+                    status={b.progress_status}
+                    overdue={!!b.target_date && new Date(b.target_date).getTime() < now}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {subscription?.status === "active" ? (
             <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} />
           ) : (
@@ -68,6 +138,10 @@ export default async function DashboardPage() {
               </a>
             </div>
           )}
+
+          <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
+            Open Founder Tools (calculators & milestone planner)
+          </a>
         </div>
       )}
     </main>
