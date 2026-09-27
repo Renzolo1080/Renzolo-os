@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const VALID_WIDGETS = ["reminders", "valuation", "goalsProgress"];
+const VALID_WIDGETS = ["reminders", "valuation", "goalsProgress", "progressOverview"];
 
 /** PATCH /api/profile/dashboard-widgets { widgets: string[] }
  * Lets a founder choose which OPTIONAL widgets appear on their own

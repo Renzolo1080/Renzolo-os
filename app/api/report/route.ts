@@ -113,11 +113,12 @@ export async function POST(req: NextRequest) {
   const nextSteps = extractNextSteps(diagnosticMarkdown);
   if (nextSteps.length > 0) {
     await supabase.from("recommendations").insert(
-      nextSteps.map((title) => ({
+      nextSteps.map((title, index) => ({
         assessment_id: assessmentId,
         report_id: report.id,
         source: "ai" as const,
         title,
+        priority: index,
       }))
     );
   }

@@ -188,10 +188,21 @@ launch date moved to accommodate this rather than cutting scope):
 - **Customizable dashboard** — a standard view (Venture Score,
   Market/Customer/Investor Readiness, Health Index, the report/subscribe
   panel, and the Founder Tools link) is always shown to every founder.
-  Three additional data points — the reminders banner, the valuation
-  card, and the Goals & Progress list — are optional; founders choose
-  which to include via `components/DashboardCustomizer.tsx`, saved on
-  `profiles.dashboard_widgets` (`PATCH /api/profile/dashboard-widgets`).
+  Four additional data points are optional; founders choose which to
+  include via `components/DashboardCustomizer.tsx`, saved on
+  `profiles.dashboard_widgets` (`PATCH /api/profile/dashboard-widgets`):
+  the reminders banner, the valuation card, the full Goals & Progress
+  list, and:
+  - **Progress Overview** (`components/ProgressOverview.tsx`) — the
+    condensed, at-a-glance view: the top 3 recommendations (not the full
+    list on /tools — AI ones in the report's own priority order via a
+    new `recommendations.priority` column, advisor ones by recency, with
+    advisor input always shown first), the 3 nearest incomplete
+    milestones, a status bar chart of all goals (not started / on track
+    / at risk / behind / done), and a Venture Score trend line across
+    the founder's full assessment history (once they've completed more
+    than one). Pure server-rendered SVG/CSS, no chart library or client
+    JS needed.
 
 - **Recommendations** (`/tools`, third Founder Tool) — a combined,
   read-only list of targets/goals/next-steps from two sources: the AI

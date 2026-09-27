@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
 import { GoalProgressRow } from "@/components/GoalProgressRow";
 import { DashboardCustomizer } from "@/components/DashboardCustomizer";
+import { ProgressOverview, type TopRecommendation, type TopMilestone } from "@/components/ProgressOverview";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 
 export default async function DashboardPage() {
@@ -13,10 +14,11 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase.from("profiles").select("dashboard_widgets").eq("id", user.id).single();
-  const widgets: string[] = profile?.dashboard_widgets ?? ["reminders", "valuation", "goalsProgress"];
+  const widgets: string[] = profile?.dashboard_widgets ?? ["reminders", "valuation", "goalsProgress", "progressOverview"];
   const showReminders = widgets.includes("reminders");
   const showValuation = widgets.includes("valuation");
   const showGoalsProgress = widgets.includes("goalsProgress");
+  const showProgressOverview = widgets.includes("progressOverview");
 
   const { data: latestScore } = await supabase
     .from("scores")
@@ -32,7 +34,7 @@ export default async function DashboardPage() {
     .eq("founder_id", user.id)
     .maybeSingle();
 
-  const needsBlockResponses = latestScore && (showReminders || showGoalsProgress);
+  const needsBlockResponses = latestScore && (showReminders || showGoalsProgress || showProgressOverview);
   const { data: blockResponses } = needsBlockResponses
     ? await supabase
         .from("block_responses")
@@ -48,6 +50,63 @@ export default async function DashboardPage() {
     const t = new Date(b.target_date!).getTime();
     return t >= now && t - now <= TWO_WEEKS_MS;
   });
+
+  let topRecommendations: TopRecommendation[] = [];
+  let topMilestones: TopMilestone[] = [];
+  let scoreHistory: { date: string; score: number }[] = [];
+  const statusCounts: Record<string, number> = {};
+
+  if (showProgressOverview && latestScore) {
+    for (const b of blockResponses ?? []) {
+      statusCounts[b.progress_status] = (statusCounts[b.progress_status] ?? 0) + 1;
+    }
+
+    const { data: recRows } = await supabase
+      .from("recommendations")
+      .select("id, source, title, priority, created_at, profiles(full_name)")
+      .eq("assessment_id", latestScore.assessment_id);
+
+    topRecommendations = (recRows ?? [])
+      .slice()
+      .sort((a: any, b: any) => {
+        const tierA = a.source === "advisor" ? 0 : 1;
+        const tierB = b.source === "advisor" ? 0 : 1;
+        if (tierA !== tierB) return tierA - tierB;
+        if (a.source === "ai") return (a.priority ?? 999) - (b.priority ?? 999);
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })
+      .slice(0, 3)
+      .map((r: any) => ({ id: r.id, source: r.source, title: r.title, advisor_name: r.profiles?.full_name ?? null }));
+
+    const { data: milestoneRows } = await supabase
+      .from("milestones")
+      .select("id, block_key, title, target_date, completed")
+      .eq("assessment_id", latestScore.assessment_id)
+      .eq("completed", false);
+
+    topMilestones = (milestoneRows ?? [])
+      .slice()
+      .sort((a, b) => {
+        if (!a.target_date) return 1;
+        if (!b.target_date) return -1;
+        return new Date(a.target_date).getTime() - new Date(b.target_date).getTime();
+      })
+      .slice(0, 3)
+      .map((m) => ({
+        id: m.id,
+        title: m.title,
+        target_date: m.target_date,
+        blockLabel: m.block_key ? BLOCK_LABELS[m.block_key as BlockKey] ?? m.block_key : null,
+      }));
+
+    const { data: historyRows } = await supabase
+      .from("scores")
+      .select("created_at, venture_score, assessments!inner(founder_id)")
+      .eq("assessments.founder_id", user.id)
+      .order("created_at", { ascending: true });
+
+    scoreHistory = (historyRows ?? []).map((r: any) => ({ date: r.created_at, score: r.venture_score }));
+  }
 
   return (
     <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
@@ -102,6 +161,15 @@ export default async function DashboardPage() {
             </p>
           </div>
 
+          {showProgressOverview && (
+            <ProgressOverview
+              topRecommendations={topRecommendations}
+              topMilestones={topMilestones}
+              statusCounts={statusCounts}
+              scoreHistory={scoreHistory}
+            />
+          )}
+
           {showValuation && latestScore.valuation_low != null && latestScore.valuation_high != null && (
             <div className="rounded border p-6 bg-navy text-white">
               <p className="text-sm text-cream/80">Estimated Venture Value</p>
@@ -152,7 +220,7 @@ export default async function DashboardPage() {
           )}
 
           <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
-            Open Founder Tools (calculators & milestone planner)
+            Open Founder Tools (calculators, recommendations & milestones)
           </a>
         </div>
       )}

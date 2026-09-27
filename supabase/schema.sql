@@ -18,7 +18,7 @@ create table profiles (
   -- beyond the standard view (Venture Score, sub-scores, Health Index,
   -- report/subscribe, and the Founder Tools link, which are never
   -- optional). Valid values: 'reminders', 'valuation', 'goalsProgress'.
-  dashboard_widgets jsonb not null default '["reminders","valuation","goalsProgress"]'::jsonb,
+  dashboard_widgets jsonb not null default '["reminders","valuation","goalsProgress","progressOverview"]'::jsonb,
   created_at timestamptz not null default now()
 );
 
@@ -288,6 +288,13 @@ create table recommendations (
   block_key text,
   title text not null,
   detail text,
+  -- Set for source='ai' rows to their position in the report's own
+  -- "Recommended Next Steps" list (already ordered most-important-first
+  -- by the AI prompt) — lets the dashboard's condensed Progress Overview
+  -- pull the TOP few reliably, since created_at alone can't distinguish
+  -- order within one bulk insert. Left null for source='advisor' rows,
+  -- which sort by recency instead.
+  priority integer,
   advisor_id uuid references profiles(id),
   created_at timestamptz not null default now()
 );
