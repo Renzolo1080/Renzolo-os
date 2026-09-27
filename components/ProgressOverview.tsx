@@ -154,9 +154,9 @@ function ScoreTrendChart({ points }: { points: ScoreHistoryPoint[] }) {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full max-w-xs">
-      <polyline points={linePoints} fill="none" stroke="#0E6E68" strokeWidth={2} />
+      <polyline points={linePoints} fill="none" stroke="#087F77" strokeWidth={2} />
       {coords.map((c, i) => (
-        <circle key={i} cx={c.x} cy={c.y} r={3} fill="#0A1B33" />
+        <circle key={i} cx={c.x} cy={c.y} r={3} fill="#071727" />
       ))}
       <text x={coords[0].x} y={height - 1} fontSize={9} fill="#6b7280">
         {new Date(coords[0].date).toLocaleDateString(undefined, { month: "short", year: "2-digit" })}
@@ -164,7 +164,7 @@ function ScoreTrendChart({ points }: { points: ScoreHistoryPoint[] }) {
       <text x={coords[n - 1].x} y={height - 1} fontSize={9} fill="#6b7280" textAnchor="end">
         {new Date(coords[n - 1].date).toLocaleDateString(undefined, { month: "short", year: "2-digit" })}
       </text>
-      <text x={coords[n - 1].x} y={coords[n - 1].y - 6} fontSize={10} fill="#0A1B33" textAnchor="end" fontWeight="bold">
+      <text x={coords[n - 1].x} y={coords[n - 1].y - 6} fontSize={10} fill="#071727" textAnchor="end" fontWeight="bold">
         {coords[n - 1].score}
       </text>
     </svg>
