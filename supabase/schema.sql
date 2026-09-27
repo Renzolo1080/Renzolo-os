@@ -271,3 +271,28 @@ alter table milestones enable row level security;
 
 create policy "milestones: via assessment ownership" on milestones for all
   using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));
+
+-- Founder Tools, third tool: Recommendations — targets/goals/next-steps
+-- surfaced from two sources: the AI Diagnostic Report's own action plan
+-- (source='ai', parsed automatically — see lib/recommendations.ts and
+-- app/api/report/route.ts) and a human advisor/coach adding their own
+-- (source='advisor', app/advisor page). One shared table so a founder
+-- sees both in one place on /tools.
+create type recommendation_source as enum ('ai', 'advisor');
+
+create table recommendations (
+  id uuid primary key default gen_random_uuid(),
+  assessment_id uuid not null references assessments(id) on delete cascade,
+  report_id uuid references reports(id),
+  source recommendation_source not null,
+  block_key text,
+  title text not null,
+  detail text,
+  advisor_id uuid references profiles(id),
+  created_at timestamptz not null default now()
+);
+
+alter table recommendations enable row level security;
+
+create policy "recommendations: via assessment ownership" on recommendations for all
+  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));

@@ -193,6 +193,19 @@ launch date moved to accommodate this rather than cutting scope):
   which to include via `components/DashboardCustomizer.tsx`, saved on
   `profiles.dashboard_widgets` (`PATCH /api/profile/dashboard-widgets`).
 
-**Still open on "tools"**: the user also flagged a third, unspecified
-"something else" tool beyond calculators and the milestone planner —
-needs a follow-up conversation to know what to build.
+- **Recommendations** (`/tools`, third Founder Tool) — a combined,
+  read-only list of targets/goals/next-steps from two sources: the AI
+  Diagnostic Report's own "Recommended Next Steps" section, auto-parsed
+  the moment a report is generated (`lib/recommendations.ts`,
+  8/8 unit tests pass via `npm run test:recommendations`), and anything
+  a human advisor/coach adds from the `/advisor` queue
+  (`components/AdvisorRecommendationForm.tsx`,
+  `POST /api/recommendations`, advisor/admin only). Both land in one
+  `recommendations` table so a founder sees a single list, each tagged
+  AI or Coach, with a one-click "Add to Milestones" that hands it to the
+  existing Milestone Planner rather than duplicating tracking. The AI
+  report prompt now uses fixed section headings (`## Overall
+  Assessment`, `## Gap-to-Target Analysis`, `## Growth Scenarios`,
+  `## Recommended Next Steps`) specifically so this extraction is
+  reliable — if the model ever omits that heading, extraction just
+  yields zero recommendations rather than blocking report delivery.

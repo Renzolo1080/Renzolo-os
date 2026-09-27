@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { BLOCK_KEYS, BLOCK_LABELS } from "@/lib/scoring";
 import { FinancialCalculators } from "@/components/FinancialCalculators";
 import { MilestonePlanner, type BlockOption, type Milestone } from "@/components/MilestonePlanner";
+import { RecommendationsPanel, type Recommendation } from "@/components/RecommendationsPanel";
 
 export default async function ToolsPage() {
   const supabase = createClient();
@@ -35,6 +36,24 @@ export default async function ToolsPage() {
         .order("created_at", { ascending: true })
     : { data: [] };
 
+  const { data: recommendationRows } = latestScore
+    ? await supabase
+        .from("recommendations")
+        .select("id, source, block_key, title, detail, created_at, profiles(full_name)")
+        .eq("assessment_id", latestScore.assessment_id)
+        .order("created_at", { ascending: false })
+    : { data: [] };
+
+  const recommendations: Recommendation[] = (recommendationRows ?? []).map((r: any) => ({
+    id: r.id,
+    source: r.source,
+    block_key: r.block_key,
+    title: r.title,
+    detail: r.detail,
+    created_at: r.created_at,
+    advisor_name: r.profiles?.full_name ?? null,
+  }));
+
   return (
     <main className="min-h-screen px-6 py-10 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold text-navy mb-2">Founder Tools</h1>
@@ -44,6 +63,13 @@ export default async function ToolsPage() {
 
       <h2 className="text-xl font-bold text-navy mb-4">Calculators</h2>
       <FinancialCalculators />
+
+      <h2 className="text-xl font-bold text-navy mt-10 mb-2">Recommendations</h2>
+      <p className="text-sm text-ink-soft mb-4">
+        Targets, goals, and next steps from your AI Diagnostic Report and from any human advisor/coach you've
+        worked with — one combined list.
+      </p>
+      {latestScore && <RecommendationsPanel assessmentId={latestScore.assessment_id} recommendations={recommendations} />}
 
       <h2 className="text-xl font-bold text-navy mt-10 mb-2">Milestone Planner</h2>
       {!latestScore ? (

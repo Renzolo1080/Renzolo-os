@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { generateDiagnosticReport } from "@/lib/anthropic";
+import { extractNextSteps } from "@/lib/recommendations";
 
 const SLA_MIN_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MIN_HOURS ?? 24);
 const SLA_MAX_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MAX_HOURS ?? 36);
@@ -102,6 +103,24 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Pull the AI's own "Recommended Next Steps" bullets out as structured
+  // rows (source: 'ai') so the founder's Recommendations tool (/tools)
+  // can show them as data, alongside anything a human advisor/coach adds
+  // (source: 'advisor', see app/api/recommendations). Best-effort: if
+  // the model didn't include the heading for some reason, this is just
+  // an empty array and never blocks report delivery above.
+  const nextSteps = extractNextSteps(diagnosticMarkdown);
+  if (nextSteps.length > 0) {
+    await supabase.from("recommendations").insert(
+      nextSteps.map((title) => ({
+        assessment_id: assessmentId,
+        report_id: report.id,
+        source: "ai" as const,
+        title,
+      }))
+    );
+  }
 
   const message = requiresReview
     ? `Here's your Diagnostic Report. An advisor will review it in the background within ${SLA_MIN_HOURS}-${SLA_MAX_HOURS} hours as quality assurance — you don't need to wait for that.`

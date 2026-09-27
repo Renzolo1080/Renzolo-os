@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ReviewButton } from "@/components/ReviewButton";
 import { ScheduleButton } from "@/components/ScheduleButton";
 import { QAToggle } from "@/components/QAToggle";
+import { AdvisorRecommendationForm } from "@/components/AdvisorRecommendationForm";
 
 export default async function AdvisorQueuePage() {
   const supabase = createClient();
@@ -65,6 +66,7 @@ export default async function AdvisorQueuePage() {
                   <summary className="cursor-pointer text-sm text-teal">View draft report</summary>
                   <pre className="mt-2 whitespace-pre-wrap text-sm bg-cream p-3 rounded">{r.diagnostic_markdown}</pre>
                 </details>
+                <AdvisorRecommendationForm assessmentId={r.assessment_id} reportId={r.id} />
               </div>
             );
           })}

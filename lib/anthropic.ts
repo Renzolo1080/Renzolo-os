@@ -72,15 +72,26 @@ based on their industry, business type, location, size, and years in business �
 margin benchmarks, comparable market size or growth rates in their region, or how similar-stage ventures in
 their industry are typically funded or priced. Only cite what you actually find; do not invent statistics.
 
-Write, in plain language a founder can act on:
-1. A short overall assessment (2-3 sentences).
-2. Gap-to-target analysis for each of the three weakest blocks listed above — reference what the founder said
-   about their current state, future state, and goal/timeline directly, and where relevant connect it to a
-   cited market data point from your research so the target feels grounded in this founder's actual market,
-   not generic advice. Cite each source inline as (Source: <title>).
-3. Three growth scenarios (base, target, stretch), each with concrete actions, capability/capital gaps, and a
-   timeframe consistent with the founder's stated time horizon.
-4. A prioritized action plan for that time horizon (bullet list, most important first).
+Write, in plain language a founder can act on, using these EXACT section headings so the report can be
+parsed by other parts of the product:
+## Overall Assessment
+A short overall assessment (2-3 sentences).
+
+## Gap-to-Target Analysis
+For each of the three weakest blocks listed above — reference what the founder said about their current
+state, future state, and goal/timeline directly, and where relevant connect it to a cited market data point
+from your research so the target feels grounded in this founder's actual market, not generic advice. Cite
+each source inline as (Source: <title>).
+
+## Growth Scenarios
+Three growth scenarios (base, target, stretch), each with concrete actions, capability/capital gaps, and a
+timeframe consistent with the founder's stated time horizon.
+
+## Recommended Next Steps
+A prioritized action plan for that time horizon, as a bullet list (most important first), 3-5 items. Each
+bullet must be a single, concrete, specific action this founder can start now — this exact section is shown
+to the founder as a standalone Recommendations list elsewhere in the product, so keep every bullet
+self-contained (don't write "as above" or refer back to other sections).
 
 Keep it direct and specific to this founder's stage, industry, business type, location, and size — avoid
 generic startup advice that could apply to anyone.`;
