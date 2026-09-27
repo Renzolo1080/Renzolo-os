@@ -9,7 +9,7 @@ export default function HomePage() {
         your next 90 days, in one sitting.
       </p>
       <div className="mt-8 flex gap-4">
-        <a href="/register" className="rounded bg-navy px-6 py-3 text-white font-semibold">
+        <a href="/snapshot" className="rounded bg-navy px-6 py-3 text-white font-semibold">
           Start Free Readiness Snapshot
         </a>
         <a href="/login" className="rounded border border-navy px-6 py-3 text-navy font-semibold">

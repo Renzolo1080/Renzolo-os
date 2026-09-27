@@ -139,3 +139,33 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure handle_new_user();
+
+-- Added for the free Readiness Snapshot lead-gen funnel (public, no login
+-- required) — captures the lead and a quick preview score, per the
+-- Phase 1 spec's "abbreviated BMC pass" lead-generation offer.
+create table snapshot_leads (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  full_name text,
+  venture_stage text,
+  industry text,
+  block_ratings jsonb not null,
+  preview_score numeric not null,
+  preview_tier text not null,
+  converted_to_user_id uuid references profiles(id),
+  created_at timestamptz not null default now()
+);
+
+alter table snapshot_leads enable row level security;
+
+-- Anyone (including anonymous visitors) can submit a snapshot lead, but
+-- only advisors/admins can read the list back — this is a lead-capture
+-- form, not a public dataset.
+create policy "snapshot_leads: anyone can insert" on snapshot_leads for insert
+  with check (true);
+create policy "snapshot_leads: staff can read" on snapshot_leads for select
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+
+-- Advisors/admins need to update reports (mark reviewed), not just read them.
+create policy "reports: staff can update" on reports for update
+  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
