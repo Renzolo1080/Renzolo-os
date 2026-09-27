@@ -247,3 +247,22 @@ create policy "app_settings: admin can select" on app_settings for select
   using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'));
 create policy "app_settings: admin can update" on app_settings for update
   using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'));
+
+-- Founder-created milestones (Founder Tools: milestone/goal planner).
+-- Deliberately simple — one flat list per assessment, optionally tied to
+-- a BMC block — rather than a separate quarterly/monthly hierarchy, per
+-- the "not too complex" scope decision for this feature.
+create table milestones (
+  id uuid primary key default gen_random_uuid(),
+  assessment_id uuid not null references assessments(id) on delete cascade,
+  block_key text,
+  title text not null,
+  target_date date,
+  completed boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table milestones enable row level security;
+
+create policy "milestones: via assessment ownership" on milestones for all
+  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));

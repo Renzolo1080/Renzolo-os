@@ -136,13 +136,42 @@ runs the app behind it.
   not yet built — see the "What's next" note below.
 
 
-## What's next: a more sophisticated assessment tool
+## The sophisticated version: valuation, goals, reminders, and tools
 
-The founder asked for a bigger version of this product: a market
-valuation for the venture, a fuller dashboard, tools, reminders, and
-progress tracking against the goals/dates a founder sets in each BMC
-block. That's a substantial addition on top of this Launch MVP (new
-valuation methodology, new scheduled/notification infrastructure, and a
-goal-tracking data model), so it's being scoped deliberately rather than
-built ad hoc — see the conversation for the specific direction agreed
-before this gets built out.
+Built as agreed (instant data-driven valuation; in-app reminder banner,
+not email/push; financial calculators + milestone planner for "tools";
+launch date moved to accommodate this rather than cutting scope):
+
+- **Instant Venture Valuation** (`lib/valuation.ts`, unit-tested via
+  `npm run test:valuation`) — a directional low-high range computed
+  automatically from data already collected: a Berkus-style method for
+  pre-revenue ventures, or a revenue-multiple method once a founder
+  reports revenue. Shown on the dashboard as an "Estimated Venture
+  Value" card, always labeled as directional planning input — never a
+  formal appraisal or investment advice. **The dollar constants driving
+  this (Berkus factor caps, revenue multiples per tier) are placeholder,
+  MSME-scaled assumptions, exactly like the scoring weights — Keep
+  Manual, needs advisor/finance sign-off before this number is shown to
+  a real founder.**
+- **Goal-Progress Tracking** — each BMC block's existing goal now also
+  captures a structured target date (`app/assessment` → `BlockStep.tsx`),
+  and founders can update a status (Not started / On track / At risk /
+  Behind / Done) for each from the dashboard's new Goals & Progress
+  section (`components/GoalProgressRow.tsx`,
+  `PATCH /api/block-responses/[id]/progress`).
+- **Reminders** — a zero-infrastructure banner at the top of the
+  dashboard: computed on page load from each goal's target date
+  (overdue / due in the next 14 days), no email service or scheduled job
+  required. A "fast-follow" upgrade to real email/push notifications was
+  explicitly deferred in favor of shipping this now.
+- **Founder Tools** (`/tools`) — a Breakeven calculator and a CAC/LTV
+  calculator (both pure client-side, no data saved,
+  `components/FinancialCalculators.tsx`), plus a Milestone Planner
+  (`components/MilestonePlanner.tsx`, new `milestones` table) that lets a
+  founder break a goal into concrete steps, tied optionally to a BMC
+  block — blocks that are gap-to-target priorities are marked ⚠ so
+  founders naturally plan against their weakest areas first.
+
+**Still open on "tools"**: the user also flagged a third, unspecified
+"something else" tool beyond calculators and the milestone planner —
+needs a follow-up conversation to know what to build.
