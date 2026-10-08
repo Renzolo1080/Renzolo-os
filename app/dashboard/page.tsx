@@ -5,8 +5,13 @@ import { GoalProgressRow } from "@/components/GoalProgressRow";
 import { DashboardCustomizer } from "@/components/DashboardCustomizer";
 import { ProgressOverview, type TopRecommendation, type TopMilestone } from "@/components/ProgressOverview";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
+import { PaymentBanner } from "@/components/PaymentBanner";
+import { isSubscriptionActive, daysUntilExpiry } from "@/lib/payments";
 
-export default async function DashboardPage() {
+type SearchParams = Record<string, string | string[] | undefined>;
+const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+
+export default async function DashboardPage({ searchParams }: { searchParams?: SearchParams }) {
   const supabase = createClient();
   const {
     data: { user },
@@ -30,9 +35,26 @@ export default async function DashboardPage() {
 
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("status")
+    .select("status, current_period_end, auto_renew")
     .eq("founder_id", user.id)
     .maybeSingle();
+  const subscribed = isSubscriptionActive(subscription);
+  const daysLeft = daysUntilExpiry(subscription);
+  const lapsed = !subscribed && subscription?.status === "active";
+
+  // If this founder already has a report for their latest score, show it
+  // straight away instead of asking them to generate (and pay for the AI
+  // cost of) a new one on every visit.
+  const { data: existingReport } =
+    subscribed && latestScore
+      ? await supabase
+          .from("reports")
+          .select("id, diagnostic_markdown")
+          .eq("score_id", latestScore.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
 
   const needsBlockResponses = latestScore && (showReminders || showGoalsProgress || showProgressOverview);
   const { data: blockResponses } = needsBlockResponses
@@ -111,6 +133,20 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-navy mb-6">Your Dashboard</h1>
+
+      <PaymentBanner payment={first(searchParams?.payment)} product={first(searchParams?.product)} />
+
+      {subscribed && daysLeft !== null && daysLeft <= 7 && (
+        <div className="rounded border border-gold bg-cream p-4 text-sm mb-6">
+          <span className="font-semibold text-navy">
+            {daysLeft <= 0 ? "Your subscription ends today." : `Your subscription ends in ${daysLeft} day${daysLeft === 1 ? "" : "s"}.`}
+          </span>{" "}
+          <a href="/dashboard/subscribe" className="text-teal underline">
+            Renew now
+          </a>{" "}
+          <span className="text-ink-soft">— time is added on top of what you've already paid for.</span>
+        </div>
+      )}
 
       {!latestScore ? (
         <div>
@@ -208,13 +244,17 @@ export default async function DashboardPage() {
           )}
 
           {/* Standard view — always shown */}
-          {subscription?.status === "active" ? (
-            <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} />
+          {subscribed ? (
+            <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} initialReport={existingReport ?? null} />
           ) : (
             <div className="rounded border p-6 bg-cream">
-              <p className="mb-3 font-semibold">Unlock your full Diagnostic Report, Growth Navigator plan, and Readiness Passport.</p>
+              <p className="mb-3 font-semibold">
+                {lapsed
+                  ? "Your subscription has ended. Renew to open your full Diagnostic Report again."
+                  : "Unlock your full Diagnostic Report and the option to book a 1:1 session with an advisor."}
+              </p>
               <a href="/dashboard/subscribe" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
-                Subscribe
+                {lapsed ? "Renew" : "Subscribe"}
               </a>
             </div>
           )}

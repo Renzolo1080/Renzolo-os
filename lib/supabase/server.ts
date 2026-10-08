@@ -32,6 +32,8 @@ export function createAdminClient() {
   const { createClient: createSupabaseClient } = require("@supabase/supabase-js");
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    // Server-only, one request at a time: never store or refresh a session.
+    { auth: { persistSession: false, autoRefreshToken: false } }
   );
 }

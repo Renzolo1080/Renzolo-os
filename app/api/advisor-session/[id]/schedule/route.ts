@@ -20,7 +20,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { error } = await supabase
     .from("advisor_sessions")
     .update({ status: "scheduled", advisor_id: user.id, scheduled_at: new Date().toISOString() })
-    .eq("id", params.id);
+    .eq("id", params.id)
+    // Unpaid sessions can't be scheduled (see paid_at in supabase/schema.sql).
+    .not("paid_at", "is", null);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { generateDiagnosticReport } from "@/lib/anthropic";
 import { extractNextSteps } from "@/lib/recommendations";
+import { isSubscriptionActive } from "@/lib/payments";
 
 const SLA_MIN_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MIN_HOURS ?? 24);
 const SLA_MAX_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MAX_HOURS ?? 36);
@@ -31,11 +32,11 @@ export async function POST(req: NextRequest) {
 
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("status")
+    .select("status, current_period_end, auto_renew")
     .eq("founder_id", user.id)
     .maybeSingle();
 
-  if (!subscription || subscription.status !== "active") {
+  if (!isSubscriptionActive(subscription)) {
     return NextResponse.json({ error: "Full report requires an active subscription." }, { status: 402 });
   }
 

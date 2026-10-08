@@ -36,8 +36,9 @@ and session scheduling.
   `app/api/advisor-session/[id]/schedule`) — from the report panel, a
   founder can book a paid session; checkout runs through the same
   Flutterwave integration as the subscription (`lib/flutterwave.ts`
-  disambiguates the two products by `tx_ref`), and the webhook marks the
-  session paid. An advisor then coordinates the actual time by email or
+  disambiguates the two products by `tx_ref`), and the session is marked
+  paid once Flutterwave confirms the payment — only paid sessions appear
+  in the advisor queue. An advisor then coordinates the actual time by email or
   call (Keep Manual for launch) and marks it scheduled.
 - Advisor Review Queue (`app/advisor`) — two sections: pending report
   reviews (with overdue flagging against the SLA) and paid sessions
@@ -63,9 +64,10 @@ and session scheduling.
   search is billed separately by Anthropic (~$10 per 1,000 searches, on
   top of normal token cost) — worth watching as report volume grows;
   each report is capped at 4 searches.
-- Flutterwave subscription + advisor-session checkout and webhook
-  (`app/api/billing/*`, `app/api/advisor-session/*`, `lib/flutterwave.ts`)
-  — covers cards and mobile money (M-Pesa, etc.) in one integration.
+- Flutterwave subscription + advisor-session checkout, return page and
+  webhook (`app/api/billing/*`, `app/api/advisor-session/*`,
+  `lib/flutterwave.ts`, `lib/payments.ts`) — covers cards and mobile
+  money (M-Pesa, etc.) in one integration. See "How payments work".
 - Supabase schema with row-level security (`supabase/schema.sql`),
   including `snapshot_leads` and `advisor_sessions`.
 
@@ -106,7 +108,9 @@ runs the app behind it.
 2. Run `supabase/schema.sql` in your Supabase project's SQL editor. If the
    project was already set up from a copy of that file dated before
    2026-10-08, run `supabase/migrations/2026-10-08_fix_access_rules.sql`
-   instead — it repairs the access rules without touching any data.
+   then `supabase/migrations/2026-10-09_payments.sql`, in that order,
+   instead — they repair the access rules and add the payments tables
+   without touching any existing data.
 3. Copy `.env.example` to `.env.local` and fill in the real keys.
 4. In your own Terminal (not through Claude): `npm install && npm run dev`
    — this is the fastest way to actually click through it before
@@ -114,10 +118,10 @@ runs the app behind it.
 5. Push to GitHub, connect the repo to Vercel, add the same env vars in
    Vercel's dashboard, deploy, then point your GoDaddy domain's DNS at
    Vercel.
-6. In Flutterwave's dashboard, create the two subscription Payment Plans
-   (monthly, annual) and set their IDs as `FLUTTERWAVE_MONTHLY_PLAN_ID` /
-   `FLUTTERWAVE_ANNUAL_PLAN_ID`. The advisor session is one-time, so it
-   needs no Payment Plan — just the price below.
+6. In Flutterwave's dashboard, under Settings → Webhooks, set the
+   webhook URL to `<your site>/api/billing/webhook` and a secret hash
+   matching `FLUTTERWAVE_WEBHOOK_SECRET_HASH`, and turn on webhook
+   retries. Payment Plans are optional — see "How payments work" below.
 
 ## Approved for launch vs. still-open decisions
 
@@ -141,16 +145,56 @@ runs the app behind it.
   a real decision only if/when this product expands beyond Africa.
 
 **Still open, needs a real decision before launch:**
-- **Subscription pricing** (`app/api/billing/checkout/route.ts`):
-  currently a placeholder $9/mo, $90/yr. Not approved — the Phase 1 spec
-  explicitly leaves this pending validation.
-- **Non-African advisor session pricing** ($49 placeholder, see above).
-- **Advisor session redirect** (`components/ReportPanel.tsx`): the
-  "Book a 1:1 Advisor Session" button currently shows a placeholder
-  alert instead of redirecting to Flutterwave's hosted checkout page —
-  left as a next step to wire up once a live Flutterwave account and
-  redirect URL exist.
+- **Subscription pricing**: still the placeholder $9/mo, $90/yr. Not
+  approved. Now a setting, not code — set `SUBSCRIPTION_MONTHLY_PRICE` /
+  `SUBSCRIPTION_ANNUAL_PRICE` in Vercel (see `.env.example`).
+- **Non-African advisor session pricing** ($49 placeholder, see above;
+  `ADVISOR_SESSION_PRICE_OTHER`).
 
+## How payments work
+
+Built against Flutterwave's v3 "Standard" hosted checkout and tested
+against a simulated Flutterwave (`npm run test:payments`,
+`npm run test:flutterwave`). **Not yet run against a real Flutterwave
+account, test or live** — that is the next step once test keys exist.
+
+1. A founder picks a plan on `/dashboard/subscribe` (or "Book a 1:1
+   Advisor Session" on their report). The server records what it
+   expects to be paid in the `payments` table, asks Flutterwave for a
+   hosted payment page, and sends the founder there. Card and
+   mobile-money details never touch this app.
+2. Flutterwave tells us about the payment two ways: it sends the
+   founder's browser back to `/api/billing/callback`, and it calls
+   `/api/billing/webhook` server-to-server. Neither is trusted by
+   itself. Each only supplies a transaction ID; the server then asks
+   Flutterwave directly whether that transaction succeeded, and checks
+   the amount, currency and reference against the `payments` row before
+   granting anything (`lib/payments.ts`). Whichever arrives second
+   finds the work already done, so nothing is granted twice.
+3. A subscription payment sets a paid-through date one month or one year
+   out. Paying again early adds time on top; nothing already paid for is
+   lost. The dashboard shows a "renew" notice in the last 7 days. When
+   the date passes, the report is locked again until they renew.
+
+**One-off vs auto-renew.** Flutterwave's recurring billing (Payment
+Plans) is card-only, which would shut out M-Pesa and other mobile-money
+payers. So by default every subscription is a one-off payment for one
+period, by any method Flutterwave offers, renewed by paying again. If
+`FLUTTERWAVE_MONTHLY_PLAN_ID` / `FLUTTERWAVE_ANNUAL_PLAN_ID` are set, the
+subscribe page also offers a "renew automatically by card" tick-box.
+Automatic renewals are matched back to the founder by the payer's email;
+Flutterwave's documentation doesn't say what reference a renewal charge
+carries, so **treat auto-renew as untested until a real renewal has been
+observed in the sandbox.**
+
+**Giving someone access by hand** (a pilot founder, yourself for
+testing): in Supabase, add a `subscriptions` row for them with status
+`active` and `current_period_end` left empty. That never expires.
+
+**If Flutterwave only issues v4 credentials** (a client ID and client
+secret rather than a secret key starting `FLWSECK`), this integration
+will not work as written. Everything Flutterwave-specific is in
+`lib/flutterwave.ts` so that is the only file that would change.
 
 ## The sophisticated version: valuation, goals, reminders, and tools
 

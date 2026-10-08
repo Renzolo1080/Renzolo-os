@@ -120,9 +120,23 @@ create table subscriptions (
   billing_interval billing_interval,
   flutterwave_customer_id text,
   flutterwave_plan_id text,
+  -- Paid-through date. NULL with status 'active' means a manual grant
+  -- that never expires (see isSubscriptionActive in lib/payments.ts).
   current_period_end timestamptz,
+  -- True only when the founder chose card auto-renewal through a
+  -- Flutterwave Payment Plan; mobile-money and other one-off payments
+  -- buy a single period and are renewed by paying again.
+  auto_renew boolean not null default false,
+  -- The email Flutterwave has for this payer, used to match automatic
+  -- renewal charges back to the founder.
+  billing_email text,
   updated_at timestamptz not null default now()
 );
+
+-- One subscription row per founder; the app saves subscriptions with an
+-- upsert on founder_id, which requires this.
+create unique index subscriptions_founder_id_key on subscriptions (founder_id);
+create index subscriptions_billing_email_idx on subscriptions (billing_email);
 
 -- Role checks used by the policies below. These MUST be security-definer
 -- functions rather than inline "exists (select ... from profiles ...)"
@@ -244,6 +258,9 @@ create table advisor_sessions (
   advisor_id uuid references profiles(id),
   scheduled_at timestamptz,
   notes text,
+  -- Set by the server once Flutterwave confirms the payment. The advisor
+  -- queue only lists sessions where this is set.
+  paid_at timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -251,8 +268,9 @@ alter table advisor_sessions enable row level security;
 
 create policy "advisor_sessions: self or staff" on advisor_sessions for select
   using (founder_id = auth.uid() or is_staff());
-create policy "advisor_sessions: founder can insert own" on advisor_sessions for insert
-  with check (founder_id = auth.uid());
+-- No insert policy for founders on purpose: sessions are created
+-- server-side (app/api/advisor-session/checkout) so a founder can't
+-- create one from the browser already marked as paid.
 create policy "advisor_sessions: staff can update" on advisor_sessions for update
   using (is_staff());
 
@@ -356,3 +374,37 @@ alter table quiz_leads enable row level security;
 create policy "quiz_leads: anyone can insert" on quiz_leads for insert with check (true);
 create policy "quiz_leads: staff can read" on quiz_leads for select
   using (is_staff());
+
+-- Payments: one row per checkout this app starts with Flutterwave. It
+-- records the amount and currency we EXPECT, so that when Flutterwave
+-- reports a payment it can be checked against this row before any access
+-- is granted, and granted exactly once (see lib/payments.ts). Automatic
+-- card renewals, which Flutterwave charges on its own, are recorded here
+-- too. Founders can read their own rows; only the server writes.
+create type payment_status as enum ('pending', 'successful', 'failed');
+create type payment_product as enum ('subscription', 'advisor_session');
+
+create table payments (
+  id uuid primary key default gen_random_uuid(),
+  tx_ref text not null unique,
+  founder_id uuid not null references profiles(id) on delete cascade,
+  product payment_product not null,
+  billing_interval billing_interval,
+  auto_renew boolean not null default false,
+  advisor_session_id uuid references advisor_sessions(id) on delete set null,
+  amount numeric not null check (amount > 0),
+  currency text not null,
+  status payment_status not null default 'pending',
+  flutterwave_transaction_id text unique,
+  paid_amount numeric,
+  note text,
+  created_at timestamptz not null default now(),
+  fulfilled_at timestamptz
+);
+
+create index payments_founder_id_idx on payments (founder_id);
+
+alter table payments enable row level security;
+
+create policy "payments: self or staff" on payments for select
+  using (founder_id = auth.uid() or is_staff());

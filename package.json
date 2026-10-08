@@ -11,14 +11,16 @@
     "test:valuation": "tsx test/valuation.test.ts",
     "test:recommendations": "tsx test/recommendations.test.ts",
     "test:geo": "tsx test/geo.test.ts",
-    "test:quiz": "tsx test/quiz.test.ts"
+    "test:quiz": "tsx test/quiz.test.ts",
+    "test:payments": "tsx test/payments.test.ts",
+    "test:flutterwave": "tsx test/flutterwave.test.ts",
+    "test": "npm run test:scoring && npm run test:valuation && npm run test:recommendations && npm run test:geo && npm run test:quiz && npm run test:payments && npm run test:flutterwave"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.27.3",
     "@supabase/ssr": "0.5.1",
     "@supabase/supabase-js": "2.45.4",
     "clsx": "2.1.1",
-    "flutterwave-node-v3": "1.1.9",
     "next": "14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1",

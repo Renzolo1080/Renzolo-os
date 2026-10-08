@@ -1,9 +1,18 @@
 "use client";
 import { useState } from "react";
 
+interface Report {
+  id: string;
+  diagnostic_markdown: string;
+}
+
 interface Props {
   assessmentId: string;
   scoreId: string;
+  /** A report already generated for this score, if there is one — shown
+   * immediately so returning to the dashboard (including coming back
+   * from paying for an advisor session) never loses it. */
+  initialReport?: Report | null;
 }
 
 /** Requests the AI Diagnostic Report and shows it immediately — this is
@@ -11,9 +20,9 @@ interface Props {
  * review happens afterward, in the background, as quality assurance; it
  * does not gate delivery (see app/api/report/route.ts). Once a report
  * exists, offers the paid 1:1 Advisor Session as an optional upsell. */
-export function ReportPanel({ assessmentId, scoreId }: Props) {
+export function ReportPanel({ assessmentId, scoreId, initialReport = null }: Props) {
   const [loading, setLoading] = useState(false);
-  const [report, setReport] = useState<{ id: string; diagnostic_markdown: string } | null>(null);
+  const [report, setReport] = useState<Report | null>(initialReport);
   const [error, setError] = useState<string | null>(null);
   const [bookingLoading, setBookingLoading] = useState(false);
 
@@ -45,15 +54,13 @@ export function ReportPanel({ assessmentId, scoreId }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reportId: report.id }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Something went wrong");
-      // In production this redirects to the Flutterwave-hosted checkout
-      // page using data.payload; left as a next step to wire up once a
-      // live Flutterwave account exists.
-      alert("Checkout started — you'll be redirected to complete payment.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.link) throw new Error(data.error ?? "Something went wrong starting your payment.");
+      // Hand off to Flutterwave's hosted payment page. The button stays in
+      // its loading state while the browser navigates away.
+      window.location.assign(data.link);
     } catch (e: any) {
-      setError(e.message);
-    } finally {
+      setError(e?.message ?? "Something went wrong starting your payment.");
       setBookingLoading(false);
     }
   }
@@ -88,8 +95,13 @@ export function ReportPanel({ assessmentId, scoreId }: Props) {
           disabled={bookingLoading}
           className="rounded bg-navy px-5 py-3 text-white font-semibold disabled:opacity-50"
         >
-          {bookingLoading ? "Starting checkout…" : "Book a 1:1 Advisor Session"}
+          {bookingLoading ? "Taking you to payment…" : "Book a 1:1 Advisor Session"}
         </button>
+        {error && (
+          <p role="alert" className="mt-2 text-red-600 text-sm">
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );
