@@ -103,7 +103,10 @@ runs the app behind it.
    docs, EIN, and a bank letter — start this NOW, approval isn't
    instant), an [Anthropic API key](https://console.anthropic.com), and a
    [GitHub](https://github.com) repo for this code.
-2. Run `supabase/schema.sql` in your Supabase project's SQL editor.
+2. Run `supabase/schema.sql` in your Supabase project's SQL editor. If the
+   project was already set up from a copy of that file dated before
+   2026-10-08, run `supabase/migrations/2026-10-08_fix_access_rules.sql`
+   instead — it repairs the access rules without touching any data.
 3. Copy `.env.example` to `.env.local` and fill in the real keys.
 4. In your own Terminal (not through Claude): `npm install && npm run dev`
    — this is the fastest way to actually click through it before
