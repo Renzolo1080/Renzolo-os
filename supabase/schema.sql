@@ -124,6 +124,23 @@ create table subscriptions (
   updated_at timestamptz not null default now()
 );
 
+-- Role checks used by the policies below. These MUST be security-definer
+-- functions rather than inline "exists (select ... from profiles ...)"
+-- subqueries: a policy on profiles that itself reads profiles makes
+-- Postgres raise "infinite recursion detected in policy for relation
+-- profiles", which breaks every logged-in query in the app. Running as
+-- the function owner reads the caller's own role without re-entering
+-- row level security.
+create or replace function is_staff() returns boolean
+  language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('advisor','admin'));
+$$;
+
+create or replace function is_admin() returns boolean
+  language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin');
+$$;
+
 -- Row Level Security: founders only see their own data; advisors/admins
 -- see everything (kept simple for launch — refine per-advisor scoping
 -- once the advisor-review workflow ships).
@@ -136,23 +153,35 @@ alter table reports enable row level security;
 alter table subscriptions enable row level security;
 
 create policy "profiles: self or staff" on profiles for select
-  using (id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
-create policy "profiles: self update" on profiles for update using (id = auth.uid());
+  using (id = auth.uid() or is_staff());
+create policy "profiles: self update" on profiles for update
+  using (id = auth.uid()) with check (id = auth.uid());
+
+-- A founder may edit their own profile details but never their own role:
+-- without this, any signed-in user could set role = 'admin' on their own
+-- row from the browser and read every founder's data. Roles are changed
+-- only from the Supabase dashboard / service role.
+revoke update on profiles from authenticated, anon;
+grant update (full_name, country, venture_stage, industry, dashboard_widgets) on profiles to authenticated;
 
 create policy "assessments: owner or staff" on assessments for all
-  using (founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+  using (founder_id = auth.uid() or is_staff());
 
 create policy "block_responses: via assessment ownership" on block_responses for all
-  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));
+  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or is_staff())));
 
+-- scores and reports are read-only to founders on purpose: both are
+-- written server-side with the service role (app/api/score and
+-- app/api/report) after the route has confirmed ownership, so a Venture
+-- Score or report can't be fabricated from the browser.
 create policy "scores: via assessment ownership" on scores for select
-  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));
+  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or is_staff())));
 
 create policy "reports: via assessment ownership" on reports for select
-  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));
+  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or is_staff())));
 
 create policy "subscriptions: self or staff" on subscriptions for select
-  using (founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+  using (founder_id = auth.uid() or is_staff());
 
 -- Auto-create a profile row whenever a new auth user signs up.
 create function handle_new_user() returns trigger as $$
@@ -160,7 +189,7 @@ begin
   insert into public.profiles (id, full_name) values (new.id, new.raw_user_meta_data->>'full_name');
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 create trigger on_auth_user_created
   after insert on auth.users
@@ -190,11 +219,11 @@ alter table snapshot_leads enable row level security;
 create policy "snapshot_leads: anyone can insert" on snapshot_leads for insert
   with check (true);
 create policy "snapshot_leads: staff can read" on snapshot_leads for select
-  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+  using (is_staff());
 
 -- Advisors/admins need to update reports (mark reviewed), not just read them.
 create policy "reports: staff can update" on reports for update
-  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+  using (is_staff());
 
 -- Paid 1:1 Advisor Coaching Session upsell — separate from the base
 -- subscription. The AI Diagnostic Report is delivered instantly (see
@@ -221,11 +250,11 @@ create table advisor_sessions (
 alter table advisor_sessions enable row level security;
 
 create policy "advisor_sessions: self or staff" on advisor_sessions for select
-  using (founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+  using (founder_id = auth.uid() or is_staff());
 create policy "advisor_sessions: founder can insert own" on advisor_sessions for insert
   with check (founder_id = auth.uid());
 create policy "advisor_sessions: staff can update" on advisor_sessions for update
-  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+  using (is_staff());
 
 -- Singleton settings row admins can flip at runtime (no redeploy needed).
 -- qa_review_enabled controls whether EVERY new report is queued for a
@@ -249,9 +278,9 @@ insert into app_settings (id, qa_review_enabled) values (true, true);
 alter table app_settings enable row level security;
 
 create policy "app_settings: admin can select" on app_settings for select
-  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'));
+  using (is_admin());
 create policy "app_settings: admin can update" on app_settings for update
-  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role = 'admin'));
+  using (is_admin());
 
 -- Founder-created milestones (Founder Tools: milestone/goal planner).
 -- Deliberately simple — one flat list per assessment, optionally tied to
@@ -270,7 +299,7 @@ create table milestones (
 alter table milestones enable row level security;
 
 create policy "milestones: via assessment ownership" on milestones for all
-  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));
+  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or is_staff())));
 
 -- Founder Tools, third tool: Recommendations — targets/goals/next-steps
 -- surfaced from two sources: the AI Diagnostic Report's own action plan
@@ -302,7 +331,7 @@ create table recommendations (
 alter table recommendations enable row level security;
 
 create policy "recommendations: via assessment ownership" on recommendations for all
-  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')))));
+  using (exists (select 1 from assessments a where a.id = assessment_id and (a.founder_id = auth.uid() or is_staff())));
 
 -- 60-Second Readiness Quiz leads (marketing lead-gen for social
 -- media/website — see lib/quiz.ts). Deliberately separate from
@@ -326,4 +355,4 @@ alter table quiz_leads enable row level security;
 
 create policy "quiz_leads: anyone can insert" on quiz_leads for insert with check (true);
 create policy "quiz_leads: staff can read" on quiz_leads for select
-  using (exists (select 1 from profiles p where p.id = auth.uid() and p.role in ('advisor','admin')));
+  using (is_staff());

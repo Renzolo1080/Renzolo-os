@@ -49,7 +49,9 @@ export async function POST(req: NextRequest) {
     .select("block_key, current_state, future_state, goal_target")
     .eq("assessment_id", assessmentId);
 
-  if (!assessment || !score) return NextResponse.json({ error: "Assessment or score not found" }, { status: 404 });
+  if (!assessment || !score || score.assessment_id !== assessment.id) {
+    return NextResponse.json({ error: "Assessment or score not found" }, { status: 404 });
+  }
 
   const blockNarratives = Object.fromEntries(
     (blockRows ?? []).map((b) => [
@@ -90,7 +92,11 @@ export async function POST(req: NextRequest) {
 
   const reviewDueBy = requiresReview ? new Date(Date.now() + SLA_MAX_HOURS * 60 * 60 * 1000).toISOString() : null;
 
-  const { data: report, error } = await supabase
+  // Written with the service role for the same reason as scores: founders
+  // have read-only access to reports. Ownership was checked above — the
+  // assessment and score were both fetched through the founder's own
+  // session, which only returns rows they own.
+  const { data: report, error } = await admin
     .from("reports")
     .insert({
       assessment_id: assessmentId,
