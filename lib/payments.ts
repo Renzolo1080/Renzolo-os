@@ -1,21 +1,32 @@
 import type { VerifiedTransaction, FlutterwaveProduct } from "./flutterwave";
-import { parseTxRef } from "./flutterwave";
-import { getSubscriptionPrice, type BillingInterval, type Price } from "./pricing";
+import { parseTxRef, normalizeTxRef } from "./flutterwave";
+import type { BillingInterval, Price } from "./pricing";
 
 /** Turning a payment into access ("fulfilment").
  *
- * Both ways Flutterwave tells us about a payment — the founder's browser
- * being redirected back (app/api/billing/callback) and the server-to-
- * server webhook (app/api/billing/webhook) — end up in fulfilTransaction
- * below. Neither is trusted on its own: each only supplies a transaction
- * ID, which is then looked up with Flutterwave directly, and the amount,
- * currency and reference are compared against what THIS app recorded
- * when the checkout was started (the `payments` table).
+ * Flutterwave tells us about a payment three ways, and all three end up
+ * in the same place (fulfilVerified below):
+ *  - the founder's browser is sent back to app/api/billing/callback
+ *  - Flutterwave calls app/api/billing/webhook server-to-server
+ *  - if a payment is still pending when the founder next opens their
+ *    dashboard, it is looked up again (reconcilePendingPayments)
+ *
+ * None of them is trusted on its own. Each only supplies a transaction ID
+ * or reference, which is then looked up with Flutterwave directly; the
+ * amount, currency and reference are compared against what THIS app
+ * recorded when the checkout was started (the `payments` table).
+ *
+ * Marking a payment paid and granting what it paid for happen as one
+ * all-or-nothing step inside the database (the fulfil_payment and
+ * record_renewal functions in supabase/schema.sql), so there is no state
+ * in which money was taken, the payment says "successful", and nothing
+ * was granted.
  *
  * This file has no database or network code in it. It works against the
- * small PaymentStore interface so the rules can be unit-tested with a
- * simulated store and simulated Flutterwave responses
- * (test/payments.test.ts); lib/payments-store.ts is the real store. */
+ * small PaymentStore interface so the decision rules can be unit-tested
+ * with a simulated store and simulated Flutterwave responses
+ * (test/payments.test.ts). lib/payments-store.ts is the real store; the
+ * database functions it calls are tested in test/db.test.ts. */
 
 export type PaymentStatus = "pending" | "successful" | "failed";
 
@@ -33,44 +44,38 @@ export interface PaymentRecord {
   flutterwaveTransactionId: string | null;
 }
 
-export interface SubscriptionRecord {
+/** What an automatic card renewal for a founder is expected to look like. */
+export interface AutoRenewInfo {
   founderId: string;
-  status: "none" | "active" | "past_due" | "canceled";
-  billingInterval: BillingInterval | null;
-  currentPeriodEnd: string | null;
-  autoRenew: boolean;
-  billingEmail: string | null;
-}
-
-export interface SubscriptionUpdate {
-  founderId: string;
-  billingInterval: BillingInterval;
-  currentPeriodEnd: string;
-  autoRenew: boolean;
-  billingEmail: string | null;
+  renewalInterval: BillingInterval;
+  renewalAmount: number | null;
+  renewalCurrency: string | null;
   flutterwaveCustomerId: string | null;
 }
+
+export type GrantResult = "fulfilled" | "already_fulfilled";
 
 export interface PaymentStore {
   findPaymentByTxRef(txRef: string): Promise<PaymentRecord | null>;
   findPaymentByTransactionId(transactionId: string): Promise<PaymentRecord | null>;
-  /** Atomically moves a payment that is not yet successful (pending, or
-   * failed on an earlier attempt and then retried by the customer) to
-   * successful. Returns false if another request got there first — that
-   * is how a webhook and a redirect arriving at the same moment are kept
-   * from both granting access for one payment. */
-  claimPayment(paymentId: string, transactionId: string, paidAmount: number, at: string): Promise<boolean>;
-  /** Undoes claimPayment when the step after it failed, so a retry can succeed. */
-  releasePayment(paymentId: string): Promise<void>;
+  /** Marks the payment successful and grants what it paid for, atomically.
+   * Returns "already_fulfilled" if it had been granted before. */
+  grantPayment(paymentId: string, tx: VerifiedTransaction, at: string): Promise<GrantResult>;
   markPaymentFailed(paymentId: string, transactionId: string | null, note: string): Promise<void>;
-  /** Records an automatic card renewal that Flutterwave charged on its own.
-   * Returns false if this transaction was already recorded. */
-  recordRenewal(input: { txRef: string; founderId: string; billingInterval: BillingInterval; amount: number; currency: string; transactionId: string; at: string }): Promise<boolean>;
-  getSubscription(founderId: string): Promise<SubscriptionRecord | null>;
-  findAutoRenewSubscriptionByEmail(email: string): Promise<SubscriptionRecord | null>;
-  activateSubscription(update: SubscriptionUpdate): Promise<void>;
-  setAutoRenew(founderId: string, autoRenew: boolean): Promise<void>;
-  markAdvisorSessionPaid(sessionId: string, at: string): Promise<void>;
+  /** Remembers Flutterwave's transaction ID on a payment that is still
+   * pending, so it can be re-checked later without the founder. */
+  notePendingTransaction(paymentId: string, transactionId: string): Promise<void>;
+  /** The one auto-renewing subscription billed to this email, or null if
+   * there is none — or more than one, in which case nobody is credited. */
+  findAutoRenewByEmail(email: string): Promise<AutoRenewInfo | null>;
+  /** Records an automatic renewal charge and extends the subscription,
+   * atomically and at most once per Flutterwave transaction. */
+  grantRenewal(input: { founderId: string; tx: VerifiedTransaction; at: string }): Promise<GrantResult | "no_auto_renew">;
+  setAutoRenewOff(founderId: string): Promise<void>;
+  /** This founder's payments that are still pending, were started inside
+   * the window, and have not been re-checked since `notCheckedSince`. */
+  listPendingPayments(founderId: string, startedAfter: string, notCheckedSince: string, limit: number): Promise<PaymentRecord[]>;
+  markChecked(paymentId: string, at: string): Promise<void>;
 }
 
 export type FulfilResult =
@@ -78,49 +83,32 @@ export type FulfilResult =
   | { outcome: "already_fulfilled"; product: FlutterwaveProduct; founderId: string }
   | { outcome: "not_successful"; status: string; product: FlutterwaveProduct | null }
   | { outcome: "mismatch"; reason: string; product: FlutterwaveProduct }
-  | { outcome: "unknown_reference" };
+  /** `paid` is true when Flutterwave says money was taken but we could not
+   * tie it to an order — a person needs to look at it. */
+  | { outcome: "unknown_reference"; paid: boolean };
+
+/** Who is asking. Only a webhook — which carries Flutterwave's secret
+ * hash — may be treated as an automatic renewal. The browser return is
+ * open to anyone who can type a URL, so it is limited to completing a
+ * checkout that this app started and that is named in the URL. */
+export type FulfilSource = "webhook" | "callback" | "reconcile";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** How long after the paid-through date an auto-renewing subscription
- * keeps working. Flutterwave retries a failed renewal charge a few times
- * over roughly 90 minutes; this covers that plus webhook delay, so a
- * founder isn't locked out mid-renewal. One-off (non-renewing) payments
- * get no grace. */
-export const AUTO_RENEW_GRACE_MS = DAY_MS;
+ * keeps working. Covers Flutterwave's retries of a failed renewal charge,
+ * webhook delay, and a renewal schedule that runs a day or two behind the
+ * calendar month. One-off (non-renewing) payments get no grace.
+ * Must match has_active_subscription() in supabase/schema.sql. */
+export const AUTO_RENEW_GRACE_MS = 3 * DAY_MS;
 
-/** Adds one billing period. Calendar-based, in UTC: a month means "same
- * day next month" (clamped to the last day when the next month is
- * shorter, e.g. Jan 31 → Feb 28/29), a year means same date next year. */
-export function addPeriod(from: Date, interval: BillingInterval): Date {
-  const y = from.getUTCFullYear();
-  const m = from.getUTCMonth();
-  const d = from.getUTCDate();
-  const targetY = interval === "annual" ? y + 1 : m === 11 ? y + 1 : y;
-  const targetM = interval === "annual" ? m : (m + 1) % 12;
-  const lastDay = new Date(Date.UTC(targetY, targetM + 1, 0)).getUTCDate();
-  return new Date(
-    Date.UTC(targetY, targetM, Math.min(d, lastDay), from.getUTCHours(), from.getUTCMinutes(), from.getUTCSeconds(), from.getUTCMilliseconds())
-  );
-}
+type SubscriptionLike = { status?: string | null; current_period_end?: string | null; auto_renew?: boolean | null } | null | undefined;
 
-/** New paid-through date after a payment. Time already paid for is never
- * lost: paying early extends from the existing end date, paying after a
- * lapse starts a fresh period from now. */
-export function extendPeriod(currentPeriodEnd: string | null | undefined, now: Date, interval: BillingInterval): Date {
-  const currentEnd = currentPeriodEnd ? new Date(currentPeriodEnd) : null;
-  const start = currentEnd && !Number.isNaN(currentEnd.getTime()) && currentEnd.getTime() > now.getTime() ? currentEnd : now;
-  return addPeriod(start, interval);
-}
-
-/** The single definition of "does this founder currently have paid
- * access". A subscription with status 'active' and NO end date is a
- * manual grant (e.g. set by hand in Supabase for a pilot founder) and
- * never expires. */
-export function isSubscriptionActive(
-  sub: { status?: string | null; current_period_end?: string | null; auto_renew?: boolean | null } | null | undefined,
-  now: Date = new Date()
-): boolean {
+/** The single definition, on the app side, of "does this founder
+ * currently have paid access". A subscription with status 'active' and NO
+ * end date is a manual grant (e.g. set by hand in Supabase for a pilot
+ * founder) and never expires. */
+export function isSubscriptionActive(sub: SubscriptionLike, now: Date = new Date()): boolean {
   if (!sub || sub.status !== "active") return false;
   if (!sub.current_period_end) return true;
   const end = new Date(sub.current_period_end).getTime();
@@ -130,10 +118,7 @@ export function isSubscriptionActive(
 
 /** Days until access ends, for the "renew soon" notice. Null when there
  * is no end date or the subscription renews by itself. */
-export function daysUntilExpiry(
-  sub: { status?: string | null; current_period_end?: string | null; auto_renew?: boolean | null } | null | undefined,
-  now: Date = new Date()
-): number | null {
+export function daysUntilExpiry(sub: SubscriptionLike, now: Date = new Date()): number | null {
   if (!sub || sub.status !== "active" || !sub.current_period_end || sub.auto_renew) return null;
   const end = new Date(sub.current_period_end).getTime();
   if (Number.isNaN(end)) return null;
@@ -154,58 +139,81 @@ export interface FulfilDeps {
   store: PaymentStore;
   verify: (transactionId: string) => Promise<VerifiedTransaction>;
   now?: () => Date;
-  /** Injected so tests don't depend on environment settings. */
-  subscriptionPrice?: (interval: BillingInterval) => Price;
+  /** Today's subscription price in a currency — the fallback for checking
+   * a renewal when the subscription has no renewal amount stored. */
+  subscriptionPrice?: (interval: BillingInterval, currency: string) => Price | null;
+}
+
+export interface FulfilOptions {
+  source: FulfilSource;
+  /** The tx_ref from the return URL. Required when source is "callback". */
+  expectedTxRef?: string | null;
 }
 
 /** Verifies a transaction with Flutterwave and, if it is a genuine,
  * successful, correctly-priced payment for something this app sold,
- * grants what was paid for — exactly once, however many times it is
- * called for the same transaction. */
-export async function fulfilTransaction(transactionId: string, deps: FulfilDeps): Promise<FulfilResult> {
-  const { store, verify } = deps;
+ * grants what was paid for — exactly once, however many times and from
+ * however many directions it is reported. */
+export async function fulfilTransaction(transactionId: string, deps: FulfilDeps, options: FulfilOptions): Promise<FulfilResult> {
+  let expected: PaymentRecord | null = null;
+  if (options.source === "callback") {
+    // Before spending a Flutterwave API call on an ID from a URL, make
+    // sure the URL names a checkout that actually exists.
+    const ref = normalizeTxRef(options.expectedTxRef);
+    expected = ref ? await deps.store.findPaymentByTxRef(ref) : null;
+    if (!expected) return { outcome: "unknown_reference", paid: false };
+  }
+  const tx = await deps.verify(transactionId);
+  return fulfilVerified(tx, deps, options.source, expected);
+}
+
+/** The decision rules, given a transaction Flutterwave has vouched for. */
+export async function fulfilVerified(tx: VerifiedTransaction, deps: FulfilDeps, source: FulfilSource, expected: PaymentRecord | null = null): Promise<FulfilResult> {
+  const { store } = deps;
   const now = (deps.now ?? (() => new Date()))();
-  const priceFor = deps.subscriptionPrice ?? ((i: BillingInterval) => getSubscriptionPrice(i));
+  const ref = normalizeTxRef(tx.txRef);
+  const successful = tx.status === "successful";
 
-  const tx = await verify(transactionId);
+  const payment = ref ? await store.findPaymentByTxRef(ref) : null;
 
-  const payment = await store.findPaymentByTxRef(tx.txRef);
+  if (expected && (!payment || payment.id !== expected.id)) {
+    // The URL named one order but the transaction belongs to another (or
+    // to none): someone pasted a transaction ID onto a different order.
+    return { outcome: "mismatch", reason: "transaction does not belong to the order named in the return address", product: expected.product };
+  }
 
   if (!payment) {
     // Not a checkout this app started. The only legitimate case is an
-    // automatic card renewal, which Flutterwave charges itself under its
-    // own reference. Anything shaped like OUR reference with no record
-    // behind it is refused outright.
-    if (parseTxRef(tx.txRef)) return { outcome: "unknown_reference" };
-    if (tx.status !== "successful") return { outcome: "not_successful", status: tx.status, product: null };
-    if (!tx.customerEmail) return { outcome: "unknown_reference" };
+    // automatic card renewal, which Flutterwave charges by itself under
+    // its own reference — and only a webhook may claim one.
+    if (parseTxRef(ref)) return { outcome: "unknown_reference", paid: successful };
+    if (!successful) return { outcome: "not_successful", status: tx.status, product: null };
+    if (source !== "webhook" || !tx.customerEmail) return { outcome: "unknown_reference", paid: true };
 
-    const sub = await store.findAutoRenewSubscriptionByEmail(tx.customerEmail);
-    if (!sub || !sub.billingInterval) return { outcome: "unknown_reference" };
+    const sub = await store.findAutoRenewByEmail(tx.customerEmail);
+    if (!sub) return { outcome: "unknown_reference", paid: true };
 
-    const problem = checkAmount(tx, priceFor(sub.billingInterval));
+    // Where we know Flutterwave's customer number for this founder, the
+    // charge must come from that same customer, not merely the same email.
+    if (sub.flutterwaveCustomerId && tx.customerId && sub.flutterwaveCustomerId !== tx.customerId) {
+      return { outcome: "unknown_reference", paid: true };
+    }
+
+    // Compared with what was agreed when auto-renew was switched on, so a
+    // later price change doesn't reject existing subscribers' renewals.
+    const expectedPrice: Price | null =
+      sub.renewalAmount !== null && sub.renewalCurrency
+        ? { amount: sub.renewalAmount, currency: sub.renewalCurrency }
+        : deps.subscriptionPrice?.(sub.renewalInterval, tx.currency) ?? null;
+    if (!expectedPrice) return { outcome: "mismatch", reason: "no renewal price on record for this subscription", product: "subscription" };
+    const problem = checkAmount(tx, expectedPrice);
     if (problem) return { outcome: "mismatch", reason: problem, product: "subscription" };
 
-    const recorded = await store.recordRenewal({
-      txRef: tx.txRef || `flw-renewal-${tx.id}`,
-      founderId: sub.founderId,
-      billingInterval: sub.billingInterval,
-      amount: tx.amount,
-      currency: tx.currency,
-      transactionId: tx.id,
-      at: now.toISOString(),
-    });
-    if (!recorded) return { outcome: "already_fulfilled", product: "subscription", founderId: sub.founderId };
-
-    await store.activateSubscription({
-      founderId: sub.founderId,
-      billingInterval: sub.billingInterval,
-      currentPeriodEnd: extendPeriod(sub.currentPeriodEnd, now, sub.billingInterval).toISOString(),
-      autoRenew: true,
-      billingEmail: tx.customerEmail,
-      flutterwaveCustomerId: tx.customerId,
-    });
-    return { outcome: "fulfilled", product: "subscription", founderId: sub.founderId, renewal: true };
+    const granted = await store.grantRenewal({ founderId: sub.founderId, tx, at: now.toISOString() });
+    if (granted === "no_auto_renew") return { outcome: "unknown_reference", paid: true };
+    return granted === "fulfilled"
+      ? { outcome: "fulfilled", product: "subscription", founderId: sub.founderId, renewal: true }
+      : { outcome: "already_fulfilled", product: "subscription", founderId: sub.founderId };
   }
 
   if (payment.status === "successful") {
@@ -218,10 +226,14 @@ export async function fulfilTransaction(transactionId: string, deps: FulfilDeps)
     return { outcome: "mismatch", reason: "transaction already used for a different payment", product: payment.product };
   }
 
-  if (tx.status !== "successful") {
-    // "pending" may still complete (mobile money waits on the customer's
-    // phone), so only a definite failure closes the payment.
-    if (tx.status === "failed") await store.markPaymentFailed(payment.id, tx.id, "Flutterwave reported the charge as failed");
+  if (!successful) {
+    if (tx.status === "failed") {
+      await store.markPaymentFailed(payment.id, tx.id, "Flutterwave reported the charge as failed");
+    } else {
+      // Still in progress (mobile money waits on the customer's phone).
+      // Keep the ID so the dashboard can re-check it without the founder.
+      await store.notePendingTransaction(payment.id, tx.id);
+    }
     return { outcome: "not_successful", status: tx.status, product: payment.product };
   }
 
@@ -231,42 +243,73 @@ export async function fulfilTransaction(transactionId: string, deps: FulfilDeps)
     return { outcome: "mismatch", reason: problem, product: payment.product };
   }
 
-  const claimed = await store.claimPayment(payment.id, tx.id, tx.amount, now.toISOString());
-  if (!claimed) return { outcome: "already_fulfilled", product: payment.product, founderId: payment.founderId };
-
-  try {
-    if (payment.product === "subscription") {
-      const interval = payment.billingInterval ?? "monthly";
-      const existing = await store.getSubscription(payment.founderId);
-      await store.activateSubscription({
-        founderId: payment.founderId,
-        billingInterval: interval,
-        currentPeriodEnd: extendPeriod(existing?.currentPeriodEnd, now, interval).toISOString(),
-        autoRenew: payment.autoRenew,
-        billingEmail: tx.customerEmail,
-        flutterwaveCustomerId: tx.customerId,
-      });
-    } else if (payment.advisorSessionId) {
-      await store.markAdvisorSessionPaid(payment.advisorSessionId, now.toISOString());
-    }
-  } catch (e) {
-    // Put the payment back to pending so the next attempt (Flutterwave
-    // retries webhooks; the founder may also reload) can finish the job.
-    await store.releasePayment(payment.id);
-    throw e;
-  }
-
-  return { outcome: "fulfilled", product: payment.product, founderId: payment.founderId, renewal: false };
+  const granted = await store.grantPayment(payment.id, tx, now.toISOString());
+  return granted === "fulfilled"
+    ? { outcome: "fulfilled", product: payment.product, founderId: payment.founderId, renewal: false }
+    : { outcome: "already_fulfilled", product: payment.product, founderId: payment.founderId };
 }
 
-/** A founder (or Flutterwave, after repeated failed charges) cancelled
- * card auto-renewal. Access already paid for is kept until its end date;
- * only the "renews by itself" flag is switched off. */
+/** Card auto-renewal was cancelled (by the founder from Flutterwave's
+ * email, or by Flutterwave after repeated failed charges). Access already
+ * paid for is kept until its end date; only the "renews by itself" flag
+ * is switched off. */
 export async function handleSubscriptionCancelled(customerEmail: string | null | undefined, store: PaymentStore): Promise<boolean> {
   const email = (customerEmail ?? "").trim().toLowerCase();
   if (!email) return false;
-  const sub = await store.findAutoRenewSubscriptionByEmail(email);
+  const sub = await store.findAutoRenewByEmail(email);
   if (!sub) return false;
-  await store.setAutoRenew(sub.founderId, false);
+  await store.setAutoRenewOff(sub.founderId);
   return true;
+}
+
+export interface ReconcileDeps extends FulfilDeps {
+  verifyByReference: (txRef: string) => Promise<VerifiedTransaction>;
+}
+
+/** Only payments started within this long are worth re-checking. */
+export const RECONCILE_WINDOW_MS = 24 * 60 * 60 * 1000;
+/** …and each is re-checked at most this often. */
+export const RECONCILE_MIN_INTERVAL_MS = 2 * 60 * 1000;
+/** …and at most this many per dashboard visit. */
+export const RECONCILE_MAX_PER_VISIT = 3;
+
+/** The safety net for "I paid but nothing happened". Called when a
+ * founder opens their dashboard: any of THEIR payments that is still
+ * pending is looked up with Flutterwave again and completed if it has
+ * since gone through. This is what makes it true to tell a founder
+ * "refresh shortly — you don't need to pay again", even if the webhook
+ * never arrives.
+ *
+ * Deliberately bounded (recent payments only, a few per visit, each at
+ * most every couple of minutes) so an abandoned checkout doesn't turn
+ * every page view into calls to Flutterwave. Never throws: a failed
+ * re-check just leaves the payment pending for next time. */
+export async function reconcilePendingPayments(founderId: string, deps: ReconcileDeps): Promise<FulfilResult[]> {
+  const now = (deps.now ?? (() => new Date()))();
+  const results: FulfilResult[] = [];
+  let pending: PaymentRecord[];
+  try {
+    pending = await deps.store.listPendingPayments(
+      founderId,
+      new Date(now.getTime() - RECONCILE_WINDOW_MS).toISOString(),
+      new Date(now.getTime() - RECONCILE_MIN_INTERVAL_MS).toISOString(),
+      RECONCILE_MAX_PER_VISIT
+    );
+  } catch {
+    return results;
+  }
+
+  for (const payment of pending) {
+    try {
+      await deps.store.markChecked(payment.id, now.toISOString());
+      const tx = payment.flutterwaveTransactionId ? await deps.verify(payment.flutterwaveTransactionId) : await deps.verifyByReference(payment.txRef);
+      // Belt and braces: whatever Flutterwave returned must be for this payment.
+      if (normalizeTxRef(tx.txRef) !== payment.txRef) continue;
+      results.push(await fulfilVerified(tx, deps, "reconcile"));
+    } catch {
+      // No transaction yet for an abandoned checkout, or Flutterwave was
+      // unreachable. Either way: try again on a later visit.
+    }
+  }
+  return results;
 }

@@ -15,8 +15,13 @@ import { getAppUrl } from "@/lib/app-url";
  * Pricing (lib/pricing.ts): $30 USD for a founder in Africa — approved
  * by the founder for launch, reduced from the original $49 for
  * accessibility. A founder outside Africa gets $49, which is still an
- * unapproved placeholder. Both can be changed in settings. See
- * lib/geo.ts for how "African" is determined from profiles.country.
+ * unapproved placeholder. Both can be changed in settings, and a
+ * local-currency price is used instead when one is set for the founder's
+ * country. See lib/geo.ts for how "African" is determined.
+ *
+ * Known and accepted for launch: the price depends on profiles.country,
+ * which a founder can edit, so someone outside Africa could set their
+ * country to get the lower price. They still pay that price in full.
  *
  * The session row is created now, unpaid (paid_at empty). It only shows
  * up in the advisor queue once Flutterwave confirms the payment and the

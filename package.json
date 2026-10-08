@@ -14,7 +14,8 @@
     "test:quiz": "tsx test/quiz.test.ts",
     "test:payments": "tsx test/payments.test.ts",
     "test:flutterwave": "tsx test/flutterwave.test.ts",
-    "test": "npm run test:scoring && npm run test:valuation && npm run test:recommendations && npm run test:geo && npm run test:quiz && npm run test:payments && npm run test:flutterwave"
+    "test": "npm run test:scoring && npm run test:valuation && npm run test:recommendations && npm run test:geo && npm run test:quiz && npm run test:payments && npm run test:flutterwave && npm run test:db",
+    "test:db": "tsx test/db.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.27.3",
@@ -27,6 +28,7 @@
     "zod": "3.23.8"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@types/node": "20.16.10",
     "@types/react": "18.3.10",
     "@types/react-dom": "18.3.0",

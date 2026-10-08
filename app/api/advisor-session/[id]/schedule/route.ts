@@ -17,13 +17,17 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "Advisor or admin role required" }, { status: 403 });
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("advisor_sessions")
     .update({ status: "scheduled", advisor_id: user.id, scheduled_at: new Date().toISOString() })
     .eq("id", params.id)
     // Unpaid sessions can't be scheduled (see paid_at in supabase/schema.sql).
-    .not("paid_at", "is", null);
+    .not("paid_at", "is", null)
+    .select("id");
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ error: "No paid session with that id." }, { status: 409 });
+  }
   return NextResponse.json({ ok: true });
 }

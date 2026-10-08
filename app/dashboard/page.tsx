@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
 import { GoalProgressRow } from "@/components/GoalProgressRow";
@@ -6,7 +6,9 @@ import { DashboardCustomizer } from "@/components/DashboardCustomizer";
 import { ProgressOverview, type TopRecommendation, type TopMilestone } from "@/components/ProgressOverview";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 import { PaymentBanner } from "@/components/PaymentBanner";
-import { isSubscriptionActive, daysUntilExpiry } from "@/lib/payments";
+import { isSubscriptionActive, daysUntilExpiry, reconcilePendingPayments } from "@/lib/payments";
+import { createPaymentStore } from "@/lib/payments-store";
+import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -33,12 +35,43 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
     .limit(1)
     .maybeSingle();
 
+  // Safety net for "I paid but nothing happened": before reading the
+  // subscription, re-check any of this founder's payments that are still
+  // pending and complete them if Flutterwave now says they went through.
+  // Bounded and never throws — see reconcilePendingPayments.
+  if (process.env.FLUTTERWAVE_SECRET_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    await reconcilePendingPayments(user.id, {
+      store: createPaymentStore(createAdminClient()),
+      verify: (id) => verifyTransaction(id),
+      verifyByReference: (ref) => verifyTransactionByReference(ref),
+    });
+  }
+
   const { data: subscription } = await supabase
     .from("subscriptions")
     .select("status, current_period_end, auto_renew")
     .eq("founder_id", user.id)
     .maybeSingle();
   const subscribed = isSubscriptionActive(subscription);
+
+  // The banner's wording comes from the address bar, which anyone can
+  // edit — so "payment received" is only shown when the database agrees.
+  let paymentResult = first(searchParams?.payment);
+  const paymentProduct = first(searchParams?.product);
+  if (paymentResult === "success") {
+    let confirmed = subscribed;
+    if (paymentProduct === "advisor_session") {
+      const { data: paidSession } = await supabase
+        .from("advisor_sessions")
+        .select("id")
+        .eq("founder_id", user.id)
+        .gte("paid_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .limit(1)
+        .maybeSingle();
+      confirmed = !!paidSession;
+    }
+    if (!confirmed) paymentResult = "pending";
+  }
   const daysLeft = daysUntilExpiry(subscription);
   const lapsed = !subscribed && subscription?.status === "active";
 
@@ -134,12 +167,12 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
     <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-navy mb-6">Your Dashboard</h1>
 
-      <PaymentBanner payment={first(searchParams?.payment)} product={first(searchParams?.product)} />
+      <PaymentBanner payment={paymentResult} product={paymentProduct} />
 
       {subscribed && daysLeft !== null && daysLeft <= 7 && (
         <div className="rounded border border-gold bg-cream p-4 text-sm mb-6">
           <span className="font-semibold text-navy">
-            {daysLeft <= 0 ? "Your subscription ends today." : `Your subscription ends in ${daysLeft} day${daysLeft === 1 ? "" : "s"}.`}
+            {daysLeft <= 1 ? "Your subscription ends within a day." : `Your subscription ends in ${daysLeft} days.`}
           </span>{" "}
           <a href="/dashboard/subscribe" className="text-teal underline">
             Renew now

@@ -68,15 +68,25 @@ async function call(path: string, init: RequestInit, options: ClientOptions): Pr
  * Must be unique per transaction (Flutterwave requirement); the random
  * suffix covers two checkouts started in the same millisecond. */
 export function buildTxRef(product: FlutterwaveProduct, founderId: string, now: number = Date.now()): string {
-  const suffix = Math.floor(Math.random() * 1e6)
+  const suffix = Math.floor(Math.random() * 1e9)
     .toString()
-    .padStart(6, "0");
+    .padStart(9, "0");
   return `renzolo-${product}-${founderId}-${now}${suffix}`;
+}
+
+/** Defensive: Flutterwave has been reported to append a retry marker
+ * ("_PMCKDU_1", "_PMCKDU_2", …) to the reference when a customer's first
+ * attempt fails and they try again inside the same checkout. That is not
+ * in the current documentation and has not been observed against this
+ * app, but if it happens the payment must still be matched to the order
+ * it was for — so the marker is stripped before any lookup. */
+export function normalizeTxRef(txRef: string | null | undefined): string {
+  return (txRef ?? "").trim().replace(/_PMCKDU_\d+$/, "");
 }
 
 /** Parses a tx_ref of the form renzolo-<product>-<founderId>-<digits>. */
 export function parseTxRef(txRef: string | null | undefined): { product: FlutterwaveProduct; founderId: string } | null {
-  const match = /^renzolo-(subscription|advisor_session)-(.+)-\d+$/.exec(txRef ?? "");
+  const match = /^renzolo-(subscription|advisor_session)-(.+)-\d+$/.exec(normalizeTxRef(txRef));
   if (!match) return null;
   return { product: match[1] as FlutterwaveProduct, founderId: match[2] };
 }
@@ -137,15 +147,30 @@ export async function verifyTransaction(transactionId: string | number, options:
   const id = String(transactionId);
   if (!/^\d+$/.test(id)) throw new FlutterwaveError("Invalid transaction id.");
   const body = await call(`/transactions/${id}/verify`, { method: "GET" }, options);
-  const d = body.data;
-  if (!d) throw new FlutterwaveError("Flutterwave returned no transaction data.");
+  return toVerified(body.data);
+}
+
+/** Looks a transaction up by OUR reference instead of Flutterwave's ID.
+ * Used only to re-check a payment that is still pending and for which we
+ * never learned a transaction ID (the founder closed the tab and no
+ * webhook arrived). Flutterwave documents the endpoint but not its
+ * response body; it is read the same way as verify-by-ID and anything
+ * unexpected is treated as "nothing found". */
+export async function verifyTransactionByReference(txRef: string, options: ClientOptions = {}): Promise<VerifiedTransaction> {
+  if (!txRef) throw new FlutterwaveError("Missing transaction reference.");
+  const body = await call(`/transactions/verify_by_reference?tx_ref=${encodeURIComponent(txRef)}`, { method: "GET" }, options);
+  return toVerified(body.data);
+}
+
+function toVerified(d: any): VerifiedTransaction {
+  if (!d || d.id == null || !/^\d+$/.test(String(d.id))) throw new FlutterwaveError("Flutterwave returned no transaction data.");
   return {
     id: String(d.id),
     txRef: String(d.tx_ref ?? ""),
-    status: String(d.status ?? ""),
+    status: String(d.status ?? "").toLowerCase(),
     amount: Number(d.amount),
     currency: String(d.currency ?? "").toUpperCase(),
-    customerEmail: d.customer?.email ? String(d.customer.email).toLowerCase() : null,
+    customerEmail: d.customer?.email ? String(d.customer.email).trim().toLowerCase() : null,
     customerId: d.customer?.id != null ? String(d.customer.id) : null,
     paymentType: d.payment_type ? String(d.payment_type) : null,
   };

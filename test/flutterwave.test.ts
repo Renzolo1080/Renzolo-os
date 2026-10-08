@@ -1,5 +1,5 @@
-import { buildTxRef, parseTxRef, createHostedCheckout, verifyTransaction, verifyWebhookSignature, FlutterwaveError } from "../lib/flutterwave";
-import { getSubscriptionPrice, getAdvisorSessionPrice, isBillingInterval, formatPrice } from "../lib/pricing";
+import { buildTxRef, parseTxRef, normalizeTxRef, createHostedCheckout, verifyTransaction, verifyTransactionByReference, verifyWebhookSignature, FlutterwaveError } from "../lib/flutterwave";
+import { getSubscriptionPrice, getSubscriptionPriceIn, subscriptionCurrenciesFor, currencyForCountry, getAdvisorSessionPrice, isBillingInterval, formatPrice } from "../lib/pricing";
 import { getAppUrl } from "../lib/app-url";
 
 function assert(cond: boolean, msg: string) {
@@ -36,9 +36,12 @@ const FOUNDER = "11111111-1111-1111-1111-111111111111";
 async function main() {
   // --- references ------------------------------------------------------
   const ref = buildTxRef("subscription", FOUNDER, 1760000000000);
-  assert(/^renzolo-subscription-11111111-1111-1111-1111-111111111111-1760000000000\d{6}$/.test(ref), "tx_ref has the expected shape");
+  assert(/^renzolo-subscription-11111111-1111-1111-1111-111111111111-1760000000000\d{9}$/.test(ref), "tx_ref has the expected shape");
   const sameInstant = new Set(Array.from({ length: 50 }, () => buildTxRef("subscription", FOUNDER, 1760000000000)));
-  assert(sameInstant.size > 40, "references created in the same millisecond still differ (random suffix)");
+  assert(sameInstant.size === 50, "50 references created in the same millisecond are all different (random suffix)");
+  assert(normalizeTxRef(`${ref}_PMCKDU_1`) === ref && normalizeTxRef(`${ref}_PMCKDU_12`) === ref, "Flutterwave's retry marker is stripped from a reference");
+  assert(normalizeTxRef(ref) === ref && normalizeTxRef(null) === "" && normalizeTxRef("  abc ") === "abc", "a reference without the marker is unchanged (and trimmed)");
+  assert(parseTxRef(`${ref}_PMCKDU_1`)?.founderId === FOUNDER, "a reference with the retry marker still parses");
   const parsed = parseTxRef(ref);
   assert(parsed?.product === "subscription" && parsed.founderId === FOUNDER, "tx_ref parses back to product and founder (UUID with dashes intact)");
   assert(parseTxRef(buildTxRef("advisor_session", FOUNDER))?.product === "advisor_session", "advisor-session tx_ref parses");
@@ -138,6 +141,21 @@ async function main() {
     assert(err instanceof FlutterwaveError && fw.calls.length === 0, "a non-numeric transaction id is rejected before any request is made");
   }
 
+  {
+    const fw = fakeFlutterwave(200, { status: "success", data: { id: 77, tx_ref: ref, amount: 9, currency: "USD", status: "Successful", customer: { id: 1, email: " F@E.com " } } });
+    const t = await verifyTransactionByReference(ref, { secretKey: "k", fetchImpl: fw.fetchImpl });
+    assert(fw.calls[0].url === `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${encodeURIComponent(ref)}`, "verify-by-reference asks Flutterwave with our reference, URL-encoded");
+    assert(t.id === "77" && t.status === "successful" && t.customerEmail === "f@e.com", "…and reads the reply the same way (status lower-cased, email trimmed)");
+  }
+  {
+    const fw = fakeFlutterwave(200, { status: "success", data: { tx_ref: ref, amount: 9, currency: "USD", status: "successful" } });
+    const err = await rejects(() => verifyTransactionByReference(ref, { secretKey: "k", fetchImpl: fw.fetchImpl }));
+    assert(err instanceof FlutterwaveError, "a reply with no transaction id is treated as nothing found, never as a payment");
+    const fw2 = fakeFlutterwave(200, { status: "success", data: null });
+    const err2 = await rejects(() => verifyTransaction("5", { secretKey: "k", fetchImpl: fw2.fetchImpl }));
+    assert(err2 instanceof FlutterwaveError, "a 'success' reply with empty data is an error");
+  }
+
   // --- webhook signature -----------------------------------------------
   assert(verifyWebhookSignature("s3cret-hash", "s3cret-hash") === true, "matching webhook hash is accepted");
   assert(verifyWebhookSignature("wrong", "s3cret-hash") === false, "wrong webhook hash is rejected");
@@ -158,8 +176,23 @@ async function main() {
   assert(getAdvisorSessionPrice(null, {}).amount === 30, "…and $30 when no country is set");
   assert(getAdvisorSessionPrice("United States", {}).amount === 49, "…and $49 elsewhere");
   assert(getAdvisorSessionPrice("Kenya", { ADVISOR_SESSION_PRICE_AFRICA: "25" }).amount === 25, "advisor session price can be set in settings");
+  // local-currency prices (needed for mobile money — see lib/pricing.ts)
+  assert(currencyForCountry("Kenya") === "KES" && currencyForCountry("Nairobi, kenya") === "KES" && currencyForCountry("South Africa") === "ZAR", "a founder's country maps to its currency");
+  assert(currencyForCountry("United States") === null && currencyForCountry(null) === null && currencyForCountry("") === null, "countries without a local option, or no country, map to none");
+  const kes = { SUBSCRIPTION_MONTHLY_PRICE_KES: "1200", SUBSCRIPTION_ANNUAL_PRICE_KES: "12000" };
+  assert(getSubscriptionPriceIn("monthly", "KES", kes)?.amount === 1200 && getSubscriptionPriceIn("annual", "kes", kes)?.currency === "KES", "a local-currency price is used when set");
+  assert(getSubscriptionPriceIn("monthly", "KES", {}) === null, "a local currency with no price set is not offered — nothing is converted automatically");
+  assert(getSubscriptionPriceIn("monthly", "USD", {})?.amount === 9, "asking for the main currency returns the main price");
+  assert(getSubscriptionPriceIn("monthly", "K E S", kes) === null && getSubscriptionPriceIn("monthly", undefined, kes) === null, "a malformed currency is refused");
+  assert(getSubscriptionPriceIn("monthly", "KES", { SUBSCRIPTION_MONTHLY_PRICE_KES: "0" }) === null, "a zero local price counts as not set");
+  assert(JSON.stringify(subscriptionCurrenciesFor("Kenya", kes)) === '["KES","USD"]', "a founder in Kenya is offered KES first, then USD, when KES prices are set");
+  assert(JSON.stringify(subscriptionCurrenciesFor("Kenya", {})) === '["USD"]', "…and only USD when they are not");
+  assert(JSON.stringify(subscriptionCurrenciesFor("Kenya", { SUBSCRIPTION_MONTHLY_PRICE_KES: "1200" })) === '["USD"]', "…or when only one of the two KES prices is set");
+  assert(JSON.stringify(subscriptionCurrenciesFor("United States", kes)) === '["USD"]', "a founder elsewhere is not offered KES");
+  assert(getAdvisorSessionPrice("Kenya", { ADVISOR_SESSION_PRICE_KES: "4000" }).currency === "KES", "advisor session uses the local price when set");
+  assert(getAdvisorSessionPrice("Ghana", { ADVISOR_SESSION_PRICE_KES: "4000" }).currency === "USD", "…only for founders in that country");
   assert(isBillingInterval("monthly") && isBillingInterval("annual") && !isBillingInterval("weekly") && !isBillingInterval(undefined), "only monthly and annual are valid intervals");
-  assert(formatPrice({ amount: 9, currency: "USD" }) === "$9" && formatPrice({ amount: 12.5, currency: "USD" }) === "$12.50" && formatPrice({ amount: 900, currency: "KES" }) === "KES 900", "prices are formatted for display");
+  assert(formatPrice({ amount: 9, currency: "USD" }) === "$9" && formatPrice({ amount: 12.5, currency: "USD" }) === "$12.50" && formatPrice({ amount: 12000, currency: "KES" }) === "KES 12,000", "prices are formatted for display");
 
   // --- return address --------------------------------------------------
   assert(getAppUrl("https://preview-abc.vercel.app/api/billing/checkout", {}) === "https://preview-abc.vercel.app", "with no setting, the return address is wherever the request came in");

@@ -10,12 +10,15 @@ export const dynamic = "force-dynamic";
 
 /** GET /api/billing/callback?status=…&tx_ref=…&transaction_id=…
  * Where Flutterwave sends the founder's browser after the hosted payment
- * page. The query string is NOT trusted — anyone can type a URL. It only
- * supplies a transaction ID, which is verified with Flutterwave and
- * checked against our own record before anything is granted
- * (lib/payments.ts). The webhook does the same job server-to-server, so
- * access still arrives if the founder closes the tab before getting here;
- * whichever of the two runs second finds the work already done.
+ * page. The query string is NOT trusted — anyone can type a URL. It must
+ * name a checkout this app actually started (tx_ref), and the transaction
+ * ID is then verified with Flutterwave and checked against our own record
+ * before anything is granted (lib/payments.ts). This route can never
+ * treat a charge as an automatic renewal; only the webhook can.
+ *
+ * The webhook does the same job server-to-server, and the dashboard
+ * re-checks anything still pending, so access still arrives if the
+ * founder closes the tab before getting here.
  *
  * Ends by sending the founder to their dashboard with a result the
  * dashboard turns into a plain-language banner. */
@@ -23,6 +26,7 @@ export async function GET(req: NextRequest) {
   const base = getAppUrl(req.url);
   const params = req.nextUrl.searchParams;
   const transactionId = params.get("transaction_id");
+  const txRef = params.get("tx_ref");
   const status = (params.get("status") ?? "").toLowerCase();
 
   const done = (payment: string, product?: string | null) => {
@@ -32,17 +36,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(url, 303);
   };
 
-  if (!transactionId || !/^\d+$/.test(transactionId)) {
+  if (!transactionId || !/^\d+$/.test(transactionId) || !txRef) {
     // Flutterwave omits transaction_id when the founder cancelled or the
     // charge failed before a transaction existed.
     return done(status === "cancelled" || status === "canceled" ? "cancelled" : "failed");
   }
 
   try {
-    const result = await fulfilTransaction(transactionId, {
-      store: createPaymentStore(createAdminClient()),
-      verify: (id) => verifyTransaction(id),
-    });
+    const result = await fulfilTransaction(
+      transactionId,
+      { store: createPaymentStore(createAdminClient()), verify: (id) => verifyTransaction(id) },
+      { source: "callback", expectedTxRef: txRef }
+    );
     switch (result.outcome) {
       case "fulfilled":
       case "already_fulfilled":
@@ -52,12 +57,13 @@ export async function GET(req: NextRequest) {
       case "mismatch":
         console.error("Payment mismatch on callback:", transactionId, result.reason);
         return done("review", result.product);
-      default:
-        return done("failed");
+      case "unknown_reference":
+        if (result.paid) console.error("Paid transaction with no matching order on callback:", transactionId);
+        return done(result.paid ? "review" : "failed");
     }
   } catch (e) {
     // Couldn't check right now (e.g. Flutterwave unreachable). The webhook
-    // will still complete it, so tell the founder it's being confirmed.
+    // and the dashboard's re-check will still complete it.
     console.error("Payment callback could not verify transaction:", transactionId, e);
     return done("pending");
   }

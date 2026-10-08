@@ -153,48 +153,119 @@ runs the app behind it.
 
 ## How payments work
 
-Built against Flutterwave's v3 "Standard" hosted checkout and tested
-against a simulated Flutterwave (`npm run test:payments`,
-`npm run test:flutterwave`). **Not yet run against a real Flutterwave
-account, test or live** — that is the next step once test keys exist.
+Built against Flutterwave's v3 "Standard" hosted checkout. Tested against
+a simulated Flutterwave (`npm run test:payments`,
+`npm run test:flutterwave`) and a real in-process Postgres loaded with
+this repo's SQL (`npm run test:db`). **Not yet run against a real
+Flutterwave account, test or live** — that is the next step once test
+keys exist, and several things below can only be confirmed there.
 
 1. A founder picks a plan on `/dashboard/subscribe` (or "Book a 1:1
    Advisor Session" on their report). The server records what it
    expects to be paid in the `payments` table, asks Flutterwave for a
    hosted payment page, and sends the founder there. Card and
    mobile-money details never touch this app.
-2. Flutterwave tells us about the payment two ways: it sends the
-   founder's browser back to `/api/billing/callback`, and it calls
+2. Flutterwave tells us about the payment by sending the founder's
+   browser back to `/api/billing/callback` and by calling
    `/api/billing/webhook` server-to-server. Neither is trusted by
    itself. Each only supplies a transaction ID; the server then asks
    Flutterwave directly whether that transaction succeeded, and checks
    the amount, currency and reference against the `payments` row before
-   granting anything (`lib/payments.ts`). Whichever arrives second
-   finds the work already done, so nothing is granted twice.
-3. A subscription payment sets a paid-through date one month or one year
-   out. Paying again early adds time on top; nothing already paid for is
-   lost. The dashboard shows a "renew" notice in the last 7 days. When
-   the date passes, the report is locked again until they renew.
+   granting anything (`lib/payments.ts`).
+3. Marking the payment paid and granting what it paid for happen as one
+   all-or-nothing step inside the database (`fulfil_payment` in
+   `supabase/schema.sql`), so a payment can't end up recorded as paid
+   with nothing granted, and can't be granted twice.
+4. If a payment is still pending when the founder next opens their
+   dashboard (mobile money waiting on a PIN, tab closed, webhook never
+   arrived), it is looked up with Flutterwave again and completed.
+5. A subscription payment sets a paid-through date one calendar month
+   or year out. Paying again early adds time on top; nothing already
+   paid for is lost. The dashboard shows a "renew" notice in the last 7
+   days. When the date passes, the report is locked again until they
+   renew — enforced in the database, not just on the page.
 
-**One-off vs auto-renew.** Flutterwave's recurring billing (Payment
-Plans) is card-only, which would shut out M-Pesa and other mobile-money
-payers. So by default every subscription is a one-off payment for one
-period, by any method Flutterwave offers, renewed by paying again. If
-`FLUTTERWAVE_MONTHLY_PLAN_ID` / `FLUTTERWAVE_ANNUAL_PLAN_ID` are set, the
-subscribe page also offers a "renew automatically by card" tick-box.
-Automatic renewals are matched back to the founder by the payer's email;
-Flutterwave's documentation doesn't say what reference a renewal charge
-carries, so **treat auto-renew as untested until a real renewal has been
-observed in the sandbox.**
+### Mobile money needs local-currency prices — a decision to make
 
-**Giving someone access by hand** (a pilot founder, yourself for
-testing): in Supabase, add a `subscriptions` row for them with status
-`active` and `current_period_end` left empty. That never expires.
+Flutterwave decides which payment methods to show from the **currency**
+of the charge. Its documentation lists M-Pesa for Kenyan shillings only,
+and for a US-dollar charge lists card and US bank account. So with the
+default USD prices, **a founder in Kenya will be offered card, not
+M-Pesa.** (An earlier note in this codebase assumed a USD price would
+"settle in local currency at checkout"; Flutterwave's documentation does
+not support that.)
 
-**If Flutterwave only issues v4 credentials** (a client ID and client
-secret rather than a secret key starting `FLWSECK`), this integration
-will not work as written. Everything Flutterwave-specific is in
-`lib/flutterwave.ts` so that is the only file that would change.
+To take mobile money, set a price in that currency in Vercel:
+
+```
+SUBSCRIPTION_MONTHLY_PRICE_KES=...
+SUBSCRIPTION_ANNUAL_PRICE_KES=...
+ADVISOR_SESSION_PRICE_KES=...
+```
+
+A founder whose profile country is Kenya is then offered KES first and
+USD second on the subscribe page. The same works for ZAR (South Africa),
+NGN, GHS, UGX, RWF and TZS. Nothing is converted automatically — the
+amounts are yours to choose. Which methods Flutterwave actually shows
+for each currency should be confirmed on its test checkout page.
+
+### One-off vs auto-renew
+
+Flutterwave's recurring billing (Payment Plans) is card-only. So by
+default every subscription is a one-off payment for one period, renewed
+by paying again. If `FLUTTERWAVE_MONTHLY_PLAN_ID` /
+`FLUTTERWAVE_ANNUAL_PLAN_ID` are set, the subscribe page also offers a
+"renew automatically by card" tick-box (main currency only — create the
+plans in that currency and at the same price as the settings).
+
+Automatic renewals are charged by Flutterwave itself and reported only
+by webhook. They are matched back to the founder by the payer's email
+and Flutterwave customer number, and checked against the price agreed
+when auto-renew was switched on. Flutterwave's documentation does not
+describe what a renewal webhook looks like, so **treat auto-renew as
+untested until a real renewal has been observed in the sandbox.**
+A founder stops auto-renew from the cancellation link in Flutterwave's
+reminder email; there is no cancel button in this app yet.
+
+### Known gaps
+
+- **Refunds and chargebacks are not handled.** If a payment is refunded
+  in Flutterwave, access stays until someone removes it by hand in
+  Supabase.
+- **A payment that was taken but couldn't be matched** (wrong amount,
+  unknown reference) is not applied automatically. It is written to the
+  server log with the words `NEEDS ATTENTION` and the founder is told
+  to get in touch. Set `NEXT_PUBLIC_SUPPORT_EMAIL` so they know where.
+- **Advisor-session price depends on the country in the founder's
+  profile**, which they can edit, so someone outside Africa could claim
+  the lower price.
+- **True simultaneous requests are not tested** — the database tests
+  run on a single connection. The design relies on Postgres row locks.
+
+### Giving someone access by hand
+
+For a pilot founder, or yourself for testing: in Supabase, add a
+`subscriptions` row for them with status `active` and
+`current_period_end` left empty. That never expires, and a later payment
+by them won't change that.
+
+### If Flutterwave only issues v4 credentials
+
+If a new account gives you a client ID and client secret rather than a
+secret key starting `FLWSECK`, this integration will not work as
+written. Everything Flutterwave-specific is in `lib/flutterwave.ts`, so
+that is the only file that would change.
+
+### Tests
+
+`npm test` runs everything. The payment-related suites:
+- `test:payments` — the decision rules (grant or refuse) against a
+  simulated store and simulated Flutterwave.
+- `test:flutterwave` — what is sent to and read from Flutterwave,
+  prices, and the return address.
+- `test:db` — loads `supabase/schema.sql` into an in-process Postgres
+  and checks the access rules and the payment functions; then does the
+  same for the pre-2026-10-08 schema upgraded with the migration files.
 
 ## The sophisticated version: valuation, goals, reminders, and tools
 

@@ -1,6 +1,9 @@
 /** Turns the result the payment return page (app/api/billing/callback)
  * puts in the dashboard URL into a plain-language message. Rendered on
- * the server; shows nothing for an unrecognised value. */
+ * the server; shows nothing for an unrecognised value.
+ *
+ * The dashboard only passes "success" here after confirming it in the
+ * database (an address-bar value alone is downgraded to "pending"). */
 export function PaymentBanner({ payment, product }: { payment?: string; product?: string }) {
   const support = process.env.NEXT_PUBLIC_SUPPORT_EMAIL;
   const contact = support ? ` Contact ${support} and we'll sort it out.` : " Please contact us and we'll sort it out.";
@@ -19,7 +22,7 @@ export function PaymentBanner({ payment, product }: { payment?: string; product?
     case "pending":
       tone = "wait";
       message =
-        "We're confirming your payment. This can take a few minutes, especially with mobile money. Refresh this page shortly — you don't need to pay again.";
+        "We're confirming your payment. This can take a few minutes, especially with mobile money. Refresh this page shortly; it re-checks each time. If you completed the payment, you don't need to pay again.";
       break;
     case "cancelled":
       tone = "wait";

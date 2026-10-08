@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { verifyWebhookSignature, verifyTransaction } from "@/lib/flutterwave";
 import { fulfilTransaction, handleSubscriptionCancelled } from "@/lib/payments";
 import { createPaymentStore } from "@/lib/payments-store";
+import { getSubscriptionPriceIn } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,9 @@ export const dynamic = "force-dynamic";
  * Responds 200 for anything it understood (including "nothing to do"),
  * because Flutterwave treats any other status as a failed delivery. It
  * responds 500 only when something on our side broke mid-way, so that
- * Flutterwave's retry (when enabled in their dashboard) gets another go. */
+ * Flutterwave's retry (when enabled in their dashboard) gets another go.
+ * A payment that was taken but could not be applied is written to the
+ * server log with "NEEDS ATTENTION" so it can be found. */
 export async function POST(req: NextRequest) {
   if (!verifyWebhookSignature(req.headers.get("verif-hash"))) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
@@ -35,8 +38,14 @@ export async function POST(req: NextRequest) {
 
   try {
     if (event.event === "charge.completed" && event.data?.id != null) {
-      const result = await fulfilTransaction(String(event.data.id), { store, verify: (id) => verifyTransaction(id) });
-      if (result.outcome === "mismatch") console.error("Payment mismatch on webhook:", event.data.id, result.reason);
+      const id = String(event.data.id);
+      const result = await fulfilTransaction(
+        id,
+        { store, verify: (txId) => verifyTransaction(txId), subscriptionPrice: (interval, currency) => getSubscriptionPriceIn(interval, currency) },
+        { source: "webhook" }
+      );
+      if (result.outcome === "mismatch") console.error("NEEDS ATTENTION — payment taken but not applied (mismatch):", id, result.reason);
+      if (result.outcome === "unknown_reference" && result.paid) console.error("NEEDS ATTENTION — payment taken but no matching order:", id);
       return NextResponse.json({ received: true, outcome: result.outcome });
     }
 

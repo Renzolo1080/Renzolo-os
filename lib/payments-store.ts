@@ -1,10 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { PaymentRecord, PaymentStore, SubscriptionRecord } from "./payments";
+import type { PaymentRecord, PaymentStore, AutoRenewInfo, GrantResult } from "./payments";
 
 /** The real PaymentStore, backed by Supabase. Always constructed with the
  * service-role (admin) client: founders have read-only access to
  * payments and subscriptions (see supabase/schema.sql), so nothing here
- * can be done from a browser session. */
+ * can be done from a browser session.
+ *
+ * The two operations that grant access (grantPayment, grantRenewal) call
+ * database functions, so each is a single all-or-nothing transaction —
+ * see fulfil_payment and record_renewal in supabase/schema.sql. */
 
 function toPayment(row: any): PaymentRecord {
   return {
@@ -19,17 +23,6 @@ function toPayment(row: any): PaymentRecord {
     currency: row.currency,
     status: row.status,
     flutterwaveTransactionId: row.flutterwave_transaction_id ?? null,
-  };
-}
-
-function toSubscription(row: any): SubscriptionRecord {
-  return {
-    founderId: row.founder_id,
-    status: row.status,
-    billingInterval: row.billing_interval ?? null,
-    currentPeriodEnd: row.current_period_end ?? null,
-    autoRenew: !!row.auto_renew,
-    billingEmail: row.billing_email ?? null,
   };
 }
 
@@ -52,20 +45,18 @@ export function createPaymentStore(admin: SupabaseClient): PaymentStore {
       return data ? toPayment(data) : null;
     },
 
-    async claimPayment(paymentId, transactionId, paidAmount, at) {
-      const { data, error } = await admin
-        .from("payments")
-        .update({ status: "successful", flutterwave_transaction_id: transactionId, paid_amount: paidAmount, fulfilled_at: at, note: null })
-        .eq("id", paymentId)
-        .neq("status", "successful")
-        .select("id");
-      check(error, "Claiming payment");
-      return (data ?? []).length === 1;
-    },
-
-    async releasePayment(paymentId) {
-      const { error } = await admin.from("payments").update({ status: "pending", fulfilled_at: null }).eq("id", paymentId);
-      check(error, "Releasing payment");
+    async grantPayment(paymentId, tx, at) {
+      const { data, error } = await admin.rpc("fulfil_payment", {
+        p_payment_id: paymentId,
+        p_transaction_id: tx.id,
+        p_paid_amount: tx.amount,
+        p_customer_email: tx.customerEmail,
+        p_customer_id: tx.customerId,
+        p_now: at,
+      });
+      check(error, "Granting payment");
+      if (data !== "fulfilled" && data !== "already_fulfilled") throw new Error(`Granting payment: unexpected result ${JSON.stringify(data)}`);
+      return data as GrantResult;
     },
 
     async markPaymentFailed(paymentId, transactionId, note) {
@@ -77,70 +68,77 @@ export function createPaymentStore(admin: SupabaseClient): PaymentStore {
       check(error, "Marking payment failed");
     },
 
-    async recordRenewal(input) {
-      const { error } = await admin.from("payments").insert({
-        tx_ref: input.txRef,
-        founder_id: input.founderId,
-        product: "subscription",
-        billing_interval: input.billingInterval,
-        auto_renew: true,
-        amount: input.amount,
-        currency: input.currency,
-        status: "successful",
-        flutterwave_transaction_id: input.transactionId,
-        paid_amount: input.amount,
-        fulfilled_at: input.at,
-        note: "automatic card renewal",
-      });
-      // 23505 = unique violation: this transaction (or reference) is already recorded.
-      if (error && (error as any).code === "23505") return false;
-      check(error, "Recording renewal");
-      return true;
+    async notePendingTransaction(paymentId, transactionId) {
+      const { error } = await admin
+        .from("payments")
+        .update({ flutterwave_transaction_id: transactionId })
+        .eq("id", paymentId)
+        .neq("status", "successful");
+      check(error, "Noting pending transaction");
     },
 
-    async getSubscription(founderId) {
-      const { data, error } = await admin.from("subscriptions").select("*").eq("founder_id", founderId).maybeSingle();
-      check(error, "Looking up subscription");
-      return data ? toSubscription(data) : null;
-    },
-
-    async findAutoRenewSubscriptionByEmail(email) {
+    async findAutoRenewByEmail(email) {
       const { data, error } = await admin
         .from("subscriptions")
-        .select("*")
+        .select("founder_id, renewal_interval, renewal_amount, renewal_currency, flutterwave_customer_id")
         .eq("billing_email", email.toLowerCase())
         .eq("auto_renew", true)
-        .limit(1)
-        .maybeSingle();
+        .not("renewal_interval", "is", null)
+        .limit(2);
       check(error, "Looking up subscription by email");
-      return data ? toSubscription(data) : null;
+      // Two founders billed to one email: there is no safe way to choose,
+      // so nobody is credited and the charge is flagged for a person.
+      if (!data || data.length !== 1) return null;
+      const row: any = data[0];
+      const info: AutoRenewInfo = {
+        founderId: row.founder_id,
+        renewalInterval: row.renewal_interval,
+        renewalAmount: row.renewal_amount === null || row.renewal_amount === undefined ? null : Number(row.renewal_amount),
+        renewalCurrency: row.renewal_currency ?? null,
+        flutterwaveCustomerId: row.flutterwave_customer_id ?? null,
+      };
+      return info;
     },
 
-    async activateSubscription(update) {
-      const { error } = await admin.from("subscriptions").upsert(
-        {
-          founder_id: update.founderId,
-          status: "active",
-          billing_interval: update.billingInterval,
-          current_period_end: update.currentPeriodEnd,
-          auto_renew: update.autoRenew,
-          billing_email: update.billingEmail,
-          flutterwave_customer_id: update.flutterwaveCustomerId,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "founder_id" }
-      );
-      check(error, "Activating subscription");
+    async grantRenewal({ founderId, tx, at }) {
+      const { data, error } = await admin.rpc("record_renewal", {
+        p_founder: founderId,
+        p_transaction_id: tx.id,
+        p_amount: tx.amount,
+        p_currency: tx.currency,
+        p_customer_email: tx.customerEmail,
+        p_customer_id: tx.customerId,
+        p_now: at,
+      });
+      check(error, "Recording renewal");
+      if (data !== "fulfilled" && data !== "already_fulfilled" && data !== "no_auto_renew") {
+        throw new Error(`Recording renewal: unexpected result ${JSON.stringify(data)}`);
+      }
+      return data;
     },
 
-    async setAutoRenew(founderId, autoRenew) {
-      const { error } = await admin.from("subscriptions").update({ auto_renew: autoRenew, updated_at: new Date().toISOString() }).eq("founder_id", founderId);
-      check(error, "Updating auto-renew");
+    async setAutoRenewOff(founderId) {
+      const { error } = await admin.from("subscriptions").update({ auto_renew: false, updated_at: new Date().toISOString() }).eq("founder_id", founderId);
+      check(error, "Switching auto-renew off");
     },
 
-    async markAdvisorSessionPaid(sessionId, at) {
-      const { error } = await admin.from("advisor_sessions").update({ paid_at: at }).eq("id", sessionId).is("paid_at", null);
-      check(error, "Marking advisor session paid");
+    async listPendingPayments(founderId, startedAfter, notCheckedSince, limit) {
+      const { data, error } = await admin
+        .from("payments")
+        .select("*")
+        .eq("founder_id", founderId)
+        .eq("status", "pending")
+        .gte("created_at", startedAfter)
+        .or(`last_checked_at.is.null,last_checked_at.lt.${notCheckedSince}`)
+        .order("created_at", { ascending: false })
+        .limit(limit);
+      check(error, "Listing pending payments");
+      return (data ?? []).map(toPayment);
+    },
+
+    async markChecked(paymentId, at) {
+      const { error } = await admin.from("payments").update({ last_checked_at: at }).eq("id", paymentId);
+      check(error, "Marking payment checked");
     },
   };
 }
