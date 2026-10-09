@@ -256,6 +256,17 @@ secret key starting `FLWSECK`, this integration will not work as
 written. Everything Flutterwave-specific is in `lib/flutterwave.ts`, so
 that is the only file that would change.
 
+### Staying logged in, and the report's time limit
+
+- `middleware.ts` renews a founder's login on every signed-in page and
+  sends anyone not logged in to `/login`. Without it a founder who left
+  a tab open would be logged out, or hit an error, about an hour in.
+- The AI report is limited to 150 seconds (`lib/anthropic.ts`) inside a
+  180-second route limit (`app/api/report/route.ts`). If it runs out of
+  time or fails, the founder sees a "try again" message and nothing is
+  saved. There is one report per score: asking again returns the same
+  one rather than generating (and paying for) another.
+
 ### Tests
 
 `npm test` runs everything. The payment-related suites:
