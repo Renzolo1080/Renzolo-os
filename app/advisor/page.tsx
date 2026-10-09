@@ -6,7 +6,7 @@ import { QAToggle } from "@/components/QAToggle";
 import { AdvisorRecommendationForm } from "@/components/AdvisorRecommendationForm";
 
 export default async function AdvisorQueuePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -27,7 +27,10 @@ export default async function AdvisorQueuePage() {
     .from("advisor_sessions")
     .select("*, profiles!advisor_sessions_founder_id_fkey(full_name)")
     .eq("status", "requested")
-    .order("created_at", { ascending: true });
+    // Only sessions Flutterwave has confirmed as paid — a founder who
+    // started checkout and never paid must not land in this queue.
+    .not("paid_at", "is", null)
+    .order("paid_at", { ascending: true });
 
   const now = Date.now();
 
@@ -89,7 +92,7 @@ export default async function AdvisorQueuePage() {
                 <div>
                   <p className="font-semibold">{s.profiles?.full_name ?? "Unknown founder"}</p>
                   <p className="text-sm text-ink-soft">
-                    {s.currency} {s.price} · requested {new Date(s.created_at).toLocaleString()}
+                    {s.currency} {s.price} · paid {new Date(s.paid_at).toLocaleString()}
                   </p>
                   {s.report_id && <p className="text-xs text-ink-soft mt-1">Linked report: {s.report_id}</p>}
                 </div>

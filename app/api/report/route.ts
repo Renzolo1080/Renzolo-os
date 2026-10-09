@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { generateDiagnosticReport } from "@/lib/anthropic";
 import { extractNextSteps } from "@/lib/recommendations";
+import { isSubscriptionActive } from "@/lib/payments";
+
+/** The longest this route may run on Vercel, in seconds. Above the
+ * report's own 150-second ceiling (REPORT_TIMEOUT_MS in lib/anthropic.ts)
+ * with room to save the result. */
+export const maxDuration = 180;
 
 const SLA_MIN_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MIN_HOURS ?? 24);
 const SLA_MAX_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MAX_HOURS ?? 36);
@@ -23,7 +29,7 @@ const SLA_MAX_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MAX_HOURS ?? 36);
  * downstream relies on it. Either way, this never gates what the
  * founder already received above. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -31,15 +37,30 @@ export async function POST(req: NextRequest) {
 
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("status")
+    .select("status, current_period_end, auto_renew")
     .eq("founder_id", user.id)
     .maybeSingle();
 
-  if (!subscription || subscription.status !== "active") {
+  if (!isSubscriptionActive(subscription)) {
     return NextResponse.json({ error: "Full report requires an active subscription." }, { status: 402 });
   }
 
-  const { assessmentId, scoreId } = await req.json();
+  const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; scoreId?: unknown } | null;
+  const assessmentId = typeof body?.assessmentId === "string" ? body.assessmentId : null;
+  const scoreId = typeof body?.scoreId === "string" ? body.scoreId : null;
+  if (!assessmentId || !scoreId) return NextResponse.json({ error: "Missing assessmentId or scoreId" }, { status: 400 });
+
+  // One report per score. If it already exists (a double-click, a second
+  // tab, a reload half-way through), hand that one back instead of paying
+  // for the AI and web searches again.
+  const { data: existing } = await supabase
+    .from("reports")
+    .select("*")
+    .eq("score_id", scoreId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (existing) return NextResponse.json({ report: existing, message: "Here's your Diagnostic Report." });
 
   const { data: assessment } = await supabase.from("assessments").select("*").eq("id", assessmentId).single();
   const { data: score } = await supabase.from("scores").select("*").eq("id", scoreId).single();
@@ -49,7 +70,9 @@ export async function POST(req: NextRequest) {
     .select("block_key, current_state, future_state, goal_target")
     .eq("assessment_id", assessmentId);
 
-  if (!assessment || !score) return NextResponse.json({ error: "Assessment or score not found" }, { status: 404 });
+  if (!assessment || !score || score.assessment_id !== assessment.id) {
+    return NextResponse.json({ error: "Assessment or score not found" }, { status: 404 });
+  }
 
   const blockNarratives = Object.fromEntries(
     (blockRows ?? []).map((b) => [
@@ -58,25 +81,41 @@ export async function POST(req: NextRequest) {
     ])
   );
 
-  const diagnosticMarkdown = await generateDiagnosticReport({
-    founderName: profile?.full_name ?? "Founder",
-    ventureStage: assessment.venture_stage ?? "",
-    industry: assessment.industry ?? "",
-    geography: assessment.geography ?? "",
-    timeHorizon: assessment.time_horizon ?? "",
-    businessType: assessment.business_type ?? "",
-    employeeCount: assessment.employee_count ?? "",
-    yearsInBusiness: assessment.years_in_business ?? "",
-    annualRevenue: assessment.annual_revenue ?? "",
-    diagnostic: {
-      ventureScore: { score: score.venture_score, tier: score.venture_tier },
-      subScores: { market: score.market_subscore, customer: score.customer_subscore, investor: score.investor_subscore },
-      healthIndex: { index: score.health_index, confidence: score.health_confidence, evidenceCompleteness: score.evidence_completeness },
-      blockScores: score.block_scores,
-      gaps: score.gaps,
-    },
-    blockNarratives,
-  });
+  let diagnosticMarkdown: string;
+  try {
+    diagnosticMarkdown = await generateDiagnosticReport({
+      founderName: profile?.full_name ?? "Founder",
+      ventureStage: assessment.venture_stage ?? "",
+      industry: assessment.industry ?? "",
+      geography: assessment.geography ?? "",
+      timeHorizon: assessment.time_horizon ?? "",
+      businessType: assessment.business_type ?? "",
+      employeeCount: assessment.employee_count ?? "",
+      yearsInBusiness: assessment.years_in_business ?? "",
+      annualRevenue: assessment.annual_revenue ?? "",
+      diagnostic: {
+        ventureScore: { score: score.venture_score, tier: score.venture_tier },
+        subScores: { market: score.market_subscore, customer: score.customer_subscore, investor: score.investor_subscore },
+        healthIndex: { index: score.health_index, confidence: score.health_confidence, evidenceCompleteness: score.evidence_completeness },
+        blockScores: score.block_scores,
+        gaps: score.gaps,
+      },
+      blockNarratives,
+    });
+  } catch (e) {
+    // Nothing has been saved or charged to the founder at this point, so
+    // it is safe for them to simply try again.
+    console.error("Report generation failed:", e);
+    const timedOut = e instanceof Error && /timed? ?out|timeout/i.test(`${e.name} ${e.message}`);
+    return NextResponse.json(
+      {
+        error: timedOut
+          ? "Your report took too long to generate. Please try again in a minute."
+          : "We couldn't generate your report just now. Please try again in a minute.",
+      },
+      { status: 502 }
+    );
+  }
 
   // app_settings is read via the admin (service-role) client so this
   // works regardless of the founder's own RLS grants — only admins can
@@ -90,7 +129,11 @@ export async function POST(req: NextRequest) {
 
   const reviewDueBy = requiresReview ? new Date(Date.now() + SLA_MAX_HOURS * 60 * 60 * 1000).toISOString() : null;
 
-  const { data: report, error } = await supabase
+  // Written with the service role for the same reason as scores: founders
+  // have read-only access to reports. Ownership was checked above — the
+  // assessment and score were both fetched through the founder's own
+  // session, which only returns rows they own.
+  const { data: report, error } = await admin
     .from("reports")
     .insert({
       assessment_id: assessmentId,

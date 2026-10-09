@@ -9,8 +9,9 @@ const VALID_STATUSES = ["not_started", "on_track", "at_risk", "behind", "done"];
  * assessment ownership") already scopes this to the founder's own rows
  * (or staff), so the only thing this route adds is input validation and
  * a server-set progress_updated_at timestamp. */
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -28,7 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       progress_note: progressNote ?? null,
       progress_updated_at: new Date().toISOString(),
     })
-    .eq("id", params.id)
+    .eq("id", id)
     .select()
     .single();
 
