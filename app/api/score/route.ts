@@ -21,7 +21,7 @@ interface BlockSubmission {
  * interview refinement on paid tiers is a fast-follow, not this route.
  */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

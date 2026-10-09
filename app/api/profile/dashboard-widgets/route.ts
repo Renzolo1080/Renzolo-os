@@ -10,7 +10,7 @@ const VALID_WIDGETS = ["reminders", "valuation", "goalsProgress", "progressOverv
  * shown to everyone). RLS ("profiles: self update") already scopes
  * this to the caller's own row. */
 export async function PATCH(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

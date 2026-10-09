@@ -27,7 +27,7 @@ import { getAppUrl } from "@/lib/app-url";
  * up in the advisor queue once Flutterwave confirms the payment and the
  * server sets paid_at (lib/payments.ts). */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

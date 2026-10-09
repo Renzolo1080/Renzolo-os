@@ -6,7 +6,7 @@ import { MilestonePlanner, type BlockOption, type Milestone } from "@/components
 import { RecommendationsPanel, type Recommendation } from "@/components/RecommendationsPanel";
 
 export default async function ToolsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

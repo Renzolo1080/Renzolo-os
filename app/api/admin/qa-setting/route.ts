@@ -12,7 +12,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
  * setting (see app/api/report/route.ts). */
 
 async function requireAdmin() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

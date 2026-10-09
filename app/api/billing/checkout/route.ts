@@ -25,7 +25,7 @@ import { getAppUrl } from "@/lib/app-url";
  * founder is sent to pay, and access is only granted when Flutterwave
  * confirms that amount was paid (lib/payments.ts). */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

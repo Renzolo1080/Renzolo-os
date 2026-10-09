@@ -13,8 +13,9 @@ import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwa
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-export default async function DashboardPage({ searchParams }: { searchParams?: SearchParams }) {
-  const supabase = createClient();
+export default async function DashboardPage(props: { searchParams?: Promise<SearchParams> }) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

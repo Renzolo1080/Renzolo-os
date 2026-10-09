@@ -6,13 +6,13 @@ import { cookies } from "next/headers";
  * Reads/writes the auth cookies so a logged-in founder's session carries
  * through server-rendered pages and route handlers.
  *
- * Writing cookies is only allowed in route handlers and middleware, not
+ * Writing cookies is only allowed in route handlers and the proxy, not
  * while a page is rendering. If Supabase needs to save a refreshed login
  * during a page render, that write is skipped here on purpose — the
- * middleware (middleware.ts) has already refreshed and saved it for this
+ * proxy (proxy.ts) has already refreshed and saved it for this
  * request, so nothing is lost, and the page doesn't crash. */
-export function createClient() {
-  const cookieStore = cookies();
+export async function createClient() {
+  const cookieStore = await cookies();
   return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
       getAll() {

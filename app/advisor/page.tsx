@@ -6,7 +6,7 @@ import { QAToggle } from "@/components/QAToggle";
 import { AdvisorRecommendationForm } from "@/components/AdvisorRecommendationForm";
 
 export default async function AdvisorQueuePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -7,6 +7,14 @@ Flutterwave (cards + mobile money across African markets), a paid 1:1
 Advisor Session upsell, and an advisor-facing queue for both report QA
 and session scheduling.
 
+## Versions
+
+Next.js 16 (App Router, Turbopack) and React 19. Request-time values
+(`cookies()`, route `params`, page `searchParams`) are asynchronous in
+this version, which is why `createClient()` in `lib/supabase/server.ts`
+is awaited everywhere. What earlier versions called `middleware.ts` is
+`proxy.ts`. Needs Node.js 20.9 or newer.
+
 ## Status (as of this build session)
 
 **Verified working right now, without any external accounts:**
@@ -258,7 +266,7 @@ that is the only file that would change.
 
 ### Staying logged in, and the report's time limit
 
-- `middleware.ts` renews a founder's login on every signed-in page and
+- `proxy.ts` renews a founder's login on every signed-in page and
   sends anyone not logged in to `/login`. Without it a founder who left
   a tab open would be logged out, or hit an error, about an hour in.
 - The AI report is limited to 150 seconds (`lib/anthropic.ts`) inside a

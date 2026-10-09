@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/server";
  * Marks a paid 1:1 session as scheduled. The actual time is coordinated
  * manually (email/call) for launch — Keep Manual, same as advisor
  * report review — this just records that it happened and who owns it. */
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -20,7 +21,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data: updated, error } = await supabase
     .from("advisor_sessions")
     .update({ status: "scheduled", advisor_id: user.id, scheduled_at: new Date().toISOString() })
-    .eq("id", params.id)
+    .eq("id", id)
     // Unpaid sessions can't be scheduled (see paid_at in supabase/schema.sql).
     .not("paid_at", "is", null)
     .select("id");

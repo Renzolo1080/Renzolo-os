@@ -28,7 +28,7 @@ function methodsFor(currency: string): string {
 }
 
 export default async function SubscribePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
