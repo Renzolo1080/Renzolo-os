@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { runDiagnostic, BLOCK_KEYS, type AllBlockScores, type BlockKey } from "@/lib/scoring";
 import { computeValuation } from "@/lib/valuation";
 
@@ -87,7 +87,12 @@ export async function POST(req: NextRequest) {
     blockScores: diagnostic.blockScores,
   });
 
-  const { data: scoreRow, error: scoreError } = await supabase
+  // Scores are written with the service role, not the founder's own
+  // session: founders have read-only access to scores (see
+  // supabase/schema.sql) so a Venture Score can't be fabricated from the
+  // browser. Ownership is already established here — the assessment row
+  // above was just created under this founder's own session.
+  const { data: scoreRow, error: scoreError } = await createAdminClient()
     .from("scores")
     .insert({
       assessment_id: assessment.id,

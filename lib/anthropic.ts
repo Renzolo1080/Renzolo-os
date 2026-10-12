@@ -1,7 +1,23 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { DiagnosticResult } from "./scoring";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+/** How long one report is allowed to take before we give up and tell the
+ * founder to try again. A report makes up to four web searches, so it is
+ * slow by nature; this is a ceiling on a stuck request, not a target.
+ * Kept under the route's own limit (maxDuration in app/api/report/route.ts)
+ * so the founder gets a clear message rather than a blank timeout page. */
+export const REPORT_TIMEOUT_MS = 150_000;
+
+/** Created on first use, so a missing key fails the one request that
+ * needs it with a clear message instead of breaking the whole app at
+ * start-up. No automatic retries: a retry would repeat the web searches
+ * (which are billed) and could run past the time limit. */
+let cached: Anthropic | null = null;
+function getClient(): Anthropic {
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not set.");
+  cached ??= new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: REPORT_TIMEOUT_MS, maxRetries: 0 });
+  return cached;
+}
 
 export interface ReportInput {
   founderName: string;
@@ -96,7 +112,7 @@ self-contained (don't write "as above" or refer back to other sections).
 Keep it direct and specific to this founder's stage, industry, business type, location, and size — avoid
 generic startup advice that could apply to anyone.`;
 
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: "claude-sonnet-4-5",
     max_tokens: 3000,
     tools: [
@@ -116,5 +132,8 @@ generic startup advice that could apply to anyone.`;
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
     .join("\n\n");
+  // Never save or show an empty report (e.g. the reply was cut off before
+  // any text was written).
+  if (!text.trim()) throw new Error("The report came back empty.");
   return text;
 }

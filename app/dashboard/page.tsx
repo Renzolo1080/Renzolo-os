@@ -1,12 +1,19 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
 import { GoalProgressRow } from "@/components/GoalProgressRow";
 import { DashboardCustomizer } from "@/components/DashboardCustomizer";
 import { ProgressOverview, type TopRecommendation, type TopMilestone } from "@/components/ProgressOverview";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
+import { PaymentBanner } from "@/components/PaymentBanner";
+import { isSubscriptionActive, daysUntilExpiry, reconcilePendingPayments } from "@/lib/payments";
+import { createPaymentStore } from "@/lib/payments-store";
+import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 
-export default async function DashboardPage() {
+type SearchParams = Record<string, string | string[] | undefined>;
+const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+
+export default async function DashboardPage({ searchParams }: { searchParams?: SearchParams }) {
   const supabase = createClient();
   const {
     data: { user },
@@ -28,11 +35,59 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
+  // Safety net for "I paid but nothing happened": before reading the
+  // subscription, re-check any of this founder's payments that are still
+  // pending and complete them if Flutterwave now says they went through.
+  // Bounded and never throws — see reconcilePendingPayments.
+  if (process.env.FLUTTERWAVE_SECRET_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    await reconcilePendingPayments(user.id, {
+      store: createPaymentStore(createAdminClient()),
+      verify: (id) => verifyTransaction(id),
+      verifyByReference: (ref) => verifyTransactionByReference(ref),
+    });
+  }
+
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("status")
+    .select("status, current_period_end, auto_renew")
     .eq("founder_id", user.id)
     .maybeSingle();
+  const subscribed = isSubscriptionActive(subscription);
+
+  // The banner's wording comes from the address bar, which anyone can
+  // edit — so "payment received" is only shown when the database agrees.
+  let paymentResult = first(searchParams?.payment);
+  const paymentProduct = first(searchParams?.product);
+  if (paymentResult === "success") {
+    let confirmed = subscribed;
+    if (paymentProduct === "advisor_session") {
+      const { data: paidSession } = await supabase
+        .from("advisor_sessions")
+        .select("id")
+        .eq("founder_id", user.id)
+        .gte("paid_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .limit(1)
+        .maybeSingle();
+      confirmed = !!paidSession;
+    }
+    if (!confirmed) paymentResult = "pending";
+  }
+  const daysLeft = daysUntilExpiry(subscription);
+  const lapsed = !subscribed && subscription?.status === "active";
+
+  // If this founder already has a report for their latest score, show it
+  // straight away instead of asking them to generate (and pay for the AI
+  // cost of) a new one on every visit.
+  const { data: existingReport } =
+    subscribed && latestScore
+      ? await supabase
+          .from("reports")
+          .select("id, diagnostic_markdown")
+          .eq("score_id", latestScore.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
 
   const needsBlockResponses = latestScore && (showReminders || showGoalsProgress || showProgressOverview);
   const { data: blockResponses } = needsBlockResponses
@@ -111,6 +166,20 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-navy mb-6">Your Dashboard</h1>
+
+      <PaymentBanner payment={paymentResult} product={paymentProduct} />
+
+      {subscribed && daysLeft !== null && daysLeft <= 7 && (
+        <div className="rounded border border-gold bg-cream p-4 text-sm mb-6">
+          <span className="font-semibold text-navy">
+            {daysLeft <= 1 ? "Your subscription ends within a day." : `Your subscription ends in ${daysLeft} days.`}
+          </span>{" "}
+          <a href="/dashboard/subscribe" className="text-teal underline">
+            Renew now
+          </a>{" "}
+          <span className="text-ink-soft">— time is added on top of what you've already paid for.</span>
+        </div>
+      )}
 
       {!latestScore ? (
         <div>
@@ -208,13 +277,17 @@ export default async function DashboardPage() {
           )}
 
           {/* Standard view — always shown */}
-          {subscription?.status === "active" ? (
-            <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} />
+          {subscribed ? (
+            <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} initialReport={existingReport ?? null} />
           ) : (
             <div className="rounded border p-6 bg-cream">
-              <p className="mb-3 font-semibold">Unlock your full Diagnostic Report, Growth Navigator plan, and Readiness Passport.</p>
+              <p className="mb-3 font-semibold">
+                {lapsed
+                  ? "Your subscription has ended. Renew to open your full Diagnostic Report again."
+                  : "Unlock your full Diagnostic Report and the option to book a 1:1 session with an advisor."}
+              </p>
               <a href="/dashboard/subscribe" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
-                Subscribe
+                {lapsed ? "Renew" : "Subscribe"}
               </a>
             </div>
           )}
