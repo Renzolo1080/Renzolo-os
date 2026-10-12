@@ -8,6 +8,7 @@ import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 import { PaymentBanner } from "@/components/PaymentBanner";
 import { isSubscriptionActive, daysUntilExpiry, reconcilePendingPayments } from "@/lib/payments";
 import { createPaymentStore } from "@/lib/payments-store";
+import { detailsComplete } from "@/lib/quickcheck";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -74,6 +75,15 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   }
   const daysLeft = daysUntilExpiry(subscription);
   const lapsed = !subscribed && subscription?.status === "active";
+
+  // A subscriber gets their full report once they've answered the
+  // detailed questions for their weakest areas (lib/quickcheck.ts).
+  const { data: detailRows } =
+    subscribed && latestScore
+      ? await supabase.from("block_responses").select("current_state").eq("assessment_id", latestScore.assessment_id)
+      : { data: null };
+  const detailsDone = detailsComplete(detailRows);
+  const gapLabels: string[] = ((latestScore?.gaps as any[] | null) ?? []).map((g) => g.label).filter(Boolean);
 
   // If this founder already has a report for their latest score, show it
   // straight away instead of asking them to generate (and pay for the AI
@@ -183,11 +193,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 
       {!latestScore ? (
         <div>
-          <p className="mb-4">You haven't completed a Readiness Assessment yet.</p>
+          <p className="mb-1 font-semibold text-navy">Start with your free Quick Check</p>
+          <p className="mb-4 text-ink-soft">About 3 to 5 minutes, mostly tapping answers. You'll get your Venture Score and your three weakest areas.</p>
           <a href="/assessment" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
-            Start Assessment
+            Start the Quick Check
           </a>
         </div>
+      ) : !subscribed ? (
+        <FreeResult score={latestScore.venture_score} tier={latestScore.venture_tier} gaps={gapLabels} lapsed={lapsed} />
       ) : (
         <div className="space-y-6">
           <DashboardCustomizer initialWidgets={widgets} />
@@ -254,14 +267,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             </div>
           )}
 
-          {showGoalsProgress && blockResponses && blockResponses.length > 0 && (
+          {showGoalsProgress && blockResponses && blockResponses.some((b) => b.goal_target || b.target_date) && (
             <div className="rounded border p-4">
               <p className="font-semibold text-navy mb-1">Goals & Progress</p>
               <p className="text-xs text-ink-soft mb-2">
                 Your own targets and dates from the assessment — update status any time.
               </p>
               <div>
-                {blockResponses.map((b) => (
+                {blockResponses.filter((b) => b.goal_target || b.target_date).map((b) => (
                   <GoalProgressRow
                     key={b.id}
                     blockResponseId={b.id}
@@ -276,18 +289,18 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             </div>
           )}
 
-          {/* Standard view — always shown */}
-          {subscribed ? (
+          {detailsDone || existingReport ? (
             <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} initialReport={existingReport ?? null} />
           ) : (
-            <div className="rounded border p-6 bg-cream">
-              <p className="mb-3 font-semibold">
-                {lapsed
-                  ? "Your subscription has ended. Renew to open your full Diagnostic Report again."
-                  : "Unlock your full Diagnostic Report and the option to book a 1:1 session with an advisor."}
+            <div className="rounded border border-gold p-6 bg-cream">
+              <p className="font-semibold text-navy">One more step for your full Diagnostic Report</p>
+              <p className="text-sm text-ink-soft mt-1 mb-4">
+                Answer a few detailed questions about your three weakest areas
+                {gapLabels.length ? ` (${gapLabels.join(", ")})` : ""}. It takes about 10 minutes, sharpens your score, and lets
+                your report and 90-day plan speak to your actual business.
               </p>
-              <a href="/dashboard/subscribe" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
-                {lapsed ? "Renew" : "Subscribe"}
+              <a href="/assessment/details" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
+                Answer the detailed questions
               </a>
             </div>
           )}
@@ -298,6 +311,59 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
         </div>
       )}
     </main>
+  );
+}
+
+/** What a founder sees before subscribing: enough of their result to want
+ * the rest. The score and tier, and their three weakest areas named but
+ * not explained. Everything that explains them is the paid product. */
+function FreeResult({ score, tier, gaps, lapsed }: { score: number; tier: string; gaps: string[]; lapsed: boolean }) {
+  return (
+    <div className="space-y-6">
+      <div className="rounded border p-6">
+        <p className="text-sm text-ink-soft">Your Venture Score</p>
+        <p className="text-5xl font-bold text-navy">
+          {score}
+          <span className="text-lg font-normal text-ink-soft"> / 100</span>
+        </p>
+        <p className="text-gold font-semibold mt-1">{tier}</p>
+      </div>
+
+      {gaps.length > 0 && (
+        <div className="rounded border p-6">
+          <p className="font-semibold text-navy">Your 3 weakest areas</p>
+          <ol className="mt-3 space-y-2">
+            {gaps.map((g, i) => (
+              <li key={g} className="flex items-center gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-bold text-white">{i + 1}</span>
+                <span>{g}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-sm text-ink-soft mt-4">These are holding your score back the most. Your full report explains why, and what to do about each one.</p>
+        </div>
+      )}
+
+      <div className="rounded border p-6 bg-navy text-white">
+        <p className="text-lg font-semibold">
+          {lapsed ? "Your subscription has ended" : "Unlock your full Diagnostic Report"}
+        </p>
+        <ul className="mt-3 space-y-1 text-sm text-cream">
+          <li>• What's behind each weak area, and how to fix it</li>
+          <li>• A 90-day action plan for your business</li>
+          <li>• Market, customer and investor readiness scores</li>
+          <li>• An estimated value range for your business</li>
+          <li>• Goals, reminders and progress tracking</li>
+        </ul>
+        <a href="/dashboard/subscribe" className="mt-5 inline-block rounded bg-gold px-6 py-3 font-semibold text-white">
+          {lapsed ? "Renew my subscription" : "Subscribe to unlock"}
+        </a>
+      </div>
+
+      <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
+        Open Founder Tools (free calculators)
+      </a>
+    </div>
   );
 }
 
