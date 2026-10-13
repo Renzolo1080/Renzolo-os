@@ -5,6 +5,15 @@ import { extractNextSteps } from "@/lib/recommendations";
 import { entitlements } from "@/lib/membership";
 import { loadMembership } from "@/lib/membership-server";
 import { TIME_HORIZONS } from "@/lib/quickcheck";
+import { loadPlan } from "@/lib/plan-server";
+import { planAsText } from "@/lib/plan";
+import { parsePlanReview, reviewAsText } from "@/lib/plan-review";
+
+/** One-time assessment buyers can update their report as they finish more
+ * of the assessment and build their plan: up to this many versions. */
+const REPORTS_PER_PURCHASE = 3;
+/** Any founder: at most this many new reports in 24 hours. */
+const REPORTS_PER_DAY = 3;
 
 /** The longest this route may run on Vercel, in seconds. Above the
  * report's own 150-second ceiling (REPORT_TIMEOUT_MS in lib/anthropic.ts)
@@ -45,15 +54,21 @@ export async function POST(req: NextRequest) {
   const m = await loadMembership(supabase, user.id);
   const ent = entitlements(m.tier);
   const { data: usedRows } = await supabase.from("reports").select("assessment_purchase_id").not("assessment_purchase_id", "is", null);
-  const used = new Set((usedRows ?? []).map((r: any) => r.assessment_purchase_id));
-  const unusedPurchase = m.purchases.find((p) => !used.has(p.id)) ?? null;
+  const uses = new Map<string, number>();
+  for (const r of usedRows ?? []) uses.set((r as any).assessment_purchase_id, (uses.get((r as any).assessment_purchase_id) ?? 0) + 1);
+  // A purchase not yet used, or else the newest one with versions left.
+  const unusedPurchase = m.purchases.find((p) => !uses.has(p.id)) ?? m.purchases.find((p) => (uses.get(p.id) ?? 0) < REPORTS_PER_PURCHASE) ?? null;
   const usePurchase = !ent.fullReport && !!unusedPurchase;
   const level: "summary" | "full" | null = ent.fullReport || usePurchase ? "full" : ent.summaryReport ? "summary" : null;
+  if (!level && m.purchases.length > 0) {
+    return NextResponse.json({ error: `Your Readiness Assessment includes ${REPORTS_PER_PURCHASE} report versions, and you've used them. Join a membership to keep updating your report.` }, { status: 402 });
+  }
   if (!level) {
     return NextResponse.json({ error: "Your Readiness Report needs a membership or the one-time Readiness Assessment." }, { status: 402 });
   }
 
-  const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; scoreId?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; scoreId?: unknown; refresh?: unknown } | null;
+  const refresh = body?.refresh === true;
   const assessmentId = typeof body?.assessmentId === "string" ? body.assessmentId : null;
   const scoreId = typeof body?.scoreId === "string" ? body.scoreId : null;
   if (!assessmentId || !scoreId) return NextResponse.json({ error: "Missing assessmentId or scoreId" }, { status: 400 });
@@ -70,8 +85,21 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
   // A summary report is replaced by a full one once the founder is
   // entitled to it (e.g. after upgrading); otherwise reuse what exists.
-  if (existing && !(existing.level === "summary" && level === "full")) {
+  const [planRow, { data: reviewRow }, { data: briefRow }] = await Promise.all([
+    loadPlan(supabase, user.id),
+    supabase.from("plan_reviews").select("result, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("market_briefs").select("insights, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  // A refresh is only worth paying for when something has changed since
+  // this score's report: the plan, its review or the market brief.
+  const changedSince = (iso: string) =>
+    [planRow?.updated_at, reviewRow?.created_at, briefRow?.created_at].some((t) => t && new Date(t).getTime() > new Date(iso).getTime());
+  if (existing && !(existing.level === "summary" && level === "full") && !(refresh && changedSince(existing.created_at))) {
     return NextResponse.json({ report: existing, message: "Here's your Readiness Report." });
+  }
+  const { count: recent } = await supabase.from("reports").select("id", { count: "exact", head: true }).gte("created_at", new Date(Date.now() - 864e5).toISOString());
+  if ((recent ?? 0) >= REPORTS_PER_DAY) {
+    return NextResponse.json({ error: "You've created several reports today. Please try again tomorrow." }, { status: 429 });
   }
 
   const { data: assessment } = await supabase.from("assessments").select("*").eq("id", assessmentId).single();
@@ -114,6 +142,9 @@ export async function POST(req: NextRequest) {
         gaps: score.gaps,
       },
       blockNarratives,
+      planText: planRow ? planAsText(planRow.data) : null,
+      planReviewText: reviewText(reviewRow?.result),
+      marketHighlights: marketText(briefRow?.insights),
     }, {
       level,
       planLength: planLengthFor(assessment),
@@ -174,6 +205,8 @@ export async function POST(req: NextRequest) {
   // an empty array and never blocks report delivery above.
   const nextSteps = extractNextSteps(diagnosticMarkdown);
   if (nextSteps.length > 0) {
+    // A newer report replaces the AI's earlier next steps (a coach's stay).
+    await supabase.from("recommendations").delete().eq("assessment_id", assessmentId).eq("source", "ai");
     await supabase.from("recommendations").insert(
       nextSteps.map((title, index) => ({
         assessment_id: assessmentId,
@@ -190,6 +223,17 @@ export async function POST(req: NextRequest) {
     : "Here's your Readiness Report.";
 
   return NextResponse.json({ report, message });
+}
+
+function reviewText(result: unknown): string | null {
+  const r = result ? parsePlanReview(JSON.stringify(result)) : null;
+  return r ? reviewAsText(r) : null;
+}
+
+function marketText(insights: any): string | null {
+  const recs = Array.isArray(insights?.recommendations) ? insights.recommendations : [];
+  if (!recs.length) return null;
+  return recs.slice(0, 6).map((r: any) => `- ${r.action} (${r.why})`).join("\n");
 }
 
 /** The plan length the founder chose (assessments.extra.planLength), or
