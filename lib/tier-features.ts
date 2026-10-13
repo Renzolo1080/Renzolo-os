@@ -17,7 +17,7 @@ export const TIER_FEATURES: { label: string; values: Record<Tier, boolean | stri
   { label: "Pitch and investor readiness review", values: { essentials: false, growth: false, elevate: true } },
   { label: "Priority support", values: { essentials: false, growth: false, elevate: true } },
   { label: "Extra coaching sessions at member prices", values: { essentials: true, growth: true, elevate: true } },
-  { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Foundations (8 weeks)", growth: "Foundations and Growth Cohort (12 weeks)", elevate: "All cohorts, including Elevate (6 months)" } },
+  { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Foundations", growth: "Foundations and Growth", elevate: "All levels, including Elevate" } },
 ];
 
 export const TIER_TAGLINES: Record<Tier, string> = {

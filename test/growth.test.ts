@@ -34,7 +34,7 @@ async function main() {
   const d2 = buildEmail("day2", ctx);
   assert(d2.subject.includes("Channels") && AREA_TIPS.channels.tips.every((t) => d2.text.includes(t)), "day-2 email: tips for their weakest area");
   assert(BLOCK_KEYS.every((k) => AREA_TIPS[k]?.tips.length === 3), "every business-model area has three tips");
-  assert(buildEmail("day5", ctx).text.includes("$79") && buildEmail("day10", ctx).text.includes("Founder Trajectory(TM) Academy") && buildEmail("day10", ctx).text.includes("Growth Cohort (12 weeks)"), "day-5 (membership) and day-10 (Academy) emails");
+  assert(buildEmail("day5", ctx).text.includes("$79") && buildEmail("day10", ctx).text.includes("Founder Trajectory(TM) Academy") && buildEmail("day10", ctx).text.includes("Growth (12 weeks)"), "day-5 (membership) and day-10 (Academy) emails");
   for (const k of ["results", "day2", "day5", "day10"] as const) {
     const e = buildEmail(k, { ...ctx, firstName: "<b>x</b>" });
     assert(!e.html.includes("<b>x</b>") && !/renzcelerator/i.test(e.text), `${k}: names are escaped in HTML; no old program name`);

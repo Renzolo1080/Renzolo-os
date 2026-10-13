@@ -2,13 +2,13 @@ import { CohortForm } from "@/components/PublicForms";
 
 export const metadata = {
   title: "Founder Trajectory™ Academy · cohorts",
-  description: "Founder Trajectory™ Academy: the 8-week Foundations cohort, the 12-week Growth cohort and the 6-month Elevate cohort.",
+  description: "Founder Trajectory™ Academy development levels: Foundations (8 weeks), Growth (12 weeks) and Elevate (6 months).",
 };
 
 const FORMATS = [
   { name: "Foundations", weeks: "8 weeks", focus: "Your customers, your offer, your numbers and a written growth plan. For Essentials members." },
-  { name: "Growth Cohort", weeks: "12 weeks", focus: "Traction and readiness: channels, pricing, cash flow and operations, then investor, lender and contract readiness. For Growth members." },
-  { name: "Elevate Cohort", weeks: "6 months", focus: "Hands-on support to raise, scale or win big contracts. For Elevate members, once a year." },
+  { name: "Growth", weeks: "12 weeks", focus: "Traction and readiness: channels, pricing, cash flow and operations, then investor, lender and contract readiness. For Growth members." },
+  { name: "Elevate", weeks: "6 months", focus: "Hands-on support to raise, scale or win big contracts. For Elevate members, once a year." },
 ];
 
 export default function ProgramsPage() {
@@ -26,6 +26,7 @@ export default function ProgramsPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <h2 className="mb-6 text-2xl font-bold text-navy">Founder Trajectory™ Academy: Development Levels</h2>
         <div className="grid gap-5 md:grid-cols-3">
           {FORMATS.map((f) => (
             <div key={f.name} className="rounded-2xl bg-white p-6 shadow-sm">
@@ -41,7 +42,7 @@ export default function ProgramsPage() {
             <h2 className="text-2xl font-bold text-navy">How cohorts work</h2>
             <ul className="mt-4 space-y-3 text-sm">
               {[
-                "Foundations and Growth cohorts open three times a year. The Elevate Cohort runs once a year.",
+                "Foundations and Growth open three times a year. Elevate runs once a year.",
                 "Cohorts have their own fee, separate from membership.",
                 "Members get priority when applying. Every founder applies and must qualify, so each cohort is a strong group.",
                 "Your Readiness Assessment and plan are your starting point, so you arrive knowing exactly what to work on.",

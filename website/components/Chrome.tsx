@@ -12,7 +12,7 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
     <header className="bg-navy text-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
         <a href="/" className="font-display text-xl font-800 tracking-tight" style={{ fontWeight: 800 }}>
-          RENZOLO
+          RENZOLO<sup className="ml-0.5 text-[0.55em] font-semibold">™</sup>
         </a>
         <nav aria-label="Main" className="hidden items-center gap-7 text-sm md:flex">
           {NAV.map(([label, href]) => (
@@ -47,7 +47,7 @@ export function Footer() {
     <footer className="bg-navy text-mist">
       <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 text-sm md:grid-cols-[2fr_1fr_1fr]">
         <div>
-          <p className="font-display text-lg font-bold text-white">RENZOLO</p>
+          <p className="font-display text-lg font-bold text-white">RENZOLO™</p>
           <p className="mt-2 max-w-sm">
             Venture readiness and development for founders in the United States, Kenya and South Africa. Home of Founder Trajectory™, powered by
             RENZOLO OS™.

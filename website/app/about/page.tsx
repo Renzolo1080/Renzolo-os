@@ -2,7 +2,7 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
 
-export const metadata = { title: "About", description: "RENZOLO supports the trajectory of your business: Founder Trajectory™, powered by RENZOLO OS™." };
+export const metadata = { title: "About", description: "RENZOLO™ gets businesses ready for customers and investors with Founder Trajectory™, powered by RENZOLO OS™." };
 
 /** Experience and impact: bullet points with real figures, supplied by
  * Lorenzo. The section stays hidden until this list has entries, so the
@@ -23,8 +23,8 @@ export default function AboutPage() {
       <Header campaign="about_header" />
       <main>
         <PageHero
-          title="We build businesses that are ready."
-          intro="RENZOLO is a venture development company. We give founders an honest view of where their business stands, and the plan, coaching and connections to get it ready to grow, get funded and scale."
+          title="We get businesses ready to grow, get funded and scale."
+          intro="RENZOLO™ is a venture development firm. We give founders an honest view of where their business stands, then the plan, coaching and connections to close the gaps that customers, lenders and investors look for."
         />
 
         {CREDIBILITY.length > 0 && (
@@ -43,7 +43,7 @@ export default function AboutPage() {
 
         <section className="bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">We support the trajectory of your business</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">We get your business ready for customers and investors</h2>
             <p className="mt-4 max-w-2xl text-lg text-muted">Founder Trajectory™ is powered by RENZOLO OS™, to help founders:</p>
             <ol className="mt-10 divide-y divide-mist border-y border-mist">
               {STEPS.map(([name, text], i) => (

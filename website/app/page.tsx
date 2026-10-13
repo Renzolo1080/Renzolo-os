@@ -33,7 +33,7 @@ const OFFERS = [
   },
   {
     name: "Founder Trajectory™ Academy",
-    what: "Foundations (8 weeks), the Growth Cohort (12 weeks) and the Elevate Cohort (6 months): founders working through their plans together, with live sessions and coaching.",
+    what: "Three development levels: Foundations (8 weeks), Growth (12 weeks) and Elevate (6 months). Founders work through their plans together, with live sessions and coaching.",
     price: "Applications by cohort",
     action: "Explore the Academy",
     href: "/academy/",
@@ -71,7 +71,7 @@ export default function Home() {
               Know where your business stands. Then move it forward.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-mist">
-              RENZOLO helps founders in the United States, Kenya and South Africa measure how ready their business is, close the gaps holding it back, and
+              RENZOLO™ helps founders in the United States, Kenya and South Africa measure how ready their business is, close the gaps holding it back, and
               grow with a plan, coaching and the right connections.
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">

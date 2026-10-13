@@ -133,12 +133,12 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
   const subject = "Grow alongside other founders";
   const html = layout(
     `${hi}you don't have to do this alone`,
-    p(`The Founder Trajectory&trade; Academy runs cohorts where founders work through their plan together, with coaching along the way: Foundations (8 weeks), the Growth Cohort (12 weeks) and the Elevate Cohort (6 months).`) +
-      p(`Foundations and Growth cohorts open three times a year, and the Elevate Cohort once a year. Members get priority when applying.`),
+    p(`The Founder Trajectory&trade; Academy runs cohorts where founders work through their plan together, with coaching along the way at three development levels: Foundations (8 weeks), Growth (12 weeks) and Elevate (6 months).`) +
+      p(`Foundations and Growth open three times a year, and Elevate once a year. Members get priority when applying.`),
     ctx,
     { label: "Learn about cohorts", href: programs }
   );
-  const text = `${hi}The Founder Trajectory(TM) Academy runs cohorts where founders work through their plan together, with coaching: Foundations (8 weeks), the Growth Cohort (12 weeks) and the Elevate Cohort (6 months). Members get priority when applying.\n\nLearn more: ${programs}${textFooter(ctx)}`;
+  const text = `${hi}The Founder Trajectory(TM) Academy runs cohorts where founders work through their plan together, with coaching at three development levels: Foundations (8 weeks), Growth (12 weeks) and Elevate (6 months). Members get priority when applying.\n\nLearn more: ${programs}${textFooter(ctx)}`;
   return { subject, html, text };
 }
 

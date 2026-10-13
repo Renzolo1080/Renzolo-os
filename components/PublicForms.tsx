@@ -86,8 +86,8 @@ export function CohortForm({ defaultCohort = "foundations" }: { defaultCohort?: 
         <span className="mb-1 block text-sm font-medium">Which cohort?</span>
         <select name="cohort" className={input} defaultValue={defaultCohort}>
           <option value="foundations">Foundations (8 weeks)</option>
-          <option value="growth">Growth Cohort (12 weeks)</option>
-          <option value="elevate">Elevate Cohort (6 months)</option>
+          <option value="growth">Growth (12 weeks)</option>
+          <option value="elevate">Elevate (6 months)</option>
         </select>
       </label>
       <label className="block">
