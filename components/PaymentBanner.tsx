@@ -17,7 +17,7 @@ export function PaymentBanner({ payment, product }: { payment?: string; product?
       message =
         product === "advisor_session"
           ? "Payment received. An advisor will contact you by email to arrange your 1:1 session."
-          : "Payment received. Your subscription is active.";
+          : "Payment received. Your membership is active.";
       break;
     case "pending":
       tone = "wait";

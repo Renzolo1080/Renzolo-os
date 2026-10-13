@@ -27,7 +27,7 @@ function assert(cond: boolean, msg: string) {
 const allAt = (level: 0 | 1 | 2 | 3) => Object.fromEntries(BLOCK_KEYS.map((k) => [k, level]));
 const goodProfile = {
   ventureStage: STAGES[1],
-  industry: "Agriculture and agribusiness",
+  industry: "Agriculture and food production",
   country: "Kenya",
   businessType: "Registered small business / LLC",
   yearsInBusiness: "1-3 years",
@@ -45,8 +45,8 @@ const goodProfile = {
 assert(QUICK_QUESTIONS.length === 9 && new Set(QUICK_QUESTIONS.map((q) => q.key)).size === 9, "one question for each of the nine business areas");
 assert(BLOCK_KEYS.every((k) => QUICK_QUESTIONS.some((q) => q.key === k)), "every scoring area has a question");
 assert(QUICK_QUESTIONS.every((q) => q.options.length === 4 && q.options.every((o) => o.trim().length > 0)), "every question has four non-empty answers");
-const inputs = 7 + 4 + 9 + 3;
-assert(inputs >= 20 && inputs <= 25, `${inputs} taps or dropdowns in total, inside the 3-5 minute budget`);
+const inputs = 3 + 7 + 4 + 4 + 1 + 9 + 3;
+assert(inputs >= 25 && inputs <= 35, `${inputs} taps or dropdowns in total, inside the 5-7 minute budget`);
 
 // --- validation -----------------------------------------------------------
 assert(parseQuickCheck({ answers: allAt(2), evidence: [] }).ok, "a complete set of answers is accepted");
@@ -91,3 +91,62 @@ assert(!detailsComplete([{ current_state: "a" }, { current_state: "  " }, { curr
 assert(detailsComplete([{ current_state: "a" }, { current_state: "b" }, { current_state: "c" }, { current_state: null }]), "three written areas: complete");
 
 console.log("\nAll Quick Check tests completed.");
+
+// --- Readiness Snapshot: life cycle, strategic plan, overview ---------------
+import {
+  PLAN_QUESTIONS,
+  parsePlan,
+  computePlanScore,
+  applyPlanToMeasures,
+  PLAN_CLARITY_BONUS,
+  parseContact,
+  SUBSCRIPTION_FEATURES,
+} from "../lib/quickcheck";
+import { scoreSnapshot, snapshotOverview } from "../lib/snapshot";
+
+assert(STAGES[0].startsWith("Discover") && STAGES[STAGES.length - 1].startsWith("Exit"), "stages run the full life cycle, Discover to Exit");
+assert(INDUSTRIES.length >= 12 && INDUSTRIES.length <= 18 && INDUSTRIES.includes("Other" as any), "a short list of high-level industries, with Other");
+assert(PLAN_QUESTIONS.length === 4 && PLAN_QUESTIONS.every((q) => q.options.length === 4), "four strategic plan questions with four answers each");
+assert(SUBSCRIPTION_FEATURES.length >= 6 && SUBSCRIPTION_FEATURES.length <= 10, `${SUBSCRIPTION_FEATURES.length} subscription features listed (6-10)`);
+
+const planAll = (level: 0 | 1 | 2 | 3) => Object.fromEntries(PLAN_QUESTIONS.map((q) => [q.key, level]));
+assert(!parsePlan({ answers: { planExists: 1 } }).ok, "an incomplete strategic plan section is refused");
+const plan = parsePlan({ answers: planAll(3), coverage: ["channels", "channels", "bogus"] });
+assert(plan.ok && plan.value.coverage.length === 1, "plan coverage keeps only real areas, once each");
+const noPlan = parsePlan({ answers: planAll(0), coverage: [] });
+const fullPlan = parsePlan({ answers: planAll(3), coverage: [...BLOCK_KEYS] });
+assert(noPlan.ok && computePlanScore(noPlan.value) === 9, `no plan scores low (${noPlan.ok && computePlanScore(noPlan.value)})`);
+assert(fullPlan.ok && computePlanScore(fullPlan.value) === 94, `a full plan covering every area scores high (${fullPlan.ok && computePlanScore(fullPlan.value)})`);
+
+if (plan.ok) {
+  const q = parseQuickCheck({ answers: allAt(1), evidence: [] });
+  if (q.ok) {
+    const base = quickCheckToScoringInput(q.value).measures;
+    const lifted = applyPlanToMeasures(base, plan.value);
+    assert(lifted.channels.clarity === base.channels.clarity + PLAN_CLARITY_BONUS && lifted.revenueStreams.clarity === base.revenueStreams.clarity, "an area the plan addresses gets a clarity lift; others don't");
+    const capped = applyPlanToMeasures(quickCheckToScoringInput({ answers: allAt(3) as any, evidence: [] }).measures, fullPlan.ok ? fullPlan.value : plan.value);
+    assert(Object.values(capped).every((m) => m.clarity <= 100), "the clarity lift never goes over 100");
+  }
+}
+
+const prof = parseProfile({ ...goodProfile, ventureStage: STAGES[3], industry: INDUSTRIES[5] });
+const qc = parseQuickCheck({ answers: { ...allAt(2), costStructure: 0, channels: 0, keyPartnerships: 1 }, evidence: [] });
+if (prof.ok && qc.ok && noPlan.ok) {
+  const ov = snapshotOverview(prof.value, scoreSnapshot(prof.value, qc.value, noPlan.value));
+  assert(ov.weakest.length === 3, "overview names three weakest areas");
+  assert(ov.weakest.includes("Cost Structure") && ov.weakest.includes("Channels"), `the weakest answers are the ones named (${ov.weakest.join(", ")})`);
+  assert(!ov.weakest.includes(ov.strongest ?? ""), "strongest area is not also listed as a weakness");
+  assert(/strategic plan/i.test(ov.recommendation) && /grow revenue/i.test(ov.recommendation), "with no plan, the recommendation starts with the plan and names their goal");
+}
+if (prof.ok && qc.ok && fullPlan.ok) {
+  const ov = snapshotOverview(prof.value, scoreSnapshot(prof.value, qc.value, fullPlan.value));
+  assert(!/biggest lever right now is your strategic plan/i.test(ov.recommendation), "with a solid plan, the recommendation moves on to the weakest areas");
+}
+
+assert(!parseContact({ fullName: "", email: "a@b.co" }).ok, "contact needs a name");
+assert(!parseContact({ fullName: "Ama", email: "not-an-email" }).ok, "contact needs a valid email");
+const ct = parseContact({ fullName: " Ama Owusu ", companyName: "Owusu Farms", email: " Ama@Example.COM " });
+assert(ct.ok && ct.value.email === "ama@example.com" && ct.value.fullName === "Ama Owusu", "email is stored lower-cased and trimmed (used to match the account later)");
+import { snapshotRecommendation } from "../lib/quickcheck";
+const rec = snapshotRecommendation({ planScore: 20, weakest: ["Channels"], primaryGoal: "Get my first paying customers", challenges: [] });
+assert(rec.includes("get your first paying customers") && !/\bmy\b/.test(rec), "the recommendation speaks to the founder ('your', not 'my')");

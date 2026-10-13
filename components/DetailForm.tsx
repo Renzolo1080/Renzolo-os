@@ -17,7 +17,7 @@ export function DetailForm({ assessmentId, areas }: { assessmentId: string; area
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (areas.length === 0) return <p>There are no areas to describe yet. Take the Quick Check first.</p>;
+  if (areas.length === 0) return <p>There are no areas to describe yet. Take the Readiness Snapshot first.</p>;
   const area = areas[step];
   const current = answers[area.prompt.key];
   const filled = current.currentState.trim().length > 0 && current.futureState.trim().length > 0;

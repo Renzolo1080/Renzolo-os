@@ -186,30 +186,36 @@ export function detailsComplete(blockRows: { current_state: string | null }[] | 
 // answer and give consistent data RENZOLO can segment and report on.
 // ---------------------------------------------------------------------
 
+/** The Founder Trajectory™ journey stages, from first idea to exit.
+ * The word before the colon is the stage name used across the platform. */
 export const STAGES = [
-  "Idea or pre-launch",
-  "Early: first customers",
-  "Growing: steady sales",
-  "Established: profitable",
-  "Scaling: expanding fast",
+  "Discover: exploring an idea",
+  "Validate: testing with real customers",
+  "Build: developing the product or service",
+  "Acquire: winning first and repeat customers",
+  "Prepare: getting ready to grow or raise",
+  "Fund: raising capital or financing",
+  "Scale: expanding fast",
+  "Exit: selling, merging or succession",
 ] as const;
 
+/** High-level industry groups, broad enough for any founder to place themselves. */
 export const INDUSTRIES = [
-  "Agriculture and agribusiness",
-  "Food and beverage",
-  "Retail and e-commerce",
-  "Manufacturing",
+  "Agriculture and food production",
+  "Manufacturing and industrial",
   "Construction and real estate",
-  "Transport and logistics",
-  "ICT and software",
-  "Fintech and financial services",
+  "Retail and e-commerce",
+  "Food service and hospitality",
+  "Technology and software",
+  "Financial services",
   "Health and wellness",
   "Education and training",
-  "Creative arts and media",
-  "Fashion and beauty",
-  "Tourism and hospitality",
-  "Energy and environment",
-  "Professional services",
+  "Professional and business services",
+  "Media, arts and entertainment",
+  "Transportation and logistics",
+  "Energy, utilities and environment",
+  "Consumer products and services",
+  "Nonprofit and social enterprise",
   "Other",
 ] as const;
 
@@ -243,7 +249,7 @@ export const BUSINESS_TYPES = [
   "Nonprofit / social enterprise",
 ] as const;
 
-export const YEARS_IN_BUSINESS = ["Pre-launch / idea stage", "Less than 1 year", "1-3 years", "3-5 years", "5+ years"] as const;
+export const YEARS_IN_BUSINESS = ["Not started yet", "Less than 1 year", "1-3 years", "3-5 years", "5+ years"] as const;
 
 export const TEAM_SIZES = ["Just me", "2-5 employees", "6-20 employees", "21-50 employees", "50+ employees"] as const;
 
@@ -259,7 +265,9 @@ export const PRIMARY_GOALS = [
   "Formalise and register my business",
 ] as const;
 
-export const TIME_HORIZONS = ["3 months", "6 months", "12 months", "2-3 years"] as const;
+/** Also the lengths a founder can choose for their growth and readiness
+ * plan: the first 90 days in detail, the rest in phases. */
+export const TIME_HORIZONS = ["90 days", "6 months", "12 months", "18 months", "24 months", "36 months"] as const;
 
 export const FUNDING_NEEDS = [
   "Not looking for funding",
@@ -339,4 +347,141 @@ export function parseProfile(body: unknown): { ok: true; value: QuickProfile } |
   out.challenges = challenges;
   out.heardFrom = pick(HEARD_FROM, b.heardFrom) ?? "";
   return { ok: true, value: out as QuickProfile };
+}
+
+// ---------------------------------------------------------------------
+// Strategic plan: does the founder have a plan, and does it address each
+// building block of their business model (the Business Model Canvas)?
+// ---------------------------------------------------------------------
+
+export type PlanKey = "planExists" | "planGoals" | "planFinancials" | "planReview";
+
+export interface PlanQuestion {
+  key: PlanKey;
+  question: string;
+  /** Four answers, weakest first (same 0-3 levels as the area questions). */
+  options: [string, string, string, string];
+}
+
+export const PLAN_QUESTIONS: PlanQuestion[] = [
+  {
+    key: "planExists",
+    question: "Do you have a strategic or business plan?",
+    options: ["No plan yet", "It's mostly in my head", "Written, but out of date", "Written, current and shared with my team"],
+  },
+  {
+    key: "planGoals",
+    question: "Does it set clear goals with measurable targets and dates?",
+    options: ["No goals set", "General goals, no numbers or dates", "Some goals have targets and dates", "Every major goal has a target, a date and an owner"],
+  },
+  {
+    key: "planFinancials",
+    question: "Does it include a budget and financial projections?",
+    options: ["No", "Rough numbers only", "A budget, but no projections", "A budget and 12+ months of projections"],
+  },
+  {
+    key: "planReview",
+    question: "How often do you check progress against the plan?",
+    options: ["Never", "Once a year or less", "Every quarter", "Every month or more often"],
+  },
+];
+
+export const PLAN_KEYS = PLAN_QUESTIONS.map((q) => q.key) as PlanKey[];
+
+export interface PlanSubmission {
+  answers: Record<PlanKey, QuickLevel>;
+  /** The business-model areas the founder says their plan addresses. */
+  coverage: BlockKey[];
+}
+
+export function parsePlan(body: unknown): { ok: true; value: PlanSubmission } | { ok: false; error: string } {
+  const b = (body ?? {}) as { answers?: Record<string, unknown>; coverage?: unknown };
+  const answers = {} as Record<PlanKey, QuickLevel>;
+  for (const key of PLAN_KEYS) {
+    const v = b.answers?.[key];
+    if (!isQuickLevel(v)) return { ok: false, error: "Please answer every strategic plan question." };
+    answers[key] = v;
+  }
+  const raw = Array.isArray(b.coverage) ? b.coverage : [];
+  const coverage = Array.from(new Set(raw.filter((k): k is BlockKey => (BLOCK_KEYS as readonly string[]).includes(k as string))));
+  return { ok: true, value: { answers, coverage } };
+}
+
+/** Strategic Plan Readiness, 0-100: 60% how solid the plan is (the four
+ * questions), 40% how much of the business model it addresses. */
+export function computePlanScore(plan: PlanSubmission): number {
+  const base = PLAN_KEYS.reduce((sum, k) => sum + LEVEL_SCORES[plan.answers[k]], 0) / PLAN_KEYS.length;
+  const coverage = (plan.coverage.length / BLOCK_KEYS.length) * 100;
+  return Math.round(0.6 * base + 0.4 * coverage);
+}
+
+/** How much a plan that addresses an area lifts that area's clarity
+ * measure: a founder who has planned for an area is clearer about it. */
+export const PLAN_CLARITY_BONUS = 10;
+
+/** Adds the plan's effect to the scoring inputs: areas the plan
+ * addresses get a clarity bonus (never above 100). */
+export function applyPlanToMeasures(measures: AllBlockScores, plan: PlanSubmission): AllBlockScores {
+  const out = {} as AllBlockScores;
+  for (const key of BLOCK_KEYS) {
+    const m = { ...measures[key] };
+    if (plan.coverage.includes(key)) m.clarity = Math.min(100, m.clarity + PLAN_CLARITY_BONUS);
+    out[key] = m;
+  }
+  return out;
+}
+
+/** Short, plain recommendation for the free result. Points at the single
+ * most useful next move and ties it to the founder's own goal. */
+export function snapshotRecommendation(input: { planScore: number; weakest: string[]; primaryGoal: string; challenges: string[] }): string {
+  // Goals are written in the founder's voice ("Get my first paying
+  // customers"); the recommendation speaks to them ("get your first...").
+  const goal = input.primaryGoal
+    ? (input.primaryGoal.charAt(0).toLowerCase() + input.primaryGoal.slice(1)).replace(/\bmy\b/g, "your")
+    : "reach your next milestone";
+  const first = input.weakest[0];
+  const parts: string[] = [];
+  if (input.planScore < 50) {
+    parts.push(
+      `Your biggest lever right now is your strategic plan. Put it in writing with measurable goals, a budget and a monthly check-in, and make sure it covers ${first ? `${first} and your other weakest areas` : "every part of your business model"}.`
+    );
+  } else if (first) {
+    parts.push(`Your plan gives you a solid base. The fastest gains now are in ${first}${input.weakest[1] ? ` and ${input.weakest[1]}` : ""}.`);
+  } else {
+    parts.push("Your plan gives you a solid base. The next step is to pressure-test each part of your business model.");
+  }
+  if (input.challenges.length) parts.push(`With ${input.challenges.map((c) => c.toLowerCase()).join(" and ")} as your biggest challenge${input.challenges.length > 1 ? "s" : ""}, that is where a focused 90-day plan will pay off first.`);
+  parts.push(`Your Founder Trajectory™ membership starts with a full Readiness Assessment that shows what's behind each gap, then builds your plan to ${goal}.`);
+  return parts.join(" ");
+}
+
+/** What a subscription includes. Shown after the free Snapshot and on the
+ * dashboard; every line must be something the app actually provides. */
+export const SUBSCRIPTION_FEATURES = [
+  "Full Readiness Assessment across your strategic plan and all nine building blocks of your business model",
+  "AI-powered Readiness Report explaining what's behind each gap and how to close it",
+  "A personalized 90+ day growth and readiness plan (up to 36 months) tied to your goals",
+  "Market, Customer and Investor readiness scores, plus your Venture Health Index",
+  "An estimated value range for your venture",
+  "Goal tracking with reminders and a progress dashboard",
+  "Milestone planner and tailored recommendations",
+  "Founder tools, including financial calculators",
+  "Re-assess any time and watch your score improve",
+  "Option to book one-on-one sessions with a RENZOLO advisor",
+] as const;
+
+export interface SnapshotContact {
+  fullName: string;
+  companyName: string;
+  email: string;
+}
+
+export function parseContact(body: unknown): { ok: true; value: SnapshotContact } | { ok: false; error: string } {
+  const b = (body ?? {}) as Record<string, unknown>;
+  const fullName = typeof b.fullName === "string" ? b.fullName.trim().slice(0, 120) : "";
+  const companyName = typeof b.companyName === "string" ? b.companyName.trim().slice(0, 160) : "";
+  const email = typeof b.email === "string" ? b.email.trim().toLowerCase().slice(0, 254) : "";
+  if (!fullName) return { ok: false, error: "Please enter your name." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "Please enter a valid email address." };
+  return { ok: true, value: { fullName, companyName, email } };
 }
