@@ -20,7 +20,7 @@ export function PasswordInput({
   return (
     <div className="relative">
       <input
-        className="w-full rounded border px-3 py-2 pr-20"
+        className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-20 focus:border-navy focus:outline-none"
         type={visible ? "text" : "password"}
         placeholder={placeholder}
         value={value}

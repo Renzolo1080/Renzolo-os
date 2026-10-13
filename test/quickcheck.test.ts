@@ -104,7 +104,7 @@ import {
 } from "../lib/quickcheck";
 import { scoreSnapshot, snapshotOverview } from "../lib/snapshot";
 
-assert(STAGES[0].startsWith("Ideation") && STAGES[STAGES.length - 1].startsWith("Exit"), "stages run the full life cycle, ideation to exit");
+assert(STAGES[0].startsWith("Discover") && STAGES[STAGES.length - 1].startsWith("Exit"), "stages run the full life cycle, Discover to Exit");
 assert(INDUSTRIES.length >= 12 && INDUSTRIES.length <= 18 && INDUSTRIES.includes("Other" as any), "a short list of high-level industries, with Other");
 assert(PLAN_QUESTIONS.length === 4 && PLAN_QUESTIONS.every((q) => q.options.length === 4), "four strategic plan questions with four answers each");
 assert(SUBSCRIPTION_FEATURES.length >= 6 && SUBSCRIPTION_FEATURES.length <= 10, `${SUBSCRIPTION_FEATURES.length} subscription features listed (6-10)`);

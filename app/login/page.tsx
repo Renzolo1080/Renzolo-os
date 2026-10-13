@@ -36,11 +36,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold text-navy">Log in</h1>
+    <main className="flex min-h-[70vh] items-center justify-center px-4 py-12 sm:px-6">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+        <h1 className="text-2xl font-bold text-navy">Welcome back</h1>
+        <p className="text-sm text-ink-soft">Log in to continue your Founder Trajectory™.</p>
         <input
-          className="w-full rounded border px-3 py-2"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:border-navy focus:outline-none"
           type="email"
           autoComplete="email"
           placeholder="Email"
@@ -59,7 +60,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-navy px-6 py-3 text-white font-semibold disabled:opacity-50"
+          className="w-full rounded-lg bg-navy px-6 py-3 text-white font-semibold disabled:opacity-50"
         >
           {loading ? "Logging in…" : "Log in"}
         </button>

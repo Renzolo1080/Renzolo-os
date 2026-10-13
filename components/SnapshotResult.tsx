@@ -61,13 +61,13 @@ export function SnapshotResult({ overview, fullName, companyName, email }: { ove
       </div>
 
       <div className="rounded-2xl bg-navy p-6 text-white sm:p-8">
-        <p className="text-xl font-bold">Get your comprehensive Readiness Assessment</p>
-        <p className="mt-1 text-sm text-cream/80">Your Snapshot shows where the gaps are. A subscription shows why they're there and what to do about them, and supports you as you close them.</p>
+        <p className="text-xl font-bold">Continue your Founder Trajectory™</p>
+        <p className="mt-1 text-sm text-cream/80">Your Snapshot shows where the gaps are. A membership starts with your full Readiness Assessment, shows why the gaps are there and what to do about them, and supports you as you close them.</p>
         <div className="mt-5">
           <SubscriptionFeatures dark />
         </div>
         <a href={registerHref} className="mt-6 inline-block rounded-lg bg-gold px-6 py-3 font-semibold text-white">
-          Create my account and subscribe
+          Create my account and become a member
         </a>
         <p className="mt-3 text-xs text-cream/70">Sign up with {email.trim() || "the same email"} and this Snapshot will be waiting in your account.</p>
       </div>

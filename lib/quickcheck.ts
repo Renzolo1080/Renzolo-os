@@ -186,16 +186,16 @@ export function detailsComplete(blockRows: { current_state: string | null }[] | 
 // answer and give consistent data RENZOLO can segment and report on.
 // ---------------------------------------------------------------------
 
-/** The full venture life cycle, from first idea to exit. */
+/** The Founder Trajectory™ journey stages, from first idea to exit.
+ * The word before the colon is the stage name used across the platform. */
 export const STAGES = [
-  "Ideation: exploring an idea",
-  "Validation: testing with real customers",
-  "Building: developing the product or service",
-  "Launch: first paying customers",
-  "Early growth: steady sales",
-  "Scaling: expanding fast",
-  "Mature: established and profitable",
-  "Renewal: pivoting or turning around",
+  "Discover: exploring an idea",
+  "Validate: testing with real customers",
+  "Build: developing the product or service",
+  "Acquire: winning first and repeat customers",
+  "Prepare: getting ready to grow or raise",
+  "Fund: raising capital or financing",
+  "Scale: expanding fast",
   "Exit: selling, merging or succession",
 ] as const;
 
@@ -265,7 +265,9 @@ export const PRIMARY_GOALS = [
   "Formalise and register my business",
 ] as const;
 
-export const TIME_HORIZONS = ["3 months", "6 months", "12 months", "2-3 years"] as const;
+/** Also the lengths a founder can choose for their growth and readiness
+ * plan: the first 90 days in detail, the rest in phases. */
+export const TIME_HORIZONS = ["90 days", "6 months", "12 months", "18 months", "24 months", "36 months"] as const;
 
 export const FUNDING_NEEDS = [
   "Not looking for funding",
@@ -449,16 +451,16 @@ export function snapshotRecommendation(input: { planScore: number; weakest: stri
     parts.push("Your plan gives you a solid base. The next step is to pressure-test each part of your business model.");
   }
   if (input.challenges.length) parts.push(`With ${input.challenges.map((c) => c.toLowerCase()).join(" and ")} as your biggest challenge${input.challenges.length > 1 ? "s" : ""}, that is where a focused 90-day plan will pay off first.`);
-  parts.push(`The comprehensive Readiness Assessment shows what's behind each gap and lays out the steps to ${goal}.`);
+  parts.push(`Your Founder Trajectory™ membership starts with a full Readiness Assessment that shows what's behind each gap, then builds your plan to ${goal}.`);
   return parts.join(" ");
 }
 
 /** What a subscription includes. Shown after the free Snapshot and on the
  * dashboard; every line must be something the app actually provides. */
 export const SUBSCRIPTION_FEATURES = [
-  "Comprehensive Readiness Assessment across all nine building blocks of your business model",
-  "AI-powered Diagnostic Report explaining what's behind each gap and how to close it",
-  "A personalized 90-day action plan tied to your goals",
+  "Full Readiness Assessment across your strategic plan and all nine building blocks of your business model",
+  "AI-powered Readiness Report explaining what's behind each gap and how to close it",
+  "A personalized 90+ day growth and readiness plan (up to 36 months) tied to your goals",
   "Market, Customer and Investor readiness scores, plus your Venture Health Index",
   "An estimated value range for your venture",
   "Goal tracking with reminders and a progress dashboard",

@@ -57,11 +57,11 @@ export default async function SubscribePage() {
       <a href="/dashboard" className="text-sm text-teal">
         ← Back to dashboard
       </a>
-      <h1 className="text-2xl font-bold text-navy mt-3 mb-2">{active ? "Your subscription" : "Subscribe to RENZOLO OS"}</h1>
+      <h1 className="text-2xl font-bold text-navy mt-3 mb-2">{active ? "Your membership" : "Become a Founder Trajectory™ member"}</h1>
 
       {active ? (
         <div className="rounded border border-gold bg-cream p-4 text-sm mb-6">
-          <p className="font-semibold text-navy">Your subscription is active.</p>
+          <p className="font-semibold text-navy">Your membership is active.</p>
           {subscription?.current_period_end ? (
             <p className="text-ink-soft mt-1">
               {subscription.auto_renew

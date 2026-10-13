@@ -201,14 +201,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 
   return (
     <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-navy mb-6">Your Dashboard</h1>
+      <h1 className="text-2xl font-bold text-navy mb-6">Your Founder Trajectory™</h1>
 
       <PaymentBanner payment={paymentResult} product={paymentProduct} />
 
       {subscribed && daysLeft !== null && daysLeft <= 7 && (
         <div className="rounded border border-gold bg-cream p-4 text-sm mb-6">
           <span className="font-semibold text-navy">
-            {daysLeft <= 1 ? "Your subscription ends within a day." : `Your subscription ends in ${daysLeft} days.`}
+            {daysLeft <= 1 ? "Your membership ends within a day." : `Your membership ends in ${daysLeft} days.`}
           </span>{" "}
           <a href="/dashboard/subscribe" className="text-teal underline">
             Renew now
@@ -383,13 +383,13 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
 
       <div className="rounded border p-6 bg-navy text-white">
         <p className="text-lg font-semibold">
-          {lapsed ? "Your subscription has ended" : "Get your comprehensive Readiness Assessment"}
+          {lapsed ? "Your membership has ended" : "Continue your Founder Trajectory™"}
         </p>
         <div className="mt-4">
           <SubscriptionFeatures dark />
         </div>
         <a href="/dashboard/subscribe" className="mt-5 inline-block rounded bg-gold px-6 py-3 font-semibold text-white">
-          {lapsed ? "Renew my subscription" : "Subscribe to unlock"}
+          {lapsed ? "Renew my membership" : "Become a member"}
         </a>
       </div>
 

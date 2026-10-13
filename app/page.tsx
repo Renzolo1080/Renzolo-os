@@ -1,26 +1,28 @@
-import { SiteHeader } from "@/components/SiteHeader";
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { QUICK_QUESTIONS, STAGES } from "@/lib/quickcheck";
 
-const STEPS = [
+const METHOD = [
   {
-    title: "Take the free Readiness Snapshot",
-    body: "5 to 7 minutes of dropdowns and quick taps about your venture, your goals, your strategic plan and your business model. No account needed.",
+    name: "Evaluate",
+    body: "Start with the free Readiness Snapshot, then complete your full Readiness Assessment. You get a Readiness Report that shows exactly where you stand and why.",
   },
   {
-    title: "See where you stand, instantly",
-    body: "Your Venture Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back, and a clear recommendation.",
+    name: "Evolve",
+    body: "Turn your results into a growth and readiness plan of 90 days to 36 months, and update your strategic plan around the gaps that matter most.",
   },
   {
-    title: "Go deeper and get support",
-    body: "Subscribe for the comprehensive Readiness Assessment, an AI-powered Diagnostic Report, a 90-day plan, and the tools and tracking to follow it through.",
+    name: "Execute",
+    body: "Work the plan from your dashboard with goals, reminders, tools and coaching, from AI insight to one-on-one sessions, depending on your membership.",
+  },
+  {
+    name: "Elevate",
+    body: "Re-assess, measure your progress, and move to your next stage, with priority access to RENZOLO cohorts and accelerators.",
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      <SiteHeader />
       <main>
         {/* Hero */}
         <section className="bg-navy text-white">
@@ -30,8 +32,9 @@ export default function HomePage() {
               Know exactly where your venture stands, and what to do next.
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-cream/85">
-              RENZOLO OS measures your venture against your strategic plan and the nine building blocks of your business model, pinpoints the
-              gaps holding you back, and turns them into a 90-day plan, with the tools, tracking and advisor support to see it through.
+              Founder Trajectory™ measures your venture against your strategic plan and the nine building blocks of your business model,
+              pinpoints the gaps holding you back, and turns them into a growth and readiness plan, with the dashboard, tools and coaching to
+              see it through. Powered by RENZOLO OS™.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a href="/snapshot" className="rounded-lg bg-gold px-7 py-4 text-center text-lg font-semibold text-white hover:opacity-95">
@@ -48,15 +51,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* How it works */}
+        {/* The method */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <h2 className="text-2xl font-bold text-navy sm:text-3xl">How it works</h2>
-          <ol className="mt-8 grid gap-6 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <li key={s.title} className="rounded-2xl bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal">How it works</p>
+          <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">The Founder Trajectory™ method</h2>
+          <p className="mt-3 max-w-2xl text-ink-soft">Four steps, repeated as you grow. Each cycle leaves your venture more ready than the last.</p>
+          <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {METHOD.map((m, i) => (
+              <li key={m.name} className="rounded-2xl bg-white p-6 shadow-sm">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-bold text-white">{i + 1}</span>
-                <p className="mt-4 font-semibold text-navy">{s.title}</p>
-                <p className="mt-2 text-sm text-ink-soft">{s.body}</p>
+                <p className="mt-4 text-lg font-bold text-navy">{m.name}</p>
+                <p className="mt-2 text-sm text-ink-soft">{m.body}</p>
               </li>
             ))}
           </ol>
@@ -95,8 +100,8 @@ export default function HomePage() {
 
         {/* Every stage */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <h2 className="text-2xl font-bold text-navy sm:text-3xl">Built for every stage of the venture life cycle</h2>
-          <p className="mt-3 max-w-2xl text-ink-soft">Whether you're testing an idea or preparing for an exit, RENZOLO OS meets you where you are.</p>
+          <h2 className="text-2xl font-bold text-navy sm:text-3xl">Built for every stage of your Founder Trajectory™</h2>
+          <p className="mt-3 max-w-2xl text-ink-soft">Whether you're discovering an idea or preparing for an exit, the platform meets you where you are.</p>
           <ol className="mt-8 flex flex-wrap gap-2">
             {STAGES.map((s, i) => (
               <li key={s} className="flex items-center gap-2">
@@ -114,8 +119,8 @@ export default function HomePage() {
         {/* Subscription */}
         <section className="bg-navy text-white">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-            <h2 className="text-2xl font-bold sm:text-3xl">With a subscription</h2>
-            <p className="mt-3 max-w-2xl text-cream/80">The Snapshot shows where the gaps are. A subscription shows why they're there, what to do about them, and keeps you on track.</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">With a Founder Trajectory™ membership</h2>
+            <p className="mt-3 max-w-2xl text-cream/80">The Snapshot shows where the gaps are. Membership shows why they're there, what to do about them, and keeps you on track. Choose the level of coaching and support that fits you.</p>
             <div className="mt-8">
               <SubscriptionFeatures dark />
             </div>
@@ -125,9 +130,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <footer className="mx-auto max-w-6xl px-4 py-8 text-sm text-ink-soft sm:px-6">
-          © {new Date().getFullYear()} Renzolo Enterprises LLC · RENZOLO OS™
-        </footer>
       </main>
     </>
   );
