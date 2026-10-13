@@ -39,6 +39,7 @@ const S = "33333333-3333-3333-3333-333333333333"; // advisor
 const M = "44444444-4444-4444-4444-444444444444"; // admin
 const C = "55555555-5555-5555-5555-555555555555"; // founder used for payment-function tests
 const D = "66666666-6666-6666-6666-666666666666"; // founder with a manual grant
+const E = "77777777-7777-7777-7777-777777777777"; // founder used for tier tests
 
 type Result = { ok: true; rows: any[]; n: number } | { ok: false; err: string; rows: any[]; n: number };
 
@@ -66,7 +67,8 @@ async function suite(label: string, files: string[]) {
     insert into auth.users values
       ('${A}','a@x','{"full_name":"A"}'), ('${B}','b@x','{"full_name":"B"}'),
       ('${S}','s@x','{"full_name":"Advisor"}'), ('${M}','m@x','{"full_name":"Admin"}'),
-      ('${C}','c@x','{"full_name":"C"}'), ('${D}','d@x','{"full_name":"D"}');
+      ('${C}','c@x','{"full_name":"C"}'), ('${D}','d@x','{"full_name":"D"}'),
+      ('${E}','e@x','{"full_name":"E"}');
     update profiles set role='advisor' where id='${S}';
     update profiles set role='admin' where id='${M}';
   `);
@@ -166,11 +168,11 @@ async function suite(label: string, files: string[]) {
     `insert into payments (tx_ref,founder_id,product,billing_interval,amount,currency${txid ? ",flutterwave_transaction_id" : ""}) values ('${ref}','${founder}','subscription','monthly',9,'USD'${txid ? `,'${txid}'` : ""}) returning id`;
   r = await U(A, paySql("renzolo-subscription-a-0"));
   assert(!r.ok, "founder cannot write a payment record from the browser");
-  r = await SRV(paySql("renzolo-subscription-a-1", "9001"));
+  r = await SRV(paySql("renzolo-subscription-a-1", "e9001"));
   assert(r.ok, "server records a payment", r);
   r = await SRV(paySql("renzolo-subscription-a-1"));
   assert(!r.ok, "duplicate payment reference is rejected");
-  r = await SRV(paySql("renzolo-subscription-a-2", "9001"));
+  r = await SRV(paySql("renzolo-subscription-a-2", "e9001"));
   assert(!r.ok, "one Flutterwave transaction can't be recorded twice");
   r = await SRV(`insert into payments (tx_ref,founder_id,product,amount,currency) values ('renzolo-subscription-a-3','${A}','subscription',0,'USD')`);
   assert(!r.ok, "a zero-amount payment is rejected");
@@ -204,7 +206,7 @@ async function suite(label: string, files: string[]) {
   r = await U(A, `select * from quiz_leads`);
   assert(r.ok && r.rows.length === 0, "founder cannot read lead lists", r);
   r = await U(S, `select id from profiles`);
-  assert(r.ok && r.rows.length === 6, "advisor sees all profiles", r);
+  assert(r.ok && r.rows.length === 7, "advisor sees all profiles", r);
   r = await U(S, `update reports set advisor_reviewed=true where id='${rid}'`);
   assert(r.ok && r.n === 1, "advisor marks a report reviewed", r);
   r = await U(S, `select * from app_settings`);
@@ -332,6 +334,114 @@ async function suite(label: string, files: string[]) {
   assert(r.ok && r.n === 1, "advisor schedules the paid session", r);
 
   // ------------------------------------------------------------------
+  // Membership tiers, one-time purchases, coaching credits
+  // ------------------------------------------------------------------
+  const tierPay = async (ref: string, o: { tier: string; interval: string; amount: number; kind?: string; credit?: number; extra?: number; autoRenew?: boolean }) =>
+    (
+      await SRV(
+        `insert into payments (tx_ref,founder_id,product,tier,billing_interval,change_kind,credit_applied,extra_days,auto_renew,amount,currency) values ('${ref}','${E}','subscription','${o.tier}','${o.interval}','${o.kind ?? "new"}',${o.credit ?? 0},${o.extra ?? 0},${o.autoRenew ? "true" : "false"},${o.amount},'USD') returning id`
+      )
+    ).rows[0].id as string;
+  const pay = (id: string, txid: string, at: string) => SRV(`select fulfil_payment('${id}','${txid}',1,'e@x','9','${at}') as r`);
+  const credits = async () => (await SRV(`select source, tier, quantity, used, available_from, expires_at from coaching_credits where founder_id='${E}' order by available_from, created_at`)).rows;
+
+  const g1 = await tierPay("renzolo-subscription-e-1", { tier: "growth", interval: "quarterly", amount: 117 });
+  r = await pay(g1, "t9001", "2026-10-15T00:00:00Z");
+  let se = await sub(E);
+  assert(r.ok && se.tier === "growth" && se.billing_interval === "quarterly" && iso(se.current_period_end) === "2027-01-15T00:00:00.000Z", "a Growth quarter: tier Growth, paid through 3 months on", se);
+  let cr = await credits();
+  assert(cr.length === 1 && cr[0].quantity === 2 && iso(cr[0].expires_at) === "2027-01-15T00:00:00.000Z", "…with 2 included coaching sessions that expire at the end of the quarter", cr);
+
+  const u1 = await tierPay("renzolo-subscription-e-2", { tier: "elevate", interval: "quarterly", amount: 400, kind: "upgrade", credit: 47, extra: 5 });
+  await pay(u1, "t9002", "2026-11-15T00:00:00Z");
+  se = await sub(E);
+  assert(se.tier === "elevate" && iso(se.current_period_end) === "2027-02-20T00:00:00.000Z", "upgrade to Elevate: starts now, 3 months plus the 5 extra days worked out at checkout", se);
+  cr = await credits();
+  const elevateCr = cr.filter((c: any) => c.tier === "elevate");
+  assert(elevateCr.length === 3 && elevateCr.every((c: any) => c.quantity === 2) && iso(elevateCr[2].expires_at) === "2027-02-15T00:00:00.000Z", "…3 monthly batches of 2 Elevate sessions", elevateCr);
+  assert(cr.filter((c: any) => c.tier === "growth").length === 1, "…and Growth sessions already given are kept until they expire");
+
+  const d1 = await tierPay("renzolo-subscription-e-3", { tier: "essentials", interval: "monthly", amount: 15, kind: "downgrade" });
+  await pay(d1, "t9003", "2026-12-01T00:00:00Z");
+  se = await sub(E);
+  assert(se.tier === "elevate" && se.scheduled_tier === "essentials" && iso(se.scheduled_from) === "2027-02-20T00:00:00.000Z" && iso(se.current_period_end) === "2027-03-20T00:00:00.000Z", "downgrade: Elevate kept until the paid period ends, then Essentials for the month paid", se);
+  assert((await credits()).length === 4, "…no coaching sessions added for Essentials");
+
+  const r2 = await tierPay("renzolo-subscription-e-4", { tier: "essentials", interval: "monthly", amount: 15, kind: "renewal" });
+  await pay(r2, "t9004", "2027-03-01T00:00:00Z");
+  se = await sub(E);
+  assert(se.tier === "essentials" && se.scheduled_tier === null && iso(se.current_period_end) === "2027-04-20T00:00:00.000Z", "once the downgrade date has passed it is settled, and a renewal adds on after the end", se);
+
+  await SRV(`delete from subscriptions where founder_id='${E}'`);
+  await SRV(`delete from coaching_credits where founder_id='${E}'`);
+  const a1 = await tierPay("renzolo-subscription-e-5", { tier: "elevate", interval: "annual", amount: 1490 });
+  await pay(a1, "t9005", "2027-01-31T00:00:00Z");
+  cr = await credits();
+  assert(cr.length === 12 && iso(cr[1].available_from) === "2027-02-28T00:00:00.000Z", "Elevate annual: 12 monthly batches (month-end dates clamp correctly)", cr.slice(0, 2));
+  await SRV(`delete from subscriptions where founder_id='${E}'`);
+  await SRV(`delete from coaching_credits where founder_id='${E}'`);
+  const ga = await tierPay("renzolo-subscription-e-6", { tier: "growth", interval: "annual", amount: 390 });
+  await pay(ga, "t9006", "2027-01-01T00:00:00Z");
+  assert((await credits()).length === 4, "Growth annual: 4 quarterly batches of 2");
+
+  const ar = await tierPay("renzolo-subscription-e-7", { tier: "growth", interval: "quarterly", amount: 100, kind: "upgrade", credit: 17, autoRenew: true });
+  await SRV(`delete from subscriptions where founder_id='${E}'`);
+  await pay(ar, "t9007", "2027-02-01T00:00:00Z");
+  se = await sub(E);
+  assert(se.auto_renew === true && Number(se.renewal_amount) === 117, "card auto-renewal remembers the full price, not a first payment reduced by credit", se);
+
+  const legacy = await newPayment("renzolo-subscription-d-legacy", { founder: B });
+  await fulfil(legacy, "t9008");
+  assert((await sub(B)).tier === "essentials", "a payment with no tier (from before tiers) gives Essentials");
+  await SRV(`delete from subscriptions where founder_id='${B}'`);
+
+  const ap = (await SRV(`insert into payments (tx_ref,founder_id,product,amount,currency) values ('renzolo-assessment-e-1','${E}','assessment',79,'USD') returning id`)).rows[0].id;
+  r = await pay(ap, "t9010", "2027-02-02T00:00:00Z");
+  const purchase = await one(`select * from assessment_purchases where payment_id='${ap}'`);
+  assert(r.ok && purchase?.founder_id === E, "a $79 assessment payment records the purchase", purchase);
+  r = await pay(ap, "t9010", "2027-02-02T00:00:00Z");
+  assert((await one(`select count(*)::int as c from assessment_purchases where founder_id='${E}'`)).c === 1, "…exactly once");
+
+  await SRV(`delete from coaching_credits where founder_id='${E}'`);
+  const cp = (await SRV(`insert into payments (tx_ref,founder_id,product,quantity,amount,currency) values ('renzolo-coaching-e-1','${E}','coaching',3,199,'USD') returning id`)).rows[0].id;
+  await pay(cp, "t9011", "2027-02-02T00:00:00Z");
+  cr = await credits();
+  assert(cr.length === 1 && cr[0].source === "purchase" && cr[0].quantity === 3 && iso(cr[0].expires_at) === "2028-02-02T00:00:00.000Z", "buying 3 coaching sessions gives 3 credits, valid a year", cr);
+
+  r = await U(E, `select use_coaching_credit('${E}') as s`);
+  assert(!r.ok, "a founder can't spend coaching credits directly from the browser");
+  r = await U(E, `insert into coaching_credits (founder_id,source,quantity,available_from,expires_at) values ('${E}','manual',5,now(),now()+interval '1 year')`);
+  assert(!r.ok, "…or give themselves credits");
+  r = await U(E, `select quantity from coaching_credits`);
+  assert(r.ok && r.rows.length === 1, "founder sees their own coaching credits", r);
+  r = await U(B, `select quantity from coaching_credits`);
+  assert(r.ok && r.rows.length === 0, "…and not anyone else's", r);
+  for (let i = 0; i < 3; i++) {
+    r = await SRV(`select use_coaching_credit('${E}','2027-03-01T00:00:00Z') as s`);
+    assert(r.ok && !!r.rows[0].s, `booking session ${i + 1} of 3 uses a credit and creates a paid session request`, r);
+  }
+  r = await SRV(`select use_coaching_credit('${E}','2027-03-01T00:00:00Z') as s`);
+  assert(r.ok && r.rows[0].s === null, "a 4th booking is refused: no credits left");
+  const booked = await one(`select count(*)::int as c, min(paid_at) as p from advisor_sessions where founder_id='${E}' and coaching_credit_id is not null`);
+  assert(booked.c === 3 && !!booked.p, "…3 sessions are in the advisor queue (marked paid)", booked);
+  await SRV(`insert into coaching_credits (founder_id,source,quantity,available_from,expires_at) values ('${E}','membership',2,'2027-01-01','2027-02-01')`);
+  r = await SRV(`select use_coaching_credit('${E}','2027-03-01T00:00:00Z') as s`);
+  assert(r.ok && r.rows[0].s === null, "expired included sessions can't be booked (no roll-over)");
+
+  // reports: members, or bought with the one-time assessment
+  const ba = (await SRV(`insert into assessments (founder_id,status) values ('${B}','scored') returning id`)).rows[0].id;
+  const bs = (await SRV(`insert into scores (assessment_id,venture_score,venture_tier,market_subscore,customer_subscore,investor_subscore,health_index,health_confidence,evidence_completeness,block_scores,gaps) values ('${ba}',50,'Developing',50,50,50,50,'Low',0,'{}','[]') returning id`)).rows[0].id;
+  r = await SRV(`insert into reports (assessment_id, score_id, diagnostic_markdown) values ('${ba}','${bs}','member report')`);
+  assert(r.ok, "server saves a report", r);
+  const bp = (await SRV(`insert into assessment_purchases (founder_id,purchased_at) values ('${B}',now()) returning id`)).rows[0].id;
+  r = await SRV(`insert into reports (assessment_id, score_id, diagnostic_markdown, assessment_purchase_id, level) values ('${ba}','${bs}','bought report','${bp}','full')`);
+  assert(r.ok, "server saves a report bought with the $79 assessment", r);
+  r = await U(B, `select diagnostic_markdown from reports where assessment_id='${ba}'`);
+  assert(r.ok && r.rows.length === 1 && r.rows[0].diagnostic_markdown === "bought report", "without a membership, only the report bought with the $79 assessment is readable", r);
+  r = await U(A, `select diagnostic_markdown from reports where assessment_id='${ba}'`);
+  assert(r.ok && r.rows.length === 0, "…and never by another founder", r);
+
+  // ------------------------------------------------------------------
   // "Is this founder subscribed?" — database and app must agree
   // ------------------------------------------------------------------
   const cases: { name: string; status: string; end: string | null; autoRenew: boolean }[] = [
@@ -365,6 +475,14 @@ async function main() {
     "supabase/migrations/2026-10-08_fix_access_rules.sql",
     "supabase/migrations/2026-10-09_payments.sql",
     "supabase/migrations/2026-10-09_payments.sql",
+    "supabase/migrations/2026-10-12_quick_check.sql",
+    "supabase/migrations/2026-10-12_quick_check.sql",
+    "supabase/migrations/2026-10-13_readiness_snapshot.sql",
+    "supabase/migrations/2026-10-13_readiness_snapshot.sql",
+    "supabase/migrations/2026-10-13_tiers_enums.sql",
+    "supabase/migrations/2026-10-13_tiers_enums.sql",
+    "supabase/migrations/2026-10-13_tiers.sql",
+    "supabase/migrations/2026-10-13_tiers.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

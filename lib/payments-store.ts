@@ -80,7 +80,7 @@ export function createPaymentStore(admin: SupabaseClient): PaymentStore {
     async findAutoRenewByEmail(email) {
       const { data, error } = await admin
         .from("subscriptions")
-        .select("founder_id, renewal_interval, renewal_amount, renewal_currency, flutterwave_customer_id")
+        .select("founder_id, tier, renewal_interval, renewal_amount, renewal_currency, flutterwave_customer_id")
         .eq("billing_email", email.toLowerCase())
         .eq("auto_renew", true)
         .not("renewal_interval", "is", null)
@@ -93,6 +93,7 @@ export function createPaymentStore(admin: SupabaseClient): PaymentStore {
       const info: AutoRenewInfo = {
         founderId: row.founder_id,
         renewalInterval: row.renewal_interval,
+        renewalTier: row.tier ?? null,
         renewalAmount: row.renewal_amount === null || row.renewal_amount === undefined ? null : Number(row.renewal_amount),
         renewalCurrency: row.renewal_currency ?? null,
         flutterwaveCustomerId: row.flutterwave_customer_id ?? null,

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { runDiagnostic, BLOCK_KEYS, MEASURE_KEYS, type AllBlockScores, type BlockKey, type BlockMeasureScores } from "@/lib/scoring";
 import { computeValuation } from "@/lib/valuation";
-import { isSubscriptionActive } from "@/lib/payments";
+import { loadMembership } from "@/lib/membership-server";
+import { TIME_HORIZONS } from "@/lib/quickcheck";
 
 const clampScore = (v: unknown) => {
   const n = Number(v);
@@ -15,7 +16,7 @@ const text = (v: unknown, max = 2000) => (typeof v === "string" ? v.trim().slice
  * re-scores the whole assessment (Quick Check answers for the other
  * areas, detailed answers for these) and saves the new score. The
  * dashboard always shows the newest score, and the report is built from
- * it. Subscribers only. */
+ * it. Members and founders who bought the one-time assessment. */
 export async function POST(req: NextRequest) {
   const supabase = createClient();
   const {
@@ -23,17 +24,25 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const { data: subscription } = await supabase.from("subscriptions").select("status, current_period_end, auto_renew").eq("founder_id", user.id).maybeSingle();
-  if (!isSubscriptionActive(subscription)) return NextResponse.json({ error: "The detailed questions are part of the subscription." }, { status: 402 });
+  const m = await loadMembership(supabase, user.id);
+  if (!m.tier && m.purchases.length === 0) {
+    return NextResponse.json({ error: "The detailed questions are part of membership and the one-time Readiness Assessment." }, { status: 402 });
+  }
 
-  const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; blocks?: Record<string, any> } | null;
+  const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; blocks?: Record<string, any>; planLength?: unknown } | null;
   const assessmentId = typeof body?.assessmentId === "string" ? body.assessmentId : null;
   if (!assessmentId || !body?.blocks || typeof body.blocks !== "object") return NextResponse.json({ error: "Missing answers" }, { status: 400 });
 
   // Read through the founder's own session: row-level security only
   // returns an assessment they own, so this is also the ownership check.
-  const { data: assessment } = await supabase.from("assessments").select("id, annual_revenue").eq("id", assessmentId).maybeSingle();
+  const { data: assessment } = await supabase.from("assessments").select("id, annual_revenue, extra").eq("id", assessmentId).maybeSingle();
   if (!assessment) return NextResponse.json({ error: "Assessment not found" }, { status: 404 });
+
+  // How far ahead the growth and readiness plan should go (90 days to 36 months).
+  if (typeof body.planLength === "string" && (TIME_HORIZONS as readonly string[]).includes(body.planLength)) {
+    const extra = { ...((assessment as any).extra ?? {}), planLength: body.planLength };
+    await supabase.from("assessments").update({ extra }).eq("id", assessment.id);
+  }
 
   const keys = Object.keys(body.blocks).filter((k): k is BlockKey => (BLOCK_KEYS as readonly string[]).includes(k));
   if (keys.length === 0) return NextResponse.json({ error: "Missing answers" }, { status: 400 });

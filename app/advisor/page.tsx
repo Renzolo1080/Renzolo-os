@@ -92,7 +92,7 @@ export default async function AdvisorQueuePage() {
                 <div>
                   <p className="font-semibold">{s.profiles?.full_name ?? "Unknown founder"}</p>
                   <p className="text-sm text-ink-soft">
-                    {s.currency} {s.price} · paid {new Date(s.paid_at).toLocaleString()}
+                    {s.coaching_credit_id ? "Coaching session credit" : `${s.currency} ${s.price}`} · paid {new Date(s.paid_at).toLocaleString()}
                   </p>
                   {s.report_id && <p className="text-xs text-ink-soft mt-1">Linked report: {s.report_id}</p>}
                 </div>

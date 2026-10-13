@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { verifyWebhookSignature, verifyTransaction } from "@/lib/flutterwave";
 import { fulfilTransaction, handleSubscriptionCancelled } from "@/lib/payments";
 import { createPaymentStore } from "@/lib/payments-store";
-import { getSubscriptionPriceIn } from "@/lib/pricing";
+import { getMembershipPrice } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       const id = String(event.data.id);
       const result = await fulfilTransaction(
         id,
-        { store, verify: (txId) => verifyTransaction(txId), subscriptionPrice: (interval, currency) => getSubscriptionPriceIn(interval, currency) },
+        { store, verify: (txId) => verifyTransaction(txId), subscriptionPrice: (tier, interval, currency) => getMembershipPrice(tier, interval, currency) },
         { source: "webhook" }
       );
       if (result.outcome === "mismatch") console.error("NEEDS ATTENTION — payment taken but not applied (mismatch):", id, result.reason);

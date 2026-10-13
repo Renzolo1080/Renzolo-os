@@ -117,7 +117,7 @@ const deps = (s: S, t: VerifiedTransaction) => ({
   store: s.store,
   verify: async () => t,
   now: () => NOW,
-  subscriptionPrice: (i: "monthly" | "annual", c: string) => (c === "USD" ? { amount: i === "monthly" ? 9 : 90, currency: "USD" } : null),
+  subscriptionPrice: (_t: string, i: string, c: string) => (c === "USD" ? { amount: i === "monthly" ? 9 : 90, currency: "USD" } : null),
 });
 const viaWebhook = (s: S, t: VerifiedTransaction) => fulfilTransaction(t.id, deps(s, t), { source: "webhook" });
 const viaCallback = (s: S, t: VerifiedTransaction, urlRef: string | null = t.txRef) => fulfilTransaction(t.id, deps(s, t), { source: "callback", expectedTxRef: urlRef });
@@ -261,7 +261,7 @@ async function main() {
   {
     const s = makeStore();
     s.payments.set("pay-1", pending());
-    s.autoRenew.push({ email: "founder@example.com", founderId: FOUNDER, renewalInterval: "monthly", renewalAmount: 9, renewalCurrency: "USD", flutterwaveCustomerId: "77" });
+    s.autoRenew.push({ email: "founder@example.com", founderId: FOUNDER, renewalInterval: "monthly", renewalTier: null, renewalAmount: 9, renewalCurrency: "USD", flutterwaveCustomerId: "77" });
     const foreign = tx({ id: "6001", txRef: "FLW-SUBSCRIPTION-abc" });
     const r = await viaCallback(s, foreign, REF);
     assert(r.outcome === "mismatch" && s.grants.length === 0, "the browser return can never be used to claim an automatic renewal");
@@ -284,6 +284,7 @@ async function main() {
     email: "founder@example.com",
     founderId: FOUNDER,
     renewalInterval: "monthly" as const,
+    renewalTier: null,
     renewalAmount: 9 as number | null,
     renewalCurrency: "USD" as string | null,
     flutterwaveCustomerId: "77" as string | null,

@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { generateDiagnosticReport } from "@/lib/anthropic";
 import { extractNextSteps } from "@/lib/recommendations";
-import { isSubscriptionActive } from "@/lib/payments";
+import { entitlements } from "@/lib/membership";
+import { loadMembership } from "@/lib/membership-server";
+import { TIME_HORIZONS } from "@/lib/quickcheck";
 
 /** The longest this route may run on Vercel, in seconds. Above the
  * report's own 150-second ceiling (REPORT_TIMEOUT_MS in lib/anthropic.ts)
@@ -13,9 +15,9 @@ const SLA_MIN_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MIN_HOURS ?? 24);
 const SLA_MAX_HOURS = Number(process.env.ADVISOR_REVIEW_SLA_MAX_HOURS ?? 36);
 
 /** POST /api/report { assessmentId, scoreId }
- * Gated behind an active subscription (Registered/paid entitlement — see
- * the Phase 1 spec's entitlement table). Generates the AI Diagnostic
- * Report and returns it in THIS response — delivery to the founder is
+ * Needs a membership (Essentials: summary report; Growth/Elevate: full)
+ * or an unused one-time Readiness Assessment (full). Generates the AI
+ * Readiness Report and returns it in THIS response — delivery to the founder is
  * instant, not held for review.
  *
  * Whether the report is additionally queued for a human advisor to read
@@ -35,14 +37,20 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("status, current_period_end, auto_renew")
-    .eq("founder_id", user.id)
-    .maybeSingle();
-
-  if (!isSubscriptionActive(subscription)) {
-    return NextResponse.json({ error: "Full report requires an active subscription." }, { status: 402 });
+  // Who may have a report, and which kind (lib/membership.ts):
+  //  - Growth and Elevate members: the full report;
+  //  - Essentials members: the summary report;
+  //  - anyone with an unused one-time Readiness Assessment ($79): one full
+  //    report, which stays readable without a membership.
+  const m = await loadMembership(supabase, user.id);
+  const ent = entitlements(m.tier);
+  const { data: usedRows } = await supabase.from("reports").select("assessment_purchase_id").not("assessment_purchase_id", "is", null);
+  const used = new Set((usedRows ?? []).map((r: any) => r.assessment_purchase_id));
+  const unusedPurchase = m.purchases.find((p) => !used.has(p.id)) ?? null;
+  const usePurchase = !ent.fullReport && !!unusedPurchase;
+  const level: "summary" | "full" | null = ent.fullReport || usePurchase ? "full" : ent.summaryReport ? "summary" : null;
+  if (!level) {
+    return NextResponse.json({ error: "Your Readiness Report needs a membership or the one-time Readiness Assessment." }, { status: 402 });
   }
 
   const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; scoreId?: unknown } | null;
@@ -60,7 +68,11 @@ export async function POST(req: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (existing) return NextResponse.json({ report: existing, message: "Here's your Diagnostic Report." });
+  // A summary report is replaced by a full one once the founder is
+  // entitled to it (e.g. after upgrading); otherwise reuse what exists.
+  if (existing && !(existing.level === "summary" && level === "full")) {
+    return NextResponse.json({ report: existing, message: "Here's your Readiness Report." });
+  }
 
   const { data: assessment } = await supabase.from("assessments").select("*").eq("id", assessmentId).single();
   const { data: score } = await supabase.from("scores").select("*").eq("id", scoreId).single();
@@ -102,6 +114,10 @@ export async function POST(req: NextRequest) {
         gaps: score.gaps,
       },
       blockNarratives,
+    }, {
+      level,
+      planLength: planLengthFor(assessment),
+      tierRecommendation: usePurchase && !m.tier,
     });
   } catch (e) {
     // Nothing has been saved or charged to the founder at this point, so
@@ -142,6 +158,8 @@ export async function POST(req: NextRequest) {
       diagnostic_markdown: diagnosticMarkdown,
       advisor_reviewed: !requiresReview,
       review_due_by: reviewDueBy,
+      level,
+      assessment_purchase_id: usePurchase ? unusedPurchase!.id : null,
     })
     .select()
     .single();
@@ -168,8 +186,17 @@ export async function POST(req: NextRequest) {
   }
 
   const message = requiresReview
-    ? `Here's your Diagnostic Report. An advisor will review it in the background within ${SLA_MIN_HOURS}-${SLA_MAX_HOURS} hours as quality assurance — you don't need to wait for that.`
-    : "Here's your Diagnostic Report.";
+    ? `Here's your Readiness Report. An advisor will review it in the background within ${SLA_MIN_HOURS}-${SLA_MAX_HOURS} hours as quality assurance — you don't need to wait for that.`
+    : "Here's your Readiness Report.";
 
   return NextResponse.json({ report, message });
+}
+
+/** The plan length the founder chose (assessments.extra.planLength), or
+ * their goal timeframe from the Snapshot, or 12 months. */
+function planLengthFor(assessment: any): string {
+  const chosen = assessment?.extra?.planLength;
+  if (typeof chosen === "string" && (TIME_HORIZONS as readonly string[]).includes(chosen)) return chosen;
+  if (typeof assessment?.time_horizon === "string" && (TIME_HORIZONS as readonly string[]).includes(assessment.time_horizon)) return assessment.time_horizon;
+  return "12 months";
 }

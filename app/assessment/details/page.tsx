@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { isSubscriptionActive } from "@/lib/payments";
+import { loadMembership } from "@/lib/membership-server";
 import { BLOCK_PROMPTS } from "@/lib/blocks";
-import { DETAIL_AREAS_REQUIRED } from "@/lib/quickcheck";
+import { DETAIL_AREAS_REQUIRED, TIME_HORIZONS } from "@/lib/quickcheck";
 import { DetailForm, type DetailArea } from "@/components/DetailForm";
 
 export const dynamic = "force-dynamic";
@@ -17,16 +17,13 @@ export default async function DetailsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("status, current_period_end, auto_renew")
-    .eq("founder_id", user.id)
-    .maybeSingle();
-  if (!isSubscriptionActive(subscription)) redirect("/dashboard/subscribe");
+  // Members, and founders who bought the one-time Readiness Assessment.
+  const m = await loadMembership(supabase, user.id);
+  if (!m.tier && m.purchases.length === 0) redirect("/dashboard/subscribe");
 
   const { data: latestScore } = await supabase
     .from("scores")
-    .select("assessment_id, gaps, assessments!inner(founder_id)")
+    .select("assessment_id, gaps, assessments!inner(founder_id, extra, time_horizon)")
     .eq("assessments.founder_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -75,9 +72,16 @@ export default async function DetailsPage() {
       <h1 className="text-2xl font-bold text-navy mt-3">Your three weakest areas, in detail</h1>
       <p className="text-ink-soft mt-2 mb-8">
         Tell us where things stand and where you want them to be. About 10 minutes. Your answers sharpen your score and
-        shape your Diagnostic Report and 90-day plan.
+        shape your Readiness Report and your growth and readiness plan.
       </p>
-      <DetailForm assessmentId={latestScore.assessment_id} areas={areas} />
+      <DetailForm assessmentId={latestScore.assessment_id} areas={areas} planLengths={[...TIME_HORIZONS]} initialPlanLength={initialPlanLength((latestScore as any).assessments)} />
     </main>
   );
+}
+
+function initialPlanLength(a: any): string {
+  const list = TIME_HORIZONS as readonly string[];
+  if (typeof a?.extra?.planLength === "string" && list.includes(a.extra.planLength)) return a.extra.planLength;
+  if (typeof a?.time_horizon === "string" && list.includes(a.time_horizon)) return a.time_horizon;
+  return "12 months";
 }

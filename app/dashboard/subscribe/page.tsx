@@ -1,8 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { SubscribeOptions, type CurrencyOption, type PlanOption } from "@/components/SubscribeOptions";
-import { getSubscriptionPrice, getSubscriptionPriceIn, subscriptionCurrenciesFor, formatPrice, type Price } from "@/lib/pricing";
-import { isSubscriptionActive } from "@/lib/payments";
+import { MembershipPlans } from "@/components/MembershipPlans";
+import { OneOffPurchases, type OneOffPrices } from "@/components/OneOffPurchases";
+import { TIER_FEATURES, TIER_TAGLINES, MEMBERSHIP_POLICIES } from "@/lib/tier-features";
+import { buildCurrencyBlocks } from "@/lib/membership-view";
+import { loadMembership, countElevateMembers } from "@/lib/membership-server";
+import { entitlements, upcomingTier, elevateSeatLimit } from "@/lib/membership";
+import { getOneOffPrice, oneOffCurrenciesFor, formatPrice, TIER_NAMES, INTERVAL_NAMES, isBillingInterval } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -10,103 +14,119 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
 
-/** What can be used to pay, per currency — taken from Flutterwave's
- * published payment-methods table, NOT yet confirmed against the live
- * checkout page. Kept deliberately modest: a currency not listed here
- * gets a neutral line rather than a promise. */
-function methodsFor(currency: string): string {
-  switch (currency) {
-    case "USD":
-      return "US dollar payments are by card or US bank account. Mobile money such as M-Pesa is only offered when paying in local currency.";
-    case "KES":
-      return "Kenyan shilling payments can be made by M-Pesa or card.";
-    case "ZAR":
-      return "South African rand payments can be made by card, bank account or 1Voucher.";
-    default:
-      return `The payment methods offered are the ones Flutterwave supports for ${currency}.`;
-  }
-}
-
-export default async function SubscribePage() {
+/** Membership: current plan, the three tiers (with the exact cost of
+ * upgrading, renewing or moving down), the one-time assessment, and
+ * coaching. */
+export default async function MembershipPage() {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("status, current_period_end, auto_renew, billing_interval")
-    .eq("founder_id", user.id)
-    .maybeSingle();
-  const { data: profile } = await supabase.from("profiles").select("country").eq("id", user.id).single();
+  const [{ data: profile }, m, { data: waitRow }] = await Promise.all([
+    supabase.from("profiles").select("country").eq("id", user.id).single(),
+    loadMembership(supabase, user.id),
+    supabase.from("elevate_waitlist").select("founder_id").eq("founder_id", user.id).maybeSingle(),
+  ]);
+  const sub = m.subscription;
+  const ent = entitlements(m.tier, m.purchases.length > 0);
+  const upcoming = upcomingTier(sub);
+  const elevateFull = process.env.SUPABASE_SERVICE_ROLE_KEY ? (await countElevateMembers(createAdminClient())) >= elevateSeatLimit() : false;
 
-  const active = isSubscriptionActive(subscription);
-  const neverExpires = active && !subscription?.current_period_end;
-  const mainCurrency = getSubscriptionPrice("monthly").currency;
-
-  const options: CurrencyOption[] = subscriptionCurrenciesFor(profile?.country).flatMap((currency) => {
-    const monthly = getSubscriptionPriceIn("monthly", currency);
-    const annual = getSubscriptionPriceIn("annual", currency);
-    if (!monthly || !annual) return [];
-    return [{ currency, methods: methodsFor(currency), plans: buildPlans(monthly, annual, currency === mainCurrency) }];
+  const blocks = buildCurrencyBlocks(profile?.country, m.current, m.tier);
+  const member = !!m.tier;
+  const oneOffCurrencies = Array.from(
+    new Set([...oneOffCurrenciesFor("assessment", false, profile?.country), ...oneOffCurrenciesFor("coaching_single", member, profile?.country)])
+  );
+  const prices: OneOffPrices[] = oneOffCurrencies.map((c) => {
+    const f = (p: ReturnType<typeof getOneOffPrice>) => (p ? formatPrice(p) : null);
+    return { currency: c, assessment: f(getOneOffPrice("assessment", false, c)), single: f(getOneOffPrice("coaching_single", member, c)), pack: f(getOneOffPrice("coaching_pack3", member, c)) };
   });
+  const std = (item: "coaching_single" | "coaching_pack3") => {
+    const p = getOneOffPrice(item, false);
+    return p ? formatPrice(p) : null;
+  };
 
   return (
-    <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
+    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <a href="/dashboard" className="text-sm text-teal">
         ← Back to dashboard
       </a>
-      <h1 className="text-2xl font-bold text-navy mt-3 mb-2">{active ? "Your membership" : "Become a Founder Trajectory™ member"}</h1>
+      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-teal">Founder Trajectory™ membership</p>
+      <h1 className="mt-1 text-3xl font-bold text-navy">{m.tier ? "Your membership" : "Choose your membership"}</h1>
 
-      {active ? (
-        <div className="rounded border border-gold bg-cream p-4 text-sm mb-6">
-          <p className="font-semibold text-navy">Your membership is active.</p>
-          {subscription?.current_period_end ? (
-            <p className="text-ink-soft mt-1">
-              {subscription.auto_renew
-                ? `Your card is charged automatically; the current period runs to ${formatDate(subscription.current_period_end)}. To stop automatic renewal, use the cancellation link in the reminder email Flutterwave sends before each charge.`
-                : `It is paid through ${formatDate(subscription.current_period_end)}. Paying again now adds time on top of that date, so nothing you have already paid for is lost.`}
+      {m.tier && sub ? (
+        <div className="mt-4 rounded-2xl border border-gold bg-white p-5 text-sm shadow-sm">
+          <p className="text-base font-semibold text-navy">
+            {TIER_NAMES[m.tier]}
+            {sub.billing_interval && isBillingInterval(sub.billing_interval) ? ` · ${INTERVAL_NAMES[sub.billing_interval]}` : ""}
+          </p>
+          {sub.current_period_end ? (
+            <p className="mt-1 text-ink-soft">
+              {sub.auto_renew
+                ? `Your card is charged automatically; the current period runs to ${formatDate(sub.current_period_end)}. To stop automatic renewal, use the link in the reminder email Flutterwave sends before each charge.`
+                : `Paid through ${formatDate(sub.current_period_end)}. Renewing adds time on top of that date, so nothing you've paid for is lost.`}
             </p>
           ) : (
-            <p className="text-ink-soft mt-1">It has no end date, so there is nothing to pay.</p>
+            <p className="mt-1 text-ink-soft">Set up by the RENZOLO team, with no end date.</p>
           )}
+          {upcoming && (
+            <p className="mt-1 text-ink-soft">
+              {TIER_NAMES[upcoming.tier]} starts on {formatDate(upcoming.from)}.
+            </p>
+          )}
+          {ent.includedCoaching && <p className="mt-1 text-ink-soft">Includes {ent.includedCoaching}.</p>}
         </div>
       ) : (
-        <p className="text-ink-soft mb-6">Unlock your full Diagnostic Report and the option to book a 1:1 session with an advisor.</p>
+        <p className="mt-2 max-w-2xl text-ink-soft">
+          Every membership starts with your full Readiness Assessment and a growth and readiness plan. Choose the level of coaching and support
+          that fits you.
+          {m.purchases.length > 0 ? " Your Readiness Assessment carries into your membership." : ""}
+        </p>
       )}
 
-      {!neverExpires && !(active && subscription?.auto_renew) && <SubscribeOptions options={options} renewing={active} />}
+      <div className="mt-8">
+        <MembershipPlans
+          mode="member"
+          blocks={blocks}
+          currentTier={m.tier}
+          elevateFull={elevateFull}
+          onWaitlist={!!waitRow}
+          features={TIER_FEATURES}
+          taglines={TIER_TAGLINES}
+        />
+      </div>
 
-      <p className="mt-6 text-xs text-ink-soft">
-        Payment is handled by Flutterwave on their secure page. Card and mobile-money details are never entered on or stored
-        by this site.
-      </p>
+      <section className="mt-12" id="one-time">
+        <h2 className="text-2xl font-bold text-navy">{ent.fullReport ? "Coaching" : "Assessment and coaching"}</h2>
+        <div className="mt-5">
+          <OneOffPurchases
+            prices={prices}
+            showAssessment={!ent.fullReport}
+            member={member}
+            coachingAvailable={m.coachingAvailable}
+            nextCoachingFrom={m.nextCoachingFrom}
+            standardSingle={std("coaching_single")}
+            standardPack={std("coaching_pack3")}
+          />
+        </div>
+      </section>
+
+      <section className="mt-12 rounded-2xl bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-bold text-navy">How membership works</h2>
+        <ul className="mt-3 space-y-2 text-sm text-ink-soft">
+          {MEMBERSHIP_POLICIES.map((p) => (
+            <li key={p} className="flex gap-2">
+              <span className="text-gold">•</span>
+              <span>{p}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-xs text-ink-soft">
+          Payment is handled by Flutterwave on their secure page. Card and mobile-money details are never entered on or stored by this site.
+        </p>
+      </section>
     </main>
   );
-}
-
-function buildPlans(monthly: Price, annual: Price, isMainCurrency: boolean): PlanOption[] {
-  // Only claim a saving that is true for the prices currently set.
-  const monthsFree = (monthly.amount * 12 - annual.amount) / monthly.amount;
-  const annualNote =
-    monthsFree >= 1 ? `${Number.isInteger(monthsFree) ? monthsFree : monthsFree.toFixed(1)} month${monthsFree === 1 ? "" : "s"} free compared with paying monthly` : null;
-  return [
-    {
-      interval: "monthly",
-      name: "Monthly",
-      price: formatPrice(monthly),
-      per: "per month",
-      note: null,
-      autoRenewAvailable: isMainCurrency && !!process.env.FLUTTERWAVE_MONTHLY_PLAN_ID,
-    },
-    {
-      interval: "annual",
-      name: "Annual",
-      price: formatPrice(annual),
-      per: "per year",
-      note: annualNote,
-      autoRenewAvailable: isMainCurrency && !!process.env.FLUTTERWAVE_ANNUAL_PLAN_ID,
-    },
-  ];
 }

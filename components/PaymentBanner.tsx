@@ -17,6 +17,10 @@ export function PaymentBanner({ payment, product }: { payment?: string; product?
       message =
         product === "advisor_session"
           ? "Payment received. An advisor will contact you by email to arrange your 1:1 session."
+          : product === "assessment"
+          ? "Payment received. Your Readiness Assessment is unlocked: answer the detailed questions below to get your full report."
+          : product === "coaching"
+          ? "Payment received. Your coaching sessions are ready to book from the Membership page."
           : "Payment received. Your membership is active.";
       break;
     case "pending":
