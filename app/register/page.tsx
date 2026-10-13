@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/PasswordInput";
+import { track } from "@/lib/track";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -9,6 +10,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [marketingConsent, setMarketingConsent] = useState(false);
 
   // Coming from the free Snapshot: fill in the name and email they gave,
   // so their Snapshot is matched to the new account.
@@ -29,13 +31,14 @@ export default function RegisterPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: { data: { full_name: fullName, marketing_consent: marketingConsent } },
       });
       if (error) {
         setError(error.message);
         setStatus("error");
         return;
       }
+      track("sign_up");
       setStatus("sent");
     } catch (err) {
       console.error("Registration failed:", err);
@@ -96,6 +99,14 @@ export default function RegisterPage() {
           minLength={8}
           autoComplete="new-password"
         />
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" className="mt-1" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} />
+          <span>Email me practical tips for growing my venture. You can unsubscribe at any time.</span>
+        </label>
+        <p className="text-xs text-ink-soft">
+          By creating an account you agree to our <a href="/terms" className="underline">terms</a> and{" "}
+          <a href="/privacy" className="underline">privacy policy</a>.
+        </p>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <p className="text-sm text-ink-soft">
           Already have an account?{" "}

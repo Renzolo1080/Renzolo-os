@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@/lib/track";
 
 export interface OneOffPrices {
   currency: string;
@@ -42,6 +43,7 @@ export function OneOffPurchases({
       const res = await fetch("/api/billing/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...body, currency: p.currency }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.link) throw new Error(data.error ?? "Something went wrong starting your payment.");
+      track("begin_checkout", { item: String(body.item ?? body.kind) });
       window.location.assign(data.link);
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong starting your payment.");
@@ -109,7 +111,7 @@ export function OneOffPurchases({
         <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-teal">{member ? "Member prices" : "No minimum"}</p>
           <p className="mt-1 text-xl font-bold text-navy">One-on-one coaching</p>
-          <p className="mt-1 text-sm text-ink-soft">With a RENZOLO coach. Sessions are valid for a year; we arrange the time with you by email.</p>
+          <p className="mt-1 text-sm text-ink-soft">With a Founder Trajectory™ coach. Sessions are valid for a year; we arrange the time with you by email.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
               { key: "coaching_single", label: "1 session", price: p.single, standard: standardSingle },

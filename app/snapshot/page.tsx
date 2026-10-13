@@ -1,6 +1,6 @@
 import { ReadinessSnapshotForm } from "@/components/ReadinessSnapshotForm";
 
-export const metadata = { title: "Free Readiness Snapshot · RENZOLO OS" };
+export const metadata = { title: "Free Readiness Snapshot · Founder Trajectory™" };
 
 export default function SnapshotPage() {
   return (

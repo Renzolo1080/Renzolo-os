@@ -16,7 +16,7 @@ const METHOD = [
   },
   {
     name: "Elevate",
-    body: "Re-assess, measure your progress, and move to your next stage, with priority access to RENZOLO cohorts and accelerators.",
+    body: "Re-assess, measure your progress, and move to your next stage, with priority access to Founder Trajectory™ Academy cohorts.",
   },
 ];
 

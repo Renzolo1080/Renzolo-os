@@ -14,6 +14,9 @@ import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { loadMembership } from "@/lib/membership-server";
 import { entitlements, ASSESSMENT_CARRY_DAYS } from "@/lib/membership";
 import { TIER_NAMES } from "@/lib/pricing";
+import { ensureProfileExtras, readAttribution, publicAppUrl } from "@/lib/growth-server";
+import { InviteCard } from "@/components/InviteCard";
+import { PurchaseTracker } from "@/components/PurchaseTracker";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -78,6 +81,12 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   }
 
   const m = await loadMembership(supabase, user.id);
+
+  // Once per founder: referral code, where they came from, who invited them.
+  const referralCode = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? await ensureProfileExtras(createAdminClient(), user.id, readAttribution(), user.user_metadata?.marketing_consent === true).catch(() => null)
+    : null;
+  const { data: rewards } = await supabase.from("referral_rewards").select("id");
   const subscription = m.subscription;
   const subscribed = isSubscriptionActive(subscription);
   const ent = entitlements(m.tier, m.purchases.length > 0);
@@ -112,6 +121,11 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
     }
     if (!confirmed) paymentResult = "pending";
   }
+  // For analytics: the payment just confirmed (amount only, nothing personal).
+  const { data: lastPaid } =
+    paymentResult === "success"
+      ? await supabase.from("payments").select("id, amount, currency, product").eq("status", "successful").order("fulfilled_at", { ascending: false }).limit(1).maybeSingle()
+      : { data: null };
   const daysLeft = daysUntilExpiry(subscription);
   const lapsed = !subscribed && subscription?.status === "active";
 
@@ -217,6 +231,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
       <h1 className="text-2xl font-bold text-navy mb-6">Your Founder Trajectory™</h1>
 
       <PaymentBanner payment={paymentResult} product={paymentProduct} />
+      {lastPaid && <PurchaseTracker id={lastPaid.id} value={Number(lastPaid.amount)} currency={lastPaid.currency} item={lastPaid.product} />}
 
       {subscribed && daysLeft !== null && daysLeft <= 7 && (
         <div className="rounded border border-gold bg-cream p-4 text-sm mb-6">
@@ -401,6 +416,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
               <p className="mt-1 text-sm text-ink-soft">Ask questions about your plan and get check-ins as you carry it out. Included in your membership when it launches.</p>
             </div>
           )}
+
+          {referralCode && <InviteCard inviteUrl={`${publicAppUrl()}/?ref=${referralCode}&utm_source=referral&utm_medium=member`} rewardsEarned={(rewards ?? []).length} />}
 
           <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
             {ent.tools ? "Open Founder Tools (calculators, recommendations & milestones)" : "Open Founder Tools (free calculators)"}

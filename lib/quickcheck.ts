@@ -467,7 +467,7 @@ export const SUBSCRIPTION_FEATURES = [
   "Milestone planner and tailored recommendations",
   "Founder tools, including financial calculators",
   "Re-assess any time and watch your score improve",
-  "Option to book one-on-one sessions with a RENZOLO advisor",
+  "Option to book one-on-one sessions with a Founder Trajectory™ coach",
 ] as const;
 
 export interface SnapshotContact {

@@ -14,11 +14,12 @@
     "test:quiz": "tsx test/quiz.test.ts",
     "test:payments": "tsx test/payments.test.ts",
     "test:flutterwave": "tsx test/flutterwave.test.ts",
-    "test": "npm run test:scoring && npm run test:valuation && npm run test:recommendations && npm run test:geo && npm run test:quiz && npm run test:payments && npm run test:flutterwave && npm run test:membership && npm run test:report && npm run test:quickcheck && npm run test:db",
+    "test": "npm run test:scoring && npm run test:valuation && npm run test:recommendations && npm run test:geo && npm run test:quiz && npm run test:payments && npm run test:flutterwave && npm run test:membership && npm run test:report && npm run test:growth && npm run test:quickcheck && npm run test:db",
     "test:db": "tsx test/db.test.ts",
     "test:quickcheck": "tsx test/quickcheck.test.ts",
     "test:membership": "tsx test/membership.test.ts",
-    "test:report": "tsx test/report.test.ts"
+    "test:report": "tsx test/report.test.ts",
+    "test:growth": "tsx test/growth.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.27.3",
