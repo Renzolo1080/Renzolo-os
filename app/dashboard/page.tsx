@@ -1,10 +1,12 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
-import { GoalProgressRow } from "@/components/GoalProgressRow";
-import { DashboardCustomizer } from "@/components/DashboardCustomizer";
-import { ProgressOverview, type TopRecommendation, type TopMilestone } from "@/components/ProgressOverview";
-import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
+import { BLOCK_KEYS } from "@/lib/scoring";
+import { FounderDashboard } from "@/components/dashboard/FounderDashboard";
+import { normalizeExtras } from "@/lib/dashboard";
+import { loadPlan } from "@/lib/plan-server";
+import { parsePlanReview } from "@/lib/plan-review";
+import type { MarketInsights } from "@/lib/market";
 import { PaymentBanner } from "@/components/PaymentBanner";
 import { isSubscriptionActive, daysUntilExpiry, reconcilePendingPayments } from "@/lib/payments";
 import { createPaymentStore } from "@/lib/payments-store";
@@ -30,11 +32,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   if (!user) redirect("/login");
 
   const { data: profile } = await supabase.from("profiles").select("dashboard_widgets").eq("id", user.id).single();
-  const widgets: string[] = profile?.dashboard_widgets ?? ["reminders", "valuation", "goalsProgress", "progressOverview"];
-  const showReminders = widgets.includes("reminders");
-  const showValuation = widgets.includes("valuation");
-  const showGoalsProgress = widgets.includes("goalsProgress");
-  const showProgressOverview = widgets.includes("progressOverview");
+  const extras = normalizeExtras(profile?.dashboard_widgets);
 
   const loadLatestScore = () =>
     supabase
@@ -136,99 +134,84 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
       ? await supabase.from("block_responses").select("current_state").eq("assessment_id", latestScore.assessment_id)
       : { data: null };
   const detailsDone = detailsComplete(detailRows);
+  const areasAnswered = (detailRows ?? []).filter((r: any) => (r.current_state ?? "").trim()).length;
   const gapLabels: string[] = ((latestScore?.gaps as any[] | null) ?? []).map((g) => g.label).filter(Boolean);
 
-  // If this founder already has a report for their latest score, show it
-  // straight away instead of asking them to generate (and pay for the AI
-  // cost of) a new one on every visit.
+  // The founder's most recent report (for any score; reports are only
+  // ever readable to their owner while they have access).
   const { data: existingReport } =
     hasAccess && latestScore
-      ? await supabase
-          .from("reports")
-          .select("id, diagnostic_markdown, level")
-          .eq("score_id", latestScore.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
+      ? await supabase.from("reports").select("id, diagnostic_markdown, level, score_id, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle()
       : { data: null };
 
-  const needsBlockResponses = latestScore && ent.tools && (showReminders || showGoalsProgress || showProgressOverview);
-  const { data: blockResponses } = needsBlockResponses
-    ? await supabase
-        .from("block_responses")
-        .select("id, block_key, goal_target, target_date, progress_status")
-        .eq("assessment_id", latestScore.assessment_id)
-    : { data: null };
+  let dashboard: React.ComponentProps<typeof FounderDashboard> | null = null;
+  let reportOutdated: string | null = null;
+  if (hasAccess && latestScore) {
+    const access = { member: ent.planBuilder, growth: ent.planReview };
+    const [planRow, { data: checkins }, { data: updates }, { data: reviewRow }, { data: briefRow }] = await Promise.all([
+      loadPlan(supabase, user.id),
+      supabase.from("goal_checkins").select("goal_id, value, note, checked_on").order("checked_on", { ascending: true }).limit(500),
+      supabase.from("founder_updates").select("period, revenue, customers, cash, wins, challenges, asks").order("period", { ascending: false }).limit(13),
+      supabase.from("plan_reviews").select("result, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("market_briefs").select("insights, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    const review = reviewRow ? parsePlanReview(JSON.stringify(reviewRow.result)) : null;
 
-  const now = Date.now();
-  const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
-  const withDates = (blockResponses ?? []).filter((b) => b.target_date && b.progress_status !== "done");
-  const overdueGoals = withDates.filter((b) => new Date(b.target_date!).getTime() < now);
-  const dueSoonGoals = withDates.filter((b) => {
-    const t = new Date(b.target_date!).getTime();
-    return t >= now && t - now <= TWO_WEEKS_MS;
-  });
-
-  let topRecommendations: TopRecommendation[] = [];
-  let topMilestones: TopMilestone[] = [];
-  let scoreHistory: { date: string; score: number }[] = [];
-  const statusCounts: Record<string, number> = {};
-
-  if (showProgressOverview && latestScore && ent.tools) {
-    for (const b of blockResponses ?? []) {
-      statusCounts[b.progress_status] = (statusCounts[b.progress_status] ?? 0) + 1;
+    let recommendations: { id: string; source: string; title: string }[] = [];
+    let milestones: { id: string; title: string; target_date: string | null }[] = [];
+    if (extras.includes("recommendations") && access.member) {
+      const [{ data: recRows }, { data: msRows }] = await Promise.all([
+        supabase.from("recommendations").select("id, source, title, priority, created_at").eq("assessment_id", latestScore.assessment_id),
+        supabase.from("milestones").select("id, title, target_date").eq("assessment_id", latestScore.assessment_id).eq("completed", false),
+      ]);
+      recommendations = (recRows ?? [])
+        .slice()
+        .sort((a: any, b: any) => (a.source === b.source ? (a.source === "ai" ? (a.priority ?? 999) - (b.priority ?? 999) : b.created_at.localeCompare(a.created_at)) : a.source === "advisor" ? -1 : 1))
+        .slice(0, 4)
+        .map((r: any) => ({ id: r.id, source: r.source, title: r.title }));
+      milestones = (msRows ?? []).slice().sort((a: any, b: any) => (a.target_date ?? "9999").localeCompare(b.target_date ?? "9999")).slice(0, 3);
+    }
+    let scoreHistory: { date: string; score: number }[] = [];
+    if (extras.includes("history")) {
+      const { data: historyRows } = await supabase
+        .from("scores")
+        .select("created_at, venture_score, assessments!inner(founder_id)")
+        .eq("assessments.founder_id", user.id)
+        .order("created_at", { ascending: true });
+      scoreHistory = (historyRows ?? []).map((r: any) => ({ date: r.created_at, score: Number(r.venture_score) }));
     }
 
-    const { data: recRows } = await supabase
-      .from("recommendations")
-      .select("id, source, title, priority, created_at, profiles(full_name)")
-      .eq("assessment_id", latestScore.assessment_id);
+    if (existingReport) {
+      if (existingReport.score_id !== latestScore.id) reportOutdated = "Your score has changed since this report was written.";
+      else if (planRow && new Date(planRow.updated_at) > new Date(existingReport.created_at)) reportOutdated = "You've updated your plan since this report was written.";
+      else if (reviewRow && new Date(reviewRow.created_at) > new Date(existingReport.created_at)) reportOutdated = "Your plan has been reviewed since this report was written.";
+    }
 
-    topRecommendations = (recRows ?? [])
-      .slice()
-      .sort((a: any, b: any) => {
-        const tierA = a.source === "advisor" ? 0 : 1;
-        const tierB = b.source === "advisor" ? 0 : 1;
-        if (tierA !== tierB) return tierA - tierB;
-        if (a.source === "ai") return (a.priority ?? 999) - (b.priority ?? 999);
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      })
-      .slice(0, 3)
-      .map((r: any) => ({ id: r.id, source: r.source, title: r.title, advisor_name: r.profiles?.full_name ?? null }));
-
-    const { data: milestoneRows } = await supabase
-      .from("milestones")
-      .select("id, block_key, title, target_date, completed")
-      .eq("assessment_id", latestScore.assessment_id)
-      .eq("completed", false);
-
-    topMilestones = (milestoneRows ?? [])
-      .slice()
-      .sort((a, b) => {
-        if (!a.target_date) return 1;
-        if (!b.target_date) return -1;
-        return new Date(a.target_date).getTime() - new Date(b.target_date).getTime();
-      })
-      .slice(0, 3)
-      .map((m) => ({
-        id: m.id,
-        title: m.title,
-        target_date: m.target_date,
-        blockLabel: m.block_key ? BLOCK_LABELS[m.block_key as BlockKey] ?? m.block_key : null,
-      }));
-
-    const { data: historyRows } = await supabase
-      .from("scores")
-      .select("created_at, venture_score, assessments!inner(founder_id)")
-      .eq("assessments.founder_id", user.id)
-      .order("created_at", { ascending: true });
-
-    scoreHistory = (historyRows ?? []).map((r: any) => ({ date: r.created_at, score: r.venture_score }));
+    dashboard = {
+      access,
+      extras,
+      score: latestScore,
+      plan: planRow?.data ?? null,
+      planCompleteness: planRow?.completeness ?? null,
+      checkins: (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })),
+      updates: (updates ?? []).map((u: any) => ({ ...u, revenue: u.revenue === null ? null : Number(u.revenue), cash: u.cash === null ? null : Number(u.cash) })),
+      review: review && reviewRow ? { review, createdAt: reviewRow.created_at } : null,
+      market: briefRow ? { createdAt: briefRow.created_at, insights: (briefRow.insights ?? { recommendations: [], targets: [] }) as MarketInsights } : null,
+      areasAnswered,
+      areasTotal: BLOCK_KEYS.length,
+      report: { exists: !!existingReport, current: !!existingReport && !reportOutdated },
+      scoreHistory,
+      recommendations,
+      milestones,
+      coaching: { available: m.coachingAvailable, nextFrom: m.nextCoachingFrom, included: ent.includedCoaching },
+      invite: referralCode ? <InviteCard inviteUrl={`${publicAppUrl()}/?ref=${referralCode}&utm_source=referral&utm_medium=member`} rewardsEarned={(rewards ?? []).length} /> : null,
+      today: new Date().toISOString().slice(0, 10),
+    };
   }
 
   return (
-    <main className="min-h-screen px-6 py-10 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-navy mb-6">Your Founder Trajectory™</h1>
+    <main className={`mx-auto min-h-screen px-4 py-10 sm:px-6 ${hasAccess && latestScore ? "max-w-6xl" : "max-w-2xl"}`}>
+      <h1 className="mb-6 text-2xl font-bold text-navy">Your Founder Trajectory™</h1>
 
       <PaymentBanner payment={paymentResult} product={paymentProduct} />
       {lastPaid && <PurchaseTracker id={lastPaid.id} value={Number(lastPaid.amount)} currency={lastPaid.currency} item={lastPaid.product} />}
@@ -281,129 +264,40 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             </div>
           )}
 
-          {ent.tools && <DashboardCustomizer initialWidgets={widgets} />}
+          {dashboard && <FounderDashboard {...dashboard} />}
 
-          {showReminders && (overdueGoals.length > 0 || dueSoonGoals.length > 0) && (
-            <div className="rounded border border-gold bg-cream p-4 text-sm">
-              {overdueGoals.length > 0 && (
-                <p className="text-red-700 font-semibold">
-                  {overdueGoals.length} goal{overdueGoals.length > 1 ? "s" : ""} overdue.
+          <div id="report">
+            {detailsDone || existingReport ? (
+              <ReportPanel
+                assessmentId={latestScore.assessment_id}
+                scoreId={latestScore.id}
+                initialReport={existingReport ?? null}
+                canUpgradeToFull={ent.fullReport}
+                outdatedReason={reportOutdated}
+              />
+            ) : (
+              <div className="rounded-2xl border border-gold bg-cream p-6">
+                <p className="font-semibold text-navy">One more step for your Readiness Report</p>
+                <p className="mb-4 mt-1 text-sm text-ink-soft">
+                  Complete the full assessment for at least your three weakest areas
+                  {gapLabels.length ? ` (${gapLabels.join(", ")})` : ""}. About 5 minutes an area, saved as you go. It sharpens your score and lets your
+                  report and plan speak to your actual business.
                 </p>
-              )}
-              {dueSoonGoals.length > 0 && (
-                <p className="text-navy">
-                  {dueSoonGoals.length} goal{dueSoonGoals.length > 1 ? "s" : ""} due in the next 14 days.
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Standard view — always shown */}
-          <div className="rounded border p-6">
-            <p className="text-sm text-ink-soft">Venture Score</p>
-            <p className="text-4xl font-bold text-navy">
-              {latestScore.venture_score}
-              <span className="text-lg font-normal text-ink-soft"> / 100</span>
-            </p>
-            <p className="text-gold font-semibold">{latestScore.venture_tier}</p>
-          </div>
-
-          {ent.readinessScores ? (
-            <div className="grid grid-cols-3 gap-4">
-              <Stat label="Market" value={latestScore.market_subscore} />
-              <Stat label="Customer" value={latestScore.customer_subscore} />
-              <Stat label="Investor" value={latestScore.investor_subscore} />
-            </div>
-          ) : (
-            <Locked text="Market, Customer and Investor readiness scores, your valuation range and an AI market insight come with Growth." />
-          )}
-
-          <div className="rounded border p-4">
-            <p className="text-sm text-ink-soft">Health Index</p>
-            <p className="text-2xl font-bold">
-              {latestScore.health_index} <span className="text-sm font-normal text-ink-soft">({latestScore.health_confidence} confidence)</span>
-            </p>
-          </div>
-
-          {showProgressOverview && (
-            <ProgressOverview
-              topRecommendations={topRecommendations}
-              topMilestones={topMilestones}
-              statusCounts={statusCounts}
-              scoreHistory={scoreHistory}
-            />
-          )}
-
-          {ent.valuation && (showValuation || !m.tier) && latestScore.valuation_low != null && latestScore.valuation_high != null && (
-            <div className="rounded border p-6 bg-navy text-white">
-              <p className="text-sm text-cream/80">Estimated Business Value</p>
-              <p className="text-3xl font-bold">
-                ${Number(latestScore.valuation_low).toLocaleString()} – ${Number(latestScore.valuation_high).toLocaleString()}
-              </p>
-              <p className="text-xs text-cream/70 mt-2">{latestScore.valuation_basis}</p>
-              <p className="text-xs text-cream/70 mt-2 italic">
-                Directional estimate for your own planning, not a formal valuation, appraisal, or investment
-                advice. Consult a qualified professional before relying on this for funding, a sale, or any
-                legal purpose.
-              </p>
-            </div>
-          )}
-
-          {ent.tools && showGoalsProgress && blockResponses && blockResponses.some((b) => b.goal_target || b.target_date) && (
-            <div className="rounded border p-4">
-              <p className="font-semibold text-navy mb-1">Goals & Progress</p>
-              <p className="text-xs text-ink-soft mb-2">
-                Your own targets and dates from the assessment — update status any time.
-              </p>
-              <div>
-                {blockResponses.filter((b) => b.goal_target || b.target_date).map((b) => (
-                  <GoalProgressRow
-                    key={b.id}
-                    blockResponseId={b.id}
-                    label={BLOCK_LABELS[b.block_key as BlockKey] ?? b.block_key}
-                    goalTarget={b.goal_target ?? ""}
-                    targetDate={b.target_date}
-                    status={b.progress_status}
-                    overdue={!!b.target_date && new Date(b.target_date).getTime() < now}
-                  />
-                ))}
+                <a href="/assessment/details" className="inline-block rounded-lg bg-navy px-5 py-3 font-semibold text-white">
+                  Continue the full assessment
+                </a>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {detailsDone || existingReport ? (
-            <ReportPanel
-              assessmentId={latestScore.assessment_id}
-              scoreId={latestScore.id}
-              initialReport={existingReport ?? null}
-              canUpgradeToFull={ent.fullReport}
-            />
-          ) : (
-            <div className="rounded border border-gold p-6 bg-cream">
-              <p className="font-semibold text-navy">One more step for your Readiness Report</p>
-              <p className="text-sm text-ink-soft mt-1 mb-4">
-                Answer a few detailed questions about your three weakest areas
-                {gapLabels.length ? ` (${gapLabels.join(", ")})` : ""}. It takes about 10 minutes, sharpens your score, and lets
-                your report and growth plan speak to your actual business. You'll also choose how far ahead your plan should go.
+          {m.coachingAvailable > 0 && !extras.includes("coaching") && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold bg-white p-5">
+              <p className="text-sm">
+                <span className="font-semibold text-navy">One-on-one coaching: </span>
+                you have {m.coachingAvailable} session{m.coachingAvailable > 1 ? "s" : ""} to book.
               </p>
-              <a href="/assessment/details" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
-                Answer the detailed questions
-              </a>
-            </div>
-          )}
-
-          {(m.coachingAvailable > 0 || ent.includedCoaching) && (
-            <div className="rounded-2xl border p-5">
-              <p className="font-semibold text-navy">One-on-one coaching</p>
-              <p className="mt-1 text-sm text-ink-soft">
-                {m.coachingAvailable > 0
-                  ? `You have ${m.coachingAvailable} session${m.coachingAvailable > 1 ? "s" : ""} to book.`
-                  : m.nextCoachingFrom
-                  ? `Your next included sessions arrive on ${new Date(m.nextCoachingFrom).toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" })}.`
-                  : "No sessions to book right now."}
-              </p>
-              <a href="/dashboard/subscribe#one-time" className="mt-3 inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
-                {m.coachingAvailable > 0 ? "Book a session" : "Buy extra sessions"}
+              <a href="/dashboard/subscribe#one-time" className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
+                Book a session
               </a>
             </div>
           )}
@@ -417,7 +311,9 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             </div>
           )}
 
-          {referralCode && <InviteCard inviteUrl={`${publicAppUrl()}/?ref=${referralCode}&utm_source=referral&utm_medium=member`} rewardsEarned={(rewards ?? []).length} />}
+          {referralCode && ent.tools && !extras.includes("invite") && (
+            <InviteCard inviteUrl={`${publicAppUrl()}/?ref=${referralCode}&utm_source=referral&utm_medium=member`} rewardsEarned={(rewards ?? []).length} />
+          )}
 
           <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
             {ent.tools ? "Open Founder Tools (calculators, recommendations & milestones)" : "Open Founder Tools (free calculators)"}
@@ -491,26 +387,6 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
       <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
         Open Founder Tools (free calculators)
       </a>
-    </div>
-  );
-}
-
-function Locked({ text }: { text: string }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-gray-300 p-4 text-sm">
-      <span className="text-ink-soft">{text}</span>
-      <a href="/dashboard/subscribe" className="font-semibold text-teal">
-        See Growth
-      </a>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded border p-4 text-center">
-      <p className="text-xs text-ink-soft">{label}</p>
-      <p className="text-xl font-bold">{value}</p>
     </div>
   );
 }

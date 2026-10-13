@@ -54,6 +54,12 @@ export interface Entitlements {
   marketInsight: boolean;
   /** Market, Customer and Investor readiness scores. */
   readinessScores: boolean;
+  /** The guided Plan Builder (any member, and the one-time assessment). */
+  planBuilder: boolean;
+  /** AI review of the strategic plan. */
+  planReview: boolean;
+  /** The Market Intelligence page (researched brief, refreshed monthly). */
+  marketIntel: boolean;
   /** Ongoing AI coaching (not built yet: shown as coming soon). */
   aiCoaching: boolean;
   advisorReview: boolean;
@@ -78,6 +84,9 @@ export function entitlements(tier: Tier | null, purchasedAssessment = false): En
     valuation: growthUp || purchasedAssessment,
     marketInsight: growthUp || purchasedAssessment,
     readinessScores: growthUp || purchasedAssessment,
+    planBuilder: rank > 0 || purchasedAssessment,
+    planReview: growthUp || purchasedAssessment,
+    marketIntel: growthUp || purchasedAssessment,
     aiCoaching: growthUp,
     advisorReview: growthUp,
     tools: rank > 0,

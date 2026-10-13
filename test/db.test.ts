@@ -493,6 +493,71 @@ async function suite(label: string, files: string[]) {
   assert(!r.ok, "…but not an unknown cohort");
 
   // ------------------------------------------------------------------
+  // Plan Builder, plan reviews, Market Intelligence, dashboard view
+  // ------------------------------------------------------------------
+  r = await U(A, `insert into strategic_plans (founder_id,data,completeness) values ('${A}','{"vision":{}}',20) returning id`);
+  assert(r.ok, "founder saves own strategic plan", r);
+  const planId = r.rows[0]?.id;
+  r = await U(A, `insert into strategic_plans (founder_id,data) values ('${B}','{}')`);
+  assert(!r.ok, "founder cannot create a plan for someone else");
+  r = await U(A, `insert into strategic_plans (founder_id,data) values ('${A}','{}')`);
+  assert(!r.ok, "one plan per founder");
+  r = await U(A, `update strategic_plans set data='{"goals":[]}', updated_at=now() where founder_id='${A}'`);
+  assert(r.ok && r.n === 1, "founder updates own plan", r);
+  r = await U(B, `select id from strategic_plans`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read the plan", r);
+  r = await U(B, `update strategic_plans set data='{}' where founder_id='${A}'`);
+  assert(r.ok && r.n === 0, "other founder cannot change the plan", r);
+  r = await U(S, `select id from strategic_plans`);
+  assert(r.ok && r.rows.length === 1, "advisor can read plans", r);
+  r = await U(A, `update strategic_plans set completeness=150 where founder_id='${A}'`);
+  assert(!r.ok, "completeness stays between 0 and 100");
+
+  const reviewSql = `insert into plan_reviews (founder_id,plan_id,plan_updated_at,overall,result) values ('${A}','${planId}',now(),70,'{}')`;
+  r = await U(A, reviewSql);
+  assert(!r.ok, "founder cannot write a plan review from the browser");
+  r = await SRV(reviewSql);
+  assert(r.ok, "server writes the plan review", r);
+  r = await U(A, `select overall from plan_reviews`);
+  assert(r.ok && r.rows.length === 1, "founder reads own plan review", r);
+  r = await U(B, `select overall from plan_reviews`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read the plan review", r);
+
+  const briefSql = `insert into market_briefs (founder_id,industry,country,markdown) values ('${A}','Retail','Kenya','x')`;
+  r = await U(A, briefSql);
+  assert(!r.ok, "founder cannot write a market brief from the browser");
+  r = await SRV(briefSql);
+  assert(r.ok, "server writes the market brief", r);
+  r = await U(A, `select id from market_briefs`);
+  assert(r.ok && r.rows.length === 1, "founder reads own market brief", r);
+  r = await U(B, `select id from market_briefs`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read the market brief", r);
+
+  r = await U(A, `insert into goal_checkins (founder_id,goal_id,value,checked_on) values ('${A}','g1',120,'2026-10-01')`);
+  assert(r.ok, "founder logs a goal check-in", r);
+  r = await U(A, `insert into goal_checkins (founder_id,goal_id,value,checked_on) values ('${B}','g1',1,'2026-10-01')`);
+  assert(!r.ok, "…but not for someone else");
+  r = await U(B, `select id from goal_checkins`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read check-ins", r);
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue,customers,cash,wins) values ('${A}','2026-10-01',5000,40,12000,'First distributor signed')`);
+  assert(r.ok, "founder saves a monthly update", r);
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue) values ('${A}','2026-10-01',1)`);
+  assert(!r.ok, "one update per month");
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue) values ('${A}','2026-10-15',1)`);
+  assert(!r.ok, "an update's period is the first of a month");
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue) values ('${A}','2026-11-01',-5)`);
+  assert(!r.ok, "revenue can't be negative");
+  r = await U(B, `select id from founder_updates`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read monthly updates", r);
+
+  r = await U(A, `update profiles set dashboard_view='investor', dashboard_widgets='["score","valuation"]' where id='${A}'`);
+  assert(r.ok && r.n === 1, "founder chooses a dashboard view and cards", r);
+  r = await U(A, `update profiles set dashboard_view='everything' where id='${A}'`);
+  assert(!r.ok, "…but only a known view");
+  r = await U(A, `update profiles set role='admin' where id='${A}'`);
+  assert(!r.ok, "founder still cannot change own role");
+
+  // ------------------------------------------------------------------
   // "Is this founder subscribed?" — database and app must agree
   // ------------------------------------------------------------------
   const cases: { name: string; status: string; end: string | null; autoRenew: boolean }[] = [
@@ -538,6 +603,8 @@ async function main() {
     "supabase/migrations/2026-10-14_growth.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
+    "supabase/migrations/2026-10-15_plans_market.sql",
+    "supabase/migrations/2026-10-15_plans_market.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }
