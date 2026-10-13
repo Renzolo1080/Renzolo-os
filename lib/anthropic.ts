@@ -29,6 +29,8 @@ export interface ReportInput {
   employeeCount: string;
   yearsInBusiness: string;
   annualRevenue: string;
+  /** Quick Check answers with no column of their own (assessments.extra). */
+  extra?: { primaryGoal?: string; fundingNeed?: string; registration?: string; challenges?: string[] } | null;
   diagnostic: DiagnosticResult;
   blockNarratives: Record<string, { currentState: string; futureState: string; goalTarget: string }>;
 }
@@ -73,6 +75,10 @@ Years in business: ${orUnspecified(input.yearsInBusiness)}
 Team size: ${orUnspecified(input.employeeCount)}
 Annual revenue: ${orUnspecified(input.annualRevenue)}
 Target time horizon for goals: ${orUnspecified(input.timeHorizon)}
+Main goal: ${orUnspecified(input.extra?.primaryGoal)}
+Biggest challenges right now: ${orUnspecified(input.extra?.challenges?.join(", "))}
+Funding plans for the next 12 months: ${orUnspecified(input.extra?.fundingNeed)}
+Registration and tax status: ${orUnspecified(input.extra?.registration)}
 
 Venture Score: ${input.diagnostic.ventureScore.score}/100 (${input.diagnostic.ventureScore.tier})
 Market Readiness: ${input.diagnostic.subScores.market}/100
@@ -108,6 +114,9 @@ A prioritized action plan for that time horizon, as a bullet list (most importan
 bullet must be a single, concrete, specific action this founder can start now — this exact section is shown
 to the founder as a standalone Recommendations list elsewhere in the product, so keep every bullet
 self-contained (don't write "as above" or refer back to other sections).
+
+Make the Recommended Next Steps serve the founder's stated main goal and address their stated biggest
+challenges where the evidence supports it.
 
 Keep it direct and specific to this founder's stage, industry, business type, location, and size — avoid
 generic startup advice that could apply to anyone.`;

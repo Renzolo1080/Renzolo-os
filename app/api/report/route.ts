@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
       employeeCount: assessment.employee_count ?? "",
       yearsInBusiness: assessment.years_in_business ?? "",
       annualRevenue: assessment.annual_revenue ?? "",
+      extra: (assessment as any).extra ?? null,
       diagnostic: {
         ventureScore: { score: score.venture_score, tier: score.venture_tier },
         subScores: { market: score.market_subscore, customer: score.customer_subscore, investor: score.investor_subscore },

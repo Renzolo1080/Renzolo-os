@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -40,9 +41,18 @@ export default function RegisterPage() {
   if (status === "sent") {
     return (
       <main className="min-h-screen flex items-center justify-center px-6">
-        <p className="max-w-md text-center">
-          Check your email to confirm your account, then log in to start your Readiness Assessment.
-        </p>
+        <div className="max-w-md text-center space-y-3">
+          <p>
+            We sent a confirmation link to <strong className="break-all">{email}</strong>. Open it to confirm your
+            account, then log in to take your free Quick Check.
+          </p>
+          <p className="text-sm text-ink-soft">
+            Not the right email?{" "}
+            <button type="button" className="text-teal underline" onClick={() => setStatus("idle")}>
+              Go back and fix it
+            </button>
+          </p>
+        </div>
       </main>
     );
   }
@@ -61,21 +71,26 @@ export default function RegisterPage() {
         <input
           className="w-full rounded border px-3 py-2"
           type="email"
+          autoComplete="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
-          className="w-full rounded border px-3 py-2"
-          type="password"
-          placeholder="Password"
+        <PasswordInput
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
+          placeholder="Password (at least 8 characters)"
           minLength={8}
-          required
+          autoComplete="new-password"
         />
         {error && <p className="text-red-600 text-sm">{error}</p>}
+        <p className="text-sm text-ink-soft">
+          Already have an account?{" "}
+          <a href="/login" className="text-teal underline">
+            Log in
+          </a>
+        </p>
         <button
           type="submit"
           disabled={status === "loading"}

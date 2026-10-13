@@ -1,25 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { runDiagnostic, BLOCK_KEYS, type AllBlockScores, type BlockKey } from "@/lib/scoring";
+import { runDiagnostic, BLOCK_KEYS } from "@/lib/scoring";
 import { computeValuation } from "@/lib/valuation";
+import { parseProfile, parseQuickCheck, quickCheckToScoringInput } from "@/lib/quickcheck";
 
-interface BlockSubmission {
-  currentState: string;
-  futureState: string;
-  goalTarget: string;
-  targetDate: string;
-  evidenceUploaded: boolean;
-  measures: { clarity: number; evidence: number; economics: number; scalability: number; defensibility: number; risk: number };
-}
-
-/** POST /api/score
- * Body: { ventureStage, industry, geography, timeHorizon, businessType, employeeCount,
- *          yearsInBusiness, annualRevenue, blocks: Record<BlockKey, BlockSubmission> }
- * Saves the full 9-block assessment and computes the Venture Score,
- * sub-scores, and Health Index in one pass — this is the "Launch MVP"
- * shortcut (self-assessment produces the six measures directly); advisor
- * interview refinement on paid tiers is a fast-follow, not this route.
- */
+/** POST /api/score — submits the free Quick Check.
+ * Body: { profile: QuickProfile, answers: Record<BlockKey, 0-3>, evidence: BlockKey[] }
+ *
+ * Every answer is checked against the fixed list of choices
+ * (lib/quickcheck.ts) before anything is saved. Saves the assessment and
+ * one block response per business area, then computes and saves the
+ * Venture Score, sub-scores, Health Index, gaps and valuation.
+ *
+ * The detailed written questions (current state, future state, goal,
+ * target date) are NOT part of this. A subscriber answers them later for
+ * their weakest areas (app/api/assessment/details), which refines the
+ * score and feeds the AI report. */
 export async function POST(req: NextRequest) {
   const supabase = createClient();
   const {
@@ -27,63 +23,66 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const body = await req.json();
-  const blocks: Record<BlockKey, BlockSubmission> = body.blocks;
+  const body = (await req.json().catch(() => null)) as { profile?: unknown; answers?: unknown; evidence?: unknown } | null;
+  const profile = parseProfile(body?.profile);
+  if (!profile.ok) return NextResponse.json({ error: profile.error }, { status: 400 });
+  const quick = parseQuickCheck({ answers: body?.answers, evidence: body?.evidence });
+  if (!quick.ok) return NextResponse.json({ error: quick.error }, { status: 400 });
+  const p = profile.value;
 
-  for (const key of BLOCK_KEYS) {
-    if (!blocks[key]) {
-      return NextResponse.json({ error: `Missing block: ${key}` }, { status: 400 });
-    }
-  }
-
+  const now = new Date().toISOString();
   const { data: assessment, error: assessmentError } = await supabase
     .from("assessments")
     .insert({
       founder_id: user.id,
       status: "scored",
-      venture_stage: body.ventureStage,
-      industry: body.industry,
-      geography: body.geography,
-      time_horizon: body.timeHorizon,
-      business_type: body.businessType,
-      employee_count: body.employeeCount,
-      years_in_business: body.yearsInBusiness,
-      annual_revenue: body.annualRevenue,
-      submitted_at: new Date().toISOString(),
-      scored_at: new Date().toISOString(),
+      venture_stage: p.ventureStage,
+      industry: p.industry,
+      geography: p.country,
+      time_horizon: p.timeHorizon,
+      business_type: p.businessType,
+      employee_count: p.teamSize,
+      years_in_business: p.yearsInBusiness,
+      annual_revenue: p.annualRevenue,
+      extra: {
+        primaryGoal: p.primaryGoal,
+        fundingNeed: p.fundingNeed,
+        registration: p.registration,
+        challenges: p.challenges,
+        heardFrom: p.heardFrom,
+        source: "quick_check",
+      },
+      submitted_at: now,
+      scored_at: now,
     })
     .select()
     .single();
 
   if (assessmentError || !assessment) {
-    return NextResponse.json({ error: assessmentError?.message ?? "Failed to create assessment" }, { status: 500 });
+    return NextResponse.json({ error: assessmentError?.message ?? "Failed to save your answers" }, { status: 500 });
   }
 
-  const blockRows = BLOCK_KEYS.map((key) => ({
-    assessment_id: assessment.id,
-    block_key: key,
-    current_state: blocks[key].currentState,
-    future_state: blocks[key].futureState,
-    goal_target: blocks[key].goalTarget,
-    target_date: blocks[key].targetDate || null,
-    evidence_uploaded: blocks[key].evidenceUploaded,
-    measures: blocks[key].measures,
-  }));
+  const { measures, evidenceByBlock } = quickCheckToScoringInput(quick.value);
 
-  const { error: blockError } = await supabase.from("block_responses").insert(blockRows);
+  const { error: blockError } = await supabase.from("block_responses").insert(
+    BLOCK_KEYS.map((key) => ({
+      assessment_id: assessment.id,
+      block_key: key,
+      evidence_uploaded: evidenceByBlock[key],
+      measures: measures[key],
+    }))
+  );
   if (blockError) return NextResponse.json({ error: blockError.message }, { status: 500 });
 
-  const all: AllBlockScores = {} as AllBlockScores;
-  const evidenceByBlock = {} as Record<BlockKey, boolean>;
-  for (const key of BLOCK_KEYS) {
-    all[key] = blocks[key].measures;
-    evidenceByBlock[key] = blocks[key].evidenceUploaded;
-  }
-  const diagnostic = runDiagnostic(all, evidenceByBlock);
+  // Remember the founder's country on their profile if they haven't set
+  // one: it decides advisor-session pricing and which local currency they
+  // are offered (lib/pricing.ts). Never overwrites a country already set.
+  await supabase.from("profiles").update({ country: p.country, venture_stage: p.ventureStage, industry: p.industry }).eq("id", user.id).is("country", null);
 
+  const diagnostic = runDiagnostic(measures, evidenceByBlock);
   const valuation = computeValuation({
     ventureTier: diagnostic.ventureScore.tier,
-    annualRevenue: body.annualRevenue,
+    annualRevenue: p.annualRevenue,
     blockScores: diagnostic.blockScores,
   });
 
@@ -116,5 +115,10 @@ export async function POST(req: NextRequest) {
 
   if (scoreError) return NextResponse.json({ error: scoreError.message }, { status: 500 });
 
-  return NextResponse.json({ assessmentId: assessment.id, scoreId: scoreRow.id, diagnostic, valuation });
+  return NextResponse.json({
+    assessmentId: assessment.id,
+    scoreId: scoreRow.id,
+    ventureScore: diagnostic.ventureScore,
+    gaps: diagnostic.gaps.map((g) => g.label),
+  });
 }

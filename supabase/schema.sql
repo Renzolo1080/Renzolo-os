@@ -34,6 +34,9 @@ create table assessments (
   employee_count text,
   years_in_business text,
   annual_revenue text,
+  -- Quick Check answers with no column of their own: main goal, funding
+  -- need, registration status, biggest challenges, where they heard of us.
+  extra jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   submitted_at timestamptz,
   scored_at timestamptz
