@@ -36,6 +36,9 @@ export function SiteHeader() {
           </nav>
         ) : (
           <nav className="flex items-center gap-4 text-sm">
+            <a href="/programs" className="hidden text-cream hover:text-white sm:inline">
+              Academy
+            </a>
             <a href="/pricing" className="text-cream hover:text-white">
               Pricing
             </a>
@@ -53,11 +56,25 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const links = [
+    ["Pricing", "/pricing"],
+    ["Academy", "/programs"],
+    ["Contact", "/contact"],
+    ["Privacy", "/privacy"],
+    ["Terms", "/terms"],
+    ["Refunds", "/refunds"],
+  ];
   return (
-    <footer className="border-t border-gray-200 bg-cream">
-      <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-6 text-xs text-ink-soft sm:flex-row sm:justify-between sm:px-6">
-        <span>Founder Trajectory™ · Powered by RENZOLO OS™</span>
-        <span>© {new Date().getFullYear()} Renzolo Enterprises LLC</span>
+    <footer className="border-t border-gray-200 bg-cream print:hidden">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-6 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <nav className="flex flex-wrap gap-x-4 gap-y-1">
+          {links.map(([label, href]) => (
+            <a key={href} href={href} className="hover:text-navy">
+              {label}
+            </a>
+          ))}
+        </nav>
+        <span>Founder Trajectory™ · Powered by RENZOLO OS™ · © {new Date().getFullYear()} Renzolo Enterprises LLC</span>
       </div>
     </footer>
   );

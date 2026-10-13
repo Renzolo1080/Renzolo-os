@@ -462,12 +462,12 @@ export const SUBSCRIPTION_FEATURES = [
   "AI-powered Readiness Report explaining what's behind each gap and how to close it",
   "A personalized 90+ day growth and readiness plan (up to 36 months) tied to your goals",
   "Market, Customer and Investor readiness scores, plus your Venture Health Index",
-  "An estimated value range for your venture",
+  "An estimated value range for your business",
   "Goal tracking with reminders and a progress dashboard",
   "Milestone planner and tailored recommendations",
   "Founder tools, including financial calculators",
   "Re-assess any time and watch your score improve",
-  "Option to book one-on-one sessions with a RENZOLO advisor",
+  "Option to book one-on-one sessions with a Founder Trajectory™ coach",
 ] as const;
 
 export interface SnapshotContact {

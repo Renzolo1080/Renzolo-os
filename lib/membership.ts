@@ -140,7 +140,7 @@ export function planChange(
   if (!tierNow) return { ok: true, kind: "new", charge: target.listPrice, listPrice: target.listPrice, startsAt: nowIso, ...none };
 
   if (!sub?.current_period_end) {
-    return { ok: false, reason: "Your membership was set up by the RENZOLO team and has no end date. Contact us to change it." };
+    return { ok: false, reason: "Your membership was set up by our team and has no end date. Contact us to change it." };
   }
   if (sub.auto_renew) {
     return {

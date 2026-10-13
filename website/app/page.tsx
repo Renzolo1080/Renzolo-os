@@ -1,0 +1,224 @@
+import { Header, Footer } from "@/components/Chrome";
+import { Trajectory } from "@/components/Trajectory";
+import { APP_URL, appLink } from "@/lib/site";
+
+const OFFERS = [
+  {
+    name: "Free Readiness Snapshot",
+    what: "Five to seven minutes. Your Venture Score, your Strategic Plan Readiness and the three areas holding your business back.",
+    price: "Free",
+    action: "Take the Snapshot",
+    href: appLink("/snapshot", "home_offers"),
+  },
+  {
+    name: "Founder Trajectory™ membership",
+    what: "Your full Readiness Assessment, a growth and readiness plan of 90 days to 36 months, a dashboard to work it, and coaching at the level you choose.",
+    price: "From $15 a month",
+    action: "Compare plans",
+    href: appLink("/pricing", "home_offers"),
+  },
+  {
+    name: "Readiness Assessment",
+    what: "The full report once, with a valuation range, an AI market insight for your industry and country, and a recommendation of the plan that fits you.",
+    price: "$79 one time",
+    action: "See what's included",
+    href: appLink("/pricing", "home_offers_assessment"),
+  },
+  {
+    name: "One-on-one coaching",
+    what: "Sessions with a Founder Trajectory™ coach to work through your plan, your numbers or your next big decision.",
+    price: "$79 a session, $59 for members",
+    action: "See coaching",
+    href: appLink("/pricing", "home_offers_coaching"),
+  },
+  {
+    name: "Founder Trajectory™ Academy",
+    what: "Three development levels: Foundations (8 weeks), Growth (12 weeks) and Elevate (6 months). Founders work through their plans together, with live sessions and coaching.",
+    price: "Applications by cohort",
+    action: "Explore the Academy",
+    href: "/academy/",
+  },
+  {
+    name: "For partners",
+    what: "Readiness assessments and cohorts for the founders and suppliers in your program, association or supply chain.",
+    price: "Built with you",
+    action: "Talk to us",
+    href: "/contact/",
+  },
+];
+
+const METHOD = [
+  ["Evaluate", "Take the Snapshot, then your full Readiness Assessment, and see exactly where you stand and why."],
+  ["Evolve", "Turn the results into a growth and readiness plan, and update your strategy around the gaps that matter."],
+  ["Execute", "Work the plan with your dashboard, goals, reminders, tools and coaching."],
+  ["Elevate", "Re-assess, measure progress and move to your next stage."],
+];
+
+const MARKETS = [
+  { name: "United States", note: "Where RENZOLO™ is based.", href: appLink("/snapshot?country=United%20States", "home_markets_us") },
+  { name: "Kenya", note: "For founders and MSMEs ready to formalise, win contracts and grow.", href: `${APP_URL}/ke?utm_source=website&utm_medium=referral&utm_campaign=home_markets_ke` },
+  { name: "South Africa", note: "For founders and SMMEs getting supplier- and funding-ready.", href: `${APP_URL}/za?utm_source=website&utm_medium=referral&utm_campaign=home_markets_za` },
+  { name: "Everywhere else", note: "The Snapshot and membership work for founders and suppliers in any country.", href: appLink("/snapshot", "home_markets_other") },
+];
+
+/** What the free Snapshot gives a founder in about seven minutes: the
+ * proof that the tool produces concrete results quickly. */
+const SNAPSHOT_GIVES = [
+  ["Your Venture Readiness Score", "Where your business stands today, out of 100."],
+  ["Your Strategic Plan Readiness", "How solid your plan is, and how much of your business model it covers."],
+  ["Your strongest area", "What's already working, so you can build on it."],
+  ["The three areas holding you back", "Named, so you know exactly where to focus first."],
+  ["A clear recommendation", "Your most useful next move, tied to your own goal."],
+];
+
+/** Endorsements and testimonials, with a photo of the person. Shown only
+ * once real, permitted remarks are added here. */
+const ENDORSEMENTS: { quote: string; name: string; role: string; photo?: string }[] = [];
+
+export default function Home() {
+  return (
+    <>
+      <Header campaign="home_header" />
+      <main>
+        <section className="bg-navy text-white">
+          <div className="mx-auto max-w-6xl px-5 pb-10 pt-10 md:pt-16">
+            <h1 className="max-w-4xl font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-tight sm:text-6xl md:text-7xl" style={{ fontWeight: 800 }}>
+              Know where your business stands. Then move it forward.
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-mist">
+              RENZOLO™ gives founders and suppliers a comprehensive view of where their business stands, a readiness and growth plan to close the
+              gaps, and coaching to elevate it to the level partners, investors and customers look for.
+            </p>
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <a href={appLink("/snapshot", "home_hero")} className="rounded-full bg-gold px-7 py-4 text-center text-lg font-semibold text-white hover:bg-[#ad7b24]">
+                Take the free Readiness Snapshot
+              </a>
+              <a href="/founder-trajectory/" className="text-center font-semibold text-gold-soft underline-offset-4 hover:underline">
+                How Founder Trajectory™ works
+              </a>
+            </div>
+            <div className="mt-12 md:mt-6">
+              <Trajectory />
+            </div>
+            <p className="mt-2 max-w-xl text-sm text-mist">
+              Every business is somewhere on this path, from first idea to exit. Founder Trajectory™ shows you where you are and what it takes to reach
+              the next stage.
+            </p>
+          </div>
+        </section>
+
+        <section className="bg-white">
+          <div className="mx-auto grid max-w-6xl gap-12 px-5 py-16 md:grid-cols-[1fr_1.3fr] md:py-24">
+            <div>
+              <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">See results in about seven minutes</h2>
+              <p className="mt-4 text-lg text-muted">
+                The free Readiness Snapshot is the quickest way to see what Founder Trajectory™ does. Answer simple questions about your business,
+                your goals and your plan, and get concrete results straight away. No account needed.
+              </p>
+              <a href={appLink("/snapshot", "home_snapshot_section")} className="mt-8 inline-block rounded-full bg-gold px-7 py-4 font-semibold text-white hover:bg-[#ad7b24]">
+                Take the free Readiness Snapshot
+              </a>
+            </div>
+            <dl className="divide-y divide-mist border-y border-mist">
+              {SNAPSHOT_GIVES.map(([title, text]) => (
+                <div key={title} className="grid gap-1 py-5 sm:grid-cols-[15rem_1fr] sm:gap-6">
+                  <dt className="font-display text-lg font-bold">{title}</dt>
+                  <dd className="text-muted">{text}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+          <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Ways to work with us</h2>
+          <p className="mt-3 max-w-2xl text-muted">Start free. Go as deep as your business needs.</p>
+          <ul className="mt-10 divide-y divide-mist border-y border-mist">
+            {OFFERS.map((o) => (
+              <li key={o.name} className="grid gap-3 py-7 md:grid-cols-[15rem_1fr_11rem] md:items-center md:gap-10">
+                <div>
+                  <p className="font-display text-xl font-bold">{o.name}</p>
+                  <p className="mt-1 text-sm font-semibold text-teal">{o.price}</p>
+                </div>
+                <p className="max-w-xl text-muted">{o.what}</p>
+                <a href={o.href} className="justify-self-start rounded-full border-2 border-navy px-5 py-2.5 text-sm font-semibold text-navy hover:bg-navy hover:text-white md:justify-self-end">
+                  {o.action}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="bg-white">
+          <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The Founder Trajectory™ method</h2>
+            <p className="mt-3 max-w-2xl text-muted">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
+            <ol className="relative mt-12 grid gap-10 md:grid-cols-4 md:gap-6">
+              <span aria-hidden="true" className="absolute left-0 right-0 top-6 hidden h-[3px] bg-gold/40 md:block" />
+              {METHOD.map(([name, text], i) => (
+                <li key={name} className="relative">
+                  <span className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-navy font-display text-lg font-bold text-gold-soft">{i + 1}</span>
+                  <p className="mt-5 font-display text-2xl font-bold">{name}</p>
+                  <p className="mt-2 text-muted">{text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section className="bg-panel text-white">
+          <div className="mx-auto max-w-6xl px-5 py-16 md:py-20">
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Launching first in Kenya, South Africa and the United States</h2>
+            <p className="mt-3 max-w-2xl text-mist">Built for founders and suppliers wherever they are.</p>
+            <div className="mt-10 grid gap-px overflow-hidden rounded-2xl bg-navy sm:grid-cols-2 lg:grid-cols-4">
+              {MARKETS.map((m) => (
+                <a key={m.name} href={m.href} className="group bg-panel p-7 hover:bg-[#173651]">
+                  <p className="font-display text-2xl font-bold">{m.name}</p>
+                  <p className="mt-2 text-sm text-mist">{m.note}</p>
+                  <p className="mt-6 text-sm font-semibold text-gold-soft group-hover:underline">Start your Snapshot</p>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {ENDORSEMENTS.length > 0 && (
+          <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">What founders and partners say</h2>
+            <div className="mt-10 grid gap-10 md:grid-cols-2">
+              {ENDORSEMENTS.map((e) => (
+                <figure key={e.name} className="flex gap-5">
+                  {e.photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={e.photo} alt={e.name} className="h-16 w-16 shrink-0 rounded-full object-cover" />
+                  ) : (
+                    <span aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-navy font-display text-lg font-bold text-gold-soft">
+                      {e.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                    </span>
+                  )}
+                  <div>
+                    <blockquote className="text-lg leading-relaxed">{e.quote}</blockquote>
+                    <figcaption className="mt-3 text-sm">
+                      <span className="font-semibold">{e.name}</span>
+                      <span className="text-muted">, {e.role}</span>
+                    </figcaption>
+                  </div>
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="bg-gold">
+          <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-14 md:flex-row md:items-center md:justify-between">
+            <p className="max-w-2xl font-display text-3xl font-bold leading-tight text-navy md:text-4xl">Seven minutes to know where your business stands.</p>
+            <a href={appLink("/snapshot", "home_footer_band")} className="shrink-0 rounded-full bg-navy px-7 py-4 text-center text-lg font-semibold text-white">
+              Take the free Snapshot
+            </a>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}

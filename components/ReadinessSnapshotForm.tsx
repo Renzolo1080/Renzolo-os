@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { track } from "@/lib/track";
 import { useRouter } from "next/navigation";
 import type { BlockKey } from "@/lib/scoring";
 import type { SnapshotOverview } from "@/lib/snapshot";
@@ -65,7 +66,7 @@ const EMPTY: Profile = {
 type Field = [keyof Profile, string, readonly string[]];
 
 const BUSINESS_FIELDS: Field[] = [
-  ["ventureStage", "Stage of your venture", STAGES],
+  ["ventureStage", "Stage of your business", STAGES],
   ["industry", "Industry", INDUSTRIES],
   ["country", "Country you operate in", COUNTRIES],
   ["businessType", "Business type", BUSINESS_TYPES],
@@ -87,7 +88,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
   const router = useRouter();
   const sections: Section[] = [
     ...(mode === "public" ? [{ id: "you", title: "About you" }] : []),
-    { id: "business", title: "Your venture" },
+    { id: "business", title: "Your business" },
     { id: "goals", title: "Your goals" },
     { id: "plan", title: "Your strategic plan" },
     ...QUICK_QUESTIONS.map((q) => ({ id: `area:${q.key}`, title: "Your business model" })),
@@ -108,6 +109,16 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [overview, setOverview] = useState<SnapshotOverview | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+
+  // Country pages (/ke, /za) link here with ?country=Kenya etc.
+  useEffect(() => {
+    try {
+      const c = new URLSearchParams(window.location.search).get("country");
+      if (c && (COUNTRIES as readonly string[]).includes(c)) setProfile((p) => (p.country ? p : { ...p, country: c }));
+    } catch {}
+  }, []);
 
   const current = sections[screen];
   const fieldsDone = (fields: Field[]) => fields.every(([k]) => profile[k] !== "");
@@ -151,11 +162,13 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
       const res = await fetch(mode === "public" ? "/api/snapshot" : "/api/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(mode === "public" ? { ...payload, contact: { fullName, companyName, email } } : payload),
+        body: JSON.stringify(mode === "public" ? { ...payload, contact: { fullName, companyName, email, marketingConsent } } : payload),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Something went wrong. Please try again.");
+      track("snapshot_complete");
       if (mode === "public") {
+        setShareUrl(data.shareUrl ?? null);
         setOverview(data.overview);
         window.scrollTo({ top: 0 });
       } else {
@@ -167,7 +180,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
     }
   }
 
-  if (overview) return <SnapshotResult overview={overview} fullName={fullName} companyName={companyName} email={email} />;
+  if (overview) return <SnapshotResult overview={overview} fullName={fullName} companyName={companyName} email={email} shareUrl={shareUrl} />;
 
   const selectClass = "w-full rounded-lg border border-gray-300 px-3 py-2.5 bg-white focus:border-navy focus:outline-none";
   const inputClass = selectClass;
@@ -216,20 +229,27 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
               <input className={inputClass} autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
             </label>
             <label className="block">
-              <span className="block text-sm font-medium mb-1">Company or venture name</span>
+              <span className="block text-sm font-medium mb-1">Business or company name</span>
               <input className={inputClass} autoComplete="organization" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
             </label>
             <label className="block">
               <span className="block text-sm font-medium mb-1">Email address</span>
               <input className={inputClass} type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <span className="block text-xs text-ink-soft mt-1">Use the email you'd sign up with. Your results will be waiting in your account.</span>
+              <span className="block text-xs text-ink-soft mt-1">We'll email you your results. Use the email you'd sign up with: your results will be waiting in your account.</span>
             </label>
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" className="mt-1" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} />
+              <span>Also email me practical tips for growing my venture. You can unsubscribe at any time.</span>
+            </label>
+            <p className="text-xs text-ink-soft">
+              By continuing you agree to our <a href="/terms" className="underline">terms</a> and <a href="/privacy" className="underline">privacy policy</a>.
+            </p>
           </section>
         )}
 
         {current.id === "business" && (
           <section className="space-y-4">
-            <h1 className="text-2xl font-bold text-navy">Your venture</h1>
+            <h1 className="text-2xl font-bold text-navy">Your business</h1>
             {renderSelects(BUSINESS_FIELDS)}
           </section>
         )}
@@ -365,7 +385,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
               </div>
             </fieldset>
             <label className="block">
-              <span className="block text-sm font-medium mb-1">How did you hear about RENZOLO? (optional)</span>
+              <span className="block text-sm font-medium mb-1">How did you hear about us? (optional)</span>
               <select className={selectClass} value={profile.heardFrom} onChange={(e) => setProfile({ ...profile, heardFrom: e.target.value })}>
                 <option value="">Choose…</option>
                 {HEARD_FROM.map((o) => (

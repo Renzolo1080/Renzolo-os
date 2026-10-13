@@ -40,6 +40,10 @@ const M = "44444444-4444-4444-4444-444444444444"; // admin
 const C = "55555555-5555-5555-5555-555555555555"; // founder used for payment-function tests
 const D = "66666666-6666-6666-6666-666666666666"; // founder with a manual grant
 const E = "77777777-7777-7777-7777-777777777777"; // founder used for tier tests
+const F = "88888888-8888-8888-8888-888888888888"; // referrer
+const G = "99999999-9999-9999-9999-999999999999"; // referred founder
+const H = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"; // referrer with no membership yet
+const J = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"; // founder referred by H
 
 type Result = { ok: true; rows: any[]; n: number } | { ok: false; err: string; rows: any[]; n: number };
 
@@ -68,7 +72,8 @@ async function suite(label: string, files: string[]) {
       ('${A}','a@x','{"full_name":"A"}'), ('${B}','b@x','{"full_name":"B"}'),
       ('${S}','s@x','{"full_name":"Advisor"}'), ('${M}','m@x','{"full_name":"Admin"}'),
       ('${C}','c@x','{"full_name":"C"}'), ('${D}','d@x','{"full_name":"D"}'),
-      ('${E}','e@x','{"full_name":"E"}');
+      ('${E}','e@x','{"full_name":"E"}'), ('${F}','f@x','{"full_name":"F"}'), ('${G}','g@x','{"full_name":"G"}'),
+      ('${H}','h@x','{"full_name":"H"}'), ('${J}','j@x','{"full_name":"J"}');
     update profiles set role='advisor' where id='${S}';
     update profiles set role='admin' where id='${M}';
   `);
@@ -206,7 +211,7 @@ async function suite(label: string, files: string[]) {
   r = await U(A, `select * from quiz_leads`);
   assert(r.ok && r.rows.length === 0, "founder cannot read lead lists", r);
   r = await U(S, `select id from profiles`);
-  assert(r.ok && r.rows.length === 7, "advisor sees all profiles", r);
+  assert(r.ok && r.rows.length === 11, "advisor sees all profiles", r);
   r = await U(S, `update reports set advisor_reviewed=true where id='${rid}'`);
   assert(r.ok && r.n === 1, "advisor marks a report reviewed", r);
   r = await U(S, `select * from app_settings`);
@@ -442,6 +447,52 @@ async function suite(label: string, files: string[]) {
   assert(r.ok && r.rows.length === 0, "…and never by another founder", r);
 
   // ------------------------------------------------------------------
+  // Referrals: a free month when an invited founder first pays
+  // ------------------------------------------------------------------
+  r = await U(G, `update profiles set referred_by='FCODE123' where id='${G}'`);
+  assert(!r.ok, "a founder can't set who referred them from the browser");
+  r = await U(F, `update profiles set referral_code='MINE' where id='${F}'`);
+  assert(!r.ok, "…or choose their own referral code");
+  await SRV(`update profiles set referral_code='FCODE123' where id='${F}'`);
+  await SRV(`update profiles set referral_code='HCODE123' where id='${H}'`);
+  await SRV(`update profiles set referred_by='FCODE123' where id='${G}'`);
+  await SRV(`update profiles set referred_by='HCODE123' where id='${J}'`);
+  await SRV(`insert into subscriptions (founder_id,status,tier,current_period_end) values ('${F}','active','growth','2026-12-01T00:00:00Z')`);
+  const refPay = async (founder: string, ref: string, tx: string, at: string) => {
+    const id = (await SRV(`insert into payments (tx_ref,founder_id,product,tier,billing_interval,change_kind,amount,currency) values ('${ref}','${founder}','subscription','essentials','monthly','new',15,'USD') returning id`)).rows[0].id;
+    return SRV(`select fulfil_payment('${id}','${tx}',15,'x@x','1','${at}') as r`);
+  };
+  r = await refPay(G, "renzolo-subscription-g-1", "r9001", "2026-11-01T00:00:00Z");
+  assert(r.ok, "the invited founder's first membership payment goes through", r);
+  let rw = await one(`select * from referral_rewards where referred_id='${G}'`);
+  assert(!!rw && rw.referrer_id === F && !!rw.applied_at, "…the referrer earns a reward, applied straight away", rw);
+  assert(iso((await sub(F)).current_period_end) === "2027-01-01T00:00:00.000Z", "…as one extra month on the referrer's membership");
+  await refPay(G, "renzolo-subscription-g-2", "r9002", "2026-12-01T00:00:00Z");
+  assert((await one(`select count(*)::int as c from referral_rewards where referrer_id='${F}'`)).c === 1 && iso((await sub(F)).current_period_end) === "2027-01-01T00:00:00.000Z", "a second payment by the same founder earns nothing more");
+  await SRV(`update profiles set referred_by='FCODE123' where id='${F}'`);
+  await refPay(F, "renzolo-subscription-f-1", "r9003", "2026-11-02T00:00:00Z");
+  assert((await one(`select count(*)::int as c from referral_rewards where referred_id='${F}'`)).c === 0, "referring yourself earns nothing");
+  await refPay(J, "renzolo-subscription-j-1", "r9004", "2026-11-01T00:00:00Z");
+  rw = await one(`select * from referral_rewards where referred_id='${J}'`);
+  assert(!!rw && rw.referrer_id === H && rw.applied_at === null, "referrer with no active membership: the reward waits", rw);
+  await refPay(H, "renzolo-subscription-h-1", "r9005", "2026-11-10T00:00:00Z");
+  const sh = await sub(H);
+  assert(iso(sh.current_period_end) === "2027-01-10T00:00:00.000Z", "…and is added when they next pay (1 month paid + 1 free)", sh);
+  assert(!!(await one(`select applied_at from referral_rewards where referred_id='${J}'`)).applied_at, "…then marked as used");
+  r = await U(F, `select referred_id from referral_rewards`);
+  assert(r.ok && r.rows.length === 1, "a referrer sees the rewards they earned", r);
+  r = await U(G, `select * from referral_rewards`);
+  assert(r.ok && r.rows.length === 0, "…and nobody else's", r);
+  r = await run("anon", null, `select * from shared_scores`);
+  assert(r.ok && r.rows.length === 0, "shared scores, applications, messages and email lists are not readable from the browser", r);
+  r = await run("anon", null, `insert into cohort_applications (full_name,email,cohort) values ('x','x@x','elevate')`);
+  assert(!r.ok, "…and can't be written from the browser either (the server validates them)");
+  r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','growth')`);
+  assert(r.ok, "the server can record a Growth Cohort application", r);
+  r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','bootcamp')`);
+  assert(!r.ok, "…but not an unknown cohort");
+
+  // ------------------------------------------------------------------
   // "Is this founder subscribed?" — database and app must agree
   // ------------------------------------------------------------------
   const cases: { name: string; status: string; end: string | null; autoRenew: boolean }[] = [
@@ -483,6 +534,10 @@ async function main() {
     "supabase/migrations/2026-10-13_tiers_enums.sql",
     "supabase/migrations/2026-10-13_tiers.sql",
     "supabase/migrations/2026-10-13_tiers.sql",
+    "supabase/migrations/2026-10-14_growth.sql",
+    "supabase/migrations/2026-10-14_growth.sql",
+    "supabase/migrations/2026-10-14_cohorts.sql",
+    "supabase/migrations/2026-10-14_cohorts.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

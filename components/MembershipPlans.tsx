@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { TierCheck } from "./TierCheck";
+import { track } from "@/lib/track";
 import type { Tier, BillingInterval } from "@/lib/pricing";
 
 export interface Quote {
@@ -85,6 +86,7 @@ export function MembershipPlans({
       const data = await res.json().catch(() => ({}));
       if (data.waitlist) setError(data.error);
       if (!res.ok || !data.link) throw new Error(data.error ?? "Something went wrong starting your payment.");
+      track("begin_checkout", { item: `membership_${tier}_${cell.interval}` });
       window.location.assign(data.link);
     } catch (e: any) {
       setError(e?.message ?? "Something went wrong starting your payment.");

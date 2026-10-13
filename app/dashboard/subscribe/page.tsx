@@ -69,7 +69,7 @@ export default async function MembershipPage() {
                 : `Paid through ${formatDate(sub.current_period_end)}. Renewing adds time on top of that date, so nothing you've paid for is lost.`}
             </p>
           ) : (
-            <p className="mt-1 text-ink-soft">Set up by the RENZOLO team, with no end date.</p>
+            <p className="mt-1 text-ink-soft">Set up by our team, with no end date.</p>
           )}
           {upcoming && (
             <p className="mt-1 text-ink-soft">
