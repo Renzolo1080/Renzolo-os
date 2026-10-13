@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "RENZOLO OS",
-  description: "Founder BMC Readiness Assessment",
+  description: "Venture Readiness Assessment and Development Support",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

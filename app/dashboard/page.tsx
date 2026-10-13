@@ -9,6 +9,8 @@ import { PaymentBanner } from "@/components/PaymentBanner";
 import { isSubscriptionActive, daysUntilExpiry, reconcilePendingPayments } from "@/lib/payments";
 import { createPaymentStore } from "@/lib/payments-store";
 import { detailsComplete } from "@/lib/quickcheck";
+import { claimSnapshotLead } from "@/lib/snapshot-save";
+import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -28,13 +30,37 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   const showGoalsProgress = widgets.includes("goalsProgress");
   const showProgressOverview = widgets.includes("progressOverview");
 
-  const { data: latestScore } = await supabase
-    .from("scores")
-    .select("*, assessments!inner(founder_id)")
-    .eq("assessments.founder_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const loadLatestScore = () =>
+    supabase
+      .from("scores")
+      .select("*, assessments!inner(founder_id, extra)")
+      .eq("assessments.founder_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+  let { data: latestScore } = await loadLatestScore();
+
+  // New member who took the free public Snapshot with this same confirmed
+  // email: carry it into their account so they don't answer twice.
+  if (!latestScore && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const claimed = await claimSnapshotLead(createAdminClient(), user).catch((e) => {
+      console.error("Couldn't carry over the Readiness Snapshot:", e);
+      return null;
+    });
+    // Looked up by the new assessment, not with the same query as above:
+    // Next.js would hand back the earlier (empty) result for an identical
+    // request made during the same page load.
+    if (claimed) {
+      ({ data: latestScore } = await supabase
+        .from("scores")
+        .select("*, assessments!inner(founder_id, extra)")
+        .eq("assessment_id", claimed)
+        .eq("assessments.founder_id", user.id)
+        .limit(1)
+        .maybeSingle());
+    }
+  }
+  const planScore: number | null = typeof (latestScore as any)?.assessments?.extra?.planScore === "number" ? (latestScore as any).assessments.extra.planScore : null;
 
   // Safety net for "I paid but nothing happened": before reading the
   // subscription, re-check any of this founder's payments that are still
@@ -193,14 +219,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 
       {!latestScore ? (
         <div>
-          <p className="mb-1 font-semibold text-navy">Start with your free Quick Check</p>
-          <p className="mb-4 text-ink-soft">About 3 to 5 minutes, mostly tapping answers. You'll get your Venture Score and your three weakest areas.</p>
+          <p className="mb-1 font-semibold text-navy">Start with your free Readiness Snapshot</p>
+          <p className="mb-4 text-ink-soft">5 to 7 minutes, mostly dropdowns and taps. You'll get your Venture Score, your Strategic Plan Readiness and the three areas holding you back.</p>
           <a href="/assessment" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
-            Start the Quick Check
+            Start the Snapshot
           </a>
         </div>
       ) : !subscribed ? (
-        <FreeResult score={latestScore.venture_score} tier={latestScore.venture_tier} gaps={gapLabels} lapsed={lapsed} />
+        <FreeResult score={latestScore.venture_score} tier={latestScore.venture_tier} planScore={planScore} gaps={gapLabels} lapsed={lapsed} />
       ) : (
         <div className="space-y-6">
           <DashboardCustomizer initialWidgets={widgets} />
@@ -317,16 +343,27 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 /** What a founder sees before subscribing: enough of their result to want
  * the rest. The score and tier, and their three weakest areas named but
  * not explained. Everything that explains them is the paid product. */
-function FreeResult({ score, tier, gaps, lapsed }: { score: number; tier: string; gaps: string[]; lapsed: boolean }) {
+function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; tier: string; planScore: number | null; gaps: string[]; lapsed: boolean }) {
   return (
     <div className="space-y-6">
-      <div className="rounded border p-6">
-        <p className="text-sm text-ink-soft">Your Venture Score</p>
-        <p className="text-5xl font-bold text-navy">
-          {score}
-          <span className="text-lg font-normal text-ink-soft"> / 100</span>
-        </p>
-        <p className="text-gold font-semibold mt-1">{tier}</p>
+      <div className={`grid gap-4 ${planScore !== null ? "sm:grid-cols-2" : ""}`}>
+        <div className="rounded border p-6">
+          <p className="text-sm text-ink-soft">Your Venture Score</p>
+          <p className="text-5xl font-bold text-navy">
+            {score}
+            <span className="text-lg font-normal text-ink-soft"> / 100</span>
+          </p>
+          <p className="text-gold font-semibold mt-1">{tier}</p>
+        </div>
+        {planScore !== null && (
+          <div className="rounded border p-6">
+            <p className="text-sm text-ink-soft">Strategic Plan Readiness</p>
+            <p className="text-5xl font-bold text-navy">
+              {planScore}
+              <span className="text-lg font-normal text-ink-soft"> / 100</span>
+            </p>
+          </div>
+        )}
       </div>
 
       {gaps.length > 0 && (
@@ -346,15 +383,11 @@ function FreeResult({ score, tier, gaps, lapsed }: { score: number; tier: string
 
       <div className="rounded border p-6 bg-navy text-white">
         <p className="text-lg font-semibold">
-          {lapsed ? "Your subscription has ended" : "Unlock your full Diagnostic Report"}
+          {lapsed ? "Your subscription has ended" : "Get your comprehensive Readiness Assessment"}
         </p>
-        <ul className="mt-3 space-y-1 text-sm text-cream">
-          <li>• What's behind each weak area, and how to fix it</li>
-          <li>• A 90-day action plan for your business</li>
-          <li>• Market, customer and investor readiness scores</li>
-          <li>• An estimated value range for your business</li>
-          <li>• Goals, reminders and progress tracking</li>
-        </ul>
+        <div className="mt-4">
+          <SubscriptionFeatures dark />
+        </div>
         <a href="/dashboard/subscribe" className="mt-5 inline-block rounded bg-gold px-6 py-3 font-semibold text-white">
           {lapsed ? "Renew my subscription" : "Subscribe to unlock"}
         </a>

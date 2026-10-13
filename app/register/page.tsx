@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/PasswordInput";
 
@@ -9,6 +9,16 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+
+  // Coming from the free Snapshot: fill in the name and email they gave,
+  // so their Snapshot is matched to the new account.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const e = q.get("email");
+    const n = q.get("name");
+    if (e) setEmail(e);
+    if (n) setFullName(n);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -44,7 +54,7 @@ export default function RegisterPage() {
         <div className="max-w-md text-center space-y-3">
           <p>
             We sent a confirmation link to <strong className="break-all">{email}</strong>. Open it to confirm your
-            account, then log in to take your free Quick Check.
+            account, then log in. If you took the free Readiness Snapshot with this email, your results will be waiting.
           </p>
           <p className="text-sm text-ink-soft">
             Not the right email?{" "}
@@ -63,6 +73,7 @@ export default function RegisterPage() {
         <h1 className="text-2xl font-bold text-navy">Create your account</h1>
         <input
           className="w-full rounded border px-3 py-2"
+          autoComplete="name"
           placeholder="Full name"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}

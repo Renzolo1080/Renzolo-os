@@ -8,7 +8,7 @@ import { DetailForm, type DetailArea } from "@/components/DetailForm";
 export const dynamic = "force-dynamic";
 
 /** The detailed questions a subscriber answers for their three weakest
- * areas, after the free Quick Check. Their answers sharpen the score and
+ * areas, after the free Readiness Snapshot. Their answers sharpen the score and
  * are what the AI Diagnostic Report and goals are built from. */
 export default async function DetailsPage() {
   const supabase = createClient();

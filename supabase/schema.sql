@@ -251,9 +251,15 @@ create table snapshot_leads (
   block_ratings jsonb not null,
   preview_score numeric not null,
   preview_tier text not null,
+  company_name text,
+  -- Full Snapshot answers, carried into the founder's account when they
+  -- sign up with the same confirmed email (lib/snapshot-save.ts).
+  answers jsonb,
+  plan_score numeric,
   converted_to_user_id uuid references profiles(id),
   created_at timestamptz not null default now()
 );
+create index snapshot_leads_email_unclaimed on snapshot_leads (email) where converted_to_user_id is null;
 
 alter table snapshot_leads enable row level security;
 
