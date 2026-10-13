@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://renzoloenterprises.com"),
   title: { default: "RENZOLO · Venture readiness for founders", template: "%s · RENZOLO" },
   description:
-    "RENZOLO helps founders in the U.S., Kenya and South Africa see where their business stands and build a plan to grow, get funded and scale. Start with the free Readiness Snapshot.",
+    "RENZOLO™ gives founders and suppliers a comprehensive view of where their business stands, a readiness and growth plan, and coaching to reach the level partners, investors and customers look for. Start with the free Readiness Snapshot.",
   openGraph: { siteName: "RENZOLO", type: "website" },
   twitter: { card: "summary_large_image" },
 };

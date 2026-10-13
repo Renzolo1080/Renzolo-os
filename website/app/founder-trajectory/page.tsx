@@ -1,6 +1,7 @@
 import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
+import { Faq } from "@/components/Faq";
 
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
@@ -17,7 +18,7 @@ export default function FounderTrajectoryPage() {
       <main>
         <PageHero
           title="A membership that turns where you are into where you're going."
-          intro="Founder Trajectory™ starts with a full Readiness Assessment of your strategic plan and the nine building blocks of your business model. Then it gives you a plan, a dashboard to work it, and coaching to keep you moving. It runs on RENZOLO OS™, our venture readiness platform."
+          intro="Founder Trajectory™ gives founders and suppliers a comprehensive view of where their business stands. It starts with a full Readiness Assessment of your strategic plan and the nine building blocks of your business model. Then it gives you a plan, a dashboard to work it, and coaching to keep you moving. It runs on RENZOLO OS™, our venture readiness platform."
         >
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
             <a href={appLink("/snapshot", "ft_hero")} className="rounded-full bg-gold px-7 py-4 text-center text-lg font-semibold text-white">
@@ -75,6 +76,13 @@ export default function FounderTrajectoryPage() {
             <a href={appLink("/pricing", "ft_tiers")} className="mt-6 inline-block rounded-full border-2 border-navy px-6 py-3 font-semibold text-navy hover:bg-navy hover:text-white">
               See full pricing
             </a>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+          <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Most asked questions</h2>
+          <div className="mt-8">
+            <Faq />
           </div>
         </section>
       </main>

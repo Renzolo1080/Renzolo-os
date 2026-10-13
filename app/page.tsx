@@ -32,9 +32,9 @@ export default function HomePage() {
               Know exactly where your business stands, and what to do next.
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-cream/85">
-              Founder Trajectory™ measures your business against your strategic plan and the nine building blocks of your business model,
-              pinpoints the gaps holding you back, and turns them into a growth and readiness plan, with the dashboard, tools and coaching to
-              see it through. Powered by RENZOLO OS™.
+              Founder Trajectory™ gives founders and suppliers a comprehensive view of where their business stands against their strategic plan
+              and the nine building blocks of their business model, a readiness and growth plan to close the gaps, and coaching to elevate it to
+              the level partners, investors and customers look for. Powered by RENZOLO OS™.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <a href="/snapshot" className="rounded-lg bg-gold px-7 py-4 text-center text-lg font-semibold text-white hover:opacity-95">

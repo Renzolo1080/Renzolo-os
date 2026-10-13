@@ -49,7 +49,7 @@ export function Footer() {
         <div>
           <p className="font-display text-lg font-bold text-white">RENZOLO™</p>
           <p className="mt-2 max-w-sm">
-            Venture readiness and development for founders in the United States, Kenya and South Africa. Home of Founder Trajectory™, powered by
+            Venture readiness and development for founders and suppliers, launching first in Kenya, South Africa and the United States. Home of Founder Trajectory™, powered by
             RENZOLO OS™.
           </p>
         </div>
