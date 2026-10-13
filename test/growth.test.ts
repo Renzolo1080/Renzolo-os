@@ -34,7 +34,7 @@ async function main() {
   const d2 = buildEmail("day2", ctx);
   assert(d2.subject.includes("Channels") && AREA_TIPS.channels.tips.every((t) => d2.text.includes(t)), "day-2 email: tips for their weakest area");
   assert(BLOCK_KEYS.every((k) => AREA_TIPS[k]?.tips.length === 3), "every business-model area has three tips");
-  assert(buildEmail("day5", ctx).text.includes("$79") && buildEmail("day10", ctx).text.includes("Founder Trajectory(TM) Academy"), "day-5 (membership) and day-10 (Academy) emails");
+  assert(buildEmail("day5", ctx).text.includes("$79") && buildEmail("day10", ctx).text.includes("Founder Trajectory(TM) Academy") && buildEmail("day10", ctx).text.includes("Growth Cohort (12 weeks)"), "day-5 (membership) and day-10 (Academy) emails");
   for (const k of ["results", "day2", "day5", "day10"] as const) {
     const e = buildEmail(k, { ...ctx, firstName: "<b>x</b>" });
     assert(!e.html.includes("<b>x</b>") && !/renzcelerator/i.test(e.text), `${k}: names are escaped in HTML; no old program name`);
@@ -59,7 +59,8 @@ async function main() {
   assert(!(await sendEmail({ to: "a@b.co", subject: "s", html: "", text: "" }, { env: {}, fetchImpl: fake })).sent, "without an email key, nothing is sent (and nothing breaks)");
 
   // --- public forms ----------------------------------------------------------------
-  assert(parseCohortApplication({ fullName: "Ama", email: "a@b.co", cohort: "elevate" }).ok, "a cohort application is accepted");
+  assert(["foundations", "growth", "elevate"].every((c) => parseCohortApplication({ fullName: "Ama", email: "a@b.co", cohort: c }).ok), "applications accepted for Foundations, Growth and Elevate cohorts");
+  assert(!parseCohortApplication({ fullName: "Ama", email: "a@b.co", cohort: "essentials_growth" }).ok, "…the old combined cohort is no longer offered");
   assert(!parseCohortApplication({ fullName: "Ama", email: "a@b", cohort: "elevate" }).ok && !parseCohortApplication({ fullName: "Ama", email: "a@b.co", cohort: "gold" }).ok, "…bad email or unknown cohort refused");
   const spam = parseCohortApplication({ fullName: "Bot", email: "a@b.co", cohort: "elevate", website: "http://spam" });
   assert(!spam.ok && (spam as any).error === "spam", "the hidden field catches bots");

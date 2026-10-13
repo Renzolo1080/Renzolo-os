@@ -36,7 +36,7 @@ const Honeypot = () => (
   </div>
 );
 
-export function CohortForm({ defaultCohort = "essentials_growth" }: { defaultCohort?: "essentials_growth" | "elevate" }) {
+export function CohortForm({ defaultCohort = "foundations" }: { defaultCohort?: "foundations" | "growth" | "elevate" }) {
   const { status, error, submit } = useSubmit("/api/applications");
   if (status === "done")
     return (
@@ -54,7 +54,7 @@ export function CohortForm({ defaultCohort = "essentials_growth" }: { defaultCoh
           <input name="fullName" required autoComplete="name" className={input} />
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium">Company or venture</span>
+          <span className="mb-1 block text-sm font-medium">Business or company</span>
           <input name="company" autoComplete="organization" className={input} />
         </label>
       </div>
@@ -85,8 +85,9 @@ export function CohortForm({ defaultCohort = "essentials_growth" }: { defaultCoh
       <label className="block">
         <span className="mb-1 block text-sm font-medium">Which cohort?</span>
         <select name="cohort" className={input} defaultValue={defaultCohort}>
-          <option value="essentials_growth">Founder Trajectory™ Academy cohort (Essentials and Growth members)</option>
-          <option value="elevate">Elevate cohort (Elevate members)</option>
+          <option value="foundations">Foundations (8 weeks)</option>
+          <option value="growth">Growth Cohort (12 weeks)</option>
+          <option value="elevate">Elevate Cohort (6 months)</option>
         </select>
       </label>
       <label className="block">

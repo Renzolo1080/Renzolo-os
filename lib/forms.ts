@@ -7,7 +7,7 @@ const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
 export const CONTACT_TOPICS = ["General question", "Partnership", "Media", "Support with my account", "Cohorts and the Academy"] as const;
 
-export type CohortChoice = "essentials_growth" | "elevate";
+export type CohortChoice = "foundations" | "growth" | "elevate";
 
 export function parseCohortApplication(b: any):
   | { ok: true; value: { fullName: string; email: string; company: string; country: string; ventureStage: string; cohort: CohortChoice; message: string } }
@@ -15,7 +15,7 @@ export function parseCohortApplication(b: any):
   if (str(b?.website, 200)) return { ok: false, error: "spam" }; // honeypot
   const fullName = str(b?.fullName, 120);
   const email = str(b?.email, 254).toLowerCase();
-  const cohort = b?.cohort === "elevate" ? "elevate" : b?.cohort === "essentials_growth" ? "essentials_growth" : null;
+  const cohort: CohortChoice | null = b?.cohort === "foundations" || b?.cohort === "growth" || b?.cohort === "elevate" ? b.cohort : null;
   if (!fullName) return { ok: false, error: "Please enter your name." };
   if (!emailOk(email)) return { ok: false, error: "Please enter a valid email address." };
   if (!cohort) return { ok: false, error: "Please choose a cohort." };

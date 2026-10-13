@@ -336,7 +336,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 
           {ent.valuation && (showValuation || !m.tier) && latestScore.valuation_low != null && latestScore.valuation_high != null && (
             <div className="rounded border p-6 bg-navy text-white">
-              <p className="text-sm text-cream/80">Estimated Venture Value</p>
+              <p className="text-sm text-cream/80">Estimated Business Value</p>
               <p className="text-3xl font-bold">
                 ${Number(latestScore.valuation_low).toLocaleString()} – ${Number(latestScore.valuation_high).toLocaleString()}
               </p>

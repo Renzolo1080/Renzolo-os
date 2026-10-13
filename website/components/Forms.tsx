@@ -55,7 +55,7 @@ export function InterestForm() {
           <input name="fullName" required autoComplete="name" className={field} />
         </label>
         <label className="grid gap-1.5 text-sm font-semibold">
-          Company or venture
+          Business or company
           <input name="company" autoComplete="organization" className={field} />
         </label>
       </div>
@@ -74,9 +74,10 @@ export function InterestForm() {
       </label>
       <label className="grid gap-1.5 text-sm font-semibold">
         Cohort
-        <select name="cohort" className={field} defaultValue="essentials_growth">
-          <option value="essentials_growth">Academy cohort (Foundations, Traction or Readiness)</option>
-          <option value="elevate">Elevate Cohort</option>
+        <select name="cohort" className={field} defaultValue="foundations">
+          <option value="foundations">Foundations (8 weeks)</option>
+          <option value="growth">Growth Cohort (12 weeks)</option>
+          <option value="elevate">Elevate Cohort (6 months)</option>
         </select>
       </label>
       {error && <p className="text-sm text-red-700">{error}</p>}

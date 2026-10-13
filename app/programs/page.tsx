@@ -2,14 +2,13 @@ import { CohortForm } from "@/components/PublicForms";
 
 export const metadata = {
   title: "Founder Trajectory™ Academy · cohorts",
-  description: "Structured 6, 8 and 12-week cohorts where founders work through their growth and readiness plan together, with coaching.",
+  description: "Founder Trajectory™ Academy: the 8-week Foundations cohort, the 12-week Growth cohort and the 6-month Elevate cohort.",
 };
 
 const FORMATS = [
-  { name: "Foundations", weeks: "6 weeks", focus: "Customers, your offer and a written plan." },
-  { name: "Traction", weeks: "8 weeks", focus: "Channels, pricing, cash flow and operations." },
-  { name: "Readiness", weeks: "12 weeks", focus: "Investor, lender and contract readiness: ready to raise or scale." },
-  { name: "Elevate Cohort", weeks: "Once a year", focus: "For Elevate members: hands-on support to raise, scale or win big contracts." },
+  { name: "Foundations", weeks: "8 weeks", focus: "Your customers, your offer, your numbers and a written growth plan. For Essentials members." },
+  { name: "Growth Cohort", weeks: "12 weeks", focus: "Traction and readiness: channels, pricing, cash flow and operations, then investor, lender and contract readiness. For Growth members." },
+  { name: "Elevate Cohort", weeks: "6 months", focus: "Hands-on support to raise, scale or win big contracts. For Elevate members, once a year." },
 ];
 
 export default function ProgramsPage() {
@@ -27,7 +26,7 @@ export default function ProgramsPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-3">
           {FORMATS.map((f) => (
             <div key={f.name} className="rounded-2xl bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-teal">{f.weeks}</p>
@@ -42,8 +41,7 @@ export default function ProgramsPage() {
             <h2 className="text-2xl font-bold text-navy">How cohorts work</h2>
             <ul className="mt-4 space-y-3 text-sm">
               {[
-                "Three Academy cohorts a year for Essentials and Growth members.",
-                "One dedicated Elevate cohort a year, for Elevate members.",
+                "Foundations and Growth cohorts open three times a year. The Elevate Cohort runs once a year.",
                 "Cohorts have their own fee, separate from membership.",
                 "Members get priority when applying. Every founder applies and must qualify, so each cohort is a strong group.",
                 "Your Readiness Assessment and plan are your starting point, so you arrive knowing exactly what to work on.",

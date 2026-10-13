@@ -106,13 +106,13 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
     const subject = `3 ways to strengthen your ${name}`;
     const html = layout(
       `${hi}let's start with ${name}`,
-      p(`Your Snapshot showed ${esc(name)} as the area holding your venture back most. Here are three things you can do this month:`) +
+      p(`Your Snapshot showed ${esc(name)} as the area holding your business back most. Here are three things you can do this month:`) +
         `<ol style="margin:0 0 14px 18px;padding:0;line-height:1.6;font-size:15px">${tips.map((t) => `<li style="margin-bottom:6px">${esc(t)}</li>`).join("")}</ol>` +
         p(`Your full Readiness Assessment goes deeper: why this gap exists for your business, and a plan to close it.`),
       ctx,
       { label: "Start my full assessment", href: cta }
     );
-    const text = `${hi}your Snapshot showed ${name} as the area holding your venture back most. Three things you can do this month:\n${tips.map((t, i) => `${i + 1}. ${t}`).join("\n")}\n\nYour full Readiness Assessment goes deeper: ${cta}${textFooter(ctx)}`;
+    const text = `${hi}your Snapshot showed ${name} as the area holding your business back most. Three things you can do this month:\n${tips.map((t, i) => `${i + 1}. ${t}`).join("\n")}\n\nYour full Readiness Assessment goes deeper: ${cta}${textFooter(ctx)}`;
     return { subject, html, text };
   }
   if (kind === "day5") {
@@ -133,12 +133,12 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
   const subject = "Grow alongside other founders";
   const html = layout(
     `${hi}you don't have to do this alone`,
-    p(`The Founder Trajectory&trade; Academy runs cohorts: structured 6, 8 and 12-week programs where founders work through their plan together, with coaching along the way.`) +
-      p(`Cohorts open three times a year for Essentials and Growth members, plus a dedicated Elevate cohort once a year. Members get priority when applying.`),
+    p(`The Founder Trajectory&trade; Academy runs cohorts where founders work through their plan together, with coaching along the way: Foundations (8 weeks), the Growth Cohort (12 weeks) and the Elevate Cohort (6 months).`) +
+      p(`Foundations and Growth cohorts open three times a year, and the Elevate Cohort once a year. Members get priority when applying.`),
     ctx,
     { label: "Learn about cohorts", href: programs }
   );
-  const text = `${hi}The Founder Trajectory(TM) Academy runs cohorts: structured 6, 8 and 12-week programs where founders work through their plan together, with coaching. Members get priority when applying.\n\nLearn more: ${programs}${textFooter(ctx)}`;
+  const text = `${hi}The Founder Trajectory(TM) Academy runs cohorts where founders work through their plan together, with coaching: Foundations (8 weeks), the Growth Cohort (12 weeks) and the Elevate Cohort (6 months). Members get priority when applying.\n\nLearn more: ${programs}${textFooter(ctx)}`;
   return { subject, html, text };
 }
 

@@ -47,7 +47,7 @@ create table if not exists cohort_applications (
   company text,
   country text,
   venture_stage text,
-  cohort text not null check (cohort in ('essentials_growth', 'elevate')),
+  cohort text not null check (cohort in ('foundations', 'growth', 'elevate', 'essentials_growth')),
   message text,
   attribution jsonb,
   created_at timestamptz not null default now()

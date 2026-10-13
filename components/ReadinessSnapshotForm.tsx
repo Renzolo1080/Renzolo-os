@@ -66,7 +66,7 @@ const EMPTY: Profile = {
 type Field = [keyof Profile, string, readonly string[]];
 
 const BUSINESS_FIELDS: Field[] = [
-  ["ventureStage", "Stage of your venture", STAGES],
+  ["ventureStage", "Stage of your business", STAGES],
   ["industry", "Industry", INDUSTRIES],
   ["country", "Country you operate in", COUNTRIES],
   ["businessType", "Business type", BUSINESS_TYPES],
@@ -88,7 +88,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
   const router = useRouter();
   const sections: Section[] = [
     ...(mode === "public" ? [{ id: "you", title: "About you" }] : []),
-    { id: "business", title: "Your venture" },
+    { id: "business", title: "Your business" },
     { id: "goals", title: "Your goals" },
     { id: "plan", title: "Your strategic plan" },
     ...QUICK_QUESTIONS.map((q) => ({ id: `area:${q.key}`, title: "Your business model" })),
@@ -229,7 +229,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
               <input className={inputClass} autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
             </label>
             <label className="block">
-              <span className="block text-sm font-medium mb-1">Company or venture name</span>
+              <span className="block text-sm font-medium mb-1">Business or company name</span>
               <input className={inputClass} autoComplete="organization" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
             </label>
             <label className="block">
@@ -249,7 +249,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
 
         {current.id === "business" && (
           <section className="space-y-4">
-            <h1 className="text-2xl font-bold text-navy">Your venture</h1>
+            <h1 className="text-2xl font-bold text-navy">Your business</h1>
             {renderSelects(BUSINESS_FIELDS)}
           </section>
         )}

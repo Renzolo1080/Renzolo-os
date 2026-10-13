@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 const WIDGET_OPTIONS: { key: string; label: string; description: string }[] = [
   { key: "reminders", label: "Goal reminders banner", description: "Overdue / due-soon goals at the top of your dashboard." },
-  { key: "valuation", label: "Estimated Venture Value", description: "Instant directional valuation range." },
+  { key: "valuation", label: "Estimated Business Value", description: "Instant directional valuation range." },
   { key: "goalsProgress", label: "Goals & Progress list", description: "Per-block goal status you can update yourself, full detail." },
   { key: "progressOverview", label: "Progress Overview", description: "At-a-glance: top recommendations, nearest milestones, and a progress chart." },
 ];

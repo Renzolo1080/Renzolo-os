@@ -29,10 +29,10 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-20">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Venture Readiness Assessment and Development Support</p>
             <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-              Know exactly where your venture stands, and what to do next.
+              Know exactly where your business stands, and what to do next.
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-cream/85">
-              Founder Trajectory™ measures your venture against your strategic plan and the nine building blocks of your business model,
+              Founder Trajectory™ measures your business against your strategic plan and the nine building blocks of your business model,
               pinpoints the gaps holding you back, and turns them into a growth and readiness plan, with the dashboard, tools and coaching to
               see it through. Powered by RENZOLO OS™.
             </p>
@@ -55,7 +55,7 @@ export default function HomePage() {
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal">How it works</p>
           <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">The Founder Trajectory™ method</h2>
-          <p className="mt-3 max-w-2xl text-ink-soft">Four steps, repeated as you grow. Each cycle leaves your venture more ready than the last.</p>
+          <p className="mt-3 max-w-2xl text-ink-soft">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
           <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {METHOD.map((m, i) => (
               <li key={m.name} className="rounded-2xl bg-white p-6 shadow-sm">

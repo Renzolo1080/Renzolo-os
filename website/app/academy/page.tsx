@@ -3,13 +3,12 @@ import { PageHero } from "@/components/PageHero";
 import { InterestForm } from "@/components/Forms";
 import { appLink } from "@/lib/site";
 
-export const metadata = { title: "Founder Trajectory™ Academy", description: "Six, eight and twelve-week cohorts where founders work through their plans together." };
+export const metadata = { title: "Founder Trajectory™ Academy", description: "Foundations (8 weeks), the Growth Cohort (12 weeks) and the Elevate Cohort (6 months)." };
 
 const PROGRAMS = [
-  { name: "Foundations", length: "6 weeks", text: "Customers, your offer and a written plan." },
-  { name: "Traction", length: "8 weeks", text: "Channels, pricing, cash flow and operations." },
-  { name: "Readiness", length: "12 weeks", text: "Investor, lender and contract readiness: ready to raise or scale." },
-  { name: "Elevate Cohort", length: "Once a year", text: "For Elevate members: hands-on support to raise, scale or win big contracts." },
+  { name: "Foundations", length: "8 weeks", text: "Your customers, your offer, your numbers and a written growth plan. For Essentials members." },
+  { name: "Growth Cohort", length: "12 weeks", text: "Traction and readiness: channels, pricing, cash flow and operations, then investor, lender and contract readiness. For Growth members." },
+  { name: "Elevate Cohort", length: "6 months", text: "Hands-on support to raise, scale or win big contracts. For Elevate members, once a year." },
 ];
 
 export default function AcademyPage() {
@@ -22,7 +21,7 @@ export default function AcademyPage() {
           intro="Founder Trajectory™ Academy cohorts are structured programs with live sessions and coaching. You work through your own growth and readiness plan, together with a group of founders at a similar stage."
         />
         <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-          <dl className="grid gap-px overflow-hidden rounded-3xl bg-mist sm:grid-cols-2 lg:grid-cols-4">
+          <dl className="grid gap-px overflow-hidden rounded-3xl bg-mist md:grid-cols-3">
             {PROGRAMS.map((p) => (
               <div key={p.name} className="bg-paper p-7">
                 <dt>
@@ -38,7 +37,7 @@ export default function AcademyPage() {
             <div>
               <h2 className="font-display text-3xl font-bold tracking-tight">How cohorts work</h2>
               <ul className="mt-6 space-y-4 text-lg">
-                <li>Three Academy cohorts a year for Essentials and Growth members, and one Elevate Cohort a year.</li>
+                <li>Foundations and Growth cohorts open three times a year. The Elevate Cohort runs once a year.</li>
                 <li>Cohorts have their own fee, separate from membership.</li>
                 <li>Members get priority when applying. Every founder applies and must qualify, so each group is strong.</li>
                 <li>You arrive with your Readiness Assessment and plan, so you know exactly what to work on from week one.</li>

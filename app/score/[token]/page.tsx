@@ -7,11 +7,11 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: { token: string } }): Promise<Metadata> {
   const s = await getSharedScore(params.token);
   if (!s) return { title: "Founder Trajectory™" };
-  const title = `A founder scored ${Number(s.venture_score)}/100 on their Venture Readiness. What's yours?`;
+  const title = `A founder scored ${Number(s.venture_score)}/100. What's your Venture Readiness Score?`;
   return {
     title,
-    description: "Take the free 5-7 minute Readiness Snapshot and see where your venture stands.",
-    openGraph: { title, description: "Take the free 5-7 minute Readiness Snapshot and see where your venture stands." },
+    description: "Take the free 5-7 minute Readiness Snapshot and see where your business stands.",
+    openGraph: { title, description: "Take the free 5-7 minute Readiness Snapshot and see where your business stands." },
   };
 }
 
@@ -27,7 +27,7 @@ export default async function SharedScorePage({ params }: { params: { token: str
       <section className="bg-navy text-white">
         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Venture Readiness Snapshot</p>
-          <h1 className="mt-4 text-3xl font-bold sm:text-4xl">A founder just checked how ready their venture is.</h1>
+          <h1 className="mt-4 text-3xl font-bold sm:text-4xl">A founder just got their Venture Readiness Score.</h1>
           <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-4">
             <div className="rounded-2xl bg-navy-panel p-5">
               <p className="text-sm text-cream/70">Venture Score</p>
@@ -40,9 +40,9 @@ export default async function SharedScorePage({ params }: { params: { token: str
               <p className="mt-1 text-sm text-cream/70">out of 100</p>
             </div>
           </div>
-          <p className="mx-auto mt-8 max-w-xl text-lg text-cream/85">What's yours? Take the free Readiness Snapshot: 5 to 7 minutes, no account needed.</p>
+          <p className="mx-auto mt-8 max-w-xl text-lg text-cream/85">What's your Venture Readiness Score? Take the free Readiness Snapshot: 5 to 7 minutes, no account needed.</p>
           <a href={href} className="mt-6 inline-block rounded-lg bg-gold px-7 py-4 text-lg font-semibold text-white">
-            Check my venture's readiness
+            Get my Venture Readiness Score
           </a>
         </div>
       </section>

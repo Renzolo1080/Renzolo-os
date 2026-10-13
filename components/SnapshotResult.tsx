@@ -24,7 +24,7 @@ export function SnapshotResult({
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-teal">Your Readiness Snapshot</p>
         <h1 className="mt-1 text-3xl font-bold text-navy">
-          {first ? `${first}, here's where ${companyName.trim() || "your venture"} stands` : "Here's where your venture stands"}
+          {first ? `${first}, here's where ${companyName.trim() || "your business"} stands` : "Here's where your business stands"}
         </h1>
       </div>
 
@@ -78,7 +78,7 @@ export function SnapshotResult({
           <p className="font-semibold text-navy">Know a founder who should check their readiness?</p>
           <p className="mt-1 text-sm text-ink-soft">Share your score. Only the numbers are shown: never your name or answers.</p>
           <div className="mt-3">
-            <ShareButtons url={shareUrl} text={`I scored ${overview.ventureScore}/100 on my Venture Readiness Snapshot. What's your score?`} />
+            <ShareButtons url={shareUrl} text={`I scored ${overview.ventureScore}/100 on my Venture Readiness Snapshot. What's your Venture Readiness Score?`} />
           </div>
         </div>
       )}

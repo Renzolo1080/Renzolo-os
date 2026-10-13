@@ -12,7 +12,7 @@ export default async function Image({ params }: { params: { token: string } }) {
     eyebrow: "Venture Readiness Snapshot",
     big: s ? String(Number(s.venture_score)) : "?",
     bigLabel: s ? s.venture_tier : undefined,
-    title: "A founder just scored their venture. What's yours?",
+    title: "What's your Venture Readiness Score?",
     subtitle: "Free · 5 to 7 minutes · no account needed",
   });
 }

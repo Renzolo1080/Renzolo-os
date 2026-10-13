@@ -5,7 +5,7 @@ import { APP_URL, appLink } from "@/lib/site";
 const OFFERS = [
   {
     name: "Free Readiness Snapshot",
-    what: "Five to seven minutes. Your Venture Score, your Strategic Plan Readiness and the three areas holding your venture back.",
+    what: "Five to seven minutes. Your Venture Score, your Strategic Plan Readiness and the three areas holding your business back.",
     price: "Free",
     action: "Take the Snapshot",
     href: appLink("/snapshot", "home_offers"),
@@ -33,7 +33,7 @@ const OFFERS = [
   },
   {
     name: "Founder Trajectory™ Academy",
-    what: "Six, eight and twelve-week cohorts where founders work through their plans together, with live sessions and coaching.",
+    what: "Foundations (8 weeks), the Growth Cohort (12 weeks) and the Elevate Cohort (6 months): founders working through their plans together, with live sessions and coaching.",
     price: "Applications by cohort",
     action: "Explore the Academy",
     href: "/academy/",
@@ -68,10 +68,10 @@ export default function Home() {
         <section className="bg-navy text-white">
           <div className="mx-auto max-w-6xl px-5 pb-10 pt-10 md:pt-16">
             <h1 className="max-w-4xl font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-tight sm:text-6xl md:text-7xl" style={{ fontWeight: 800 }}>
-              Know where your venture stands. Then move it forward.
+              Know where your business stands. Then move it forward.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-mist">
-              RENZOLO helps founders in the United States, Kenya and South Africa measure how ready their venture is, close the gaps holding it back, and
+              RENZOLO helps founders in the United States, Kenya and South Africa measure how ready their business is, close the gaps holding it back, and
               grow with a plan, coaching and the right connections.
             </p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -86,7 +86,7 @@ export default function Home() {
               <Trajectory />
             </div>
             <p className="mt-2 max-w-xl text-sm text-mist">
-              Every venture is somewhere on this path, from first idea to exit. Founder Trajectory™ shows you where you are and what it takes to reach
+              Every business is somewhere on this path, from first idea to exit. Founder Trajectory™ shows you where you are and what it takes to reach
               the next stage.
             </p>
           </div>
@@ -94,7 +94,7 @@ export default function Home() {
 
         <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
           <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Ways to work with us</h2>
-          <p className="mt-3 max-w-2xl text-muted">Start free. Go as deep as your venture needs.</p>
+          <p className="mt-3 max-w-2xl text-muted">Start free. Go as deep as your business needs.</p>
           <ul className="mt-10 divide-y divide-mist border-y border-mist">
             {OFFERS.map((o) => (
               <li key={o.name} className="grid gap-3 py-7 md:grid-cols-[15rem_1fr_11rem] md:items-center md:gap-10">
@@ -114,7 +114,7 @@ export default function Home() {
         <section className="bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The Founder Trajectory™ method</h2>
-            <p className="mt-3 max-w-2xl text-muted">Four steps, repeated as you grow. Each cycle leaves your venture more ready than the last.</p>
+            <p className="mt-3 max-w-2xl text-muted">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
             <ol className="relative mt-12 grid gap-10 md:grid-cols-4 md:gap-6">
               <span aria-hidden="true" className="absolute left-0 right-0 top-6 hidden h-[3px] bg-gold/40 md:block" />
               {METHOD.map(([name, text], i) => (
@@ -158,7 +158,7 @@ export default function Home() {
 
         <section className="bg-gold">
           <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-14 md:flex-row md:items-center md:justify-between">
-            <p className="max-w-2xl font-display text-3xl font-bold leading-tight text-navy md:text-4xl">Seven minutes to know where your venture stands.</p>
+            <p className="max-w-2xl font-display text-3xl font-bold leading-tight text-navy md:text-4xl">Seven minutes to know where your business stands.</p>
             <a href={appLink("/snapshot", "home_footer_band")} className="shrink-0 rounded-full bg-navy px-7 py-4 text-center text-lg font-semibold text-white">
               Take the free Snapshot
             </a>

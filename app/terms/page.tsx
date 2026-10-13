@@ -13,7 +13,7 @@ export default function TermsPage() {
 
       <H>The Service</H>
       <p>
-        The Service helps founders assess how ready their venture is and plan its growth: the free Readiness Snapshot, memberships (Essentials,
+        The Service helps founders assess how ready their business is and plan its growth: the free Readiness Snapshot, memberships (Essentials,
         Growth and Elevate), the one-time Readiness Assessment, one-on-one coaching, and Founder Trajectory™ Academy cohorts. What each includes is
         described on our <a href="/pricing" className="text-teal underline">pricing page</a>.
       </p>

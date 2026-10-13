@@ -33,7 +33,7 @@ export function InviteCard({ inviteUrl, rewardsEarned }: { inviteUrl: string; re
         {scoreUrl ? (
           <>
             <p className="mb-2 text-sm text-ink-soft">Your score link (numbers only, never your name or answers):</p>
-            <ShareButtons url={scoreUrl} text="I checked my Venture Readiness with Founder Trajectory. What's your score?" />
+            <ShareButtons url={scoreUrl} text="I checked my Venture Readiness with Founder Trajectory. What's your Venture Readiness Score?" />
           </>
         ) : (
           <button type="button" onClick={shareScore} disabled={busy} className="text-sm font-semibold text-teal underline disabled:opacity-50">
