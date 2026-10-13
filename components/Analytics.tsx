@@ -64,7 +64,7 @@ export function Analytics() {
         <div role="dialog" aria-label="Cookie choices" className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg print:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-ink">
-              We use analytics cookies to see which pages and ads help founders, so we can improve them. No names or answers are shared.{" "}
+              We use analytics cookies to see which pages and posts help founders, so we can improve them. No names or answers are shared.{" "}
               <a href="/privacy#cookies" className="text-teal underline">
                 Learn more
               </a>
