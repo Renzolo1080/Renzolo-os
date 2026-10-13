@@ -1,32 +1,32 @@
 "use client";
 import { useState } from "react";
+import { ReportMarkdown } from "./ReportMarkdown";
 
 interface Report {
   id: string;
   diagnostic_markdown: string;
+  level?: string | null;
 }
 
 interface Props {
   assessmentId: string;
   scoreId: string;
-  /** A report already generated for this score, if there is one — shown
-   * immediately so returning to the dashboard (including coming back
-   * from paying for an advisor session) never loses it. */
+  /** A report already generated for this score, shown straight away. */
   initialReport?: Report | null;
+  /** The founder is now entitled to the full report (e.g. after upgrading
+   * from Essentials), so a summary report can be replaced by a full one. */
+  canUpgradeToFull?: boolean;
 }
 
-/** Requests the AI Diagnostic Report and shows it immediately — this is
- * an instant response, not something the founder waits on. Advisor
- * review happens afterward, in the background, as quality assurance; it
- * does not gate delivery (see app/api/report/route.ts). Once a report
- * exists, offers the paid 1:1 Advisor Session as an optional upsell. */
-export function ReportPanel({ assessmentId, scoreId, initialReport = null }: Props) {
+/** Requests the AI Readiness Report and shows it immediately. Advisor
+ * review, where it applies, happens afterwards in the background and
+ * never gates delivery (see app/api/report/route.ts). */
+export function ReportPanel({ assessmentId, scoreId, initialReport = null, canUpgradeToFull = false }: Props) {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState<Report | null>(initialReport);
   const [error, setError] = useState<string | null>(null);
-  const [bookingLoading, setBookingLoading] = useState(false);
 
-  async function handleGetReport() {
+  async function generate() {
     setLoading(true);
     setError(null);
     try {
@@ -45,63 +45,66 @@ export function ReportPanel({ assessmentId, scoreId, initialReport = null }: Pro
     }
   }
 
-  async function handleBookSession() {
-    if (!report) return;
-    setBookingLoading(true);
-    try {
-      const res = await fetch("/api/advisor-session/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reportId: report.id }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.link) throw new Error(data.error ?? "Something went wrong starting your payment.");
-      // Hand off to Flutterwave's hosted payment page. The button stays in
-      // its loading state while the browser navigates away.
-      window.location.assign(data.link);
-    } catch (e: any) {
-      setError(e?.message ?? "Something went wrong starting your payment.");
-      setBookingLoading(false);
-    }
-  }
-
   if (!report) {
     return (
-      <div>
-        <button
-          onClick={handleGetReport}
-          disabled={loading}
-          className="rounded bg-gold px-5 py-3 text-white font-semibold disabled:opacity-50"
-        >
-          {loading ? "Generating your report…" : "Get My Full Diagnostic Report"}
+      <div className="rounded-2xl border border-gold bg-white p-6">
+        <p className="font-semibold text-navy">Your Readiness Report is ready to create</p>
+        <p className="mt-1 text-sm text-ink-soft">It takes a minute or two: we research your market and write your growth and readiness plan.</p>
+        <button onClick={generate} disabled={loading} className="mt-4 rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+          {loading ? "Creating your report…" : "Create my Readiness Report"}
         </button>
-        {error && <p className="mt-2 text-red-600 text-sm">{error}</p>}
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </div>
     );
   }
 
+  const summary = report.level === "summary";
   return (
     <div className="space-y-4">
-      <div className="rounded border p-4 bg-cream">
-        <pre className="whitespace-pre-wrap text-sm">{report.diagnostic_markdown}</pre>
+      <div className="rounded-2xl border bg-white p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
+          <p className="font-semibold text-navy">{summary ? "Your Readiness Report (summary)" : "Your Readiness Report"}</p>
+          {!summary && (
+            <a href={`/report/${report.id}`} target="_blank" rel="noopener" className="rounded-lg border border-navy px-3 py-1.5 text-sm font-semibold text-navy">
+              Download / print
+            </a>
+          )}
+        </div>
+        <ReportMarkdown markdown={report.diagnostic_markdown} />
       </div>
-      <div className="rounded border p-6">
-        <p className="font-semibold mb-1">Want to go deeper?</p>
-        <p className="text-sm text-ink-soft mb-3">
-          Book a paid 1:1 session with an advisor to walk through this report and build out your plan together.
-        </p>
-        <button
-          onClick={handleBookSession}
-          disabled={bookingLoading}
-          className="rounded bg-navy px-5 py-3 text-white font-semibold disabled:opacity-50"
-        >
-          {bookingLoading ? "Taking you to payment…" : "Book a 1:1 Advisor Session"}
-        </button>
-        {error && (
-          <p role="alert" className="mt-2 text-red-600 text-sm">
-            {error}
-          </p>
-        )}
+
+      {summary && (
+        <div className="rounded-2xl bg-navy p-6 text-white">
+          {canUpgradeToFull ? (
+            <>
+              <p className="font-semibold">Your membership now includes the full report</p>
+              <p className="mt-1 text-sm text-cream/80">Create it to add your market insight, growth scenarios and a downloadable copy.</p>
+              <button onClick={generate} disabled={loading} className="mt-4 rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+                {loading ? "Creating your full report…" : "Create my full report"}
+              </button>
+              {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
+            </>
+          ) : (
+            <>
+              <p className="font-semibold">Want the full picture?</p>
+              <p className="mt-1 text-sm text-cream/80">
+                Growth adds the full, downloadable report with an AI market insight, your valuation range, readiness scores and 2 coaching sessions
+                a quarter.
+              </p>
+              <a href="/dashboard/subscribe" className="mt-4 inline-block rounded-lg bg-gold px-5 py-3 font-semibold text-white">
+                See Growth
+              </a>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="rounded-2xl border p-6">
+        <p className="mb-1 font-semibold text-navy">Want to go deeper?</p>
+        <p className="mb-3 text-sm text-ink-soft">Book a one-on-one coaching session to walk through this report and build out your plan together.</p>
+        <a href="/dashboard/subscribe#one-time" className="inline-block rounded-lg bg-navy px-5 py-3 font-semibold text-white">
+          Coaching sessions
+        </a>
       </div>
     </div>
   );

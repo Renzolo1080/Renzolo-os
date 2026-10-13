@@ -15,7 +15,7 @@ import { timingSafeEqual } from "crypto";
 
 const DEFAULT_BASE_URL = "https://api.flutterwave.com/v3";
 
-export type FlutterwaveProduct = "subscription" | "advisor_session";
+export type FlutterwaveProduct = "subscription" | "advisor_session" | "assessment" | "coaching";
 
 export class FlutterwaveError extends Error {
   constructor(message: string, readonly status?: number) {
@@ -86,7 +86,7 @@ export function normalizeTxRef(txRef: string | null | undefined): string {
 
 /** Parses a tx_ref of the form renzolo-<product>-<founderId>-<digits>. */
 export function parseTxRef(txRef: string | null | undefined): { product: FlutterwaveProduct; founderId: string } | null {
-  const match = /^renzolo-(subscription|advisor_session)-(.+)-\d+$/.exec(normalizeTxRef(txRef));
+  const match = /^renzolo-(subscription|advisor_session|assessment|coaching)-(.+)-\d+$/.exec(normalizeTxRef(txRef));
   if (!match) return null;
   return { product: match[1] as FlutterwaveProduct, founderId: match[2] };
 }

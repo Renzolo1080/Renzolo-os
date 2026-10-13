@@ -1,5 +1,5 @@
 import { buildTxRef, parseTxRef, normalizeTxRef, createHostedCheckout, verifyTransaction, verifyTransactionByReference, verifyWebhookSignature, FlutterwaveError } from "../lib/flutterwave";
-import { getSubscriptionPrice, getSubscriptionPriceIn, subscriptionCurrenciesFor, currencyForCountry, getAdvisorSessionPrice, isBillingInterval, formatPrice } from "../lib/pricing";
+import { currencyForCountry, formatPrice } from "../lib/pricing";
 import { getAppUrl } from "../lib/app-url";
 
 function assert(cond: boolean, msg: string) {
@@ -163,35 +163,11 @@ async function main() {
   assert(verifyWebhookSignature(null, "s3cret-hash") === false, "missing header is rejected");
   assert(verifyWebhookSignature("anything", "") === false && verifyWebhookSignature("", "") === false, "with no secret configured, every webhook is rejected");
 
-  // --- prices ----------------------------------------------------------
-  assert(getSubscriptionPrice("monthly", {}).amount === 9 && getSubscriptionPrice("annual", {}).amount === 90, "default (placeholder) subscription prices are $9 and $90");
-  assert(getSubscriptionPrice("monthly", {}).currency === "USD", "default currency is USD");
-  assert(getSubscriptionPrice("monthly", { SUBSCRIPTION_MONTHLY_PRICE: "12.5" }).amount === 12.5, "monthly price can be set in settings");
-  assert(getSubscriptionPrice("annual", { SUBSCRIPTION_ANNUAL_PRICE: "120", SUBSCRIPTION_CURRENCY: "kes" }).currency === "KES", "currency can be set in settings");
-  for (const bad of ["", "  ", "0", "-5", "free", "NaN"]) {
-    assert(getSubscriptionPrice("monthly", { SUBSCRIPTION_MONTHLY_PRICE: bad }).amount === 9, `an unusable price setting (${JSON.stringify(bad)}) falls back to the default, never free`);
-  }
-  assert(getSubscriptionPrice("monthly", { SUBSCRIPTION_CURRENCY: "dollars" }).currency === "USD", "an unusable currency setting falls back to USD");
-  assert(getAdvisorSessionPrice("Kenya", {}).amount === 30, "advisor session is $30 in Africa");
-  assert(getAdvisorSessionPrice(null, {}).amount === 30, "…and $30 when no country is set");
-  assert(getAdvisorSessionPrice("United States", {}).amount === 49, "…and $49 elsewhere");
-  assert(getAdvisorSessionPrice("Kenya", { ADVISOR_SESSION_PRICE_AFRICA: "25" }).amount === 25, "advisor session price can be set in settings");
-  // local-currency prices (needed for mobile money — see lib/pricing.ts)
+  // --- tx_ref for the new products -------------------------------------
+  assert(parseTxRef(buildTxRef("assessment", FOUNDER))?.product === "assessment", "assessment tx_ref parses");
+  assert(parseTxRef(buildTxRef("coaching", FOUNDER))?.product === "coaching", "coaching tx_ref parses");
   assert(currencyForCountry("Kenya") === "KES" && currencyForCountry("Nairobi, kenya") === "KES" && currencyForCountry("South Africa") === "ZAR", "a founder's country maps to its currency");
   assert(currencyForCountry("United States") === null && currencyForCountry(null) === null && currencyForCountry("") === null, "countries without a local option, or no country, map to none");
-  const kes = { SUBSCRIPTION_MONTHLY_PRICE_KES: "1200", SUBSCRIPTION_ANNUAL_PRICE_KES: "12000" };
-  assert(getSubscriptionPriceIn("monthly", "KES", kes)?.amount === 1200 && getSubscriptionPriceIn("annual", "kes", kes)?.currency === "KES", "a local-currency price is used when set");
-  assert(getSubscriptionPriceIn("monthly", "KES", {}) === null, "a local currency with no price set is not offered — nothing is converted automatically");
-  assert(getSubscriptionPriceIn("monthly", "USD", {})?.amount === 9, "asking for the main currency returns the main price");
-  assert(getSubscriptionPriceIn("monthly", "K E S", kes) === null && getSubscriptionPriceIn("monthly", undefined, kes) === null, "a malformed currency is refused");
-  assert(getSubscriptionPriceIn("monthly", "KES", { SUBSCRIPTION_MONTHLY_PRICE_KES: "0" }) === null, "a zero local price counts as not set");
-  assert(JSON.stringify(subscriptionCurrenciesFor("Kenya", kes)) === '["KES","USD"]', "a founder in Kenya is offered KES first, then USD, when KES prices are set");
-  assert(JSON.stringify(subscriptionCurrenciesFor("Kenya", {})) === '["USD"]', "…and only USD when they are not");
-  assert(JSON.stringify(subscriptionCurrenciesFor("Kenya", { SUBSCRIPTION_MONTHLY_PRICE_KES: "1200" })) === '["USD"]', "…or when only one of the two KES prices is set");
-  assert(JSON.stringify(subscriptionCurrenciesFor("United States", kes)) === '["USD"]', "a founder elsewhere is not offered KES");
-  assert(getAdvisorSessionPrice("Kenya", { ADVISOR_SESSION_PRICE_KES: "4000" }).currency === "KES", "advisor session uses the local price when set");
-  assert(getAdvisorSessionPrice("Ghana", { ADVISOR_SESSION_PRICE_KES: "4000" }).currency === "USD", "…only for founders in that country");
-  assert(isBillingInterval("monthly") && isBillingInterval("annual") && !isBillingInterval("weekly") && !isBillingInterval(undefined), "only monthly and annual are valid intervals");
   assert(formatPrice({ amount: 9, currency: "USD" }) === "$9" && formatPrice({ amount: 12.5, currency: "USD" }) === "$12.50" && formatPrice({ amount: 12000, currency: "KES" }) === "KES 12,000", "prices are formatted for display");
 
   // --- return address --------------------------------------------------

@@ -30,28 +30,50 @@ export interface ReportInput {
   yearsInBusiness: string;
   annualRevenue: string;
   /** Quick Check answers with no column of their own (assessments.extra). */
-  extra?: { primaryGoal?: string; fundingNeed?: string; registration?: string; challenges?: string[] } | null;
+  extra?: {
+    primaryGoal?: string;
+    fundingNeed?: string;
+    registration?: string;
+    challenges?: string[];
+    companyName?: string | null;
+    planScore?: number;
+    plan?: Record<string, number>;
+    planCoverage?: string[];
+  } | null;
   diagnostic: DiagnosticResult;
   blockNarratives: Record<string, { currentState: string; futureState: string; goalTarget: string }>;
 }
 
 const orUnspecified = (v: string | null | undefined) => (v && v.trim() ? v : "not specified");
 
-/** Generates the Venture Diagnostic Report + 90-day plan from a scored
- * assessment. This is AI-drafted content — per the Phase 1 spec it can
- * be queued for advisor QA review (see app/api/report/route.ts for the
- * requiresReview logic and app_settings.qa_review_enabled), but that
- * review happens in the background and never gates this function's
- * output from reaching the founder.
- *
- * Uses Anthropic's server-side web_search tool so the report can ground
- * its market-comparison language in real, current data for this
- * founder's specific industry, business type, location, and stage,
- * rather than relying only on the model's training data. Each search is
- * billed separately by Anthropic (~$10 per 1,000 searches, on top of
- * normal token costs) — worth watching as report volume grows; max_uses
- * below caps it per report. */
-export async function generateDiagnosticReport(input: ReportInput): Promise<string> {
+export interface ReportOptions {
+  /** "summary" for Essentials; "full" for Growth, Elevate and the one-time assessment. */
+  level: "summary" | "full";
+  /** How far the growth and readiness plan should reach, e.g. "12 months". */
+  planLength: string;
+  /** Recommend a membership tier (the one-time assessment only). */
+  tierRecommendation: boolean;
+}
+
+const PLAN_LABELS: Record<string, string[]> = {
+  planExists: ["No plan yet", "Plan mostly in the founder's head", "Written but out of date", "Written, current and shared"],
+  planGoals: ["No goals set", "General goals, no numbers or dates", "Some goals have targets and dates", "Every major goal has a target, date and owner"],
+  planFinancials: ["No budget or projections", "Rough numbers only", "Budget but no projections", "Budget and 12+ months of projections"],
+  planReview: ["Never reviewed", "Reviewed once a year or less", "Reviewed quarterly", "Reviewed monthly or more"],
+};
+
+/** How the plan beyond the first 90 days is broken down, by length. */
+export function planPhasing(planLength: string): string {
+  const months = /^(\d+)\s*months?$/i.exec(planLength.trim())?.[1];
+  const m = months ? Number(months) : planLength.trim().toLowerCase() === "90 days" ? 3 : 12;
+  if (m <= 3) return "The whole plan is the first 90 days, in detail.";
+  if (m <= 12) return `After the first 90 days, break the rest of the ${m} months into quarterly milestones.`;
+  return `After the first 90 days, use quarterly milestones up to month 12, then 6-month milestones up to month ${m}.`;
+}
+
+/** The report prompt (pure, so it can be tested without calling the AI). */
+export function buildReportPrompt(input: ReportInput, options: ReportOptions): string {
+  const full = options.level === "full";
   const gapDetail = input.diagnostic.gaps
     .map((g) => {
       const narrative = input.blockNarratives[g.block];
@@ -63,10 +85,44 @@ export async function generateDiagnosticReport(input: ReportInput): Promise<stri
       return `- ${g.label}: score ${g.score}/100, weakest measure: ${g.weakestMeasure}${narrativeText}`;
     })
     .join("\n");
+  const plan = input.extra?.plan;
+  const planLines = plan
+    ? Object.entries(PLAN_LABELS)
+        .map(([k, labels]) => (typeof plan[k] === "number" ? `- ${labels[plan[k]] ?? "not specified"}` : null))
+        .filter(Boolean)
+        .join("\n") + `\n- Business-model areas the plan addresses: ${orUnspecified(input.extra?.planCoverage?.join(", "))}`
+    : "- not specified";
 
-  const prompt = `You are drafting a Venture Diagnostic Report for a founder using the RENZOLO OS Founder BMC Readiness Assessment.
+  const sections: string[] = [];
+  sections.push(`## Overall Assessment
+A short overall assessment (2-3 sentences).`);
+  sections.push(`## Strategic Plan Review
+${full ? "3-5 sentences" : "2-3 sentences"} on how solid the founder's strategic plan is (from the answers above) and what it most needs to cover.`);
+  sections.push(`## Gap-to-Target Analysis
+For each of the three weakest blocks listed above${full ? " — reference what the founder said about their current state, future state, and goal/timeline directly, and where relevant connect it to a cited market data point from your research. Cite each source inline as (Source: <title>)." : ", one short paragraph: why it is holding the venture back and what good looks like."}`);
+  if (full) {
+    sections.push(`## Market Insight
+A short brief for this founder's industry and country: current trends, typical customer segments, how competition usually works, the main opportunities and risks, and what lenders and investors in this market tend to look for. Use your research; cite sources inline as (Source: <title>). End with one line in italics: "AI-generated and directional: check key figures before relying on them."`);
+    sections.push(`## Growth Scenarios
+Three growth scenarios (base, target, stretch), each with concrete actions, capability/capital gaps, and a timeframe that fits the plan length below.`);
+  }
+  sections.push(`## Growth and Readiness Plan
+A plan covering ${options.planLength}. Start with "### First 90 days": specific actions month by month (Month 1, Month 2, Month 3), each with a clear deliverable. ${planPhasing(options.planLength)} Use "### Months 4-6" style sub-headings for each later phase, with 2-4 milestones each. Tie the plan to the founder's main goal.`);
+  sections.push(`## Recommended Next Steps
+A prioritized list of 3-5 bullets (most important first). Each bullet must be a single, concrete action this founder can start now. This exact section is shown on its own elsewhere in the product, so keep every bullet self-contained (don't write "as above").`);
+  if (options.tierRecommendation) {
+    sections.push(`## Recommended Membership
+Recommend ONE Founder Trajectory membership tier and explain why in 3-4 sentences, using this founder's gaps, goals, stage and funding plans:
+- Essentials ($15/month): full assessment, AI insights, growth and readiness plan, dashboard and tools. Best for founders who will work the plan themselves.
+- Growth ($39/month, billed quarterly): adds valuation, market insight, advisor review, AI coaching (coming soon) and 2 one-on-one coaching sessions a quarter. Best for founders actively executing who want regular coaching.
+- Elevate ($149/month, billed quarterly): adds 2 one-on-one sessions a month, pitch and investor readiness review and priority support. Best for founders preparing to raise, scale fast or win large contracts.
+Be honest: recommend Essentials when that is what fits.`);
+  }
+
+  return `You are drafting a ${full ? "full" : "summary"} Readiness Report for a founder on Founder Trajectory(TM), powered by RENZOLO OS(TM).
 
 Founder: ${input.founderName}
+Company: ${orUnspecified(input.extra?.companyName ?? "")}
 Venture stage: ${orUnspecified(input.ventureStage)}
 Industry: ${orUnspecified(input.industry)}
 Business type: ${orUnspecified(input.businessType)}
@@ -74,61 +130,55 @@ Location: ${orUnspecified(input.geography)}
 Years in business: ${orUnspecified(input.yearsInBusiness)}
 Team size: ${orUnspecified(input.employeeCount)}
 Annual revenue: ${orUnspecified(input.annualRevenue)}
-Target time horizon for goals: ${orUnspecified(input.timeHorizon)}
+When they want to reach their goal: ${orUnspecified(input.timeHorizon)}
 Main goal: ${orUnspecified(input.extra?.primaryGoal)}
 Biggest challenges right now: ${orUnspecified(input.extra?.challenges?.join(", "))}
 Funding plans for the next 12 months: ${orUnspecified(input.extra?.fundingNeed)}
 Registration and tax status: ${orUnspecified(input.extra?.registration)}
 
+Strategic plan${typeof input.extra?.planScore === "number" ? ` (Strategic Plan Readiness ${input.extra.planScore}/100)` : ""}:
+${planLines}
+
 Venture Score: ${input.diagnostic.ventureScore.score}/100 (${input.diagnostic.ventureScore.tier})
-Market Readiness: ${input.diagnostic.subScores.market}/100
+${full ? `Market Readiness: ${input.diagnostic.subScores.market}/100
 Customer Readiness: ${input.diagnostic.subScores.customer}/100
 Investor Readiness: ${input.diagnostic.subScores.investor}/100
-Health Index: ${input.diagnostic.healthIndex.index}/100 (confidence: ${input.diagnostic.healthIndex.confidence})
+` : ""}Health Index: ${input.diagnostic.healthIndex.index}/100 (confidence: ${input.diagnostic.healthIndex.confidence})
 
 Weakest blocks (gap-to-target priorities), with what the founder said about each:
 ${gapDetail}
 
-Before writing, use web search to find 2-4 current, real, relevant data points for THIS founder specifically —
-based on their industry, business type, location, size, and years in business — such as typical CAC/LTV or
-margin benchmarks, comparable market size or growth rates in their region, or how similar-stage ventures in
-their industry are typically funded or priced. Only cite what you actually find; do not invent statistics.
+Before writing, use web search to find ${full ? "2-4" : "1-2"} current, real, relevant data points for THIS founder specifically,
+based on their industry, business type, location, size and years in business. Only cite what you actually find; do not invent statistics.
 
-Write, in plain language a founder can act on, using these EXACT section headings so the report can be
+Write in plain language a founder can act on, using these EXACT section headings, in this order, so the report can be
 parsed by other parts of the product:
-## Overall Assessment
-A short overall assessment (2-3 sentences).
 
-## Gap-to-Target Analysis
-For each of the three weakest blocks listed above — reference what the founder said about their current
-state, future state, and goal/timeline directly, and where relevant connect it to a cited market data point
-from your research so the target feels grounded in this founder's actual market, not generic advice. Cite
-each source inline as (Source: <title>).
+${sections.join("\n\n")}
 
-## Growth Scenarios
-Three growth scenarios (base, target, stretch), each with concrete actions, capability/capital gaps, and a
-timeframe consistent with the founder's stated time horizon.
+Make the plan and the Recommended Next Steps serve the founder's stated main goal and address their stated biggest
+challenges where the evidence supports it. Keep it direct and specific to this founder's stage, industry, business type,
+location and size — avoid generic advice that could apply to anyone.${full ? "" : " Keep the whole report concise."}`;
+}
 
-## Recommended Next Steps
-A prioritized action plan for that time horizon, as a bullet list (most important first), 3-5 items. Each
-bullet must be a single, concrete, specific action this founder can start now — this exact section is shown
-to the founder as a standalone Recommendations list elsewhere in the product, so keep every bullet
-self-contained (don't write "as above" or refer back to other sections).
-
-Make the Recommended Next Steps serve the founder's stated main goal and address their stated biggest
-challenges where the evidence supports it.
-
-Keep it direct and specific to this founder's stage, industry, business type, location, and size — avoid
-generic startup advice that could apply to anyone.`;
-
+/** Generates the Readiness Report from a scored assessment. This is
+ * AI-drafted content: it can be queued for advisor QA review (see
+ * app/api/report/route.ts), but that review never gates delivery.
+ *
+ * Uses Anthropic's server-side web_search tool so market language is
+ * grounded in current data for this founder. Each search is billed
+ * (~$10 per 1,000); max_uses caps it per report. */
+export async function generateDiagnosticReport(input: ReportInput, options: ReportOptions = { level: "full", planLength: "12 months", tierRecommendation: false }): Promise<string> {
+  const prompt = buildReportPrompt(input, options);
+  const full = options.level === "full";
   const response = await getClient().messages.create({
     model: "claude-sonnet-4-5",
-    max_tokens: 3000,
+    max_tokens: full ? 4500 : 2500,
     tools: [
       {
         type: "web_search_20250305",
         name: "web_search",
-        max_uses: 4,
+        max_uses: full ? 4 : 2,
       } as any,
     ],
     messages: [{ role: "user", content: prompt }],
@@ -141,8 +191,6 @@ generic startup advice that could apply to anyone.`;
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
     .join("\n\n");
-  // Never save or show an empty report (e.g. the reply was cut off before
-  // any text was written).
   if (!text.trim()) throw new Error("The report came back empty.");
   return text;
 }

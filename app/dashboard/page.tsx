@@ -11,6 +11,9 @@ import { createPaymentStore } from "@/lib/payments-store";
 import { detailsComplete } from "@/lib/quickcheck";
 import { claimSnapshotLead } from "@/lib/snapshot-save";
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
+import { loadMembership } from "@/lib/membership-server";
+import { entitlements, ASSESSMENT_CARRY_DAYS } from "@/lib/membership";
+import { TIER_NAMES } from "@/lib/pricing";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -74,12 +77,16 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
     });
   }
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("status, current_period_end, auto_renew")
-    .eq("founder_id", user.id)
-    .maybeSingle();
+  const m = await loadMembership(supabase, user.id);
+  const subscription = m.subscription;
   const subscribed = isSubscriptionActive(subscription);
+  const ent = entitlements(m.tier, m.purchases.length > 0);
+  // Members, and founders who bought the one-time Readiness Assessment.
+  const hasAccess = !!m.tier || m.purchases.length > 0;
+  const latestPurchase = m.purchases[0] ?? null;
+  const carryDaysLeft = latestPurchase
+    ? Math.ceil((new Date(latestPurchase.purchased_at).getTime() + ASSESSMENT_CARRY_DAYS * 864e5 - Date.now()) / 864e5)
+    : null;
 
   // The banner's wording comes from the address bar, which anyone can
   // edit — so "payment received" is only shown when the database agrees.
@@ -87,7 +94,13 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   const paymentProduct = first(searchParams?.product);
   if (paymentResult === "success") {
     let confirmed = subscribed;
-    if (paymentProduct === "advisor_session") {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    if (paymentProduct === "assessment") {
+      confirmed = m.purchases.some((p) => p.purchased_at >= since);
+    } else if (paymentProduct === "coaching") {
+      const { data: bought } = await supabase.from("coaching_credits").select("id").eq("source", "purchase").gte("created_at", since).limit(1).maybeSingle();
+      confirmed = !!bought;
+    } else if (paymentProduct === "advisor_session") {
       const { data: paidSession } = await supabase
         .from("advisor_sessions")
         .select("id")
@@ -105,7 +118,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   // A subscriber gets their full report once they've answered the
   // detailed questions for their weakest areas (lib/quickcheck.ts).
   const { data: detailRows } =
-    subscribed && latestScore
+    hasAccess && latestScore
       ? await supabase.from("block_responses").select("current_state").eq("assessment_id", latestScore.assessment_id)
       : { data: null };
   const detailsDone = detailsComplete(detailRows);
@@ -115,17 +128,17 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   // straight away instead of asking them to generate (and pay for the AI
   // cost of) a new one on every visit.
   const { data: existingReport } =
-    subscribed && latestScore
+    hasAccess && latestScore
       ? await supabase
           .from("reports")
-          .select("id, diagnostic_markdown")
+          .select("id, diagnostic_markdown, level")
           .eq("score_id", latestScore.id)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle()
       : { data: null };
 
-  const needsBlockResponses = latestScore && (showReminders || showGoalsProgress || showProgressOverview);
+  const needsBlockResponses = latestScore && ent.tools && (showReminders || showGoalsProgress || showProgressOverview);
   const { data: blockResponses } = needsBlockResponses
     ? await supabase
         .from("block_responses")
@@ -147,7 +160,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   let scoreHistory: { date: string; score: number }[] = [];
   const statusCounts: Record<string, number> = {};
 
-  if (showProgressOverview && latestScore) {
+  if (showProgressOverview && latestScore && ent.tools) {
     for (const b of blockResponses ?? []) {
       statusCounts[b.progress_status] = (statusCounts[b.progress_status] ?? 0) + 1;
     }
@@ -225,11 +238,35 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             Start the Snapshot
           </a>
         </div>
-      ) : !subscribed ? (
+      ) : !hasAccess ? (
         <FreeResult score={latestScore.venture_score} tier={latestScore.venture_tier} planScore={planScore} gaps={gapLabels} lapsed={lapsed} />
       ) : (
         <div className="space-y-6">
-          <DashboardCustomizer initialWidgets={widgets} />
+          {m.tier ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-navy p-4 text-sm text-white">
+              <span>
+                <span className="font-semibold">{TIER_NAMES[m.tier]} member</span>
+                {ent.includedCoaching ? <span className="text-cream/80"> · includes {ent.includedCoaching}</span> : null}
+              </span>
+              <a href="/dashboard/subscribe" className="font-semibold text-gold">
+                {m.tier === "elevate" ? "Membership and coaching" : "Upgrade or manage"}
+              </a>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-gold bg-white p-5 text-sm">
+              <p className="font-semibold text-navy">Your Readiness Assessment</p>
+              <p className="mt-1 text-ink-soft">
+                {carryDaysLeft !== null && carryDaysLeft > 0
+                  ? `Join a membership within ${carryDaysLeft} day${carryDaysLeft === 1 ? "" : "s"} and this assessment carries straight into it.`
+                  : "Join a membership to keep building on this assessment with a plan, tools and coaching."}
+              </p>
+              <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-gold px-4 py-2 font-semibold text-white">
+                See membership options
+              </a>
+            </div>
+          )}
+
+          {ent.tools && <DashboardCustomizer initialWidgets={widgets} />}
 
           {showReminders && (overdueGoals.length > 0 || dueSoonGoals.length > 0) && (
             <div className="rounded border border-gold bg-cream p-4 text-sm">
@@ -256,11 +293,15 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             <p className="text-gold font-semibold">{latestScore.venture_tier}</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <Stat label="Market" value={latestScore.market_subscore} />
-            <Stat label="Customer" value={latestScore.customer_subscore} />
-            <Stat label="Investor" value={latestScore.investor_subscore} />
-          </div>
+          {ent.readinessScores ? (
+            <div className="grid grid-cols-3 gap-4">
+              <Stat label="Market" value={latestScore.market_subscore} />
+              <Stat label="Customer" value={latestScore.customer_subscore} />
+              <Stat label="Investor" value={latestScore.investor_subscore} />
+            </div>
+          ) : (
+            <Locked text="Market, Customer and Investor readiness scores, your valuation range and an AI market insight come with Growth." />
+          )}
 
           <div className="rounded border p-4">
             <p className="text-sm text-ink-soft">Health Index</p>
@@ -278,7 +319,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             />
           )}
 
-          {showValuation && latestScore.valuation_low != null && latestScore.valuation_high != null && (
+          {ent.valuation && (showValuation || !m.tier) && latestScore.valuation_low != null && latestScore.valuation_high != null && (
             <div className="rounded border p-6 bg-navy text-white">
               <p className="text-sm text-cream/80">Estimated Venture Value</p>
               <p className="text-3xl font-bold">
@@ -293,7 +334,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             </div>
           )}
 
-          {showGoalsProgress && blockResponses && blockResponses.some((b) => b.goal_target || b.target_date) && (
+          {ent.tools && showGoalsProgress && blockResponses && blockResponses.some((b) => b.goal_target || b.target_date) && (
             <div className="rounded border p-4">
               <p className="font-semibold text-navy mb-1">Goals & Progress</p>
               <p className="text-xs text-ink-soft mb-2">
@@ -316,14 +357,19 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
           )}
 
           {detailsDone || existingReport ? (
-            <ReportPanel assessmentId={latestScore.assessment_id} scoreId={latestScore.id} initialReport={existingReport ?? null} />
+            <ReportPanel
+              assessmentId={latestScore.assessment_id}
+              scoreId={latestScore.id}
+              initialReport={existingReport ?? null}
+              canUpgradeToFull={ent.fullReport}
+            />
           ) : (
             <div className="rounded border border-gold p-6 bg-cream">
-              <p className="font-semibold text-navy">One more step for your full Diagnostic Report</p>
+              <p className="font-semibold text-navy">One more step for your Readiness Report</p>
               <p className="text-sm text-ink-soft mt-1 mb-4">
                 Answer a few detailed questions about your three weakest areas
                 {gapLabels.length ? ` (${gapLabels.join(", ")})` : ""}. It takes about 10 minutes, sharpens your score, and lets
-                your report and 90-day plan speak to your actual business.
+                your report and growth plan speak to your actual business. You'll also choose how far ahead your plan should go.
               </p>
               <a href="/assessment/details" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
                 Answer the detailed questions
@@ -331,8 +377,33 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
             </div>
           )}
 
+          {(m.coachingAvailable > 0 || ent.includedCoaching) && (
+            <div className="rounded-2xl border p-5">
+              <p className="font-semibold text-navy">One-on-one coaching</p>
+              <p className="mt-1 text-sm text-ink-soft">
+                {m.coachingAvailable > 0
+                  ? `You have ${m.coachingAvailable} session${m.coachingAvailable > 1 ? "s" : ""} to book.`
+                  : m.nextCoachingFrom
+                  ? `Your next included sessions arrive on ${new Date(m.nextCoachingFrom).toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" })}.`
+                  : "No sessions to book right now."}
+              </p>
+              <a href="/dashboard/subscribe#one-time" className="mt-3 inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
+                {m.coachingAvailable > 0 ? "Book a session" : "Buy extra sessions"}
+              </a>
+            </div>
+          )}
+
+          {ent.aiCoaching && (
+            <div className="rounded-2xl border border-dashed border-gold p-5">
+              <p className="font-semibold text-navy">
+                AI coaching <span className="ml-2 rounded-full bg-cream px-2 py-0.5 text-xs font-semibold text-gold">Coming soon</span>
+              </p>
+              <p className="mt-1 text-sm text-ink-soft">Ask questions about your plan and get check-ins as you carry it out. Included in your membership when it launches.</p>
+            </div>
+          )}
+
           <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
-            Open Founder Tools (calculators, recommendations & milestones)
+            {ent.tools ? "Open Founder Tools (calculators, recommendations & milestones)" : "Open Founder Tools (free calculators)"}
           </a>
         </div>
       )}
@@ -388,13 +459,31 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
         <div className="mt-4">
           <SubscriptionFeatures dark />
         </div>
-        <a href="/dashboard/subscribe" className="mt-5 inline-block rounded bg-gold px-6 py-3 font-semibold text-white">
-          {lapsed ? "Renew my membership" : "Become a member"}
-        </a>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <a href="/dashboard/subscribe" className="inline-block rounded bg-gold px-6 py-3 text-center font-semibold text-white">
+            {lapsed ? "Renew my membership" : "Become a member"}
+          </a>
+          {!lapsed && (
+            <a href="/dashboard/subscribe#one-time" className="text-sm text-cream underline">
+              Or get a one-time Readiness Assessment
+            </a>
+          )}
+        </div>
       </div>
 
       <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
         Open Founder Tools (free calculators)
+      </a>
+    </div>
+  );
+}
+
+function Locked({ text }: { text: string }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-gray-300 p-4 text-sm">
+      <span className="text-ink-soft">{text}</span>
+      <a href="/dashboard/subscribe" className="font-semibold text-teal">
+        See Growth
       </a>
     </div>
   );

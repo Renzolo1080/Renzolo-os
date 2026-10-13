@@ -1,6 +1,6 @@
 import type { VerifiedTransaction, FlutterwaveProduct } from "./flutterwave";
 import { parseTxRef, normalizeTxRef } from "./flutterwave";
-import type { BillingInterval, Price } from "./pricing";
+import type { BillingInterval, Price, Tier } from "./pricing";
 
 /** Turning a payment into access ("fulfilment").
  *
@@ -48,6 +48,8 @@ export interface PaymentRecord {
 export interface AutoRenewInfo {
   founderId: string;
   renewalInterval: BillingInterval;
+  /** The tier being renewed (null for a membership from before tiers: Essentials). */
+  renewalTier: Tier | null;
   renewalAmount: number | null;
   renewalCurrency: string | null;
   flutterwaveCustomerId: string | null;
@@ -141,7 +143,7 @@ export interface FulfilDeps {
   now?: () => Date;
   /** Today's subscription price in a currency — the fallback for checking
    * a renewal when the subscription has no renewal amount stored. */
-  subscriptionPrice?: (interval: BillingInterval, currency: string) => Price | null;
+  subscriptionPrice?: (tier: Tier, interval: BillingInterval, currency: string) => Price | null;
 }
 
 export interface FulfilOptions {
@@ -204,7 +206,7 @@ export async function fulfilVerified(tx: VerifiedTransaction, deps: FulfilDeps, 
     const expectedPrice: Price | null =
       sub.renewalAmount !== null && sub.renewalCurrency
         ? { amount: sub.renewalAmount, currency: sub.renewalCurrency }
-        : deps.subscriptionPrice?.(sub.renewalInterval, tx.currency) ?? null;
+        : deps.subscriptionPrice?.(sub.renewalTier ?? "essentials", sub.renewalInterval, tx.currency) ?? null;
     if (!expectedPrice) return { outcome: "mismatch", reason: "no renewal price on record for this subscription", product: "subscription" };
     const problem = checkAmount(tx, expectedPrice);
     if (problem) return { outcome: "mismatch", reason: problem, product: "subscription" };

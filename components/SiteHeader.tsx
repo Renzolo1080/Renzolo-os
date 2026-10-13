@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 
-const MEMBER_AREAS = ["/dashboard", "/assessment", "/tools", "/advisor"];
+const MEMBER_AREAS = ["/dashboard", "/assessment", "/tools", "/advisor", "/report"];
 
 /** Top bar on every page. Signed-in areas get Dashboard / Tools / Log out;
  * public pages get Log in and the free Snapshot. */
@@ -22,8 +22,11 @@ export function SiteHeader() {
             <a href="/dashboard" className="text-cream hover:text-white">
               Dashboard
             </a>
-            <a href="/tools" className="text-cream hover:text-white">
+            <a href="/tools" className="hidden text-cream hover:text-white sm:inline">
               Tools
+            </a>
+            <a href="/dashboard/subscribe" className="text-cream hover:text-white">
+              Membership
             </a>
             <form action="/auth/signout" method="post">
               <button type="submit" className="text-cream hover:text-white">
@@ -33,6 +36,9 @@ export function SiteHeader() {
           </nav>
         ) : (
           <nav className="flex items-center gap-4 text-sm">
+            <a href="/pricing" className="text-cream hover:text-white">
+              Pricing
+            </a>
             <a href="/login" className="text-cream hover:text-white">
               Log in
             </a>

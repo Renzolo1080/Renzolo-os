@@ -124,9 +124,14 @@ export default function HomePage() {
             <div className="mt-8">
               <SubscriptionFeatures dark />
             </div>
-            <a href="/snapshot" className="mt-10 inline-block rounded-lg bg-gold px-7 py-4 text-lg font-semibold text-white">
-              Start with the free Snapshot
-            </a>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <a href="/snapshot" className="rounded-lg bg-gold px-7 py-4 text-center text-lg font-semibold text-white">
+                Start with the free Snapshot
+              </a>
+              <a href="/pricing" className="rounded-lg border border-cream/40 px-7 py-4 text-center text-lg font-semibold text-white">
+                See membership options
+              </a>
+            </div>
           </div>
         </section>
 
