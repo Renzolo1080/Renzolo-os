@@ -7,6 +7,7 @@ import { normalizeExtras } from "@/lib/dashboard";
 import { loadPlan } from "@/lib/plan-server";
 import { parsePlanReview } from "@/lib/plan-review";
 import type { MarketInsights } from "@/lib/market";
+import { openCommitments } from "@/lib/coaching";
 import { PaymentBanner } from "@/components/PaymentBanner";
 import { isSubscriptionActive, daysUntilExpiry, reconcilePendingPayments } from "@/lib/payments";
 import { createPaymentStore } from "@/lib/payments-store";
@@ -148,12 +149,13 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   let reportOutdated: string | null = null;
   if (hasAccess && latestScore) {
     const access = { member: ent.planBuilder, growth: ent.planReview };
-    const [planRow, { data: checkins }, { data: updates }, { data: reviewRow }, { data: briefRow }] = await Promise.all([
+    const [planRow, { data: checkins }, { data: updates }, { data: reviewRow }, { data: briefRow }, { data: coachRows }] = await Promise.all([
       loadPlan(supabase, user.id),
       supabase.from("goal_checkins").select("goal_id, value, note, checked_on").order("checked_on", { ascending: true }).limit(500),
       supabase.from("founder_updates").select("period, revenue, customers, cash, wins, challenges, asks").order("period", { ascending: false }).limit(13),
       supabase.from("plan_reviews").select("result, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("market_briefs").select("insights, created_at").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("advisor_sessions").select("id, status, created_at, commitments").eq("founder_id", user.id).eq("status", "completed"),
     ]);
     const review = reviewRow ? parsePlanReview(JSON.stringify(reviewRow.result)) : null;
 
@@ -204,6 +206,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
       recommendations,
       milestones,
       coaching: { available: m.coachingAvailable, nextFrom: m.nextCoachingFrom, included: ent.includedCoaching },
+      commitments: openCommitments((coachRows ?? []) as any[]).map((c) => ({ id: c.id, sessionId: c.sessionId, text: c.text, due: c.due })),
       invite: referralCode ? <InviteCard inviteUrl={`${publicAppUrl()}/?ref=${referralCode}&utm_source=referral&utm_medium=member`} rewardsEarned={(rewards ?? []).length} /> : null,
       today: new Date().toISOString().slice(0, 10),
     };
@@ -296,7 +299,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
                 <span className="font-semibold text-navy">One-on-one coaching: </span>
                 you have {m.coachingAvailable} session{m.coachingAvailable > 1 ? "s" : ""} to book.
               </p>
-              <a href="/dashboard/subscribe#one-time" className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
+              <a href="/coaching" className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
                 Book a session
               </a>
             </div>

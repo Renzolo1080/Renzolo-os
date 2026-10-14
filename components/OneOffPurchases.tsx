@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { track } from "@/lib/track";
 
 export interface OneOffPrices {
@@ -29,12 +28,10 @@ export function OneOffPurchases({
   standardSingle: string | null;
   standardPack: string | null;
 }) {
-  const router = useRouter();
   const [currency, setCurrency] = useState(prices[0]?.currency ?? "USD");
   const p = prices.find((x) => x.currency === currency) ?? prices[0];
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [booked, setBooked] = useState(false);
 
   async function buy(body: Record<string, unknown>, key: string) {
     setBusy(key);
@@ -51,16 +48,6 @@ export function OneOffPurchases({
     }
   }
 
-  async function book() {
-    setBusy("book");
-    setError(null);
-    const res = await fetch("/api/coaching/book", { method: "POST" });
-    const data = await res.json().catch(() => ({}));
-    setBusy(null);
-    if (!res.ok) return setError(data.error ?? "Could not book right now.");
-    setBooked(true);
-    router.refresh();
-  }
 
   if (!p) return null;
   return (
@@ -140,13 +127,9 @@ export function OneOffPurchases({
                 <p className="font-semibold text-navy">
                   You have {coachingAvailable} coaching session{coachingAvailable > 1 ? "s" : ""} to book.
                 </p>
-                {booked ? (
-                  <p className="mt-1 text-teal">Requested. We'll email you to arrange a time.</p>
-                ) : (
-                  <button type="button" onClick={book} disabled={busy !== null} className="mt-2 rounded-lg bg-gold px-4 py-2 font-semibold text-white disabled:opacity-50">
-                    {busy === "book" ? "Booking…" : "Book a session"}
-                  </button>
-                )}
+                <a href="/coaching" className="mt-2 inline-block rounded-lg bg-gold px-4 py-2 font-semibold text-white">
+                  Book a session
+                </a>
               </>
             ) : (
               <p className="text-ink-soft">

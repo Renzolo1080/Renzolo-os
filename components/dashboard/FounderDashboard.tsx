@@ -5,7 +5,7 @@ import { REVIEW_CRITERIA, type PlanReview } from "@/lib/plan-review";
 import type { MarketInsights } from "@/lib/market";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 import { Bars, GoalChart, LineChart, Sparkline } from "./Charts";
-import { CheckinForm, DashboardCustomizer, MarkDone, MonthlyUpdateForm } from "./Interactive";
+import { CheckinForm, CommitmentDone, DashboardCustomizer, MarkDone, MonthlyUpdateForm } from "./Interactive";
 
 export interface DashboardData {
   access: { member: boolean; growth: boolean };
@@ -24,6 +24,8 @@ export interface DashboardData {
   recommendations: { id: string; source: string; title: string }[];
   milestones: { id: string; title: string; target_date: string | null }[];
   coaching: { available: number; nextFrom: string | null; included: string | null };
+  /** Open commitments from coaching sessions. */
+  commitments: { id: string; sessionId: string; text: string; due: string }[];
   invite: React.ReactNode;
   today: string;
 }
@@ -63,7 +65,8 @@ export function FounderDashboard(d: DashboardData) {
   const thisUpdate = d.updates.find((u) => u.period === thisMonth) ?? null;
 
   // Coming up: open plan actions and goals, by date.
-  const due: { key: string; date: string; title: string; kind: string; area?: string; id?: string }[] = [];
+  const due: { key: string; date: string; title: string; kind: string; area?: string; id?: string; sessionId?: string }[] = [];
+  for (const c of d.commitments) if (c.due) due.push({ key: `c${c.sessionId}${c.id}`, date: c.due, title: c.text, kind: "Coaching commitment", id: c.id, sessionId: c.sessionId });
   if (d.plan) {
     for (const a of allActions(d.plan)) if (a.status !== "done" && a.due) due.push({ key: `a${a.id}${a.area}`, date: a.due, title: a.text, kind: BLOCK_LABELS[a.area], area: a.area, id: a.id });
     for (const g of goals) if (g.goal.date && g.status !== "achieved") due.push({ key: `g${g.goal.id}`, date: g.goal.date, title: g.goal.title, kind: "Goal" });
@@ -210,6 +213,7 @@ export function FounderDashboard(d: DashboardData) {
                         <span className="text-xs text-ink-soft">{x.kind}</span>
                       </span>
                       {x.area && x.id && <MarkDone area={x.area} id={x.id} />}
+                      {x.sessionId && x.id && <CommitmentDone sessionId={x.sessionId} id={x.id} />}
                     </li>
                   );
                 })}
@@ -494,8 +498,8 @@ function Extra({ k, d, goals, kpiList, runway }: { k: ExtraKey; d: DashboardData
               ? `Your membership includes ${d.coaching.included}.`
               : "Work through your plan with a Founder Trajectory™ coach."}
           </p>
-          <a href="/dashboard/subscribe#one-time" className="mt-3 inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
-            {d.coaching.available > 0 ? "Book a session" : "Coaching sessions"}
+          <a href="/coaching" className="mt-3 inline-block rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
+            {d.coaching.available > 0 ? "Book a session" : "Coaching"}
           </a>
         </Panel>
       );
