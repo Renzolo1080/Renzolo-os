@@ -1183,3 +1183,18 @@ alter table coaching_agreements enable row level security;
 do $$ begin
   create policy "coaching_agreements: self or staff" on coaching_agreements for select using (founder_id = auth.uid() or is_staff());
 exception when duplicate_object then null; end $$;
+
+-- ===== 2026-10-17: cohort names (same as supabase/migrations/2026-10-17_cohort_names.sql) =====
+-- Academy cohorts renamed so they can't be confused with membership
+-- levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months).
+-- Safe to run more than once.
+alter table cohort_applications drop constraint if exists cohort_applications_cohort_check;
+update cohort_applications set cohort = case cohort
+  when 'foundations' then 'launch'
+  when 'essentials_growth' then 'launch'
+  when 'growth' then 'build'
+  when 'elevate' then 'scale'
+  else cohort end
+where cohort in ('foundations', 'essentials_growth', 'growth', 'elevate');
+alter table cohort_applications add constraint cohort_applications_cohort_check
+  check (cohort in ('launch', 'build', 'scale'));

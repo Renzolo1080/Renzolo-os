@@ -487,8 +487,10 @@ async function suite(label: string, files: string[]) {
   assert(r.ok && r.rows.length === 0, "shared scores, applications, messages and email lists are not readable from the browser", r);
   r = await run("anon", null, `insert into cohort_applications (full_name,email,cohort) values ('x','x@x','elevate')`);
   assert(!r.ok, "…and can't be written from the browser either (the server validates them)");
+  r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','build')`);
+  assert(r.ok, "the server can record a Build cohort application", r);
   r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','growth')`);
-  assert(r.ok, "the server can record a Growth Cohort application", r);
+  assert(!r.ok, "…old cohort names are no longer stored");
   r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','bootcamp')`);
   assert(!r.ok, "…but not an unknown cohort");
 
@@ -636,6 +638,8 @@ async function main() {
     "supabase/migrations/2026-10-15_plans_market.sql",
     "supabase/migrations/2026-10-16_coaching.sql",
     "supabase/migrations/2026-10-16_coaching.sql",
+    "supabase/migrations/2026-10-17_cohort_names.sql",
+    "supabase/migrations/2026-10-17_cohort_names.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

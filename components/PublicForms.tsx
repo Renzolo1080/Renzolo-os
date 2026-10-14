@@ -36,7 +36,7 @@ const Honeypot = () => (
   </div>
 );
 
-export function CohortForm({ defaultCohort = "foundations" }: { defaultCohort?: "foundations" | "growth" | "elevate" }) {
+export function CohortForm({ defaultCohort = "launch" }: { defaultCohort?: "launch" | "build" | "scale" }) {
   const { status, error, submit } = useSubmit("/api/applications");
   if (status === "done")
     return (
@@ -85,9 +85,9 @@ export function CohortForm({ defaultCohort = "foundations" }: { defaultCohort?: 
       <label className="block">
         <span className="mb-1 block text-sm font-medium">Which cohort?</span>
         <select name="cohort" className={input} defaultValue={defaultCohort}>
-          <option value="foundations">Foundations (8 weeks)</option>
-          <option value="growth">Growth (12 weeks)</option>
-          <option value="elevate">Elevate (6 months)</option>
+          <option value="launch">Launch (8 weeks)</option>
+          <option value="build">Build (12 weeks)</option>
+          <option value="scale">Scale (6 months)</option>
         </select>
       </label>
       <label className="block">
