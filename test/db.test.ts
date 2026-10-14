@@ -589,6 +589,31 @@ async function suite(label: string, files: string[]) {
   assert(r.ok && r.rows.length === 1, "founder sees own agreement", r);
 
   // ------------------------------------------------------------------
+  // AI coaching
+  // ------------------------------------------------------------------
+  r = await U(A, `insert into ai_coach_threads (founder_id,title) values ('${A}','Pricing')`);
+  assert(!r.ok, "founder cannot create AI coach threads directly (the server enforces access and limits)");
+  r = await SRV(`insert into ai_coach_threads (founder_id,title) values ('${A}','Pricing') returning id`);
+  assert(r.ok, "server creates an AI coach thread", r);
+  const tid = r.rows[0]?.id;
+  r = await SRV(`insert into ai_coach_messages (thread_id,founder_id,role,content) values ('${tid}','${A}','user','How do I price?'),('${tid}','${A}','assistant','Start from cost.')`);
+  assert(r.ok, "server records the conversation", r);
+  r = await SRV(`insert into ai_coach_threads (founder_id,title,kind) values ('${A}','Insight','insights')`);
+  assert(r.ok, "insight conversations are a thread kind", r);
+  r = await SRV(`insert into ai_coach_threads (founder_id,title,kind) values ('${A}','x','gossip')`);
+  assert(!r.ok, "…but only known kinds");
+  r = await SRV(`insert into ai_coach_messages (thread_id,founder_id,role,content) values ('${tid}','${A}','system','x')`);
+  assert(!r.ok, "only user and assistant messages");
+  r = await U(A, `select role from ai_coach_messages order by created_at`);
+  assert(r.ok && r.rows.length === 2, "founder reads own conversation", r);
+  r = await U(B, `select id from ai_coach_messages`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read it", r);
+  r = await U(B, `select id from ai_coach_threads`);
+  assert(r.ok && r.rows.length === 0, "…nor the thread", r);
+  r = await U(A, `update ai_coach_messages set content='edited'`);
+  assert(r.ok && r.n === 0, "founder cannot edit the coach's replies", r);
+
+  // ------------------------------------------------------------------
   // "Is this founder subscribed?" — database and app must agree
   // ------------------------------------------------------------------
   const cases: { name: string; status: string; end: string | null; autoRenew: boolean }[] = [
@@ -640,6 +665,8 @@ async function main() {
     "supabase/migrations/2026-10-16_coaching.sql",
     "supabase/migrations/2026-10-17_cohort_names.sql",
     "supabase/migrations/2026-10-17_cohort_names.sql",
+    "supabase/migrations/2026-10-18_ai_coach.sql",
+    "supabase/migrations/2026-10-18_ai_coach.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

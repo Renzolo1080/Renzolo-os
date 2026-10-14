@@ -60,7 +60,8 @@ export interface Entitlements {
   planReview: boolean;
   /** The Market Intelligence page (researched brief, refreshed monthly). */
   marketIntel: boolean;
-  /** Ongoing AI coaching (not built yet: shown as coming soon). */
+  /** The AI coach (/ai-coach). Launch programme participants will get it
+   * through the cohort module. */
   aiCoaching: boolean;
   advisorReview: boolean;
   /** Dashboard, goals, reminders, tools, milestones. */

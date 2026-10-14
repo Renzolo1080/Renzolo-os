@@ -56,7 +56,19 @@ export default async function CoachingPage() {
         ← Back to dashboard
       </a>
       <h1 className="mt-3 text-3xl font-bold text-navy">Coaching</h1>
-      <p className="mt-2 max-w-2xl text-ink-soft">One-on-one coaching with a Founder Trajectory™ coach, built around your plan. Each session ends with commitments you'll see on your dashboard.</p>
+      <p className="mt-2 max-w-2xl text-ink-soft">
+        One-on-one coaching with a Founder Trajectory™ coach, built around your plan. Each session ends with commitments you'll see on your dashboard.
+        {ent.aiCoaching && (
+          <>
+            {" "}
+            Between sessions, your{" "}
+            <a href="/ai-coach" className="font-semibold text-teal underline">
+              AI coach
+            </a>{" "}
+            is there any time.
+          </>
+        )}
+      </p>
 
       <ol className="mt-6 grid gap-2 sm:grid-cols-5">
         {STEPS.map(([t, d], i) => (

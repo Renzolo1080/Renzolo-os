@@ -306,11 +306,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
           )}
 
           {ent.aiCoaching && (
-            <div className="rounded-2xl border border-dashed border-gold p-5">
-              <p className="font-semibold text-navy">
-                AI coaching <span className="ml-2 rounded-full bg-cream px-2 py-0.5 text-xs font-semibold text-gold">Coming soon</span>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold bg-white p-5">
+              <p className="text-sm">
+                <span className="font-semibold text-navy">AI coach: </span>
+                ask anything about your plan, customers or money, and get your weekly check-in.
               </p>
-              <p className="mt-1 text-sm text-ink-soft">Ask questions about your plan and get check-ins as you carry it out. Included in your membership when it launches.</p>
+              <a href="/ai-coach" className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white">
+                Talk to your coach
+              </a>
             </div>
           )}
 
