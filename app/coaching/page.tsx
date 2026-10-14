@@ -70,6 +70,15 @@ export default async function CoachingPage() {
       </ol>
 
       <div className="mt-8 space-y-6">
+        {!latest && (
+          <p className="rounded-lg border border-gold/60 bg-cream p-4 text-sm">
+            Starting with coaching? Take the free{" "}
+            <a href="/assessment" className="font-semibold text-teal underline">
+              Readiness Snapshot
+            </a>{" "}
+            first (5 to 7 minutes). Your coach uses it to prepare, so your first session goes straight to what matters.
+          </p>
+        )}
         {!agreement ? (
           <AgreementCard />
         ) : m.coachingAvailable > 0 ? (

@@ -15,6 +15,7 @@ export function OneOffPurchases({
   prices,
   showAssessment,
   member,
+  level = member ? "member" : "client",
   coachingAvailable,
   nextCoachingFrom,
   standardSingle,
@@ -23,6 +24,8 @@ export function OneOffPurchases({
   prices: OneOffPrices[];
   showAssessment: boolean;
   member: boolean;
+  /** Coaching price level: member, client, or starting with coaching. */
+  level?: "member" | "client" | "starter";
   coachingAvailable: number;
   nextCoachingFrom: string | null;
   standardSingle: string | null;
@@ -96,8 +99,17 @@ export function OneOffPurchases({
         )}
 
         <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-teal">{member ? "Member prices" : "No minimum"}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal">{level === "member" ? "Member prices" : level === "starter" ? "Starting with coaching" : "No minimum"}</p>
           <p className="mt-1 text-xl font-bold text-navy">One-on-one coaching</p>
+          {level === "starter" && (
+            <p className="mt-1 rounded-lg bg-cream p-2 text-xs">
+              Your first coaching purchase includes an intake review and a session plan. Take the free{" "}
+              <a href="/assessment" className="font-semibold text-teal underline">
+                Readiness Snapshot
+              </a>{" "}
+              first so your coach can prepare. After that, sessions are at the standard price, and members pay less.
+            </p>
+          )}
           <p className="mt-1 text-sm text-ink-soft">With a Founder Trajectory™ coach. Sessions are valid for a year; we arrange the time with you by email.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
