@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 
-const MEMBER_AREAS = ["/dashboard", "/assessment", "/tools", "/advisor", "/report", "/plan", "/market", "/coaching", "/coach"];
+const MEMBER_AREAS = ["/dashboard", "/assessment", "/tools", "/advisor", "/report", "/plan", "/market", "/coaching", "/coach", "/ai-coach"];
 
 /** Top bar on every page. Signed-in areas get Dashboard / Tools / Log out;
  * public pages get Log in and the free Snapshot. */

@@ -137,7 +137,7 @@ A prioritized list of 3-5 bullets (most important first). Each bullet must be a 
     sections.push(`## Recommended Membership
 Recommend ONE Founder Trajectory membership tier and explain why in 3-4 sentences, using this founder's gaps, goals, stage and funding plans:
 - Essentials ($15/month): full assessment, AI insights, growth and readiness plan, dashboard and tools. Best for founders who will work the plan themselves.
-- Growth ($39/month, billed quarterly): adds valuation, market insight, advisor review, AI coaching (coming soon) and 2 one-on-one coaching sessions a quarter. Best for founders actively executing who want regular coaching.
+- Growth ($39/month, billed quarterly): adds valuation, market insight, advisor review, AI coaching and 2 one-on-one coaching sessions a quarter. Best for founders actively executing who want regular coaching.
 - Elevate ($149/month, billed quarterly): adds 2 one-on-one sessions a month, pitch and investor readiness review and priority support. Best for founders preparing to raise, scale fast or win large contracts.
 Be honest: recommend Essentials when that is what fits.`);
   }
@@ -202,6 +202,29 @@ export async function askClaude(prompt: string, opts: { maxTokens: number; webSe
     .filter((b: any) => b.type === "text")
     .map((b: any) => b.text)
     .join("");
+  return { text, sources: extractWebSources(response.content as any[]) };
+}
+
+/** A conversation turn with a system prompt and earlier messages,
+ * optionally allowed a few live web searches. */
+export async function chatClaude(
+  system: string,
+  messages: { role: "user" | "assistant"; content: string }[],
+  maxTokens: number,
+  webSearches = 0
+): Promise<{ text: string; sources: WebSource[] }> {
+  const response = await getClient().messages.create({
+    model: "claude-sonnet-4-5",
+    max_tokens: maxTokens,
+    system,
+    messages,
+    ...(webSearches ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: webSearches } as any] } : {}),
+  });
+  const text = response.content
+    .filter((b: any) => b.type === "text")
+    .map((b: any) => b.text)
+    .join("")
+    .trim();
   return { text, sources: extractWebSources(response.content as any[]) };
 }
 
