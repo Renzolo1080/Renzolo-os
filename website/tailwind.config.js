@@ -13,6 +13,9 @@ module.exports = {
         ink: "#0E1A26",
         muted: "#5D6B78",
         mist: "#C9D3DC",
+        sunrise: "#F4B740",
+        coral: "#E8603C",
+        lagoon: "#22B8B0",
       },
       fontFamily: {
         display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],

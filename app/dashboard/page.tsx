@@ -214,7 +214,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 
   return (
     <main className={`mx-auto min-h-screen px-4 py-10 sm:px-6 ${hasAccess && latestScore ? "max-w-6xl" : "max-w-2xl"}`}>
-      <h1 className="mb-6 text-2xl font-bold text-navy">Your Founder Trajectory™</h1>
+      <h1 className="text-2xl font-bold text-navy">Your Founder Trajectory™</h1>
+      <span aria-hidden="true" className="mb-6 mt-2 block h-1 w-24 rounded-full" style={{ background: "linear-gradient(90deg,#E8603C,#F4B740,#22B8B0)" }} />
 
       <PaymentBanner payment={paymentResult} product={paymentProduct} />
       {lastPaid && <PurchaseTracker id={lastPaid.id} value={Number(lastPaid.amount)} currency={lastPaid.currency} item={lastPaid.product} />}

@@ -71,7 +71,7 @@ export default function FounderTrajectoryPage() {
             </div>
             <p className="mt-8 max-w-3xl text-muted">
               Prefer a one-time answer? The Readiness Assessment ($79) gives you the full report, a valuation range, an AI market insight and a
-              recommendation of the plan that fits you, with no membership. Coaching sessions are $79 each, or $59 for members.
+              recommendation of the plan that fits you, with no membership. Coaching sessions are from $59 for members.
             </p>
             <a href={appLink("/pricing", "ft_tiers")} className="mt-6 inline-block rounded-full border-2 border-navy px-6 py-3 font-semibold text-navy hover:bg-navy hover:text-white">
               See full pricing
