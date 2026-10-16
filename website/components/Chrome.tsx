@@ -9,10 +9,11 @@ const NAV = [
 
 export function Header({ campaign = "header" }: { campaign?: string }) {
   return (
-    <header className="bg-navy text-white">
+    <header className="relative z-20 bg-navy text-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
         <a href="/" className="font-display text-xl font-800 tracking-tight" style={{ fontWeight: 800 }}>
           RENZOLO<sup className="ml-0.5 text-[0.55em] font-semibold">™</sup>
+          <span aria-hidden="true" className="mt-0.5 block h-[3px] w-full rounded-full" style={{ background: "linear-gradient(90deg,#E8603C,#F4B740,#22B8B0)" }} />
         </a>
         <nav aria-label="Main" className="hidden items-center gap-7 text-sm md:flex">
           {NAV.map(([label, href]) => (
@@ -49,7 +50,7 @@ export function Footer() {
         <div>
           <p className="font-display text-lg font-bold text-white">RENZOLO™</p>
           <p className="mt-2 max-w-sm">
-            Venture readiness and development for founders and suppliers, launching first in Kenya, South Africa and the United States. Home of Founder Trajectory™, powered by
+            Customer, capital and investor readiness for founders and suppliers across Africa, starting in South Africa and Kenya. Home of Founder Trajectory™, powered by
             RENZOLO OS™.
           </p>
         </div>

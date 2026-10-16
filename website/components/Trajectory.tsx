@@ -31,12 +31,19 @@ export function Trajectory() {
   return (
     <figure className="w-full">
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-labelledby="traj-title">
+        <defs>
+          <linearGradient id="traj-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#E8603C" />
+            <stop offset="50%" stopColor="#F4B740" />
+            <stop offset="100%" stopColor="#22B8B0" />
+          </linearGradient>
+        </defs>
         <title id="traj-title">The Founder Trajectory: Discover, Validate, Build, Acquire, Prepare, Fund, Scale, Exit</title>
         {[0.25, 0.5, 0.75].map((f) => (
           <line key={f} x1="40" x2={W - 40} y1={H - 60 - f * (H - 130)} y2={H - 60 - f * (H - 130)} stroke="#122D44" strokeWidth="1" />
         ))}
         <path d={d} fill="none" stroke="#122D44" strokeWidth="14" strokeLinecap="round" />
-        <path className="trajectory-path" d={d} fill="none" stroke="#C18B2C" strokeWidth="5" strokeLinecap="round" />
+        <path className="trajectory-path" d={d} fill="none" stroke="url(#traj-grad)" strokeWidth="5" strokeLinecap="round" />
         {points.map((p, i) => (
           <g key={STAGES[i]}>
             <circle
@@ -45,7 +52,7 @@ export function Trajectory() {
               cx={p.x}
               cy={p.y}
               r={i === STAGES.length - 1 ? 13 : 10}
-              fill={i === STAGES.length - 1 ? "#C18B2C" : "#071727"}
+              fill={i === STAGES.length - 1 ? "#22B8B0" : "#071727"}
               stroke="#E3C27E"
               strokeWidth="4"
             />

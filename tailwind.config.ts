@@ -12,7 +12,10 @@ const config: Config = {
         teal: "#087F77", // secondary accent (data viz, icons, links)
         cream: "#F7F4EE", // page background
         ink: "#111111", // primary text on light backgrounds
-        "ink-soft": "#68737D", // secondary/muted text (was previously undefined — fixes invisible-color bug)
+        "ink-soft": "#68737D",
+        sunrise: "#F4B740", // brand refresh accents (Oct 2026): highlights, celebrations
+        coral: "#E8603C", // the "customers" outcome
+        lagoon: "#22B8B0", // the "investors" outcome, live data // secondary/muted text (was previously undefined — fixes invisible-color bug)
       },
     },
   },

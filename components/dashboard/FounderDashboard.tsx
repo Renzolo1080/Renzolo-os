@@ -6,6 +6,7 @@ import type { MarketInsights } from "@/lib/market";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 import { Bars, GoalChart, LineChart, Sparkline } from "./Charts";
 import { CheckinForm, CommitmentDone, DashboardCustomizer, MarkDone, MonthlyUpdateForm } from "./Interactive";
+import { ScoreRing } from "@/components/brand/Visuals";
 
 export interface DashboardData {
   access: { member: boolean; growth: boolean };
@@ -99,13 +100,13 @@ export function FounderDashboard(d: DashboardData) {
             {x.key === "cash" && runway !== null && <p className="mt-1 text-xs text-ink-soft">~{runway} months of runway at the recent rate</p>}
           </div>
         ))}
-        <div className="rounded-2xl bg-navy p-4 text-white shadow-sm">
-          <p className="text-xs text-cream/80">Venture Score</p>
-          <p className="mt-1 text-2xl font-bold">
-            {Math.round(d.score.venture_score)}
-            <span className="text-sm font-normal text-cream/70"> / 100</span>
-          </p>
-          <p className="text-xs font-semibold text-gold">{d.score.venture_tier}</p>
+        <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-navy p-4 text-white shadow-sm">
+          <div aria-hidden="true" className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-lagoon/25 blur-2xl" />
+          <ScoreRing value={Math.round(d.score.venture_score)} size={56} label={`Venture Score ${Math.round(d.score.venture_score)} out of 100`} />
+          <div className="relative">
+            <p className="text-xs text-cream/80">Venture Score</p>
+            <p className="text-xs font-semibold text-sunrise">{d.score.venture_tier}</p>
+          </div>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm">
           <p className="text-xs text-ink-soft">Plan actions done</p>

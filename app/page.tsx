@@ -1,5 +1,26 @@
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { QUICK_QUESTIONS, STAGES } from "@/lib/quickcheck";
+import { Glow, OutcomeChips, ProductShowcase, SignalBand } from "@/components/brand/Visuals";
+
+/** Why founders choose RENZOLO over a team operating system (competitors
+ * are named only in the private comparison doc). */
+const WHY = [
+  {
+    title: "Built around the outcome you need",
+    text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it.",
+    accent: "#E8603C",
+  },
+  {
+    title: "Built from the buyer's side of the table",
+    text: "Readiness checked against what procurement teams, lenders and investors look for, by a founder who has developed suppliers for large buyers.",
+    accent: "#F4B740",
+  },
+  {
+    title: "AI and human coaching, at founder prices",
+    text: "One founder, one price in US dollars, from $15 a month. An AI coach that knows your plan, plus one-on-one coaching for the big decisions.",
+    accent: "#22B8B0",
+  },
+];
 
 const METHOD = [
   {
@@ -25,29 +46,50 @@ export default function HomePage() {
     <>
       <main>
         {/* Hero */}
-        <section className="bg-navy text-white">
-          <div className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-20">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Venture Readiness Assessment and Development Support</p>
-            <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-              Know exactly where your business stands, and what to do next.
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg text-cream/85">
-              Founder Trajectory™ gives founders and suppliers a comprehensive view of where their business stands against their strategic plan
-              and the nine building blocks of their business model, a readiness and growth plan to close the gaps, and coaching to elevate it to
-              the level partners, investors and customers look for. Powered by RENZOLO OS™.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a href="/snapshot" className="rounded-lg bg-gold px-7 py-4 text-center text-lg font-semibold text-white hover:opacity-95">
-                Start your free Readiness Snapshot
-              </a>
-              <span className="text-sm text-cream/70 sm:ml-2">5 to 7 minutes · no account needed</span>
+        <section className="relative overflow-hidden bg-navy text-white">
+          <Glow />
+          <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-14 pt-12 sm:px-6 sm:pb-20 sm:pt-16 lg:grid-cols-[1.05fr_1fr]">
+            <div className="rise">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Customer, capital and investor readiness</p>
+              <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
+                Get ready. <span className="text-gradient">Get chosen.</span> Grow.
+              </h1>
+              <p className="mt-5 max-w-xl text-lg text-cream/85">
+                Founder Trajectory™ shows exactly where your business stands against your strategic plan and the nine building blocks of your
+                business model, builds the plan to close the gaps, and coaches you to the standard buyers, lenders and investors look for.
+                Powered by RENZOLO OS™.
+              </p>
+              <OutcomeChips className="mt-6" />
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <a href="/snapshot" className="rounded-full bg-gold px-7 py-4 text-center text-lg font-semibold text-white shadow-[0_10px_30px_-10px_rgba(193,139,44,.8)] hover:opacity-95">
+                  Start your free Readiness Snapshot
+                </a>
+                <span className="text-sm text-cream/70 sm:ml-2">5 to 7 minutes · no account needed</span>
+              </div>
+              <p className="mt-6 text-sm text-cream/70">
+                Already a member?{" "}
+                <a href="/login" className="font-semibold text-white underline">
+                  Log in
+                </a>
+              </p>
             </div>
-            <p className="mt-6 text-sm text-cream/70">
-              Already a member?{" "}
-              <a href="/login" className="font-semibold text-white underline">
-                Log in
-              </a>
-            </p>
+            <ProductShowcase />
+          </div>
+        </section>
+        <SignalBand />
+
+        {/* Why RENZOLO */}
+        <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal">Why founders choose us</p>
+          <h2 className="mt-2 max-w-3xl text-2xl font-bold text-navy sm:text-3xl">Operating systems help you run your team. RENZOLO gets your business chosen.</h2>
+          <div className="mt-8 grid gap-5 md:grid-cols-3">
+            {WHY.map((w) => (
+              <div key={w.title} className="rounded-2xl bg-white p-6 shadow-sm">
+                <span aria-hidden="true" className="block h-1.5 w-10 rounded-full" style={{ background: w.accent }} />
+                <p className="mt-4 text-lg font-bold text-navy">{w.title}</p>
+                <p className="mt-2 text-sm text-ink-soft">{w.text}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -59,7 +101,7 @@ export default function HomePage() {
           <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {METHOD.map((m, i) => (
               <li key={m.name} className="rounded-2xl bg-white p-6 shadow-sm">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-bold text-white">{i + 1}</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full font-bold text-white" style={{ background: ["#E8603C", "#C18B2C", "#087F77", "#22B8B0"][i] }}>{i + 1}</span>
                 <p className="mt-4 text-lg font-bold text-navy">{m.name}</p>
                 <p className="mt-2 text-sm text-ink-soft">{m.body}</p>
               </li>
