@@ -35,3 +35,22 @@ body { background: #F7F4EE; color: #0E1A26; font-family: "Public Sans", system-u
   @keyframes ring { from { stroke-dasharray: 0 999; } }
   @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 }
+
+/* Modern & fun pass: marquee, stickers, rotating word, lift on hover. */
+.marquee { display: flex; width: max-content; }
+.sticker { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; padding: .45rem .9rem; font-weight: 700; font-size: .8rem; box-shadow: 0 8px 20px -8px rgba(0,0,0,.45); }
+.rotator { display: inline-grid; }
+.rotator > span { grid-area: 1 / 1; }
+.rotator > span:not(:first-child) { visibility: hidden; }
+.lift { transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s; }
+.lift:hover { transform: translateY(-6px) rotate(-.4deg); box-shadow: 0 24px 40px -18px rgba(7,23,39,.45); }
+@media (prefers-reduced-motion: no-preference) {
+  .marquee { animation: marquee 32s linear infinite; }
+  .rotator > span { visibility: visible !important; opacity: 0; animation: rotword 7.5s infinite; }
+  .rotator > span:nth-child(2) { animation-delay: 2.5s; }
+  .rotator > span:nth-child(3) { animation-delay: 5s; }
+  .wiggle:hover { animation: wiggle .5s ease-in-out; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+  @keyframes rotword { 0% { opacity: 0; transform: translateY(.4em); } 4%, 30% { opacity: 1; transform: none; } 34%, 100% { opacity: 0; transform: translateY(-.4em); } }
+  @keyframes wiggle { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+}

@@ -1,6 +1,6 @@
 import { Header, Footer } from "@/components/Chrome";
 import { Trajectory } from "@/components/Trajectory";
-import { Glow, OutcomeChips, OUTCOMES, Portrait, ProductShowcase, Screen, SignalBand } from "@/components/Visuals";
+import { Arrow, Glow, Marquee, Portrait, ProductShowcase, Rotator, Screen } from "@/components/Visuals";
 import { AFFILIATION_NOTE, FOUNDER, PROOF_STATS, WHY_PROOF } from "@/lib/story";
 import { APP_URL, appLink } from "@/lib/site";
 
@@ -104,6 +104,20 @@ const MARKETS = [
  * once real, permitted remarks are added here. */
 const ENDORSEMENTS: { quote: string; name: string; role: string; photo?: string }[] = [];
 
+/** Colour blocks used across the page (navy text on each). */
+const BLOCKS = ["bg-coral", "bg-sunrise", "bg-lagoon", "bg-gold-soft"];
+
+const TICKER = [
+  "Win customers",
+  "Qualify for capital",
+  "Attract investors",
+  "800+ founders trained",
+  "19 African countries",
+  "AI coach included",
+  "From $15 a month",
+  "Results in 7 minutes",
+];
+
 export default function Home() {
   return (
     <>
@@ -112,102 +126,117 @@ export default function Home() {
         {/* Hero */}
         <section className="relative overflow-hidden bg-navy text-white">
           <Glow />
-          <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-12 pt-10 md:pt-16 lg:grid-cols-[1.05fr_1fr]">
+          <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 pb-14 pt-10 md:pt-16 lg:grid-cols-[1.05fr_1fr]">
             <div className="rise">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold-soft">Customer, capital and investor readiness</p>
-              <h1 className="mt-4 font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-tight sm:text-6xl" style={{ fontWeight: 800 }}>
-                Get ready. <span className="text-gradient">Get chosen.</span> Grow.
+              <span className="sticker -rotate-2 bg-sunrise text-navy">Get ready. Get chosen. Grow.</span>
+              <h1 className="mt-6 font-display text-[2.7rem] font-extrabold leading-[1.0] tracking-tight sm:text-6xl lg:text-7xl" style={{ fontWeight: 800 }}>
+                Get chosen by
+                <br />
+                <span className="sr-only">buyers, lenders and investors.</span>
+                <span aria-hidden="true" className="text-gradient">
+                  <Rotator words={["buyers.", "lenders.", "investors."]} />
+                </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-mist">
                 RENZOLO™ shows founders and suppliers exactly where their business stands, builds the plan to close the gaps, and coaches them to the
                 standard buyers, lenders and investors look for.
               </p>
-              <OutcomeChips className="mt-7" />
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-                <a href={appLink("/snapshot", "home_hero")} className="rounded-full bg-gold px-7 py-4 text-center text-lg font-semibold text-white shadow-[0_10px_30px_-10px_rgba(193,139,44,.8)] hover:bg-[#ad7b24] sm:whitespace-nowrap">
-                  Start your free Snapshot
+                <a
+                  href={appLink("/snapshot", "home_hero")}
+                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-coral via-sunrise to-lagoon px-7 py-4 text-lg font-bold text-navy shadow-[0_12px_34px_-10px_rgba(244,183,64,.7)] transition hover:brightness-110 sm:whitespace-nowrap"
+                >
+                  Start your free Snapshot <Arrow className="h-5 w-5 transition group-hover:translate-x-1" />
                 </a>
-                <a href="#why" className="text-center font-semibold text-gold-soft underline-offset-4 hover:underline">
-                  Why founders choose RENZOLO
+                <a href="#why" className="text-center font-semibold text-white underline decoration-sunrise decoration-2 underline-offset-4 hover:text-sunrise">
+                  Why founders choose us
                 </a>
               </div>
-              <p className="mt-4 text-sm text-mist">5 to 7 minutes · no account needed · results straight away</p>
+              <div className="mt-6 flex flex-wrap gap-2 text-sm">
+                <span className="sticker rotate-1 bg-white/10 text-white backdrop-blur">7 minutes</span>
+                <span className="sticker -rotate-1 bg-white/10 text-white backdrop-blur">No account needed</span>
+                <span className="sticker rotate-2 bg-lagoon text-navy">Free</span>
+              </div>
             </div>
             <ProductShowcase />
           </div>
         </section>
-        <SignalBand />
+        <Marquee items={TICKER} className="bg-sunrise text-navy" />
 
-        {/* Snapshot */}
-        <section className="bg-white">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 md:grid-cols-[1fr_1.15fr] md:py-24">
-            <div>
-              <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">See results in about seven minutes</h2>
-              <p className="mt-4 text-lg text-muted">
-                Answer simple questions about your business, your goals and your plan. Get your Venture Score, your strongest area, the three areas
-                holding you back, and your most useful next move.
-              </p>
-              <ul className="mt-6 grid gap-3 sm:grid-cols-3">
-                {OUTCOMES.map((o) => (
-                  <li key={o.key} className="rounded-2xl border border-mist p-4">
-                    <span aria-hidden="true" className="block h-1.5 w-10 rounded-full" style={{ background: o.color }} />
-                    <p className="mt-3 font-display font-bold">{o.label}</p>
-                    <p className="text-sm text-muted">{o.note}</p>
-                  </li>
-                ))}
-              </ul>
-              <a href={appLink("/snapshot", "home_snapshot_section")} className="mt-8 inline-block rounded-full bg-gold px-7 py-4 font-semibold text-white hover:bg-[#ad7b24]">
-                Take the free Readiness Snapshot
-              </a>
+        {/* Snapshot bento */}
+        <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+          <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>
+            Know where you stand in <span className="text-gradient whitespace-nowrap">7 minutes.</span>
+          </h2>
+          <div className="mt-10 grid gap-4 md:grid-cols-6 md:grid-rows-2">
+            <div className="lift overflow-hidden rounded-[2rem] bg-navy p-3 md:col-span-4 md:row-span-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/img/screen-plan.jpg" alt="The Plan Builder in RENZOLO OS, turning assessment results into dated goals and actions" className="h-full w-full rounded-[1.5rem] object-cover object-top" width={1280} height={800} />
             </div>
-            <Screen src="/img/screen-plan.jpg" alt="The Plan Builder in RENZOLO OS, turning assessment results into dated goals and actions" />
+            <div className="lift rounded-[2rem] bg-coral p-7 text-navy md:col-span-2">
+              <p className="font-display text-5xl font-extrabold" style={{ fontWeight: 800 }}>62<span className="text-2xl">/100</span></p>
+              <p className="mt-2 font-display text-xl font-bold">Your Venture Score</p>
+              <p className="mt-1 text-navy/80">Where your business stands today, and your strongest area.</p>
+            </div>
+            <div className="lift rounded-[2rem] bg-lagoon p-7 text-navy md:col-span-2">
+              <p className="font-display text-5xl font-extrabold" style={{ fontWeight: 800 }}>3</p>
+              <p className="mt-2 font-display text-xl font-bold">Gaps, named</p>
+              <p className="mt-1 text-navy/80">The areas holding you back, and your most useful next move.</p>
+            </div>
           </div>
+          <a href={appLink("/snapshot", "home_snapshot_section")} className="group mt-8 inline-flex items-center gap-2 rounded-full bg-navy px-7 py-4 font-bold text-white hover:bg-panel">
+            Take the free Snapshot <Arrow className="h-5 w-5 transition group-hover:translate-x-1" />
+          </a>
         </section>
 
         {/* Why RENZOLO */}
-        <section id="why" className="relative overflow-hidden bg-navy text-white">
-          <Glow />
-          <div className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold-soft">Why RENZOLO</p>
-            <h2 className="mt-3 max-w-3xl font-display text-3xl font-bold tracking-tight md:text-5xl">
-              Operating systems help you run your team. RENZOLO gets your business chosen.
+        <section id="why" className="bg-white">
+          <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+            <span className="sticker rotate-1 bg-navy text-sunrise">Why RENZOLO</span>
+            <h2 className="mt-5 max-w-4xl font-display text-4xl font-extrabold tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>
+              Operating systems help you run your team. <span className="text-gradient">RENZOLO gets you chosen.</span>
             </h2>
             <div className="mt-12 grid gap-5 md:grid-cols-3">
-              {WHY.map((w) => (
-                <div key={w.title} className="rounded-3xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur">
-                  <span aria-hidden="true" className="block h-1.5 w-12 rounded-full" style={{ background: w.accent, boxShadow: `0 0 18px ${w.accent}` }} />
-                  <h3 className="mt-5 font-display text-xl font-bold">{w.title}</h3>
-                  <p className="mt-3 leading-relaxed text-mist">{w.text}</p>
-                  <p className="mt-5 border-t border-white/10 pt-4 text-sm font-semibold text-gold-soft">{w.proof}</p>
+              {WHY.map((w, i) => (
+                <div key={w.title} className={`lift flex flex-col rounded-[2rem] p-8 text-navy ${BLOCKS[i]}`}>
+                  <p className="font-display text-6xl font-extrabold opacity-90" style={{ fontWeight: 800 }}>0{i + 1}</p>
+                  <h3 className="mt-4 font-display text-2xl font-bold leading-tight">{w.title}</h3>
+                  <p className="mt-3 leading-relaxed text-navy/85">{w.text}</p>
+                  <p className="mt-auto rounded-2xl bg-navy/90 p-4 pt-4 text-sm font-semibold text-white [margin-top:1.5rem]">{w.proof}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-12 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+
+            <div className="mt-5 grid gap-px overflow-hidden rounded-[2rem] bg-navy sm:grid-cols-2 lg:grid-cols-4">
               {PROOF_STATS.map((p) => (
-                <div key={p.label} className="bg-navy/80 p-6">
-                  <p className="text-gradient font-display text-5xl font-extrabold" style={{ fontWeight: 800 }}>{p.figure}</p>
+                <div key={p.label} className="bg-navy p-7 text-white">
+                  <p className="text-gradient font-display text-5xl font-extrabold md:text-6xl" style={{ fontWeight: 800 }}>{p.figure}</p>
                   <p className="mt-2 text-sm text-mist">{p.label}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs text-mist/70">{AFFILIATION_NOTE}</p>
-            <div className="mt-12 overflow-x-auto rounded-3xl border border-white/10">
+            <p className="mt-3 text-xs text-muted">{AFFILIATION_NOTE}</p>
+
+            <div className="mt-10 overflow-x-auto rounded-[2rem] border-2 border-navy">
               <table className="w-full min-w-[560px] text-left text-sm md:text-base">
                 <thead>
-                  <tr className="border-b border-white/10 bg-white/[0.03]">
-                    <th className="px-5 py-4 font-semibold text-mist" scope="col">
+                  <tr className="border-b-2 border-navy">
+                    <th className="px-6 py-4" scope="col">
                       <span className="sr-only">Compared on</span>
                     </th>
-                    <th className="px-5 py-4 font-semibold text-mist" scope="col">Team operating systems</th>
-                    <th className="px-5 py-4 font-display font-bold text-gold-soft" scope="col">RENZOLO™</th>
+                    <th className="px-6 py-4 font-semibold text-muted" scope="col">Team operating systems</th>
+                    <th className="bg-navy px-6 py-4 font-display font-bold text-sunrise" scope="col">RENZOLO™</th>
                   </tr>
                 </thead>
                 <tbody>
                   {COMPARE.map(([k, them, us]) => (
-                    <tr key={k} className="border-b border-white/5 last:border-0">
-                      <th scope="row" className="px-5 py-4 font-semibold">{k}</th>
-                      <td className="px-5 py-4 text-mist">{them}</td>
-                      <td className="px-5 py-4 font-semibold text-white">{us}</td>
+                    <tr key={k} className="border-b border-mist last:border-0">
+                      <th scope="row" className="px-6 py-4 font-display font-bold">{k}</th>
+                      <td className="px-6 py-4 text-muted">{them}</td>
+                      <td className="bg-navy px-6 py-4 font-semibold text-white">
+                        <span aria-hidden="true" className="mr-2 text-lagoon">✓</span>
+                        {us}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -217,55 +246,58 @@ export default function Home() {
         </section>
 
         {/* Founder story */}
-        <section className="bg-paper">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 md:grid-cols-[0.8fr_1.2fr] md:py-24">
-            <Portrait name={FOUNDER.name} photo={FOUNDER.photo} className="aspect-[4/5] w-full max-w-sm" />
+        <section className="relative overflow-hidden bg-navy text-white">
+          <Glow />
+          <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 md:grid-cols-[0.8fr_1.2fr] md:py-24">
+            <div className="relative">
+              <Portrait name={FOUNDER.name} photo={FOUNDER.photo} className="aspect-[4/5] w-full max-w-sm" />
+              <span className="sticker absolute -right-2 top-6 rotate-3 bg-sunrise text-navy md:right-6">20+ years</span>
+              <span className="sticker absolute -left-2 bottom-10 -rotate-3 bg-coral text-navy">800+ founders</span>
+            </div>
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-teal">Built by someone who sat on the other side of the table</p>
-              <blockquote className="mt-4 font-display text-2xl font-bold leading-snug md:text-3xl">“{FOUNDER.pullQuote}”</blockquote>
-              <p className="mt-6 text-lg leading-relaxed text-muted">{FOUNDER.short}</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sunrise">Built from the buyer&apos;s side of the table</p>
+              <blockquote className="mt-4 font-display text-3xl font-bold leading-snug md:text-4xl">“{FOUNDER.pullQuote}”</blockquote>
+              <p className="mt-6 text-lg leading-relaxed text-mist">{FOUNDER.short}</p>
               <p className="mt-5 font-semibold">
-                {FOUNDER.name} <span className="font-normal text-muted">· {FOUNDER.title}</span>
+                {FOUNDER.name} <span className="font-normal text-mist">· {FOUNDER.title}</span>
               </p>
-              <a href="/about/" className="mt-6 inline-block font-semibold text-teal underline-offset-4 hover:underline">
-                Read our story
+              <a href="/about/" className="group mt-6 inline-flex items-center gap-2 font-bold text-sunrise">
+                Read the story <Arrow className="h-5 w-5 transition group-hover:translate-x-1" />
               </a>
             </div>
           </div>
         </section>
 
         {/* Method */}
-        <section className="bg-white">
-          <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The Founder Trajectory™ Method</h2>
-            <p className="mt-3 max-w-2xl text-muted">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
-            <ol className="relative mt-12 grid gap-10 md:grid-cols-4 md:gap-6">
-              <span aria-hidden="true" className="absolute left-0 right-0 top-6 hidden h-[3px] rounded-full md:block" style={{ background: "linear-gradient(90deg,#E8603C,#F4B740,#22B8B0)" }} />
-              {METHOD.map(([name, text], i) => (
-                <li key={name} className="relative">
-                  <span className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-navy font-display text-lg font-bold text-gold-soft ring-4 ring-white">{i + 1}</span>
-                  <p className="mt-5 font-display text-2xl font-bold">{name}</p>
-                  <p className="mt-2 text-muted">{text}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
+        <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+          <h2 className="font-display text-4xl font-extrabold tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>The Founder Trajectory™ Method</h2>
+          <p className="mt-3 max-w-2xl text-lg text-muted">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
+          <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {METHOD.map(([name, text], i) => (
+              <li key={name} className={`lift rounded-[2rem] p-7 text-navy ${BLOCKS[i]}`}>
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-navy font-display text-lg font-bold text-white">{i + 1}</span>
+                <p className="mt-6 font-display text-3xl font-extrabold" style={{ fontWeight: 800 }}>{name}</p>
+                <p className="mt-2 text-navy/85">{text}</p>
+              </li>
+            ))}
+          </ol>
         </section>
 
         {/* Trajectory + generations */}
         <section className="relative overflow-hidden bg-navy text-white">
           <Glow />
           <div className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <h2 className="max-w-3xl font-display text-3xl font-bold tracking-tight md:text-4xl">For every generation of founder, at every stage</h2>
-            <p className="mt-3 max-w-2xl text-mist">Every business is somewhere on this path, from first idea to exit. Founder Trajectory™ shows where you are and what it takes to reach the next stage.</p>
+            <h2 className="max-w-3xl font-display text-4xl font-extrabold tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>
+              For every generation of founder. <span className="text-gradient">Every stage.</span>
+            </h2>
             <div className="mt-8">
               <Trajectory />
             </div>
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {GENERATIONS.map((g) => (
-                <div key={g.who} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                  <p className="font-display text-lg font-bold text-gold-soft">{g.who}</p>
-                  <p className="mt-2 text-mist">{g.text}</p>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {GENERATIONS.map((g, i) => (
+                <div key={g.who} className="lift rounded-[2rem] bg-white p-7 text-navy">
+                  <span className={`sticker -rotate-2 text-navy ${BLOCKS[i]}`}>{g.who}</span>
+                  <p className="mt-4 text-lg">{g.text}</p>
                 </div>
               ))}
             </div>
@@ -274,16 +306,20 @@ export default function Home() {
 
         {/* Product */}
         <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-          <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">One place to plan, track and get coached</h2>
-          <p className="mt-3 max-w-2xl text-muted">RENZOLO OS™ powers Founder Trajectory™. These are real screens from a sample business.</p>
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <figure>
-              <Screen src="/img/screen-market.jpg" alt="Market Intelligence: a researched brief for the founder's industry and country, with sources" />
-              <figcaption className="mt-3 font-semibold">Market Intelligence <span className="font-normal text-muted">· your market, researched and tied to your plan</span></figcaption>
+          <h2 className="font-display text-4xl font-extrabold tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>
+            Plan it. Track it. <span className="text-gradient">Get coached.</span>
+          </h2>
+          <p className="mt-3 max-w-2xl text-lg text-muted">RENZOLO OS™ powers Founder Trajectory™. Real screens from a sample business.</p>
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            <figure className="lift rounded-[2rem] bg-lagoon p-4">
+              <Screen src="/img/screen-market.jpg" alt="Market Intelligence: a researched brief for the founder's industry and country, with sources" className="!border-0 !shadow-none" />
+              <figcaption className="px-2 pt-4 font-display text-xl font-bold text-navy">Market Intelligence</figcaption>
+              <p className="px-2 pb-2 text-navy/80">Your market, researched and tied to your plan.</p>
             </figure>
-            <figure>
-              <Screen src="/img/screen-aicoach.jpg" alt="The AI coach: questions answered with local to global insight and dated actions" />
-              <figcaption className="mt-3 font-semibold">AI coach <span className="font-normal text-muted">· local, national, regional and global insight</span></figcaption>
+            <figure className="lift rounded-[2rem] bg-coral p-4">
+              <Screen src="/img/screen-aicoach.jpg" alt="The AI coach: questions answered with local to global insight and dated actions" className="!border-0 !shadow-none" />
+              <figcaption className="px-2 pt-4 font-display text-xl font-bold text-navy">AI coach</figcaption>
+              <p className="px-2 pb-2 text-navy/80">Local, national, regional and global insight, any time.</p>
             </figure>
           </div>
         </section>
@@ -291,18 +327,16 @@ export default function Home() {
         {/* Offers */}
         <section className="bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Ways to work with us</h2>
-            <p className="mt-3 max-w-2xl text-muted">Start free. Go as deep as your business needs.</p>
-            <ul className="mt-10 divide-y divide-mist border-y border-mist">
-              {OFFERS.map((o) => (
-                <li key={o.name} className="grid gap-3 py-7 md:grid-cols-[15rem_1fr_11rem] md:items-center md:gap-10">
-                  <div>
-                    <p className="font-display text-xl font-bold">{o.name}</p>
-                    <p className="mt-1 text-sm font-semibold text-teal">{o.price}</p>
-                  </div>
-                  <p className="max-w-xl text-muted">{o.what}</p>
-                  <a href={o.href} className="justify-self-start rounded-full border-2 border-navy px-5 py-2.5 text-sm font-semibold text-navy hover:bg-navy hover:text-white md:justify-self-end">
-                    {o.action}
+            <h2 className="font-display text-4xl font-extrabold tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>Ways to work with us</h2>
+            <p className="mt-3 max-w-2xl text-lg text-muted">Start free. Go as deep as your business needs.</p>
+            <ul className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {OFFERS.map((o, i) => (
+                <li key={o.name} className="lift flex flex-col rounded-[2rem] border-2 border-navy bg-paper p-7">
+                  <span className={`sticker self-start text-navy ${BLOCKS[i % BLOCKS.length]}`}>{o.price}</span>
+                  <p className="mt-5 font-display text-2xl font-bold">{o.name}</p>
+                  <p className="mt-2 text-muted">{o.what}</p>
+                  <a href={o.href} className="group mt-auto inline-flex items-center gap-2 pt-6 font-bold text-navy">
+                    {o.action} <Arrow className="h-5 w-5 transition group-hover:translate-x-1" />
                   </a>
                 </li>
               ))}
@@ -313,14 +347,18 @@ export default function Home() {
         {/* Markets */}
         <section className="bg-panel text-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-20">
-            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Built for Africa&apos;s founders, starting in South Africa and Kenya</h2>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight md:text-5xl" style={{ fontWeight: 800 }}>
+              Built for Africa&apos;s founders. <span className="text-gradient">Starting in South Africa and Kenya.</span>
+            </h2>
             <p className="mt-3 max-w-2xl text-mist">Prices in US dollars. Pay by card or mobile money.</p>
-            <div className="mt-10 grid gap-px overflow-hidden rounded-2xl bg-navy sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {MARKETS.map((m) => (
-                <a key={m.name} href={m.href} className="group bg-panel p-7 hover:bg-[#173651]">
+                <a key={m.name} href={m.href} className="lift group rounded-[2rem] bg-navy p-7">
                   <p className="font-display text-2xl font-bold">{m.name}</p>
                   <p className="mt-2 text-sm text-mist">{m.note}</p>
-                  <p className="mt-6 text-sm font-semibold text-gold-soft group-hover:underline">Start your Snapshot</p>
+                  <p className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-sunrise">
+                    Start your Snapshot <Arrow className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </p>
                 </a>
               ))}
             </div>
@@ -337,7 +375,7 @@ export default function Home() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={e.photo} alt={e.name} className="h-16 w-16 shrink-0 rounded-full object-cover" />
                   ) : (
-                    <span aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-navy font-display text-lg font-bold text-gold-soft">
+                    <span aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-navy font-display text-lg font-bold text-sunrise">
                       {e.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
                     </span>
                   )}
@@ -354,12 +392,14 @@ export default function Home() {
           </section>
         )}
 
-        <SignalBand dark />
-        <section className="relative overflow-hidden bg-gold">
-          <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-14 md:flex-row md:items-center md:justify-between">
-            <p className="max-w-2xl font-display text-3xl font-bold leading-tight text-navy md:text-4xl">Seven minutes to know where your business stands.</p>
-            <a href={appLink("/snapshot", "home_footer_band")} className="shrink-0 rounded-full bg-navy px-7 py-4 text-center text-lg font-semibold text-white">
-              Take the free Snapshot
+        {/* Closing band */}
+        <section className="bg-gradient-to-r from-coral via-sunrise to-lagoon">
+          <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-16 md:flex-row md:items-center md:justify-between">
+            <p className="max-w-2xl font-display text-4xl font-extrabold leading-tight text-navy md:text-5xl" style={{ fontWeight: 800 }}>
+              Seven minutes to know where your business stands.
+            </p>
+            <a href={appLink("/snapshot", "home_footer_band")} className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-navy px-8 py-4 text-lg font-bold text-white">
+              Take the free Snapshot <Arrow className="h-5 w-5 transition group-hover:translate-x-1" />
             </a>
           </div>
         </section>

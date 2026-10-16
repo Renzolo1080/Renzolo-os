@@ -159,7 +159,7 @@ export function Screen({ src, alt, className = "" }: { src: string; alt: string;
         <span className="h-2 w-2 rounded-full bg-lagoon/70" />
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="block w-full rounded-lg" width={1280} height={800} loading="lazy" />
+      <img src={src} alt={alt} className="block w-full rounded-lg" width={1280} height={800} />
     </div>
   );
 }
@@ -184,5 +184,49 @@ export function Portrait({ name, photo, className = "" }: { name: string; photo?
         {initials}
       </span>
     </div>
+  );
+}
+
+/** A scrolling ticker of short phrases. Decorative copy is repeated for the
+ * loop; screen readers get it once. */
+export function Marquee({ items, className = "" }: { items: string[]; className?: string }) {
+  const row = (hidden: boolean) => (
+    <ul aria-hidden={hidden || undefined} className="flex shrink-0 items-center">
+      {items.map((t) => (
+        <li key={t} className="flex items-center whitespace-nowrap px-6 font-display text-lg font-bold md:text-xl">
+          {t}
+          <svg aria-hidden="true" viewBox="0 0 20 20" className="ml-12 h-4 w-4">
+            <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor" />
+          </svg>
+        </li>
+      ))}
+    </ul>
+  );
+  return (
+    <div className={`overflow-hidden py-4 ${className}`}>
+      <div className="marquee">
+        {row(false)}
+        {row(true)}
+      </div>
+    </div>
+  );
+}
+
+/** Rotating word for headlines (first word shows when motion is off). */
+export function Rotator({ words, className = "" }: { words: string[]; className?: string }) {
+  return (
+    <span className={`rotator ${className}`}>
+      {words.map((w) => (
+        <span key={w}>{w}</span>
+      ))}
+    </span>
+  );
+}
+
+export function Arrow({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
   );
 }

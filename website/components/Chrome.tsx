@@ -25,7 +25,7 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
             Log in
           </a>
         </nav>
-        <a href={appLink("/snapshot", campaign)} className="rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#ad7b24]">
+        <a href={appLink("/snapshot", campaign)} className="rounded-full bg-gradient-to-r from-coral via-sunrise to-lagoon px-5 py-2.5 text-sm font-bold text-navy hover:brightness-110">
           Free Readiness Snapshot
         </a>
       </div>

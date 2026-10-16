@@ -54,7 +54,7 @@ export function SiteHeader() {
             <a href="/login" className="text-cream hover:text-white">
               Log in
             </a>
-            <a href="/snapshot" className="hidden rounded-lg bg-gold px-4 py-2 font-semibold text-white sm:inline-block">
+            <a href="/snapshot" className="hidden rounded-full bg-gradient-to-r from-coral via-sunrise to-lagoon px-4 py-2 font-bold text-navy hover:brightness-110 sm:inline-block">
               Free Snapshot
             </a>
           </nav>
