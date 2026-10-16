@@ -7,12 +7,12 @@ import { Glow, OutcomeChips, ProductShowcase, SignalBand } from "@/components/br
 const WHY = [
   {
     title: "Built around the outcome you need",
-    text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it.",
+    text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it. The approach behind 800+ founders trained in 19 African countries.",
     accent: "#E8603C",
   },
   {
     title: "Built from the buyer's side of the table",
-    text: "Readiness checked against what procurement teams, lenders and investors look for, by a founder who has developed suppliers for large buyers.",
+    text: "Readiness checked against what procurement teams, lenders and investors look for, by a founder with 20+ years developing suppliers for global buyers across Africa, Europe, the Americas and India.",
     accent: "#F4B740",
   },
   {

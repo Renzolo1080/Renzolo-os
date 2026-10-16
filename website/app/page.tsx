@@ -1,7 +1,7 @@
 import { Header, Footer } from "@/components/Chrome";
 import { Trajectory } from "@/components/Trajectory";
 import { Glow, OutcomeChips, OUTCOMES, Portrait, ProductShowcase, Screen, SignalBand } from "@/components/Visuals";
-import { FOUNDER } from "@/lib/story";
+import { AFFILIATION_NOTE, FOUNDER, PROOF_STATS, WHY_PROOF } from "@/lib/story";
 import { APP_URL, appLink } from "@/lib/site";
 
 const OFFERS = [
@@ -63,16 +63,19 @@ const WHY = [
     title: "Built around the outcome you need",
     text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it. Team operating systems start from meetings and quarterly priorities. We start from the yes you need.",
     accent: "#E8603C",
+    proof: WHY_PROOF.outcome,
   },
   {
     title: "Built from the buyer's side of the table",
     text: "Our founder has assessed and developed suppliers for large buyers and connected them to contracts. Your readiness is checked against what procurement teams, lenders and investors actually look for: capability, compliance, finance, evidence and capacity.",
     accent: "#F4B740",
+    proof: WHY_PROOF.buyer,
   },
   {
     title: "AI and human coaching, at founder prices",
     text: "One founder, one price in US dollars, from $15 a month. An AI coach that knows your plan and brings local to global insight, plus one-on-one coaching when the decision is big. No team seats to buy.",
     accent: "#22B8B0",
+    proof: WHY_PROOF.price,
   },
 ];
 
@@ -175,9 +178,19 @@ export default function Home() {
                   <span aria-hidden="true" className="block h-1.5 w-12 rounded-full" style={{ background: w.accent, boxShadow: `0 0 18px ${w.accent}` }} />
                   <h3 className="mt-5 font-display text-xl font-bold">{w.title}</h3>
                   <p className="mt-3 leading-relaxed text-mist">{w.text}</p>
+                  <p className="mt-5 border-t border-white/10 pt-4 text-sm font-semibold text-gold-soft">{w.proof}</p>
                 </div>
               ))}
             </div>
+            <div className="mt-12 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+              {PROOF_STATS.map((p) => (
+                <div key={p.label} className="bg-navy/80 p-6">
+                  <p className="text-gradient font-display text-5xl font-extrabold" style={{ fontWeight: 800 }}>{p.figure}</p>
+                  <p className="mt-2 text-sm text-mist">{p.label}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-mist/70">{AFFILIATION_NOTE}</p>
             <div className="mt-12 overflow-x-auto rounded-3xl border border-white/10">
               <table className="w-full min-w-[560px] text-left text-sm md:text-base">
                 <thead>

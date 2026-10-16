@@ -1,6 +1,6 @@
 import { Header, Footer } from "@/components/Chrome";
 import { Glow, OutcomeChips, Portrait, SignalBand } from "@/components/Visuals";
-import { CREDENTIALS, FOUNDER } from "@/lib/story";
+import { AFFILIATION_NOTE, CREDENTIALS, FOUNDER, PROOF_STATS, TRACK_RECORD } from "@/lib/story";
 import { appLink } from "@/lib/site";
 
 export const metadata = { title: "About", description: "Customer, capital and investor readiness for founders and suppliers, built by someone who has assessed and developed suppliers for large buyers. Founder Trajectory™, powered by RENZOLO OS™." };
@@ -52,6 +52,33 @@ export default function AboutPage() {
               <blockquote className="font-display text-xl font-bold leading-snug md:text-2xl">“{FOUNDER.generationsQuote}”</blockquote>
               <figcaption className="mt-4 text-sm text-mist">Lorenzo Bell Jr., in “Building Tomorrow&apos;s Supply Chain”</figcaption>
             </figure>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden bg-navy text-white">
+          <Glow />
+          <div className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The proof behind the method</h2>
+            <div className="mt-10 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+              {PROOF_STATS.map((p) => (
+                <div key={p.label} className="bg-navy/80 p-6">
+                  <p className="text-gradient font-display text-5xl font-extrabold" style={{ fontWeight: 800 }}>{p.figure}</p>
+                  <p className="mt-2 text-sm text-mist">{p.label}</p>
+                </div>
+              ))}
+            </div>
+            <ol className="mt-12 space-y-0 border-l-2 border-white/15">
+              {TRACK_RECORD.map((t) => (
+                <li key={t.org + t.years} className="relative pb-9 pl-8 last:pb-0">
+                  <span aria-hidden="true" className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-sunrise ring-4 ring-navy" />
+                  <p className="text-sm font-semibold uppercase tracking-wider text-gold-soft">{t.years}</p>
+                  <p className="mt-1 font-display text-xl font-bold">{t.role}</p>
+                  <p className="font-semibold text-mist">{t.org}</p>
+                  <p className="mt-2 max-w-3xl text-mist">{t.text}</p>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-10 max-w-3xl text-xs text-mist/70">{AFFILIATION_NOTE}</p>
           </div>
         </section>
 
