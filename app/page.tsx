@@ -54,7 +54,7 @@ export default function HomePage() {
         {/* The method */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal">How it works</p>
-          <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">The Founder Trajectory™ method</h2>
+          <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">The Founder Trajectory™ Method</h2>
           <p className="mt-3 max-w-2xl text-ink-soft">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
           <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {METHOD.map((m, i) => (

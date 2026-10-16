@@ -19,7 +19,7 @@ export default function ProgramsPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Founder Trajectory™ Academy</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-bold leading-tight">Grow alongside founders who are building too.</h1>
           <p className="mt-4 max-w-2xl text-cream/85">
-            Academy cohorts are structured, self-paced programs with live sessions and coaching, built on the Founder Trajectory™ method: Evaluate,
+            Academy cohorts are structured, self-paced programs with live sessions and coaching, built on the Founder Trajectory™ Method: Evaluate,
             Evolve, Execute, Elevate. You work through your own growth and readiness plan, together with a group of founders.
           </p>
         </div>
