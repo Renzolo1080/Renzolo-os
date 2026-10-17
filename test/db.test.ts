@@ -221,7 +221,9 @@ async function suite(label: string, files: string[]) {
   r = await run("anon", null, `insert into quiz_leads (email,answers,score,tier) values ('q@x','{}',1,'t')`);
   assert(r.ok, "anonymous visitor submits a quiz lead", r);
   r = await run("anon", null, `select * from profiles`);
-  assert(r.ok && r.rows.length === 0, "anonymous visitor reads no profiles", r);
+  // Refused either way: an empty result, or (since 2026-10-16, when signed-out
+  // visitors lost access to is_staff()) a permission error.
+  assert(r.rows.length === 0 && (r.ok || /permission denied/.test(r.err)), "anonymous visitor reads no profiles", r);
 
   // ------------------------------------------------------------------
   // Payment functions (the all-or-nothing grant)
@@ -515,6 +517,22 @@ async function suite(label: string, files: string[]) {
   await SRV(`delete from subscriptions where founder_id='${B}'`);
   assert((await U(B, `select has_active_subscription() as a`)).rows[0]?.a === false, "no subscription row: no access");
 
+  // ------------------------------------------------------------------
+  // Who can call the helper functions (Supabase security advisor)
+  // ------------------------------------------------------------------
+  for (const fn of ["is_staff()", "is_admin()", "has_active_subscription()", "handle_new_user()"]) {
+    r = await run("anon", null, `select ${fn}`);
+    assert(!r.ok, `signed-out visitors cannot call ${fn}`, r);
+  }
+  r = await U(A, `select handle_new_user()`);
+  assert(!r.ok, "signed-in founders cannot call the sign-up trigger function directly", r);
+  r = await U(M, `select is_staff() as s, is_admin() as a`);
+  assert(r.ok && r.rows[0]?.s === true && r.rows[0]?.a === true, "signed-in admin still gets answers for the access rules", r);
+  r = await U(A, `select id from profiles`);
+  assert(r.ok && r.rows.length === 1, "access rules that use is_staff() still work for founders", r);
+  await db.exec(`insert into auth.users values ('cccccccc-cccc-cccc-cccc-cccccccccccc','new@x','{"full_name":"New"}')`);
+  assert((await one(`select full_name from profiles where id='cccccccc-cccc-cccc-cccc-cccccccccccc'`))?.full_name === "New", "sign-up still creates the profile");
+
   await db.close();
 }
 
@@ -538,6 +556,8 @@ async function main() {
     "supabase/migrations/2026-10-14_growth.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
+    "supabase/migrations/2026-10-16_function_privileges.sql",
+    "supabase/migrations/2026-10-16_function_privileges.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }
