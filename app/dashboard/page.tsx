@@ -30,8 +30,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  // Login landing step: the current RENZOLO Network™ Matching Statement
-  // must be acknowledged before the dashboard opens.
+  // Login landing step: founders with the Matching add-on must have
+  // acknowledged the current RENZOLO Network™ Matching Statement.
   if (!(await ensureMatchingAcknowledgment(supabase, user))) redirect("/acknowledge");
 
   const { data: profile } = await supabase.from("profiles").select("dashboard_widgets").eq("id", user.id).single();

@@ -2,10 +2,11 @@
  * every founder acknowledges, the full statement it links to, and the rule
  * for when a founder must acknowledge it again.
  *
- * Changing the full statement means raising MATCHING_STATEMENT_VERSION.
- * Every founder whose latest acknowledgment is for an older version is then
- * asked again on their next visit to the dashboard. The text is a draft for
- * legal review. */
+ * Founders acknowledge it when they add the Matching add-on. Changing the
+ * full statement means raising MATCHING_STATEMENT_VERSION: every founder
+ * with the add-on whose acknowledgment is for an older version is then
+ * asked again on their next visit to the dashboard. The text is a draft
+ * for legal review. */
 
 export const MATCHING_STATEMENT_KEY = "matching" as const;
 export const MATCHING_STATEMENT_VERSION = "1.0";
@@ -67,32 +68,23 @@ export const FULL_STATEMENT: StatementSection[] = [
   },
 ];
 
-/** What the dashboard should do for a founder, given their saved
- * acknowledgment versions for this statement and their sign-up details.
+/** Whether a founder must acknowledge the current statement now.
  *
+ * Only founders with the Matching add-on are ever asked. They acknowledge
+ * at checkout when they add it, and again at login only when the statement
+ * has changed since.
+ *
+ * - "not-needed": no Matching add-on, so the statement doesn't apply.
  * - "acknowledged": they have a row for the current version.
- * - "record-registration": no row yet, but they ticked the box for the
- *   current version when they registered (saved with the sign-up, before
- *   they could be logged in). The row is written now.
  * - "ask": send them to the acknowledgment step. */
-export type AckDecision =
-  | { kind: "acknowledged" }
-  | { kind: "record-registration"; acknowledgedAt: string }
-  | { kind: "ask" };
+export type AckDecision = { kind: "not-needed" } | { kind: "acknowledged" } | { kind: "ask" };
 
-export function decideAcknowledgment(
-  savedVersions: string[],
-  userMetadata: Record<string, unknown> | null | undefined,
-  now: Date = new Date()
-): AckDecision {
+export function decideAcknowledgment(savedVersions: string[], hasMatchingAddOn: boolean): AckDecision {
+  if (!hasMatchingAddOn) return { kind: "not-needed" };
   if (savedVersions.includes(MATCHING_STATEMENT_VERSION)) return { kind: "acknowledged" };
-  const v = userMetadata?.matching_ack_version;
-  const at = userMetadata?.matching_ack_at;
-  if (v === MATCHING_STATEMENT_VERSION) {
-    const t = typeof at === "string" ? Date.parse(at) : NaN;
-    // Sign-up details come from the browser, so never trust a time in the future.
-    const acknowledgedAt = Number.isFinite(t) && t <= now.getTime() ? new Date(t).toISOString() : now.toISOString();
-    return { kind: "record-registration", acknowledgedAt };
-  }
   return { kind: "ask" };
 }
+
+/** Where an acknowledgment was given. */
+export type AckSource = "checkout" | "login";
+export const ACK_SOURCES: readonly AckSource[] = ["checkout", "login"];

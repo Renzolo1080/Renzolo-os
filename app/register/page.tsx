@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/PasswordInput";
 import { track } from "@/lib/track";
-import { MatchingConcept } from "@/components/MatchingConcept";
-import { MATCHING_STATEMENT_VERSION } from "@/lib/matching-statement";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -13,7 +11,6 @@ export default function RegisterPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const [matchingAck, setMatchingAck] = useState(false);
 
   // Coming from the free Snapshot: fill in the name and email they gave,
   // so their Snapshot is matched to the new account.
@@ -27,10 +24,6 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!matchingAck) {
-      setError("Please read and agree to the RENZOLO Network™ Matching Statement to continue.");
-      return;
-    }
     setStatus("loading");
     setError(null);
     try {
@@ -38,16 +31,7 @@ export default function RegisterPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            full_name: fullName,
-            marketing_consent: marketingConsent,
-            // Saved with the sign-up; written to the acknowledgments table on
-            // the founder's first dashboard visit, once they can be logged in.
-            matching_ack_version: MATCHING_STATEMENT_VERSION,
-            matching_ack_at: new Date().toISOString(),
-          },
-        },
+        options: { data: { full_name: fullName, marketing_consent: marketingConsent } },
       });
       if (error) {
         setError(error.message);
@@ -88,7 +72,7 @@ export default function RegisterPage() {
 
   return (
     <main className="flex min-h-[70vh] items-center justify-center px-4 py-12 sm:px-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
         <h1 className="text-2xl font-bold text-navy">Create your account</h1>
         <p className="text-sm text-ink-soft">Your Founder Trajectory™ starts here.</p>
         <input
@@ -119,7 +103,6 @@ export default function RegisterPage() {
           <input type="checkbox" className="mt-1" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} />
           <span>Email me practical tips for growing my venture. You can unsubscribe at any time.</span>
         </label>
-        <MatchingConcept checked={matchingAck} onChange={setMatchingAck} />
         <p className="text-xs text-ink-soft">
           By creating an account you agree to our <a href="/terms" className="underline">terms</a> and{" "}
           <a href="/privacy" className="underline">privacy policy</a>.
@@ -133,7 +116,7 @@ export default function RegisterPage() {
         </p>
         <button
           type="submit"
-          disabled={status === "loading" || !matchingAck}
+          disabled={status === "loading"}
           className="w-full rounded-lg bg-navy px-6 py-3 text-white font-semibold disabled:opacity-50"
         >
           {status === "loading" ? "Creating account…" : "Create account"}

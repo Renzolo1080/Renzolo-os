@@ -1,4 +1,5 @@
-import { decideAcknowledgment, MATCHING_STATEMENT_VERSION, FULL_STATEMENT, CONCEPT_PARAGRAPHS } from "../lib/matching-statement";
+import { decideAcknowledgment, MATCHING_STATEMENT_VERSION, FULL_STATEMENT, CONCEPT_PARAGRAPHS, ACK_SOURCES } from "../lib/matching-statement";
+import { ensureMatchingAcknowledgment, hasActiveMatchingAddOn } from "../lib/acknowledgment-server";
 
 function assert(cond: boolean, msg: string, detail?: unknown) {
   if (!cond) {
@@ -7,31 +8,33 @@ function assert(cond: boolean, msg: string, detail?: unknown) {
   } else console.log("PASS:", msg);
 }
 
-const now = new Date("2026-10-16T12:00:00Z");
-const V = MATCHING_STATEMENT_VERSION;
+async function main() {
+  const V = MATCHING_STATEMENT_VERSION;
 
-let d = decideAcknowledgment([V], {}, now);
-assert(d.kind === "acknowledged", "a saved row for the current version lets the founder in", d);
+  let d = decideAcknowledgment([], false);
+  assert(d.kind === "not-needed", "founders without the Matching add-on are never asked", d);
+  d = decideAcknowledgment(["0.9"], false);
+  assert(d.kind === "not-needed", "not even after the statement changes", d);
+  d = decideAcknowledgment([V], true);
+  assert(d.kind === "acknowledged", "add-on founders who acknowledged the current version go straight in", d);
+  d = decideAcknowledgment([], true);
+  assert(d.kind === "ask", "add-on founders with no acknowledgment are asked", d);
+  d = decideAcknowledgment(["0.9"], true);
+  assert(d.kind === "ask", "add-on founders are asked again when the statement changes", d);
 
-d = decideAcknowledgment([], {}, now);
-assert(d.kind === "ask", "no row and nothing from sign-up: ask", d);
+  assert(ACK_SOURCES.includes("checkout") && ACK_SOURCES.includes("login") && ACK_SOURCES.length === 2, "acknowledgments come from checkout or login only");
 
-d = decideAcknowledgment(["0.9"], { matching_ack_version: "0.9", matching_ack_at: "2026-10-01T00:00:00Z" }, now);
-assert(d.kind === "ask", "a row or sign-up for an older version: ask again", d);
+  // Until the add-on can be bought, nobody has it, so the dashboard never
+  // asks and never touches the database for this.
+  let queried = false;
+  const fake = { from: () => { queried = true; throw new Error("should not query"); } } as any;
+  assert((await hasActiveMatchingAddOn(fake, "x")) === false, "no founder has the add-on before its checkout exists");
+  assert((await ensureMatchingAcknowledgment(fake, { id: "x" } as any)) === true && !queried, "the dashboard lets everyone through for now, without a database read");
 
-d = decideAcknowledgment([], { matching_ack_version: V, matching_ack_at: "2026-10-15T09:30:00Z" }, now);
-assert(d.kind === "record-registration" && d.acknowledgedAt === "2026-10-15T09:30:00.000Z", "ticked at sign-up: record it with the sign-up time", d);
+  const all = [...CONCEPT_PARAGRAPHS, ...FULL_STATEMENT.map((s) => s.body)].join(" ");
+  assert(/do not guarantee|does not promise/.test(all), "the statement says results are not guaranteed");
+  assert(/not a lender/.test(all), "the statement says RENZOLO is not a lender, broker or adviser");
+  assert(/separate written agreement/.test(all), "no success fee without a separate written agreement");
+}
 
-d = decideAcknowledgment([], { matching_ack_version: V, matching_ack_at: "2027-01-01T00:00:00Z" }, now);
-assert(d.kind === "record-registration" && d.acknowledgedAt === now.toISOString(), "a sign-up time in the future is replaced with now", d);
-
-d = decideAcknowledgment([], { matching_ack_version: V, matching_ack_at: "not a date" }, now);
-assert(d.kind === "record-registration" && d.acknowledgedAt === now.toISOString(), "an unreadable sign-up time is replaced with now", d);
-
-d = decideAcknowledgment([], null, now);
-assert(d.kind === "ask", "missing sign-up details: ask", d);
-
-const all = [...CONCEPT_PARAGRAPHS, ...FULL_STATEMENT.map((s) => s.body)].join(" ");
-assert(/do not guarantee|does not promise/.test(all), "the statement says results are not guaranteed");
-assert(/not a lender/.test(all), "the statement says RENZOLO is not a lender, broker or adviser");
-assert(/separate written agreement/.test(all), "no success fee without a separate written agreement");
+main();

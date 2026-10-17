@@ -1017,7 +1017,7 @@ create table if not exists acknowledgments (
   statement text not null check (statement in ('matching')),
   version text not null check (char_length(version) between 1 and 20),
   acknowledged_at timestamptz not null default now(),
-  source text not null default 'login' check (source in ('registration', 'login')),
+  source text not null default 'login' check (source in ('checkout', 'login')),
   user_agent text check (user_agent is null or char_length(user_agent) <= 400),
   unique (founder_id, statement, version)
 );

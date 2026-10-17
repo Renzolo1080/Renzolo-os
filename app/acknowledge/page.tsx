@@ -5,8 +5,9 @@ import { AcknowledgeForm } from "./AcknowledgeForm";
 
 export const metadata = { title: "Before you continue · Founder Trajectory™" };
 
-/** Login landing step: a founder who hasn't acknowledged the current
- * Matching Statement sees it here before their dashboard. */
+/** Login landing step: a founder with the Matching add-on who hasn't
+ * acknowledged the current Matching Statement sees it here before their
+ * dashboard. Everyone else goes straight to the dashboard. */
 export default async function AcknowledgePage() {
   const supabase = createClient();
   const {

@@ -19,7 +19,7 @@ export function AcknowledgeForm() {
       const res = await fetch("/api/acknowledgments", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ version: MATCHING_STATEMENT_VERSION }),
+        body: JSON.stringify({ version: MATCHING_STATEMENT_VERSION, source: "login" }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -39,7 +39,9 @@ export function AcknowledgeForm() {
     <main className="flex min-h-[70vh] items-center justify-center px-4 py-12 sm:px-6">
       <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
         <h1 className="text-2xl font-bold text-navy">Before you continue</h1>
-        <p className="text-sm text-ink-soft">Please read and acknowledge how RENZOLO Network™ Matching works.</p>
+        <p className="text-sm text-ink-soft">
+          The RENZOLO Network™ Matching Statement has been updated. As a Matching subscriber, please read and acknowledge it to continue.
+        </p>
         <MatchingConcept checked={checked} onChange={setChecked} />
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button

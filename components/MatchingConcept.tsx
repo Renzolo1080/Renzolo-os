@@ -1,9 +1,11 @@
 import { CONCEPT_PARAGRAPHS, CONCEPT_TITLE, MATCHING_STATEMENT_PATH } from "@/lib/matching-statement";
 
 /** The short RENZOLO Network™ Matching concept statement with its required
- * acknowledgment box. Used on the registration form and the login
- * acknowledgment step. The full statement opens in a new tab so a
- * half-filled form is never lost. */
+ * acknowledgment box. Used on the login acknowledgment step and, once it
+ * exists, the Matching add-on checkout (keep Pay disabled until ticked,
+ * then record it with recordMatchingAcknowledgment, source "checkout").
+ * The full statement opens in a new tab so a half-filled form is never
+ * lost. */
 export function MatchingConcept({
   checked,
   onChange,

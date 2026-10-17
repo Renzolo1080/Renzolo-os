@@ -526,6 +526,11 @@ async function suite(label: string, files: string[]) {
   assert(!r.ok, "founder cannot acknowledge for someone else");
   r = await U(A, `insert into acknowledgments (founder_id,statement,version) values ('${A}','other','1.0')`);
   assert(!r.ok, "only known statements can be acknowledged");
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','0.9','registration')`);
+  assert(!r.ok, "acknowledgments come only from checkout or login");
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','0.9','checkout') returning id`);
+  assert(r.ok, "founder records an acknowledgment at the add-on checkout", r);
+  await SRV(`delete from acknowledgments where founder_id='${A}' and version='0.9'`);
   r = await U(B, `select id from acknowledgments`);
   assert(r.ok && r.rows.length === 0, "other founder cannot read that acknowledgment", r);
   r = await U(A, `select version, source from acknowledgments`);
