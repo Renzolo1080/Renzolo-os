@@ -515,6 +515,34 @@ async function suite(label: string, files: string[]) {
   await SRV(`delete from subscriptions where founder_id='${B}'`);
   assert((await U(B, `select has_active_subscription() as a`)).rows[0]?.a === false, "no subscription row: no access");
 
+  // ------------------------------------------------------------------
+  // Statement acknowledgments
+  // ------------------------------------------------------------------
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','1.0','login') returning id`);
+  assert(r.ok, "founder records own acknowledgment", r);
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version) values ('${A}','matching','1.0')`);
+  assert(!r.ok, "the same version can't be acknowledged twice");
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version) values ('${B}','matching','1.0')`);
+  assert(!r.ok, "founder cannot acknowledge for someone else");
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version) values ('${A}','other','1.0')`);
+  assert(!r.ok, "only known statements can be acknowledged");
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','0.9','registration')`);
+  assert(!r.ok, "acknowledgments come only from checkout or login");
+  r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','0.9','checkout') returning id`);
+  assert(r.ok, "founder records an acknowledgment at the add-on checkout", r);
+  await SRV(`delete from acknowledgments where founder_id='${A}' and version='0.9'`);
+  r = await U(B, `select id from acknowledgments`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read that acknowledgment", r);
+  r = await U(A, `select version, source from acknowledgments`);
+  assert(r.ok && r.rows.length === 1 && r.rows[0].source === "login", "founder reads own acknowledgment", r);
+  r = await U(M, `select id from acknowledgments where founder_id='${A}'`);
+  assert(r.ok && r.rows.length === 1, "admin reads founders' acknowledgments", r);
+  r = await U(A, `update acknowledgments set version='9.9' where founder_id='${A}'`);
+  assert(!r.ok || r.n === 0, "an acknowledgment can't be changed afterwards", r);
+  r = await U(A, `delete from acknowledgments where founder_id='${A}'`);
+  assert(!r.ok || r.n === 0, "an acknowledgment can't be deleted from the browser", r);
+  assert((await one(`select count(*)::int as n from acknowledgments where founder_id='${A}' and version='1.0'`))?.n === 1, "the acknowledgment is still there, unchanged");
+
   await db.close();
 }
 
@@ -538,6 +566,8 @@ async function main() {
     "supabase/migrations/2026-10-14_growth.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
+    "supabase/migrations/2026-10-16_acknowledgments.sql",
+    "supabase/migrations/2026-10-16_acknowledgments.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }
