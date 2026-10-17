@@ -18,6 +18,7 @@ import { ensureProfileExtras, readAttribution, publicAppUrl } from "@/lib/growth
 import { InviteCard } from "@/components/InviteCard";
 import { PurchaseTracker } from "@/components/PurchaseTracker";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
+import { ensureMatchingAcknowledgment } from "@/lib/acknowledgment-server";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -28,6 +29,10 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  // Login landing step: the current RENZOLO Network™ Matching Statement
+  // must be acknowledged before the dashboard opens.
+  if (!(await ensureMatchingAcknowledgment(supabase, user))) redirect("/acknowledge");
 
   const { data: profile } = await supabase.from("profiles").select("dashboard_widgets").eq("id", user.id).single();
   const widgets: string[] = profile?.dashboard_widgets ?? ["reminders", "valuation", "goalsProgress", "progressOverview"];

@@ -1006,3 +1006,33 @@ revoke all on function fulfil_payment(uuid, text, numeric, text, text, timestamp
 grant execute on function grant_referral_reward(uuid, uuid, timestamptz) to service_role;
 grant execute on function apply_pending_referral_rewards(uuid, timestamptz) to service_role;
 grant execute on function fulfil_payment(uuid, text, numeric, text, text, timestamptz) to service_role;
+
+-- =====================================================================
+-- Statement acknowledgments (same as supabase/migrations/2026-10-16_acknowledgments.sql).
+-- =====================================================================
+
+create table if not exists acknowledgments (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  statement text not null check (statement in ('matching')),
+  version text not null check (char_length(version) between 1 and 20),
+  acknowledged_at timestamptz not null default now(),
+  source text not null default 'login' check (source in ('registration', 'login')),
+  user_agent text check (user_agent is null or char_length(user_agent) <= 400),
+  unique (founder_id, statement, version)
+);
+
+alter table acknowledgments enable row level security;
+
+do $$ begin
+  create policy "acknowledgments: self or staff can read" on acknowledgments for select
+    using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create policy "acknowledgments: self can add" on acknowledgments for insert
+    with check (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+
+-- A record of agreement must not change after the fact.
+revoke update, delete on acknowledgments from authenticated, anon;
