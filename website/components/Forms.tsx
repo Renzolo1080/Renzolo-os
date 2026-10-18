@@ -127,3 +127,53 @@ export function ContactForm() {
     </form>
   );
 }
+
+/** 2. The free Founder Trajectory(TM) Method guide: name, email and consent,
+ * then the download. Posts to the app's /api/guide. */
+const GUIDE_COUNTRIES = ["Kenya", "South Africa", "Nigeria", "Ghana", "Uganda", "Rwanda", "Tanzania", "Ethiopia", "Zambia", "Zimbabwe", "Botswana", "Egypt", "Morocco", "Senegal", "Côte d'Ivoire", "Other African country", "United States", "United Kingdom"];
+export function GuideForm({ source = "website", pdf = "/guides/founder-trajectory-method.pdf" }: { source?: string; pdf?: string }) {
+  const { state, error, onSubmit } = useSend("/api/guide");
+  if (state === "sent")
+    return (
+      <div className="rounded-card border border-line bg-surface-raised p-6 md:p-8">
+        <p className="font-display text-2xl font-bold">Your guide is ready.</p>
+        <p className="mt-2 text-ink-muted">Download it now. We&apos;ll also send you a few short emails on getting ready for customers, capital and investors. Unsubscribe any time.</p>
+        <a href={pdf} download className="btn-pop mt-6 inline-flex justify-center rounded-pill border-2 border-ink bg-brand px-6 py-3 font-semibold text-on-brand">
+          Download the guide (PDF)
+        </a>
+      </div>
+    );
+  return (
+    <form onSubmit={onSubmit} className="relative grid gap-4 rounded-card border border-line bg-surface-raised p-6 md:p-8">
+      <Trap />
+      <input type="hidden" name="source" value={source} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="grid gap-1.5 text-sm font-semibold">
+          First name
+          <input name="fullName" required autoComplete="given-name" className={field} />
+        </label>
+        <label className="grid gap-1.5 text-sm font-semibold">
+          Country
+          <select name="country" className={field} defaultValue="">
+            <option value="">Choose…</option>
+            {GUIDE_COUNTRIES.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <label className="grid gap-1.5 text-sm font-semibold">
+        Email address
+        <input name="email" type="email" required autoComplete="email" className={field} />
+      </label>
+      <label className="flex items-start gap-3 text-sm text-ink-muted">
+        <input name="consent" type="checkbox" value="yes" required className="mt-0.5 h-4 w-4 accent-[rgb(var(--brand-rgb))]" />
+        <span>Send me the guide and occasional emails from RENZOLO. I can unsubscribe any time. See our <a href={`${APP_URL}/privacy`} className="font-semibold text-teal-text underline">privacy policy</a>.</span>
+      </label>
+      {error && <p role="alert" className="text-sm font-semibold text-brand-text">{error}</p>}
+      <button type="submit" disabled={state === "sending"} className="btn-pop inline-flex justify-center rounded-pill border-2 border-ink bg-brand px-6 py-3 font-semibold text-on-brand disabled:opacity-60">
+        {state === "sending" ? "Sending…" : "Get the free guide"}
+      </button>
+    </form>
+  );
+}

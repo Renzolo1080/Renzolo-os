@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Founder Trajectory™ Method</title>
+<style>
+@font-face { font-family: Bricolage; font-weight: 700; src: url(../website/node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-700-normal.woff2); }
+@font-face { font-family: Bricolage; font-weight: 800; src: url(../website/node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-800-normal.woff2); }
+@font-face { font-family: DM; font-weight: 400; src: url(../website/node_modules/@fontsource/dm-sans/files/dm-sans-latin-400-normal.woff2); }
+@font-face { font-family: DM; font-weight: 600; src: url(../website/node_modules/@fontsource/dm-sans/files/dm-sans-latin-600-normal.woff2); }
+@font-face { font-family: DM; font-weight: 700; src: url(../website/node_modules/@fontsource/dm-sans/files/dm-sans-latin-700-normal.woff2); }
+@page { size: Letter; margin: 0; }
+:root { --navy:#071727; --orange:#ff5a1f; --orange-text:#c4400f; --gold:#ffd43b; --teal:#087f77; --cream:#fff8f0; --tint:#ffefd9; --line:#e9dccb; --muted:#4f5b67; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 8.5in; height: 11in; background: var(--cream); color: var(--navy); font-family: DM, sans-serif; font-size: 10.5pt; line-height: 1.45; position: relative; overflow: hidden; }
+.top { background: var(--navy); color: var(--cream); padding: 0.4in 0.6in 0.34in; position: relative; }
+.eyebrow { font-weight: 700; font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+h1 { font-family: Bricolage; font-weight: 800; font-size: 28pt; line-height: 1.02; letter-spacing: -.02em; margin-top: 8pt; }
+.lead { margin-top: 8pt; font-size: 11pt; color: #d9dde2; max-width: 4.8in; }
+.blocks { position: absolute; right: 0.6in; bottom: -14pt; display: flex; gap: 6pt; }
+.blocks span { width: 46pt; border-radius: 10pt 10pt 4pt 4pt; display: block; }
+.b1 { height: 26pt; background: var(--orange); } .b2 { height: 40pt; background: var(--gold); } .b3 { height: 56pt; background: var(--teal); }
+.wrap { padding: 0.26in 0.6in 0; }
+h2 { font-family: Bricolage; font-weight: 700; font-size: 13pt; letter-spacing: -.01em; margin-bottom: 6pt; }
+.label { font-weight: 700; font-size: 7.5pt; letter-spacing: .14em; text-transform: uppercase; color: var(--orange-text); margin-bottom: 4pt; }
+.outcomes { display: grid; grid-template-columns: repeat(3,1fr); gap: 8pt; margin-bottom: 10pt; }
+.out { border-radius: 12pt; padding: 7pt 10pt; font-weight: 700; font-size: 10.5pt; }
+.o1 { background: var(--orange); color: var(--navy); } .o2 { background: var(--gold); color: var(--navy); } .o3 { background: var(--teal); color: #fff; }
+.out small { display:block; font-weight: 400; font-size: 8.5pt; margin-top: 2pt; opacity: .9; }
+.steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 8pt; margin-bottom: 10pt; }
+.step { background: #fff; border: 1px solid var(--line); border-radius: 12pt; padding: 8pt 10pt; }
+.step .n { font-family: Bricolage; font-weight: 800; font-size: 15pt; color: var(--orange-text); line-height: 1; }
+.step h3 { font-family: Bricolage; font-weight: 700; font-size: 12.5pt; margin: 4pt 0 3pt; }
+.step p { font-size: 8.4pt; color: var(--muted); line-height: 1.4; }
+.score { display: grid; grid-template-columns: 1.55fr 1fr; gap: 12pt; margin-bottom: 10pt; }
+table { width: 100%; border-collapse: collapse; font-size: 8.8pt; background: #fff; border-radius: 12pt; overflow: hidden; border: 1px solid var(--line); }
+td { padding: 4pt 9pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 700; width: 1in; color: var(--navy); }
+td:last-child { color: var(--muted); }
+.bands { background: var(--tint); border-radius: 12pt; padding: 10pt 12pt; font-size: 8.8pt; }
+.bands div { display: flex; justify-content: space-between; padding: 2pt 0; border-bottom: 1px dashed var(--line); }
+.bands div:last-child { border-bottom: 0; }
+.bands b { font-weight: 700; }
+.bands p { color: var(--muted); margin-top: 6pt; font-size: 8.3pt; }
+.start { display: grid; grid-template-columns: repeat(3,1fr); gap: 8pt; }
+.card { border: 1.5px solid var(--navy); border-radius: 12pt; padding: 7pt 10pt; background: #fff; }
+.card.hl { background: var(--orange); border-color: var(--navy); }
+.card h3 { font-family: Bricolage; font-weight: 700; font-size: 11.5pt; }
+.card .p { font-weight: 700; font-size: 9pt; color: var(--teal); margin: 1pt 0 3pt; }
+.card.hl .p { color: var(--navy); }
+.card p { font-size: 8.6pt; color: var(--muted); line-height: 1.38; }
+.card.hl p { color: var(--navy); }
+.foot { position: absolute; left: 0; right: 0; bottom: 0; background: var(--navy); color: #c9ced4; padding: 12pt 0.6in; font-size: 8.3pt; display: flex; justify-content: space-between; align-items: center; }
+.foot b { color: var(--cream); font-family: Bricolage; font-size: 11pt; }
+.foot a { color: var(--gold); text-decoration: none; font-weight: 700; }
+</style>
+</head>
+<body>
+  <section class="top">
+    <p class="eyebrow">Founder Trajectory™, powered by RENZOLO OS™</p>
+    <h1>The Founder Trajectory™ Method</h1>
+    <p class="lead">Know exactly where your business stands, build the plan to close the gaps, and get coached to the standard buyers, lenders and investors look for.</p>
+    <div class="blocks"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div>
+  </section>
+
+  <div class="wrap">
+    <p class="label">Three outcomes</p>
+    <h2>Pick the yes you need next.</h2>
+    <div class="outcomes">
+      <div class="out o1">Win more customers<small>Ready for buyers and contracts</small></div>
+      <div class="out o2">Access credit and grants<small>Ready for loans, credit and grants</small></div>
+      <div class="out o3">Attract investment<small>Ready for investors and partners</small></div>
+    </div>
+
+    <p class="label">The method</p>
+    <h2>Evaluate. Evolve. Execute. Elevate.</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Evaluate</h3><p>Take the free Snapshot, then your full Readiness Assessment, and see exactly where you stand and why.</p></div>
+      <div class="step"><div class="n">2</div><h3>Evolve</h3><p>Turn the results into a growth and readiness plan of 90 days to 36 months, built around the gaps that matter.</p></div>
+      <div class="step"><div class="n">3</div><h3>Execute</h3><p>Work the plan from your dashboard with goals, reminders, Lorenzo · AI and live sessions with Lorenzo.</p></div>
+      <div class="step"><div class="n">4</div><h3>Elevate</h3><p>Re-assess, measure your progress and move to your next stage.</p></div>
+    </div>
+
+    <p class="label">How readiness is measured</p>
+    <h2>One Total Readiness Score, five parts.</h2>
+    <div class="score">
+      <table>
+        <tr><td>Strategic</td><td>Is the plan written, measurable, funded and reviewed?</td></tr>
+        <tr><td>Growth</td><td>Can the business deliver and scale?</td></tr>
+        <tr><td>Customer</td><td>Is it ready to win and keep buyers?</td></tr>
+        <tr><td>Capital</td><td>Is it ready for loans, credit and grants?</td></tr>
+        <tr><td>Investment</td><td>Is it ready for investors and partners?</td></tr>
+      </table>
+      <div class="bands">
+        <div><b>Ready</b><span>75 and above</span></div>
+        <div><b>Nearly ready</b><span>60 to 74</span></div>
+        <div><b>Getting ready</b><span>40 to 59</span></div>
+        <div><b>Not yet</b><span>under 40</span></div>
+        <p>Each part has its own score, so you see exactly where to focus next.</p>
+      </div>
+    </div>
+
+    <p class="label">Where to start</p>
+    <h2>Know where you stand in seven minutes.</h2>
+    <div class="start">
+      <div class="card hl"><h3>Free Readiness Snapshot</h3><div class="p">Free · about 7 minutes</div><p>Your Total Readiness Score, your strongest area, the three areas holding you back and your best next move. No account needed.</p></div>
+      <div class="card"><h3>Readiness Assessment</h3><div class="p">$79 one time</div><p>The full report with a valuation range and AI market insight, plus the membership that fits you.</p></div>
+      <div class="card"><h3>Membership</h3><div class="p">From $15 a month</div><p>Your plan, dashboard and tools; on Growth and Elevate, your coaching team: Lorenzo · AI and live sessions with Lorenzo.</p></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span><b>RENZOLO™</b> &nbsp; Built by Lorenzo Bell Jr.: 20+ years developing suppliers and founders.</span>
+    <a href="https://app.renzoloenterprises.com/snapshot?utm_source=guide&amp;utm_medium=pdf&amp;utm_campaign=method_guide">Start free: app.renzoloenterprises.com</a>
+  </div>
+</body>
+</html>

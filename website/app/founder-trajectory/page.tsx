@@ -2,15 +2,15 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
 import { Faq } from "@/components/Faq";
-import { PageEndCta } from "@/components/Flow";
+import { HOW_TO_START, HowToStart, PageEndCta } from "@/components/Flow";
 import { OfferTabs } from "@/components/OfferTabs";
 
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
 const TIERS = [
-  { name: "Essentials", price: "$15 a month", for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools"] },
-  { name: "Growth", price: "$39 a month, billed quarterly", for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "Full, downloadable report with valuation range and market insight", "Advisor review of your report", "Two one-on-one coaching sessions a quarter"] },
-  { name: "Elevate", price: "$149 a month, billed quarterly", for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "Two one-on-one coaching sessions a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
+  { name: "Essentials", start: HOW_TO_START.essentials, price: "$15 a month", for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools"] },
+  { name: "Growth", start: HOW_TO_START.growth, price: "$39 a month, billed quarterly", for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "Full, downloadable report with valuation range and market insight", "Advisor review of your report", "Two one-on-one coaching sessions a quarter"] },
+  { name: "Elevate", start: HOW_TO_START.elevate, price: "$149 a month, billed quarterly", for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "Two one-on-one coaching sessions a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
 ];
 
 export default function FounderTrajectoryPage() {
@@ -69,6 +69,7 @@ export default function FounderTrajectoryPage() {
                       </li>
                     ))}
                   </ul>
+                  <HowToStart text={t.start} dark={i === 1} className="mt-5" />
                 </div>
               ))}
             </div>

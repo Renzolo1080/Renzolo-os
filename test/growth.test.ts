@@ -1,7 +1,7 @@
 import { attributionFromUrl, decodeAttribution, encodeAttribution, newReferralCode } from "../lib/attribution";
 import { buildEmail, dueFollowUp, unsubscribeToken, checkUnsubscribeToken, AREA_TIPS } from "../lib/emails";
 import { sendEmail } from "../lib/email-send";
-import { parseCohortApplication, parseContact } from "../lib/forms";
+import { parseCohortApplication, parseContact, parseGuideRequest } from "../lib/forms";
 import { BLOCK_KEYS } from "../lib/scoring";
 
 function assert(cond: boolean, msg: string, detail?: unknown) {
@@ -72,6 +72,13 @@ async function main() {
   const spam = parseCohortApplication({ fullName: "Bot", email: "a@b.co", cohort: "elevate", website: "http://spam" });
   assert(!spam.ok && (spam as any).error === "spam", "the hidden field catches bots");
   assert(parseContact({ fullName: "Ama", email: "a@b.co", topic: "Partnership", message: "We run a supplier program." }).ok && !parseContact({ fullName: "Ama", email: "a@b.co", topic: "Other", message: "Hello there" }).ok, "contact form checks the topic");
+  const g = parseGuideRequest({ fullName: "Ama", email: "Ama@B.co ", consent: "yes", country: "Kenya", source: "home_guide" });
+  assert(g.ok && g.value.email === "ama@b.co" && g.value.country === "Kenya" && g.value.source === "home_guide", "guide form: valid request, email tidied");
+  assert(!parseGuideRequest({ fullName: "Ama", email: "a@b.co" }).ok, "guide form: needs consent to email");
+  assert(!parseGuideRequest({ fullName: "Ama", email: "not-an-email", consent: "yes" }).ok, "guide form: needs a real email");
+  assert((parseGuideRequest({ fullName: "Ama", email: "a@b.co", consent: "yes", website: "x" }) as any).error === "spam", "guide form: the hidden field catches bots");
+  const gs = parseGuideRequest({ fullName: "Ama", email: "a@b.co", consent: "yes", source: "<script>" });
+  assert(gs.ok && gs.value.source === "website", "guide form: odd sources fall back to website");
   console.log("\nAll growth tests completed.");
 }
 main();

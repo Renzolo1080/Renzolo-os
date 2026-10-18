@@ -230,6 +230,8 @@ export type Tier = {
   prices: Partial<Record<Interval, number>>;
   gets: string[];
   popular?: boolean;
+  /** "How to start" line under the tier. */
+  start?: string;
 };
 
 export function PricingTable({ tiers, appUrl }: { tiers: Tier[]; appUrl: string }) {
@@ -264,7 +266,7 @@ export function PricingTable({ tiers, appUrl }: { tiers: Tier[]; appUrl: string 
               <p className="mt-1 min-h-[1.25rem] text-[13px] font-medium text-ink-muted">
                 {!price ? `Billed ${label[fallback as Interval].toLowerCase()}` : saving > 0 ? `Save $${saving} a year` : "Billed in USD. Cancel anytime."}
               </p>
-              <ul className="mt-6 space-y-2">
+              <ul className="mt-6 flex-1 space-y-2">
                 {t.gets.map((g) => (
                   <li key={g} className="flex gap-2">
                     <span aria-hidden="true" className="font-bold text-teal-text">✓</span>
@@ -272,6 +274,12 @@ export function PricingTable({ tiers, appUrl }: { tiers: Tier[]; appUrl: string 
                   </li>
                 ))}
               </ul>
+              {t.start && (
+                <p className="mt-6 border-t border-line pt-4 text-sm text-ink-muted">
+                  <span className="font-semibold text-brand-text">How to start: </span>
+                  {t.start}
+                </p>
+              )}
               <a
                 href={`${appUrl}/pricing?tier=${t.name.toLowerCase()}&interval=${price ? iv : fallback}&utm_source=website&utm_medium=referral&utm_campaign=home_pricing`}
                 className={`mt-8 inline-flex justify-center rounded-pill px-6 py-3 font-semibold ${t.popular ? "btn-pop border-2 border-ink bg-brand text-on-brand" : "border-[1.5px] border-ink/35 text-ink transition-colors hover:border-ink hover:bg-surface"}`}

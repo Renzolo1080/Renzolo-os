@@ -665,6 +665,22 @@ async function suite(label: string, files: string[]) {
   assert(r.ok && r.rows.length === 1, "access rules that use is_staff() still work for founders", r);
   await db.exec(`insert into auth.users values ('cccccccc-cccc-cccc-cccc-cccccccccccc','new@x','{"full_name":"New"}')`);
   assert((await one(`select full_name from profiles where id='cccccccc-cccc-cccc-cccc-cccccccccccc'`))?.full_name === "New", "sign-up still creates the profile");
+  // Method guide leads: server-written, staff-readable only
+  // ------------------------------------------------------------------
+  r = await run("anon", null, `insert into guide_leads (email, guide_version) values ('x@y.co','2026-10')`);
+  assert(!r.ok, "signed-out visitors cannot write to the guide list directly", r);
+  r = await U(A, `insert into guide_leads (email, guide_version) values ('x@y.co','2026-10')`);
+  assert(!r.ok, "founders cannot write to the guide list from the browser", r);
+  r = await SRV(`insert into guide_leads (email, full_name, guide_version) values ('lead@y.co','Ama','2026-10') returning id`);
+  assert(r.ok, "the server saves a guide download", r);
+  r = await SRV(`insert into guide_leads (email, guide_version) values ('lead@y.co','2026-10')`);
+  assert(!r.ok, "one row per email", r);
+  r = await U(A, `select email from guide_leads`);
+  assert(r.ok && r.rows.length === 0, "founders cannot read the guide list", r);
+  r = await run("anon", null, `select email from guide_leads`);
+  assert(!r.ok || r.rows.length === 0, "signed-out visitors cannot read the guide list", r);
+  r = await U(M, `select email from guide_leads`);
+  assert(r.ok && r.rows.length === 1, "admin reads the guide list", r);
   // Statement acknowledgments
   // ------------------------------------------------------------------
   r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','1.0','login') returning id`);
@@ -729,6 +745,8 @@ async function main() {
     "supabase/migrations/2026-10-16_function_privileges.sql",
     "supabase/migrations/2026-10-16_acknowledgments.sql",
     "supabase/migrations/2026-10-16_acknowledgments.sql",
+    "supabase/migrations/2026-10-20_guide_leads.sql",
+    "supabase/migrations/2026-10-20_guide_leads.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

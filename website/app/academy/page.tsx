@@ -2,15 +2,15 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { InterestForm } from "@/components/Forms";
 import { appLink } from "@/lib/site";
-import { PageEndCta } from "@/components/Flow";
+import { HOW_TO_START, HowToStart, PageEndCta } from "@/components/Flow";
 import { OfferTabs } from "@/components/OfferTabs";
 
 export const metadata = { title: "Founder Trajectory™ Academy", description: "Three development levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months)." };
 
 const PROGRAMS = [
-  { name: "Launch", length: "8 weeks", text: "Self-paced, high-volume programme for early-stage founders: all nine parts of your business model in 8 weeks, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan." },
-  { name: "Build", length: "12 weeks", text: "For businesses with customers: traction first (channels, pricing, cash flow, operations), then readiness for loans, grants, contracts and investors. Live group sessions and coaching." },
-  { name: "Scale", length: "6 months", text: "Selective, hands-on programme to raise capital, scale or win large contracts, with introductions to investors, lenders and buyers. Once a year." },
+  { name: "Launch", start: HOW_TO_START.launch, length: "8 weeks", text: "Self-paced, high-volume programme for early-stage founders: all nine parts of your business model in 8 weeks, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan." },
+  { name: "Build", start: HOW_TO_START.build, length: "12 weeks", text: "For businesses with customers: traction first (channels, pricing, cash flow, operations), then readiness for loans, grants, contracts and investors. Live group sessions and coaching." },
+  { name: "Scale", start: HOW_TO_START.scale, length: "6 months", text: "Selective, hands-on programme to raise capital, scale or win large contracts, with introductions to investors, lenders and buyers. Once a year." },
 ];
 
 export default function AcademyPage() {
@@ -33,6 +33,7 @@ export default function AcademyPage() {
                   <span className="mt-1 block font-display text-2xl font-bold">{p.name}</span>
                 </dt>
                 <dd className="mt-2 text-muted">{p.text}</dd>
+                <dd><HowToStart text={p.start} className="mt-4" /></dd>
               </div>
             ))}
           </dl>

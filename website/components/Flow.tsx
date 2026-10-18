@@ -56,3 +56,23 @@ export function PageEndCta({ campaign, title = "Know where you stand in seven mi
     </section>
   );
 }
+
+/** 3. "How to start" for every offer, so nobody has to guess the first step. */
+export const HOW_TO_START = {
+  assessment: "Buy it and start today. It carries into a membership if you join within 30 days.",
+  essentials: "Take the free Snapshot, then choose Essentials.",
+  growth: "Take the free Snapshot or the $79 assessment, then choose Growth.",
+  elevate: "Take the $79 assessment first. Places are limited.",
+  launch: "Register your interest. We email you when applications open.",
+  build: "For businesses with customers. Register your interest to hear first.",
+  scale: "Apply after your assessment. Selective, once a year.",
+} as const;
+
+export function HowToStart({ text, dark = false, className = "" }: { text: string; dark?: boolean; className?: string }) {
+  return (
+    <p className={`flex gap-2 text-sm ${dark ? "text-mist" : "text-ink-muted"} ${className}`}>
+      <span className={`shrink-0 font-semibold ${dark ? "text-gold-soft" : "text-brand-text"}`}>How to start:</span>
+      <span>{text}</span>
+    </p>
+  );
+}

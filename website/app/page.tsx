@@ -1,7 +1,9 @@
 import { Header, Footer } from "@/components/Chrome";
 import { OsStory, OutcomeFlipCards, PricingTable, ReadinessTicker, RevealOnScroll, SnapshotTaster, StickyMobileCta, type Tier } from "@/components/BrandClient";
 import { Button, DotGrid, Eyebrow, Glow, Portrait, TrajectoryBlocks } from "@/components/Visuals";
-import { ProofBand } from "@/components/Flow";
+import { HOW_TO_START, HowToStart, ProofBand } from "@/components/Flow";
+import { PathChooser, type PathStage } from "@/components/PathChooser";
+import { GuideForm } from "@/components/Forms";
 import { AFFILIATION_NOTE, FOUNDER, RESULTS, TESTIMONIALS } from "@/lib/story";
 import { APP_URL, appLink } from "@/lib/site";
 
@@ -37,11 +39,20 @@ const REASONS = [
 ];
 
 const TIERS: Tier[] = [
-  { name: "Essentials", for: "Know where you stand and work your plan.", prices: { monthly: 15, quarterly: 45, annual: 150 }, gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools"] },
-  { name: "Growth", for: "Go deeper, with coaching to carry out your plan.", prices: { quarterly: 117, annual: 390 }, gets: ["Everything in Essentials", "Full report with valuation range and market insight", "Lorenzo · AI any time, plus plan review", "Two one-on-one coaching sessions a quarter"], popular: true },
-  { name: "Elevate", for: "Hands-on support to raise, scale or win big contracts.", prices: { quarterly: 447, annual: 1490 }, gets: ["Everything in Growth", "Two one-on-one coaching sessions a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
+  { name: "Essentials", for: "Know where you stand and work your plan.", prices: { monthly: 15, quarterly: 45, annual: 150 }, gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools"], start: HOW_TO_START.essentials },
+  { name: "Growth", for: "Go deeper, with coaching to carry out your plan.", prices: { quarterly: 117, annual: 390 }, gets: ["Everything in Essentials", "Full report with valuation range and market insight", "Lorenzo · AI any time, plus plan review", "Two one-on-one coaching sessions a quarter"], popular: true, start: HOW_TO_START.growth },
+  { name: "Elevate", for: "Hands-on support to raise, scale or win big contracts.", prices: { quarterly: 447, annual: 1490 }, gets: ["Everything in Growth", "Two one-on-one coaching sessions a month", "Pitch and investor readiness review", "Priority support. Limited places"], start: HOW_TO_START.elevate },
 ];
 
+/** "Find your path": where the founder is today, and the first step. */
+const PATHS: PathStage[] = [
+  { key: "idea", label: "I have an idea or I'm just starting", who: "No steady customers yet", first: { name: "Free Snapshot", note: "See where you stand in about seven minutes." }, then: { name: "Launch or Essentials", note: "The 8-week Launch cohort, or Essentials from $15 a month." }, start: "Take the free Snapshot, then choose Launch or Essentials.", cta: { label: "Start the free Snapshot", href: appLink("/snapshot", "path_idea") } },
+  { key: "first", label: "I have my first customers", who: "Selling, but not yet steady", first: { name: "Readiness Assessment", note: "The full report, a valuation range and AI market insight, for $79." }, then: { name: "Essentials or Growth", note: "Work the plan, with coaching on Growth." }, start: HOW_TO_START.assessment, cta: { label: "Get the assessment", href: appLink("/pricing", "path_first") } },
+  { key: "growing", label: "I'm growing, with steady customers", who: "Ready to work the plan with a coach", first: { name: "Growth membership", note: "Your plan, dashboard and your coaching team." }, then: { name: "Build cohort", note: "12 weeks: traction first, then readiness for loans, grants and contracts." }, start: HOW_TO_START.growth, cta: { label: "See Growth", href: "#pricing" } },
+  { key: "raise", label: "I'm ready to raise or win big contracts", who: "Capital, investors or large buyers next", first: { name: "Elevate membership", note: "Two coaching sessions a month and a pitch and investor readiness review." }, then: { name: "Scale cohort", note: "6 months, selective, with curated introductions." }, start: HOW_TO_START.elevate, cta: { label: "See Elevate", href: "#pricing" } },
+];
+
+const ACADEMY_START: Record<string, string> = { Launch: HOW_TO_START.launch, Build: HOW_TO_START.build, Scale: HOW_TO_START.scale };
 const ACADEMY = [
   ["Launch", "8 weeks", "Self-paced for early-stage founders: all nine parts of your business model, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan."],
   ["Build", "12 weeks", "For businesses with customers: traction first, then readiness for loans, grants, contracts and investors. Live group sessions and coaching."],
@@ -142,6 +153,21 @@ export default function Home() {
           </div>
         </section>
 
+        {/* 5b. Free method guide (lead capture for founders not ready to assess) */}
+        <section id="guide">
+          <div className={`${SECTION} grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]`}>
+            <div className="reveal">
+              <img src="/img/guide-cover.png" alt="The Founder Trajectory Method guide: three outcomes, four steps, the five parts of the Total Readiness Score and where to start" width={510} height={660} className="mx-auto w-full max-w-[360px] -rotate-2 rounded-card border border-line shadow-card" loading="lazy" />
+            </div>
+            <div>
+              <Eyebrow className="reveal">Free guide</Eyebrow>
+              <h2 className={`reveal mt-2 ${H2}`}>The Founder Trajectory™ Method on one page.</h2>
+              <p className="reveal mt-4 max-w-xl text-lg text-ink-muted">The three outcomes, the four steps, how the Total Readiness Score is measured and where to start. Print it, share it with your team, keep it on your desk.</p>
+              <div className="reveal mt-8"><GuideForm source="home_guide" /></div>
+            </div>
+          </div>
+        </section>
+
         {/* 6. Readiness Snapshot taster */}
         <section>
           <div className={`${SECTION} grid items-center gap-10 lg:grid-cols-[1fr_1.2fr]`}>
@@ -236,6 +262,18 @@ export default function Home() {
         )}
 
         {/* 10. Pricing: the choice (premium) */}
+        {/* 9b. Find your path */}
+        <section id="path">
+          <div className={SECTION}>
+            <Eyebrow className="reveal">Find your path</Eyebrow>
+            <h2 className={`reveal mt-2 max-w-3xl ${H2}`}>Where is your business today?</h2>
+            <p className="reveal mt-4 max-w-2xl text-lg text-ink-muted">Pick the one that fits. We&apos;ll show you the path founders like you take, and the first step.</p>
+            <div className="reveal mt-10">
+              <PathChooser stages={PATHS} fallbackHref={appLink("/snapshot", "path_fallback")} />
+            </div>
+          </div>
+        </section>
+
         <section id="pricing" className="premium bg-surface-tint">
           <div className={SECTION}>
             <Eyebrow className="reveal">Pricing</Eyebrow>
@@ -244,6 +282,7 @@ export default function Home() {
               <div>
                 <p className="font-display text-[32px] font-bold leading-[38px]">Readiness Assessment</p>
                 <p className="mt-1 max-w-xl text-ink-muted">The full report once, with a valuation range, AI market insight for your industry and country, and the plan that fits you. No membership needed.</p>
+                <HowToStart text={HOW_TO_START.assessment} className="mt-3" />
               </div>
               <div className="flex items-center gap-6">
                 <p className="font-display text-5xl font-bold">$79</p>
@@ -268,6 +307,7 @@ export default function Home() {
                   <p className="font-mono text-sm font-medium text-ink-muted">{length}</p>
                   <h3 className="mt-2 font-display text-[32px] font-bold leading-[38px]">{name}</h3>
                   <p className="mt-3 text-ink-muted">{text}</p>
+                  <HowToStart text={ACADEMY_START[name]} className="mt-5 border-t border-line pt-4" />
                 </div>
               ))}
             </div>

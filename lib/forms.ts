@@ -40,3 +40,21 @@ export function parseContact(b: any):
   if (message.length < 5) return { ok: false, error: "Please write a short message." };
   return { ok: true, value: { fullName, email, company: str(b?.company, 160), topic, message } };
 }
+
+/** The free Founder Trajectory(TM) Method guide (website download). The
+ * founder must agree to hear from us: that consent is what lets the
+ * November launch emails reach them (POPIA, Kenya DPA). */
+export const GUIDE_VERSION = "2026-10";
+export function parseGuideRequest(b: any):
+  | { ok: true; value: { fullName: string; email: string; country: string; source: string } }
+  | { ok: false; error: string } {
+  if (str(b?.website, 200)) return { ok: false, error: "spam" };
+  const fullName = str(b?.fullName, 120);
+  const email = str(b?.email, 254).toLowerCase();
+  if (!fullName) return { ok: false, error: "Please enter your first name." };
+  if (!emailOk(email)) return { ok: false, error: "Please enter a valid email address." };
+  if (b?.consent !== "yes" && b?.consent !== true && b?.consent !== "on") return { ok: false, error: "Please tick the box so we can send you the guide." };
+  const country = (COUNTRIES as readonly string[]).includes(b?.country) ? b.country : "";
+  const source = /^[a-z0-9_-]{1,40}$/.test(str(b?.source, 40)) ? str(b?.source, 40) : "website";
+  return { ok: true, value: { fullName, email, country, source } };
+}
