@@ -69,7 +69,7 @@ export default async function AdvisorQueuePage() {
       <div className="mt-12 rounded-2xl bg-navy p-5 text-white">
         <p className="font-semibold">Coaching sessions</p>
         <p className="mt-1 text-sm text-cream/80">Requested and upcoming sessions, prep briefs, notes and founders who need attention.</p>
-        <a href="/coach" className="mt-3 inline-block rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white">
+        <a href="/coach" className="mt-3 inline-block rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
           Open coaching
         </a>
       </div>

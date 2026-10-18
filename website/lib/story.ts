@@ -114,3 +114,21 @@ export const WHY_PROOF = {
   buyer: "Proof: 20+ years developing suppliers for global buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean.",
   price: "Proof: the kind of support EIP values at $25,000 per founder, now from $15 a month.",
 };
+
+/** Results strip (brand book: Measurable outcomes). Until RENZOLO has its
+ * own results, these are labelled as Lorenzo's track record, with a base
+ * and an as-of date. */
+export const RESULTS = {
+  label: "Lorenzo's track record, before RENZOLO",
+  stats: [
+    { figure: "20+", label: "years developing suppliers and founders" },
+    { figure: "800+", label: "entrepreneurs trained to be customer and investor ready" },
+    { figure: "19", label: "African countries" },
+    { figure: "$880K", label: "invested in programme founders" },
+  ],
+  base: "Programme figures cover six years leading the EY Africa Enterprise Impact Program (2021–2026), as reported in January 2026.",
+};
+
+/** Real testimonials only, with written permission and a real photo. The
+ * section stays hidden until there are at least four. */
+export const TESTIMONIALS: { quote: string; name: string; business: string; place: string; result: string; photo?: string }[] = [];

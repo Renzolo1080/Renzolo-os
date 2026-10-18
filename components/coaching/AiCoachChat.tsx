@@ -94,7 +94,7 @@ export function AiCoachChat({
                 <span className="text-sm">
                   <span className="font-semibold">Your weekly check-in is ready.</span> Two minutes: how you're tracking and the one thing that matters this week.
                 </span>
-                <button type="button" disabled={busy || remaining <= 0} onClick={() => send({ checkin: true })} className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                <button type="button" disabled={busy || remaining <= 0} onClick={() => send({ checkin: true })} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand disabled:opacity-50">
                   Start check-in
                 </button>
               </div>
@@ -196,7 +196,7 @@ export function AiCoachChat({
             disabled={busy || remaining <= 0}
             aria-label="Message your coach"
           />
-          <button type="submit" disabled={busy || !draft.trim() || remaining <= 0} className="self-end rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+          <button type="submit" disabled={busy || !draft.trim() || remaining <= 0} className="self-end rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
             Send
           </button>
         </div>

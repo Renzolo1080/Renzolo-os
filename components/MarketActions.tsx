@@ -23,7 +23,7 @@ export function MarketGenerate({ label, disabledReason }: { label: string; disab
   }
   return (
     <div>
-      <button type="button" onClick={run} disabled={busy || !!disabledReason} className="rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+      <button type="button" onClick={run} disabled={busy || !!disabledReason} className="rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
         {busy ? "Researching your market… (2-3 minutes)" : label}
       </button>
       {disabledReason && <p className="mt-2 text-sm text-ink-soft">{disabledReason}</p>}

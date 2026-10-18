@@ -1,24 +1,22 @@
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { QUICK_QUESTIONS, STAGES } from "@/lib/quickcheck";
-import { Arrow, Glow, Marquee, ProductShowcase, Rotator } from "@/components/brand/Visuals";
+import { Button, Eyebrow, Glow, OutcomeCards, TrajectoryBlocks } from "@/components/brand/Visuals";
+import { ReadinessTicker } from "@/components/brand/BrandClient";
 
-/** Why founders choose RENZOLO over a team operating system (competitors
- * are named only in the private comparison doc). */
+/** Why founders choose RENZOLO (brand book: never name competitors; contrast
+ * with categories and show the proof). */
 const WHY = [
   {
     title: "Built around the outcome you need",
     text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it. The approach behind 800+ founders trained in 19 African countries.",
-    accent: "#E8603C",
   },
   {
     title: "Built from the buyer's side of the table",
     text: "Readiness checked against what procurement teams, lenders and investors look for, by a founder with 20+ years developing suppliers for global buyers across Africa, Europe, the Americas and India.",
-    accent: "#F4B740",
   },
   {
     title: "AI and human coaching, at founder prices",
     text: "One founder, one price in US dollars, from $15 a month. An AI coach that knows your plan, plus one-on-one coaching for the big decisions.",
-    accent: "#22B8B0",
   },
 ];
 
@@ -45,72 +43,82 @@ export default function HomePage() {
   return (
     <>
       <main>
-        {/* Hero */}
-        <section className="relative overflow-hidden bg-navy text-white">
+        {/* Hero (light, per the brand book: the website and app landing stay light) */}
+        <section id="hero" className="relative overflow-hidden">
           <Glow />
-          <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-14 pt-12 sm:px-6 sm:pb-20 sm:pt-16 lg:grid-cols-[1.05fr_1fr]">
-            <div className="rise">
-              <span className="sticker -rotate-2 bg-sunrise text-navy">Get ready. Get chosen. Grow.</span>
-              <h1 className="mt-6 max-w-3xl text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl">
-                Get chosen by
-                <br />
-                <span className="sr-only">buyers, lenders and investors.</span>
-                <span aria-hidden="true" className="text-gradient">
-                  <Rotator words={["buyers.", "lenders.", "investors."]} />
-                </span>
+          <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1.1fr_1fr]">
+            <div className="hero-in">
+              <Eyebrow>Venture Readiness Assessment and Development Support</Eyebrow>
+              <h1 className="mt-4 text-[44px] font-extrabold leading-[48px] tracking-[-0.02em] text-ink sm:text-[64px] sm:leading-[68px]">
+                Ready for customers, capital and investors.
               </h1>
-              <p className="mt-5 max-w-xl text-lg text-cream/85">
-                Founder Trajectory™ shows exactly where your business stands against your strategic plan and the nine building blocks of your
-                business model, builds the plan to close the gaps, and coaches you to the standard buyers, lenders and investors look for.
-                Powered by RENZOLO OS™.
+              <p className="max-w-xl pt-5 text-lg leading-7 text-ink-muted">
+                Founder Trajectory™ shows exactly where your business stands against your strategic plan and the nine building blocks of your business model, builds
+                the plan to close the gaps, and coaches you to the standard buyers, lenders and investors look for. Powered by RENZOLO OS™.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <a href="/snapshot" className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-coral via-sunrise to-lagoon px-7 py-4 text-lg font-bold text-navy shadow-[0_12px_34px_-10px_rgba(244,183,64,.7)] hover:brightness-110">
-                  Start your free Snapshot <Arrow className="h-5 w-5 transition group-hover:translate-x-1" />
-                </a>
-                <span className="text-sm text-cream/70 sm:ml-2">5 to 7 minutes · no account needed</span>
+              <div className="flex flex-col gap-3 pt-8 sm:flex-row sm:items-center">
+                <Button href="/snapshot" className="sm:whitespace-nowrap">Start your free Readiness Snapshot</Button>
+                <span className="text-sm text-ink-muted sm:ml-2">5 to 7 minutes · no account needed</span>
               </div>
-              <p className="mt-6 text-sm text-cream/70">
+              <p className="pt-6 text-sm text-ink-muted">
                 Already a member?{" "}
-                <a href="/login" className="font-semibold text-white underline">
+                <a href="/login" className="font-semibold text-teal-text underline underline-offset-4">
                   Log in
                 </a>
               </p>
             </div>
-            <ProductShowcase />
+            <div className="relative">
+              <TrajectoryBlocks className="absolute -bottom-6 left-6 right-6 opacity-90" />
+              <div className="float-in relative mx-auto max-w-[420px]">
+                <ReadinessTicker />
+              </div>
+            </div>
           </div>
         </section>
-        <Marquee items={["Win customers", "Qualify for capital", "Attract investors", "AI coach included", "From $15 a month", "Results in 7 minutes"]} className="bg-sunrise text-navy" />
+
+        {/* Three outcomes */}
+        <section className="bg-surface-tint">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+            <Eyebrow>Three outcomes</Eyebrow>
+            <h2 className="mt-2 text-3xl font-bold text-ink sm:text-4xl">Pick the yes you need next.</h2>
+            <div className="mt-10">
+              <OutcomeCards hrefFor={(k) => `/snapshot?goal=${k}`} />
+            </div>
+          </div>
+        </section>
 
         {/* Why RENZOLO */}
-        <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal">Why founders choose us</p>
-          <h2 className="mt-2 max-w-3xl text-2xl font-bold text-navy sm:text-3xl">Operating systems help you run your team. RENZOLO gets your business chosen.</h2>
+        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <Eyebrow>Why founders choose us</Eyebrow>
+          <h2 className="mt-2 max-w-4xl text-3xl font-bold text-ink sm:text-4xl">
+            Other tools help you run your business. RENZOLO gets you ready for customers, capital and investors, and connects you to them.
+          </h2>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {WHY.map((w) => (
-              <div key={w.title} className="lift rounded-[2rem] p-7 text-navy" style={{ background: w.accent }}>
-                <p className="text-5xl font-extrabold opacity-90">0{WHY.indexOf(w) + 1}</p>
-                <p className="mt-4 text-xl font-bold">{w.title}</p>
-                <p className="mt-2 text-navy/85">{w.text}</p>
+              <div key={w.title} className="rounded-card border border-line bg-surface-raised p-6">
+                <p className="text-lg font-bold text-ink">{w.title}</p>
+                <p className="mt-2 text-ink-muted">{w.text}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* The method */}
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal">How it works</p>
-          <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">The Founder Trajectory™ Method</h2>
-          <p className="mt-3 max-w-2xl text-ink-soft">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
-          <ol className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {METHOD.map((m, i) => (
-              <li key={m.name} className="rounded-2xl bg-white p-6 shadow-sm">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full font-bold text-white" style={{ background: ["#E8603C", "#F4B740", "#22B8B0", "#C18B2C"][i] }}>{i + 1}</span>
-                <p className="mt-4 text-lg font-bold text-navy">{m.name}</p>
-                <p className="mt-2 text-sm text-ink-soft">{m.body}</p>
-              </li>
-            ))}
-          </ol>
+        <section className="bg-surface-tint">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+            <Eyebrow>How it works</Eyebrow>
+            <h2 className="mt-2 text-3xl font-bold text-ink sm:text-4xl">The Founder Trajectory™ Method</h2>
+            <p className="mt-3 max-w-2xl text-ink-muted">Evaluate. Evolve. Execute. Elevate. Four steps, repeated as you grow.</p>
+            <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {METHOD.map((m, i) => (
+                <li key={m.name} className="rounded-card border border-line bg-surface-raised p-6">
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-pill font-display font-extrabold ${i === 0 ? "bg-brand text-on-brand" : "bg-surface-tint text-ink"}`}>{i + 1}</span>
+                  <p className="mt-4 text-lg font-bold text-ink">{m.name}</p>
+                  <p className="mt-2 text-sm text-ink-muted">{m.body}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
         </section>
 
         {/* What the Snapshot looks at */}
@@ -171,7 +179,7 @@ export default function HomePage() {
               <SubscriptionFeatures dark />
             </div>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a href="/snapshot" className="rounded-lg bg-gold px-7 py-4 text-center text-lg font-semibold text-white">
+              <a href="/snapshot" className="rounded-lg bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
                 Start with the free Snapshot
               </a>
               <a href="/pricing" className="rounded-lg border border-cream/40 px-7 py-4 text-center text-lg font-semibold text-white">

@@ -1,56 +1,61 @@
-@import "@fontsource/bricolage-grotesque/500.css";
+@import "@fontsource/bricolage-grotesque/600.css";
 @import "@fontsource/bricolage-grotesque/700.css";
 @import "@fontsource/bricolage-grotesque/800.css";
-@import "@fontsource/public-sans/400.css";
-@import "@fontsource/public-sans/600.css";
-@import "@fontsource/public-sans/700.css";
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/600.css";
+@import "@fontsource/dm-sans/700.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "./brand-tokens.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html { scroll-behavior: smooth; }
-body { background: #F7F4EE; color: #0E1A26; font-family: "Public Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-:focus-visible { outline: 3px solid #C18B2C; outline-offset: 3px; border-radius: 4px; }
+body { background: var(--surface); color: var(--ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); }
+
+/* RENZOLO Vibrant motion (brand book: Motion, Transitions). Everything moves
+   only with prefers-reduced-motion: no-preference; otherwise end states show. */
+.btn-pop { box-shadow: var(--shadow-pop); transition: transform 150ms ease-out, box-shadow 150ms ease-out; }
+.btn-pop:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop-hover); }
+.btn-pop:active { transform: translateY(2px); box-shadow: none; }
+.card-pop { box-shadow: var(--shadow-pop); transition: transform 150ms ease-out, box-shadow 150ms ease-out; }
+.card-pop:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop-hover); }
+.glass { background: var(--glass); border: 1px solid var(--glass-edge); }
+@supports (backdrop-filter: blur(16px)) { .glass { backdrop-filter: blur(16px); } }
+@media (prefers-reduced-transparency: reduce) { .glass { background: var(--surface-raised); backdrop-filter: none; } }
 
 @media (prefers-reduced-motion: no-preference) {
+  .hero-in > * { animation: fadeUp 400ms ease-out both; }
+  .hero-in > *:nth-child(2) { animation-delay: 80ms; }
+  .hero-in > *:nth-child(3) { animation-delay: 160ms; }
+  .hero-in > *:nth-child(4) { animation-delay: 240ms; }
+  .rise-block { animation: rise 600ms cubic-bezier(.2,.7,.2,1) both; }
+  .float-in { animation: fadeUp 500ms ease-out 700ms both; }
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 400ms ease-out, transform 400ms ease-out; }
+  .reveal.in { opacity: 1; transform: none; }
+  .premium .reveal { transform: none; transition: opacity 600ms ease-out; }
+  .ambient { animation: drift 20s ease-in-out infinite alternate; }
+  .ambient-2 { animation-delay: -10s; }
+  .live-dot { animation: pulse 1.6s ease-in-out infinite; }
+  .pop-in { animation: pop 150ms ease-out both; }
   .trajectory-path { stroke-dasharray: 1600; stroke-dashoffset: 1600; animation: draw 2.4s cubic-bezier(.6,.05,.2,1) .3s forwards; }
-  .trajectory-dot { opacity: 0; animation: pop .35s ease-out forwards; }
+  .trajectory-dot { opacity: 0; animation: popdot .35s ease-out forwards; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 200ms; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+  @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(40px, -30px); } }
+  @keyframes pulse { 50% { opacity: .35; transform: scale(.8); } }
+  @keyframes pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
   @keyframes draw { to { stroke-dashoffset: 0; } }
-  @keyframes pop { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
+  @keyframes popdot { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
 }
-
-/* Brand refresh (Oct 2026): gentle motion, off for reduced-motion users. */
-.text-gradient { background: linear-gradient(90deg, #E8603C, #F4B740 55%, #22B8B0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@view-transition { navigation: auto; }
 @media (prefers-reduced-motion: no-preference) {
-  .float-a { animation: floaty 7s ease-in-out infinite; }
-  .float-b { animation: floaty 8s ease-in-out -2s infinite; }
-  .float-c { animation: floaty 9s ease-in-out -4s infinite; }
-  .glow-orb { animation: drift 18s ease-in-out infinite alternate; }
-  .glow-orb-2 { animation-duration: 24s; }
-  .ring-fill { animation: ring 1.6s cubic-bezier(.6,.05,.2,1) .4s both; }
-  .rise { animation: rise .8s cubic-bezier(.2,.7,.2,1) both; }
-  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-  @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,-30px) scale(1.15); } }
-  @keyframes ring { from { stroke-dasharray: 0 999; } }
-  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-}
-
-/* Modern & fun pass: marquee, stickers, rotating word, lift on hover. */
-.marquee { display: flex; width: max-content; }
-.sticker { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; padding: .45rem .9rem; font-weight: 700; font-size: .8rem; box-shadow: 0 8px 20px -8px rgba(0,0,0,.45); }
-.rotator { display: inline-grid; }
-.rotator > span { grid-area: 1 / 1; }
-.rotator > span:not(:first-child) { visibility: hidden; }
-.lift { transition: transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s; }
-.lift:hover { transform: translateY(-6px) rotate(-.4deg); box-shadow: 0 24px 40px -18px rgba(7,23,39,.45); }
-@media (prefers-reduced-motion: no-preference) {
-  .marquee { animation: marquee 32s linear infinite; }
-  .rotator > span { visibility: visible !important; opacity: 0; animation: rotword 7.5s infinite; }
-  .rotator > span:nth-child(2) { animation-delay: 2.5s; }
-  .rotator > span:nth-child(3) { animation-delay: 5s; }
-  .wiggle:hover { animation: wiggle .5s ease-in-out; }
-  @keyframes marquee { to { transform: translateX(-50%); } }
-  @keyframes rotword { 0% { opacity: 0; transform: translateY(.4em); } 4%, 30% { opacity: 1; transform: none; } 34%, 100% { opacity: 0; transform: translateY(-.4em); } }
-  @keyframes wiggle { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+  .reveal .method-line { transform: scaleX(0); transition: transform 1.2s cubic-bezier(.6,.05,.2,1) .2s; }
+  .reveal.in .method-line { transform: scaleX(1); }
 }

@@ -101,11 +101,11 @@ export function FounderDashboard(d: DashboardData) {
           </div>
         ))}
         <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-navy p-4 text-white shadow-sm">
-          <div aria-hidden="true" className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-lagoon/25 blur-2xl" />
+          <div aria-hidden="true" className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-teal/30 blur-2xl" />
           <ScoreRing value={Math.round(d.score.venture_score)} size={56} label={`Venture Score ${Math.round(d.score.venture_score)} out of 100`} />
           <div className="relative">
             <p className="text-xs text-cream/80">Venture Score</p>
-            <p className="text-xs font-semibold text-sunrise">{d.score.venture_tier}</p>
+            <p className="text-xs font-semibold text-gold">{d.score.venture_tier}</p>
           </div>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -120,7 +120,7 @@ export function FounderDashboard(d: DashboardData) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold text-navy">Your next steps</h2>
           {next && (
-            <a href={next.href} className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white">
+            <a href={next.href} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
               Next: {next.label}
             </a>
           )}
@@ -234,7 +234,7 @@ export function FounderDashboard(d: DashboardData) {
                 )}
                 {latestUpdate.challenges && (
                   <div>
-                    <dt className="text-xs font-semibold uppercase text-gold">Challenges</dt>
+                    <dt className="text-xs font-semibold uppercase text-brand-text">Challenges</dt>
                     <dd>{latestUpdate.challenges}</dd>
                   </div>
                 )}
@@ -284,7 +284,7 @@ function Extra({ k, d, goals, kpiList, runway }: { k: ExtraKey; d: DashboardData
     return (
       <Panel title={def.label}>
         <p className="text-sm text-ink-soft">{def.description}</p>
-        <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white">
+        <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
           Included with Growth
         </a>
       </Panel>
@@ -307,7 +307,7 @@ function Extra({ k, d, goals, kpiList, runway }: { k: ExtraKey; d: DashboardData
                 </div>
               ))}
               <p className="text-xs text-ink-soft">
-                <span className="font-semibold text-gold">- - -</span> expected path · <span className="font-semibold text-teal">—</span> actual
+                <span className="font-semibold text-brand-text">- - -</span> expected path · <span className="font-semibold text-teal">—</span> actual
               </p>
             </div>
           )}

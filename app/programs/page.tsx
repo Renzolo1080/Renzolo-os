@@ -48,7 +48,7 @@ export default function ProgramsPage() {
                 "Your Readiness Assessment and plan are your starting point, so you arrive knowing exactly what to work on.",
               ].map((t) => (
                 <li key={t} className="flex gap-2">
-                  <span className="font-bold text-gold">✓</span>
+                  <span className="font-bold text-teal-text">✓</span>
                   <span>{t}</span>
                 </li>
               ))}

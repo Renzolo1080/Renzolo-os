@@ -19,12 +19,12 @@ export default function AboutPage() {
     <>
       <Header campaign="about_header" />
       <main>
-        <section className="relative overflow-hidden bg-navy text-white">
+        <section data-theme="dark" className="relative overflow-hidden bg-night text-ink">
           <Glow />
           <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 md:pt-16">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold-soft">About RENZOLO™</p>
             <h1 className="mt-4 max-w-4xl font-display text-4xl font-extrabold leading-[1.05] tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>
-              Customer, capital and investor readiness, <span className="text-gradient">from the buyer&apos;s side of the table.</span>
+              Customer, capital and investor readiness, <span className="text-gold">from the buyer&apos;s side of the table.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-mist">
               RENZOLO™ is a venture development firm. We give founders and suppliers a clear view of where their business stands, help them build a
@@ -55,14 +55,14 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-navy text-white">
+        <section data-theme="dark" className="relative overflow-hidden bg-night text-ink">
           <Glow />
           <div className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The proof behind the method</h2>
             <div className="mt-10 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
               {PROOF_STATS.map((p) => (
                 <div key={p.label} className="bg-navy/80 p-6">
-                  <p className="text-gradient font-display text-5xl font-extrabold" style={{ fontWeight: 800 }}>{p.figure}</p>
+                  <p className="font-display text-ink text-5xl font-extrabold" style={{ fontWeight: 800 }}>{p.figure}</p>
                   <p className="mt-2 text-sm text-mist">{p.label}</p>
                 </div>
               ))}
@@ -70,7 +70,7 @@ export default function AboutPage() {
             <ol className="mt-12 space-y-0 border-l-2 border-white/15">
               {TRACK_RECORD.map((t) => (
                 <li key={t.org + t.years} className="relative pb-9 pl-8 last:pb-0">
-                  <span aria-hidden="true" className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-sunrise ring-4 ring-navy" />
+                  <span aria-hidden="true" className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-gold ring-4 ring-night" />
                   <p className="text-sm font-semibold uppercase tracking-wider text-gold-soft">{t.years}</p>
                   <p className="mt-1 font-display text-xl font-bold">{t.role}</p>
                   <p className="font-semibold text-mist">{t.org}</p>
@@ -113,7 +113,7 @@ export default function AboutPage() {
               </li>
             ))}
           </ol>
-          <a href={appLink("/snapshot", "about")} className="mt-10 inline-block rounded-full bg-gold px-7 py-4 font-semibold text-white">
+          <a href={appLink("/snapshot", "about")} className="mt-10 inline-block btn-pop rounded-pill border-2 border-ink bg-brand px-7 py-4 font-semibold text-on-brand">
             Take the free Readiness Snapshot
           </a>
         </section>

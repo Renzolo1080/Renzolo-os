@@ -121,7 +121,7 @@ export default async function MembershipPage() {
         <ul className="mt-3 space-y-2 text-sm text-ink-soft">
           {MEMBERSHIP_POLICIES.map((p) => (
             <li key={p} className="flex gap-2">
-              <span className="text-gold">•</span>
+              <span className="text-brand-text">•</span>
               <span>{p}</span>
             </li>
           ))}

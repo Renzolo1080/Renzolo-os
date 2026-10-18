@@ -1,225 +1,150 @@
-/** Brand-refresh visuals (Oct 2026): "navy and gold, with sunrise energy".
- * Everything is drawn in code or uses real product screens, so the site
- * never relies on stock photos. Mirrors the website copy at
- * website/components/Visuals.tsx; keep the two in step. */
+/** RENZOLO Vibrant building blocks (see design/renzolo-vibrant/brand-book.md).
+ * Server components only; interactive pieces live in BrandClient.tsx.
+ * Mirrors website/components/Visuals.tsx: keep the two in step. */
 
+/** The three outcomes, in the fixed order and accents the brand book sets. */
 export const OUTCOMES = [
-  { key: "customers", label: "Win customers", note: "Buyer- and contract-ready", color: "#E8603C" },
-  { key: "capital", label: "Qualify for capital", note: "Loans, credit and grants", color: "#F4B740" },
-  { key: "investors", label: "Attract investors", note: "Investors and partners", color: "#22B8B0" },
+  { key: "customers", num: "01", label: "Customers", title: "Win more customers", text: "Prove your offer and get ready for buyers, tenders and supplier programmes.", fill: "bg-brand text-on-brand" },
+  { key: "capital", num: "02", label: "Capital", title: "Access credit and grants", text: "Get your plan, numbers and records lender-ready.", fill: "bg-gold text-on-gold" },
+  { key: "investors", num: "03", label: "Investors", title: "Attract investment", text: "Show investors and partners a business that is ready to grow.", fill: "bg-teal text-on-teal" },
 ] as const;
 
-/** The signature gradient: coral to sunrise to lagoon. */
-export function GradientDefs({ id }: { id: string }) {
+/** Uppercase label above a section headline. `dark` for night bands. */
+export function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <p className={`text-[13px] font-bold uppercase leading-[18px] tracking-[0.08em] text-brand-text ${className}`}>{children}</p>;
+}
+
+/** Pill button with the playful offset shadow (primary / secondary) or a link. */
+export function Button({
+  href,
+  children,
+  variant = "primary",
+  className = "",
+}: {
+  href: string;
+  children: React.ReactNode;
+  variant?: "primary" | "secondary" | "link";
+  className?: string;
+}) {
+  if (variant === "link") {
+    return (
+      <a href={href} className={`font-semibold text-teal-text underline underline-offset-4 ${className}`}>
+        {children}
+      </a>
+    );
+  }
+  const fill = variant === "primary" ? "bg-brand text-on-brand" : "bg-surface-raised text-ink";
   return (
-    <defs>
-      <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stopColor="#E8603C" />
-        <stop offset="50%" stopColor="#F4B740" />
-        <stop offset="100%" stopColor="#22B8B0" />
-      </linearGradient>
-    </defs>
+    <a
+      href={href}
+      className={`btn-pop inline-flex items-center justify-center gap-2 rounded-pill border-2 border-ink px-6 py-3 text-base font-semibold ${fill} ${className}`}
+    >
+      {children}
+    </a>
   );
 }
 
-/** Soft coloured light behind dark sections. Decorative. */
+/** Ambient light for the hero and night bands: one or two slow glows, static
+ * under reduced motion. Decorative. */
 export function Glow({ className = "" }: { className?: string }) {
   return (
     <div aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      <div className="glow-orb absolute -left-24 top-10 h-72 w-72 rounded-full bg-coral/25 blur-3xl" />
-      <div className="glow-orb glow-orb-2 absolute right-[-6rem] top-1/3 h-96 w-96 rounded-full bg-lagoon/20 blur-3xl" />
-      <div className="glow-orb absolute bottom-[-8rem] left-1/3 h-80 w-80 rounded-full bg-sunrise/15 blur-3xl" />
-      <div
-        className="absolute inset-0 opacity-[0.07]"
-        style={{ backgroundImage: "radial-gradient(#E3C27E 1px, transparent 1px)", backgroundSize: "22px 22px" }}
-      />
+      <div className="ambient absolute -left-24 top-0 h-80 w-80 rounded-full bg-brand/10 blur-3xl" />
+      <div className="ambient ambient-2 absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-gold/10 blur-3xl" />
     </div>
   );
 }
 
-/** Original geometric band, inspired by the rhythm of African textiles
- * without copying any particular cloth. Used as a divider. */
-export function SignalBand({ className = "", dark = false }: { className?: string; dark?: boolean }) {
-  const id = dark ? "signal-dark" : "signal-light";
-  const base = dark ? "#071727" : "#F7F4EE";
+/** Faint dot grid for dark bands. */
+export function DotGrid() {
   return (
-    <svg aria-hidden="true" className={`block h-5 w-full ${className}`} preserveAspectRatio="none">
-      <defs>
-        <pattern id={id} width="96" height="20" patternUnits="userSpaceOnUse">
-          <rect width="96" height="20" fill={base} />
-          <rect x="0" y="0" width="24" height="20" fill="#C18B2C" />
-          <path d="M24 0 L36 10 L24 20 Z" fill="#E8603C" />
-          <path d="M36 10 L48 0 L48 20 Z" fill="#F4B740" />
-          <rect x="52" y="4" width="4" height="12" fill="#22B8B0" />
-          <rect x="60" y="4" width="4" height="12" fill="#22B8B0" />
-          <path d="M68 20 L78 4 L88 20 Z" fill="#087F77" />
-          <rect x="90" y="0" width="6" height="20" fill="#122D44" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="20" fill={`url(#${id})`} />
-    </svg>
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0"
+      style={{ backgroundImage: "radial-gradient(var(--glass-edge) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+    />
   );
 }
 
-/** A score ring filled with the signature gradient. */
-export function ScoreRing({ value, size = 64, label }: { value: number; size?: number; label?: string }) {
-  const r = 26;
-  const c = 2 * Math.PI * r;
-  const id = `ring-${size}-${value}`;
+/** The hero motif: staggered brand / gold / teal blocks rising left to right. */
+export function TrajectoryBlocks({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} role="img" aria-label={label ?? `${value} out of 100`}>
-      <GradientDefs id={id} />
-      <circle cx="32" cy="32" r={r} fill="none" stroke="rgba(201,211,220,.25)" strokeWidth="7" />
-      <circle
-        className="ring-fill"
-        cx="32"
-        cy="32"
-        r={r}
-        fill="none"
-        stroke={`url(#${id})`}
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeDasharray={`${(value / 100) * c} ${c}`}
-        transform="rotate(-90 32 32)"
-        style={{ ["--ring-len" as string]: `${(value / 100) * c}` }}
-      />
-      <text x="32" y="37" textAnchor="middle" fontSize="16" fontWeight="800" fill="currentColor" fontFamily="inherit">
-        {value}
-      </text>
-    </svg>
+    <div aria-hidden="true" className={`pointer-events-none flex items-end gap-3 ${className}`}>
+      <span className="rise-block block h-24 w-1/3 rounded-panel bg-brand" style={{ animationDelay: "0.35s" }} />
+      <span className="rise-block block h-40 w-1/3 rounded-panel bg-gold" style={{ animationDelay: "0.45s" }} />
+      <span className="rise-block block h-56 w-1/3 rounded-panel bg-teal" style={{ animationDelay: "0.55s" }} />
+    </div>
   );
 }
 
-/** The three outcomes every founder chooses from. */
+/** The three outcome cards: the only cards that carry the offset shadow. */
+export function OutcomeCards({ hrefFor }: { hrefFor: (key: string) => string }) {
+  return (
+    <div className="grid gap-6 md:grid-cols-3">
+      {OUTCOMES.map((o) => (
+        <a key={o.key} href={hrefFor(o.key)} className="card-pop group block rounded-card border border-line bg-surface-raised p-6 md:p-8">
+          <span className={`flex h-12 w-12 items-center justify-center rounded-card font-display text-xl font-extrabold ${o.fill}`}>{o.num}</span>
+          <Eyebrow className="mt-4">{o.label}</Eyebrow>
+          <h3 className="mt-1 font-display text-[22px] font-bold leading-7">{o.title}</h3>
+          <p className="mt-2 text-ink-muted">{o.text}</p>
+          <span className="mt-4 inline-block font-semibold text-teal-text underline underline-offset-4">See how</span>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+/** Compact outcome chips (used on dark heroes). */
 export function OutcomeChips({ className = "" }: { className?: string }) {
   return (
     <ul className={`flex flex-wrap gap-2 ${className}`}>
       {OUTCOMES.map((o) => (
-        <li key={o.key} className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
-          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full" style={{ background: o.color, boxShadow: `0 0 12px ${o.color}` }} />
-          {o.label}
+        <li key={o.key} className={`rounded-pill px-4 py-2 text-sm font-semibold ${o.fill}`}>
+          {o.title}
         </li>
       ))}
     </ul>
   );
 }
 
-/** Real RENZOLO OS screens in a laptop and a phone, with floating cards.
- * Screens are from the demo account (sample business "Owusu Farms"). */
-export function ProductShowcase({ className = "" }: { className?: string }) {
-  return (
-    <div className={`relative mx-auto w-full max-w-[640px] pb-16 pt-6 ${className}`}>
-      {/* Laptop */}
-      <div className="relative rounded-2xl border border-white/10 bg-[#0d2236] p-2 shadow-[0_30px_80px_-20px_rgba(0,0,0,.7)]">
-        <div className="flex items-center gap-1.5 px-2 pb-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-coral/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-sunrise/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-lagoon/80" />
-          <span className="ml-3 truncate rounded-md bg-white/5 px-3 py-0.5 text-[10px] text-[#C9D3DC]">app.renzoloenterprises.com/dashboard</span>
-        </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/img/screen-dashboard.jpg" alt="The RENZOLO OS dashboard: revenue, customers, cash, Venture Score and goals, target against actual" className="block w-full rounded-lg" width={1280} height={800} />
-      </div>
-
-      {/* Phone */}
-      <div className="float-b absolute -bottom-2 right-[-4%] w-[34%] min-w-[130px] rounded-[1.6rem] border-[5px] border-[#0b1b2b] bg-[#0b1b2b] shadow-[0_25px_60px_-15px_rgba(0,0,0,.8)] sm:right-[-8%]">
-        <div className="mx-auto mb-1 mt-0.5 h-1.5 w-12 rounded-full bg-white/15" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/img/phone-aicoach.jpg" alt="The AI coach on a phone, answering a pricing question and suggesting a dated action" className="block w-full rounded-[1.1rem]" width={520} height={1125} />
-      </div>
-
-      {/* Floating cards */}
-      <div className="float-a absolute -left-3 top-0 flex items-center gap-3 rounded-2xl border border-white/10 bg-navy/90 px-4 py-3 text-white shadow-xl backdrop-blur sm:-left-10">
-        <ScoreRing value={78} size={52} label="Venture Score 78 out of 100" />
-        <div>
-          <p className="text-[11px] uppercase tracking-wider text-[#C9D3DC]">Venture Score</p>
-          <p className="font-display text-sm font-bold">
-            62 <span className="text-sunrise">→ 78</span> in 90 days
-          </p>
-        </div>
-      </div>
-      <div className="float-c absolute -left-2 bottom-6 hidden rounded-2xl bg-white px-4 py-3 shadow-xl sm:block sm:-left-8">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-teal">Goal on track</p>
-        <p className="mt-0.5 text-sm font-bold text-navy">Supply 3 supermarket chains</p>
-        <div className="mt-2 h-1.5 w-44 overflow-hidden rounded-full bg-[#C9D3DC]/50">
-          <div className="h-full w-2/3 rounded-full" style={{ background: "linear-gradient(90deg,#E8603C,#F4B740,#22B8B0)" }} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** A real screen in a browser frame, for feature sections. */
+/** A real product screen, framed. */
 export function Screen({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   return (
-    <div className={`rounded-2xl border border-navy/10 bg-white p-2 shadow-[0_20px_50px_-20px_rgba(7,23,39,.35)] ${className}`}>
-      <div className="flex gap-1.5 px-2 pb-2">
-        <span className="h-2 w-2 rounded-full bg-coral/70" />
-        <span className="h-2 w-2 rounded-full bg-sunrise/70" />
-        <span className="h-2 w-2 rounded-full bg-lagoon/70" />
-      </div>
+    <div className={`overflow-hidden rounded-panel border border-line bg-surface-raised shadow-soft ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="block w-full rounded-lg" width={1280} height={800} />
+      <img src={src} alt={alt} className="block w-full" width={1280} height={800} loading="lazy" decoding="async" />
     </div>
   );
 }
 
-/** Portrait slot: a real photo when supplied, otherwise a monogram on the
- * signature gradient (never a stock photo). */
+/** Portrait slot: a real photo when supplied, otherwise the wordmark initials
+ * (never a stock or AI-generated face). */
 export function Portrait({ name, photo, className = "" }: { name: string; photo?: string; className?: string }) {
   if (photo) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={photo} alt={name} className={`rounded-3xl object-cover ${className}`} />;
+    return <img src={photo} alt={name} className={`rounded-panel object-cover ${className}`} />;
   }
   const initials = name.split(" ").map((w) => w[0]).filter((ch) => /[A-Z]/.test(ch)).slice(0, 2).join("");
   return (
-    <div
-      aria-hidden="true"
-      className={`relative flex items-center justify-center overflow-hidden rounded-3xl ${className}`}
-      style={{ background: "linear-gradient(135deg,#071727 0%,#122D44 55%,#087F77 100%)" }}
-    >
-      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sunrise/30 blur-2xl" />
-      <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-coral/30 blur-2xl" />
-      <span className="relative font-display text-6xl font-extrabold text-white" style={{ fontWeight: 800 }}>
-        {initials}
-      </span>
-    </div>
-  );
-}
-
-/** A scrolling ticker of short phrases. Decorative copy is repeated for the
- * loop; screen readers get it once. */
-export function Marquee({ items, className = "" }: { items: string[]; className?: string }) {
-  const row = (hidden: boolean) => (
-    <ul aria-hidden={hidden || undefined} className="flex shrink-0 items-center">
-      {items.map((t) => (
-        <li key={t} className="flex items-center whitespace-nowrap px-6 font-display text-lg font-bold md:text-xl">
-          {t}
-          <svg aria-hidden="true" viewBox="0 0 20 20" className="ml-12 h-4 w-4">
-            <path d="M10 0 L12.5 7.5 L20 10 L12.5 12.5 L10 20 L7.5 12.5 L0 10 L7.5 7.5 Z" fill="currentColor" />
-          </svg>
-        </li>
-      ))}
-    </ul>
-  );
-  return (
-    <div className={`overflow-hidden py-4 ${className}`}>
-      <div className="marquee">
-        {row(false)}
-        {row(true)}
+    <div aria-hidden="true" className={`relative flex items-end overflow-hidden rounded-panel bg-surface-tint ${className}`}>
+      <div className="absolute inset-x-6 bottom-0 flex items-end gap-2">
+        <span className="block h-16 w-1/3 rounded-t-card bg-brand" />
+        <span className="block h-28 w-1/3 rounded-t-card bg-gold" />
+        <span className="block h-40 w-1/3 rounded-t-card bg-teal" />
       </div>
+      <span className="relative m-6 font-display text-6xl font-extrabold text-ink">{initials}</span>
     </div>
   );
 }
 
-/** Rotating word for headlines (first word shows when motion is off). */
-export function Rotator({ words, className = "" }: { words: string[]; className?: string }) {
+/** Thin brand rule used as a section divider. */
+export function SignalBand({ className = "" }: { className?: string }) {
   return (
-    <span className={`rotator ${className}`}>
-      {words.map((w) => (
-        <span key={w}>{w}</span>
-      ))}
-    </span>
+    <div aria-hidden="true" className={`flex h-1.5 w-full ${className}`}>
+      <span className="flex-1 bg-brand" />
+      <span className="flex-1 bg-gold" />
+      <span className="flex-1 bg-teal" />
+    </div>
   );
 }
 
@@ -227,6 +152,21 @@ export function Arrow({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+/** Score ring (dashboard): teal progress on a quiet track, number in mono. */
+export function ScoreRing({ value, size = 64, label }: { value: number; size?: number; label?: string }) {
+  const r = 26;
+  const c = 2 * Math.PI * r;
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} role="img" aria-label={label ?? `${value} out of 100`}>
+      <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeOpacity="0.2" strokeWidth="7" />
+      <circle className="ring-fill" cx="32" cy="32" r={r} fill="none" stroke="var(--teal)" strokeWidth="7" strokeLinecap="round" strokeDasharray={`${(value / 100) * c} ${c}`} transform="rotate(-90 32 32)" />
+      <text x="32" y="37" textAnchor="middle" fontSize="16" fontWeight="600" fill="currentColor" style={{ fontFamily: "var(--font-mono)" }}>
+        {value}
+      </text>
     </svg>
   );
 }

@@ -81,7 +81,7 @@ export function InterestForm() {
         </select>
       </label>
       {error && <p className="text-sm text-red-700">{error}</p>}
-      <button type="submit" disabled={state === "sending"} className="rounded-full bg-gold px-6 py-3.5 font-semibold text-white disabled:opacity-60">
+      <button type="submit" disabled={state === "sending"} className="btn-pop rounded-pill border-2 border-ink bg-brand px-6 py-3.5 font-semibold text-on-brand disabled:opacity-60">
         {state === "sending" ? "Sending…" : "Register my interest"}
       </button>
     </form>

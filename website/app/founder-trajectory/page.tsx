@@ -21,7 +21,7 @@ export default function FounderTrajectoryPage() {
           intro="Founder Trajectory™ gives founders and suppliers a comprehensive view of where their business stands. It starts with a full Readiness Assessment of your strategic plan and the nine building blocks of your business model. Then it gives you a plan, a dashboard to work it, and coaching to keep you moving. It runs on RENZOLO OS™, our venture readiness platform."
         >
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
-            <a href={appLink("/snapshot", "ft_hero")} className="rounded-full bg-gold px-7 py-4 text-center text-lg font-semibold text-white">
+            <a href={appLink("/snapshot", "ft_hero")} className="btn-pop rounded-pill border-2 border-ink bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
               Start with the free Snapshot
             </a>
             <a href={appLink("/pricing", "ft_hero")} className="text-center font-semibold text-gold-soft underline-offset-4 hover:underline">

@@ -107,7 +107,7 @@ export default async function CoachingPage() {
                   : "Growth includes 2 sessions a quarter and Elevate 2 a month. You can also buy single sessions."}
               </p>
             </div>
-            <a href="/dashboard/subscribe#one-time" className="rounded-lg bg-gold px-5 py-3 font-semibold text-white">
+            <a href="/dashboard/subscribe#one-time" className="rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand">
               Buy sessions
             </a>
           </div>
@@ -126,7 +126,7 @@ export default async function CoachingPage() {
                       <p className="text-ink-soft">{s.status === "scheduled" && s.scheduled_at ? fmt(s.scheduled_at) : "Waiting for a time"}</p>
                     </div>
                     {s.status === "requested" && link && (
-                      <a href={link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-gold px-4 py-2 font-semibold text-white">
+                      <a href={link} target="_blank" rel="noopener noreferrer" className="rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
                         Pick a time
                       </a>
                     )}

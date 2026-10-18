@@ -27,7 +27,7 @@ export function CountryLanding({
           <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">{headline}</h1>
           <p className="mt-5 max-w-2xl text-lg text-cream/85">{intro}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <a href={href} className="rounded-lg bg-gold px-7 py-4 text-center text-lg font-semibold text-white">
+            <a href={href} className="rounded-lg bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
               Start your free Readiness Snapshot
             </a>
             <span className="text-sm text-cream/70">5 to 7 minutes · no account needed</span>
@@ -40,7 +40,7 @@ export function CountryLanding({
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {goals.map((g) => (
             <div key={g} className="rounded-2xl bg-white p-5 text-sm shadow-sm">
-              <span className="font-bold text-gold">✓</span> {g}
+              <span className="font-bold text-teal-text">✓</span> {g}
             </div>
           ))}
         </div>
