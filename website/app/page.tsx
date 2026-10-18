@@ -151,7 +151,7 @@ export default function Home() {
 
         <section className="bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The Founder Trajectory™ method</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The Founder Trajectory™ Method</h2>
             <p className="mt-3 max-w-2xl text-muted">Four steps, repeated as you grow. Each cycle leaves your business more ready than the last.</p>
             <ol className="relative mt-12 grid gap-10 md:grid-cols-4 md:gap-6">
               <span aria-hidden="true" className="absolute left-0 right-0 top-6 hidden h-[3px] bg-gold/40 md:block" />
