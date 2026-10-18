@@ -22,6 +22,7 @@ import { InviteCard } from "@/components/InviteCard";
 import { PurchaseTracker } from "@/components/PurchaseTracker";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 import { readinessFromRows } from "@/lib/readiness";
+import { ensureMatchingAcknowledgment } from "@/lib/acknowledgment-server";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -32,6 +33,10 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  // Login landing step: founders with the Matching add-on must have
+  // acknowledged the current RENZOLO Network™ Matching Statement.
+  if (!(await ensureMatchingAcknowledgment(supabase, user))) redirect("/acknowledge");
 
   const { data: profile } = await supabase.from("profiles").select("dashboard_widgets").eq("id", user.id).single();
   const extras = normalizeExtras(profile?.dashboard_widgets);

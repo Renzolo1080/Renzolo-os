@@ -1271,3 +1271,32 @@ revoke execute on function has_active_subscription() from public, anon;
 grant execute on function is_staff() to authenticated, service_role;
 grant execute on function is_admin() to authenticated, service_role;
 grant execute on function has_active_subscription() to authenticated, service_role;
+-- =====================================================================
+-- Statement acknowledgments (same as supabase/migrations/2026-10-16_acknowledgments.sql).
+-- =====================================================================
+
+create table if not exists acknowledgments (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  statement text not null check (statement in ('matching')),
+  version text not null check (char_length(version) between 1 and 20),
+  acknowledged_at timestamptz not null default now(),
+  source text not null default 'login' check (source in ('checkout', 'login')),
+  user_agent text check (user_agent is null or char_length(user_agent) <= 400),
+  unique (founder_id, statement, version)
+);
+
+alter table acknowledgments enable row level security;
+
+do $$ begin
+  create policy "acknowledgments: self or staff can read" on acknowledgments for select
+    using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create policy "acknowledgments: self can add" on acknowledgments for insert
+    with check (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+
+-- A record of agreement must not change after the fact.
+revoke update, delete on acknowledgments from authenticated, anon;
