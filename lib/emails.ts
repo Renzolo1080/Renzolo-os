@@ -43,8 +43,9 @@ export function checkUnsubscribeToken(email: string, token: string, secret: stri
 export interface EmailContext {
   appUrl: string;
   firstName: string;
-  ventureScore: number;
-  tier: string;
+  /** Total Readiness Score and its band. */
+  score: number;
+  band: string;
   planScore: number;
   weakest: string[];
   /** Block key of the weakest area, for the day-2 tips. */
@@ -84,10 +85,10 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
   const weakList = ctx.weakest.length ? ctx.weakest.map((w, i) => `${i + 1}. ${w}`).join("\n") : "";
   if (kind === "results") {
     const signup = link(ctx, "/register", "results");
-    const subject = `Your Readiness Snapshot: ${ctx.ventureScore}/100 (${ctx.tier})`;
+    const subject = `Your Readiness Snapshot: ${ctx.score}/100 (${ctx.band})`;
     const html = layout(
       `${hi}here are your Readiness Snapshot results`,
-      p(`<strong>Venture Score:</strong> ${ctx.ventureScore}/100 &middot; ${esc(ctx.tier)}<br><strong>Strategic Plan Readiness:</strong> ${ctx.planScore}/100`) +
+      p(`<strong>Total Readiness Score:</strong> ${ctx.score}/100 &middot; ${esc(ctx.band)}<br><strong>Strategic Plan Readiness:</strong> ${ctx.planScore}/100`) +
         (ctx.weakest.length ? p(`<strong>The areas holding you back most:</strong><br>${ctx.weakest.map((w, i) => `${i + 1}. ${esc(w)}`).join("<br>")}`) : "") +
         p(`<strong>Our recommendation:</strong> ${esc(ctx.recommendation)}`) +
         p(`Create your account with this email address and your Snapshot will be waiting for you.`) +
@@ -95,7 +96,7 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
       ctx,
       { label: "Continue your Founder Trajectory", href: signup }
     );
-    const text = `${hi}here are your Readiness Snapshot results.\n\nVenture Score: ${ctx.ventureScore}/100 (${ctx.tier})\nStrategic Plan Readiness: ${ctx.planScore}/100\n${weakList ? `\nAreas holding you back most:\n${weakList}\n` : ""}\nOur recommendation: ${ctx.recommendation}\n\nCreate your account with this email address and your Snapshot will be waiting: ${signup}${textFooter(ctx)}`;
+    const text = `${hi}here are your Readiness Snapshot results.\n\nTotal Readiness Score: ${ctx.score}/100 (${ctx.band})\nStrategic Plan Readiness: ${ctx.planScore}/100\n${weakList ? `\nAreas holding you back most:\n${weakList}\n` : ""}\nOur recommendation: ${ctx.recommendation}\n\nCreate your account with this email address and your Snapshot will be waiting: ${signup}${textFooter(ctx)}`;
     return { subject, html, text };
   }
   if (kind === "day2") {
@@ -120,13 +121,13 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
     const subject = "Turn your Snapshot into a plan";
     const html = layout(
       `${hi}your score is a starting point`,
-      p(`A Venture Score of ${ctx.ventureScore} tells you where you stand. What moves it is a plan you actually carry out.`) +
+      p(`A Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you actually carry out.`) +
         p(`With a Founder Trajectory&trade; membership you get your full Readiness Assessment and report, a growth and readiness plan of 90 days to 36 months, a dashboard with goals and reminders, and coaching to keep you on track. Memberships start at $15 a month.`) +
         p(`Prefer a one-time answer? The <strong>Readiness Assessment</strong> ($79) gives you the full report, a valuation range, an AI market insight for your industry and country, and a recommendation of the membership that fits you.`),
       ctx,
       { label: "See membership options", href: pricing }
     );
-    const text = `${hi}a Venture Score of ${ctx.ventureScore} tells you where you stand. What moves it is a plan you carry out.\n\nMemberships start at $15 a month and include your full Readiness Assessment, a growth and readiness plan (90 days to 36 months), a dashboard and coaching. Or get the one-time Readiness Assessment for $79.\n\nSee the options: ${pricing}${textFooter(ctx)}`;
+    const text = `${hi}a Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you carry out.\n\nMemberships start at $15 a month and include your full Readiness Assessment, a growth and readiness plan (90 days to 36 months), a dashboard and coaching. Or get the one-time Readiness Assessment for $79.\n\nSee the options: ${pricing}${textFooter(ctx)}`;
     return { subject, html, text };
   }
   const programs = link(ctx, "/programs", "day10");

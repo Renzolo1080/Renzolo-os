@@ -162,7 +162,7 @@ Registration and tax status: ${orUnspecified(input.extra?.registration)}
 Strategic plan${typeof input.extra?.planScore === "number" ? ` (Strategic Plan Readiness ${input.extra.planScore}/100)` : ""}:
 ${planLines}
 
-Venture Score: ${input.diagnostic.ventureScore.score}/100 (${input.diagnostic.ventureScore.tier})
+Overall business model score: ${input.diagnostic.ventureScore.score}/100 (${input.diagnostic.ventureScore.tier})
 ${full ? `Market Readiness: ${input.diagnostic.subScores.market}/100
 Customer Readiness: ${input.diagnostic.subScores.customer}/100
 Investor Readiness: ${input.diagnostic.subScores.investor}/100

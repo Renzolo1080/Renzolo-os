@@ -1,5 +1,6 @@
 import { runDiagnostic, BLOCK_LABELS, type BlockKey } from "./scoring";
 import { computeValuation } from "./valuation";
+import { computeReadiness } from "./readiness";
 import {
   quickCheckToScoringInput,
   applyPlanToMeasures,
@@ -28,8 +29,10 @@ export function scoreSnapshot(profile: QuickProfile, quick: QuickCheckSubmission
 }
 
 export interface SnapshotOverview {
-  ventureScore: number;
-  tier: string;
+  /** Total Readiness Score (lib/readiness.ts), the same number the dashboard shows. */
+  score: number;
+  /** Ready, Nearly ready, Getting ready or Not yet. */
+  band: string;
   planScore: number;
   strongest: string | null;
   weakest: string[];
@@ -42,9 +45,20 @@ export function snapshotOverview(profile: QuickProfile, scored: ReturnType<typeo
   const weakest = diagnostic.gaps.slice(0, 3).map((g) => g.label);
   const entries = Object.entries(diagnostic.blockScores) as [BlockKey, number][];
   const top = entries.sort((a, b) => b[1] - a[1])[0];
+  const readiness = computeReadiness({
+    blockScores: diagnostic.blockScores,
+    marketSubscore: diagnostic.subScores.market,
+    customerSubscore: diagnostic.subScores.customer,
+    investorSubscore: diagnostic.subScores.investor,
+    evidenceCompleteness: diagnostic.healthIndex.evidenceCompleteness,
+    planCompleteness: null,
+    planReview: null,
+    planReadiness: planScore,
+    target: null,
+  });
   return {
-    ventureScore: diagnostic.ventureScore.score,
-    tier: diagnostic.ventureScore.tier,
+    score: readiness.total,
+    band: readiness.band,
     planScore,
     strongest: top ? BLOCK_LABELS[top[0]] : null,
     weakest,

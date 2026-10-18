@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Venture Readiness Assessment and Development Support. Take the free 5-7 minute Readiness Snapshot and see where your business stands.",
   openGraph: {
     title: "Know exactly where your business stands",
-    description: "Free 5-7 minute Readiness Snapshot: your Venture Score, Strategic Plan Readiness and the three areas holding you back.",
+    description: "Free 5-7 minute Readiness Snapshot: your Total Readiness Score, Strategic Plan Readiness and the three areas holding you back.",
     siteName: "Founder Trajectory™",
     type: "website",
   },

@@ -21,7 +21,7 @@ const STAGES = [
 ];
 
 const OS_MODULES = [
-  { title: "Your dashboard", text: "Revenue, customers, cash and your score in one view, with goals tracked target against actual.", src: "/img/screen-dashboard.jpg", alt: "RENZOLO OS dashboard showing revenue, customers, cash, Venture Score and goals" },
+  { title: "Your dashboard", text: "Revenue, customers, cash and your score in one view, with goals tracked target against actual.", src: "/img/screen-dashboard.jpg", alt: "RENZOLO OS dashboard showing revenue, customers, cash, Total Readiness Score and goals" },
   { title: "Your strategic plan", text: "A guided plan built from your assessment: where you are, where you're going, and dated actions for every gap.", src: "/img/screen-plan.jpg", alt: "The Plan Builder checking a strategic plan for goals, measures and dated actions" },
   { title: "Market Intelligence", text: "Your industry and country researched each month, tied to your plan and targets, with sources.", src: "/img/screen-market.jpg", alt: "A Market Intelligence brief with recommendations for the founder's plan" },
   { title: "Your coaching team", text: "Lorenzo · AI coaches you any time from Lorenzo's 20-year playbook, with local to global insight and dated actions. Book Lorenzo live when the decision is big.", src: "/img/screen-aicoach.jpg", alt: "The AI coach answering a pricing question with suggested actions" },
@@ -50,7 +50,7 @@ const ACADEMY = [
 
 const FAQ = [
   ["How do I pay?", "Prices are in US dollars. You pay by card or mobile money, including M-Pesa, through Flutterwave."],
-  ["What does the free Snapshot give me?", "Your Venture Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back and a recommended next move, in about seven minutes, with no account needed."],
+  ["What does the free Snapshot give me?", "Your Total Readiness Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back and a recommended next move, in about seven minutes, with no account needed."],
   ["What is the difference between the $79 assessment and membership?", "The assessment gives you the full report once, with a valuation range and AI market insight. Membership adds the plan, the dashboard and, on Growth and Elevate, your coaching team: Lorenzo · AI any time and live sessions with Lorenzo."],
   ["How does coaching work?", "You prepare a short brief, book a time on your coach's calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan."],
   ["Can I get a refund?", "Our refund policy sets out exactly when and how refunds apply."],

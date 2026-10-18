@@ -27,7 +27,7 @@ async function main() {
   assert(/^[A-HJ-NP-Z2-9]{8}$/.test(code), "referral codes: 8 characters, no look-alikes (0/O, 1/I/L)", code);
 
   // --- emails -------------------------------------------------------------------
-  const ctx = { appUrl: "https://app.renzoloenterprises.com", firstName: "Ama", ventureScore: 48, tier: "Early Stage", planScore: 30, weakest: ["Channels", "Cost Structure", "Key Partnerships"], weakestKey: "channels", recommendation: "Your biggest lever right now is your strategic plan.", shareUrl: "https://app.renzoloenterprises.com/score/abc", unsubscribeUrl: "https://app.renzoloenterprises.com/unsubscribe?e=a&t=b", postalAddress: "123 Main St, Milwaukee, WI" };
+  const ctx = { appUrl: "https://app.renzoloenterprises.com", firstName: "Ama", score: 48, band: "Getting ready", planScore: 30, weakest: ["Channels", "Cost Structure", "Key Partnerships"], weakestKey: "channels", recommendation: "Your biggest lever right now is your strategic plan.", shareUrl: "https://app.renzoloenterprises.com/score/abc", unsubscribeUrl: "https://app.renzoloenterprises.com/unsubscribe?e=a&t=b", postalAddress: "123 Main St, Milwaukee, WI" };
   const r = buildEmail("results", ctx);
   assert(r.subject.includes("48/100") && r.html.includes("Channels") && r.text.includes("Strategic Plan Readiness: 30/100"), "results email: scores, weakest areas, recommendation");
   assert(r.html.includes("utm_campaign=results") && r.html.includes("Unsubscribe") && r.html.includes("Renzolo Enterprises LLC, 123 Main St"), "…links are tagged, with unsubscribe and the business address");

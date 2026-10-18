@@ -8,6 +8,6 @@ export default function Image() {
   return brandImage({
     eyebrow: "Free · 5 to 7 minutes · no account needed",
     title: "How ready is your business?",
-    subtitle: "Get your Venture Score, your Strategic Plan Readiness and the three areas holding you back.",
+    subtitle: "Get your Total Readiness Score, your Strategic Plan Readiness and the three areas holding you back.",
   });
 }

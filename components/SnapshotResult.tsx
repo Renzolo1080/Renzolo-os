@@ -30,12 +30,12 @@ export function SnapshotResult({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="text-sm text-ink-soft">Venture Score</p>
+          <p className="text-sm text-ink-soft">Total Readiness Score</p>
           <p className="text-5xl font-bold text-navy">
-            {overview.ventureScore}
+            {overview.score}
             <span className="text-lg font-normal text-ink-soft"> / 100</span>
           </p>
-          <p className="mt-1 font-semibold text-brand-text">{overview.tier}</p>
+          <p className="mt-1 font-semibold text-brand-text">{overview.band}</p>
         </div>
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="text-sm text-ink-soft">Strategic Plan Readiness</p>
@@ -78,7 +78,7 @@ export function SnapshotResult({
           <p className="font-semibold text-navy">Know a founder who should check their readiness?</p>
           <p className="mt-1 text-sm text-ink-soft">Share your score. Only the numbers are shown: never your name or answers.</p>
           <div className="mt-3">
-            <ShareButtons url={shareUrl} text={`I scored ${overview.ventureScore}/100 on my Venture Readiness Snapshot. What's your Venture Readiness Score?`} />
+            <ShareButtons url={shareUrl} text={`I scored ${overview.score}/100 on my Readiness Snapshot. What's your Total Readiness Score?`} />
           </div>
         </div>
       )}

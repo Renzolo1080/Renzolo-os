@@ -147,7 +147,7 @@ export function SnapshotTaster({ appUrl }: { appUrl: string }) {
       ) : (
         <div className="pop-in">
           <h3 className="mt-4 font-display text-2xl font-bold">You&apos;re 3 questions in. Your full Snapshot takes about 5 more minutes.</h3>
-          <p className="mt-2 text-ink-muted">See your Venture Score, your strongest area, the three areas holding you back and your best next move. Free, no account needed.</p>
+          <p className="mt-2 text-ink-muted">See your Total Readiness Score, your strongest area, the three areas holding you back and your best next move. Free, no account needed.</p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <a href={`${appUrl}/snapshot?${params.toString()}`} className="btn-pop inline-flex items-center rounded-pill border-2 border-ink bg-brand px-6 py-3 font-semibold text-on-brand">
               See your full snapshot

@@ -56,8 +56,8 @@ export async function GET(req: NextRequest) {
       {
         appUrl,
         firstName: String(lead.full_name ?? "").split(/\s+/)[0] ?? "",
-        ventureScore: ov.ventureScore,
-        tier: ov.tier,
+        score: ov.score,
+        band: ov.band,
         planScore: ov.planScore,
         weakest: ov.weakest,
         weakestKey: scored.diagnostic.gaps[0]?.block,

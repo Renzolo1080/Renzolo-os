@@ -58,7 +58,7 @@ Business: ${ctx.companyName || "not specified"}
 Stage: ${ctx.stage || "not specified"}
 Industry: ${ctx.industry || "not specified"}
 Country: ${ctx.country || "not specified"}
-Venture Score: ${ctx.ventureScore}/100 (assessment taken ${ctx.assessmentAgeDays} days ago)
+Overall business model score: ${ctx.ventureScore}/100 (assessment taken ${ctx.assessmentAgeDays} days ago)
 Weakest areas from the assessment (most urgent first): ${ctx.gaps.map((g) => `${g.label} ${g.score}/100`).join("; ") || "not available"}
 All area scores: ${ctx.blockScores.map((b) => `${b.label} ${b.score}`).join("; ") || "not available"}
 

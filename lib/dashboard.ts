@@ -50,7 +50,7 @@ export const EXTRAS: ExtraDef[] = [
   { key: "valuation", label: "Estimated business value", description: "A directional valuation range and how it's worked out.", kind: "Numbers", need: "growth" },
   { key: "areas", label: "Nine business areas", description: "A score for each part of your business model, weakest first.", kind: "Chart", need: "none" },
   { key: "gaps", label: "Weakest areas", description: "The three areas holding your score back most.", kind: "List", need: "none" },
-  { key: "history", label: "Venture Score over time", description: "Your score at each assessment.", kind: "Chart", need: "none" },
+  { key: "history", label: "Readiness over time", description: "Your Total Readiness Score at each assessment.", kind: "Chart", need: "none" },
   { key: "health", label: "Health Index", description: "How sound the business is and how much evidence backs it.", kind: "Numbers", need: "none" },
   { key: "risks", label: "Risk register", description: "The risks in your plan, how likely they are and your response.", kind: "List", need: "member" },
   { key: "planReview", label: "Plan review", description: "Your latest AI plan review score and top fixes.", kind: "Numbers", need: "growth" },

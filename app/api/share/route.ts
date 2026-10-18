@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { readinessFromRows } from "@/lib/readiness";
 import { createShareToken, ensureProfileExtras, readAttribution, publicAppUrl } from "@/lib/growth-server";
 
-/** POST /api/share — a member shares their latest Venture Score. The score
+/** POST /api/share — a member shares their latest Total Readiness Score. The score
  * is read on the server (never taken from the browser), and the link
  * carries their referral code. */
 export async function POST(req: Request) {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   const { data: score } = await supabase
     .from("scores")
-    .select("venture_score, venture_tier, assessments!inner(founder_id, extra)")
+    .select("*, assessments!inner(founder_id, extra)")
     .eq("assessments.founder_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -22,9 +23,10 @@ export async function POST(req: Request) {
   const admin = createAdminClient();
   const code = await ensureProfileExtras(admin, user.id, readAttribution());
   const planScore = (score as any).assessments?.extra?.planScore;
+  const readiness = readinessFromRows(score, { completeness: null, review: null }, typeof planScore === "number" ? planScore : null);
   const token = await createShareToken(admin, {
-    score: Number(score.venture_score),
-    tier: score.venture_tier,
+    score: readiness.total,
+    tier: readiness.band,
     planScore: typeof planScore === "number" ? planScore : null,
     referralCode: code,
     source: "member",

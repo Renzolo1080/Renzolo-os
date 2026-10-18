@@ -183,10 +183,13 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
     if (extras.includes("history")) {
       const { data: historyRows } = await supabase
         .from("scores")
-        .select("created_at, venture_score, assessments!inner(founder_id)")
+        .select("*, assessments!inner(founder_id, extra)")
         .eq("assessments.founder_id", user.id)
         .order("created_at", { ascending: true });
-      scoreHistory = (historyRows ?? []).map((r: any) => ({ date: r.created_at, score: Number(r.venture_score) }));
+      scoreHistory = (historyRows ?? []).map((r: any) => ({
+        date: r.created_at,
+        score: readinessFromRows(r, { completeness: null, review: null }, typeof r.assessments?.extra?.planScore === "number" ? r.assessments.extra.planScore : null).total,
+      }));
     }
 
     if (existingReport) {
@@ -242,13 +245,13 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
       {!latestScore ? (
         <div>
           <p className="mb-1 font-semibold text-navy">Start with your free Readiness Snapshot</p>
-          <p className="mb-4 text-ink-soft">5 to 7 minutes, mostly dropdowns and taps. You'll get your Venture Score, your Strategic Plan Readiness and the three areas holding you back.</p>
+          <p className="mb-4 text-ink-soft">5 to 7 minutes, mostly dropdowns and taps. You'll get your Total Readiness Score, your Strategic Plan Readiness and the three areas holding you back.</p>
           <a href="/assessment" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
             Start the Snapshot
           </a>
         </div>
       ) : !hasAccess ? (
-        <FreeResult score={latestScore.venture_score} tier={latestScore.venture_tier} planScore={planScore} gaps={gapLabels} lapsed={lapsed} />
+        <FreeResult score={readinessFromRows(latestScore, { completeness: null, review: null }, planScore).total} tier={readinessFromRows(latestScore, { completeness: null, review: null }, planScore).band} planScore={planScore} gaps={gapLabels} lapsed={lapsed} />
       ) : (
         <div className="space-y-6">
           {m.tier ? (
@@ -346,7 +349,7 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
     <div className="space-y-6">
       <div className={`grid gap-4 ${planScore !== null ? "sm:grid-cols-2" : ""}`}>
         <div className="rounded border p-6">
-          <p className="text-sm text-ink-soft">Your Venture Score</p>
+          <p className="text-sm text-ink-soft">Your Total Readiness Score</p>
           <p className="text-5xl font-bold text-navy">
             {score}
             <span className="text-lg font-normal text-ink-soft"> / 100</span>

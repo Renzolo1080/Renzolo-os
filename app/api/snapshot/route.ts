@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
       venture_stage: profile.ventureStage,
       industry: profile.industry,
       block_ratings: scored.diagnostic.blockScores,
-      preview_score: overview.ventureScore,
-      preview_tier: overview.tier,
+      preview_score: overview.score,
+      preview_tier: overview.band,
       plan_score: overview.planScore,
       answers: { profile, plan, answers: quick.answers, evidence: quick.evidence },
       attribution: readAttribution(),
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
 
   // A link they can share ("I scored 62...") — score and tier only.
   const shareToken = await createShareToken(admin, {
-    score: overview.ventureScore,
-    tier: overview.tier,
+    score: overview.score,
+    tier: overview.band,
     planScore: overview.planScore,
     referralCode: null,
     source: "snapshot",
@@ -70,8 +70,8 @@ export async function POST(req: NextRequest) {
     {
       appUrl,
       firstName: c.fullName.split(/\s+/)[0] ?? "",
-      ventureScore: overview.ventureScore,
-      tier: overview.tier,
+      score: overview.score,
+      band: overview.band,
       planScore: overview.planScore,
       weakest: overview.weakest,
       weakestKey,

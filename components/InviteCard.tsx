@@ -33,11 +33,11 @@ export function InviteCard({ inviteUrl, rewardsEarned }: { inviteUrl: string; re
         {scoreUrl ? (
           <>
             <p className="mb-2 text-sm text-ink-soft">Your score link (numbers only, never your name or answers):</p>
-            <ShareButtons url={scoreUrl} text="I checked my Venture Readiness with Founder Trajectory. What's your Venture Readiness Score?" />
+            <ShareButtons url={scoreUrl} text="I checked my readiness with Founder Trajectory. What's your Total Readiness Score?" />
           </>
         ) : (
           <button type="button" onClick={shareScore} disabled={busy} className="text-sm font-semibold text-teal underline disabled:opacity-50">
-            {busy ? "Creating link…" : "Share my Venture Score"}
+            {busy ? "Creating link…" : "Share my Readiness Score"}
           </button>
         )}
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
