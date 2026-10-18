@@ -7,11 +7,14 @@ import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 import { Bars, GoalChart, LineChart, Sparkline } from "./Charts";
 import { CheckinForm, CommitmentDone, DashboardCustomizer, MarkDone, MonthlyUpdateForm } from "./Interactive";
 import { ScoreRing } from "@/components/brand/Visuals";
+import { COMPONENTS, COMPONENT_HELP, COMPONENT_LABELS, type ReadinessResult } from "@/lib/readiness";
 
 export interface DashboardData {
   access: { member: boolean; growth: boolean };
   extras: ExtraKey[];
   score: any;
+  /** Total Readiness Score and its five components (lib/readiness.ts). */
+  readiness: ReadinessResult;
   plan: StrategicPlan | null;
   planCompleteness: number | null;
   checkins: Checkin[];
@@ -102,10 +105,10 @@ export function FounderDashboard(d: DashboardData) {
         ))}
         <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-navy p-4 text-white shadow-sm">
           <div aria-hidden="true" className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-teal/30 blur-2xl" />
-          <ScoreRing value={Math.round(d.score.venture_score)} size={56} label={`Venture Score ${Math.round(d.score.venture_score)} out of 100`} />
+          <ScoreRing value={Math.round(d.readiness.total)} size={56} label={`Total Readiness Score ${Math.round(d.readiness.total)} out of 100`} />
           <div className="relative">
-            <p className="text-xs text-cream/80">Venture Score</p>
-            <p className="text-xs font-semibold text-gold">{d.score.venture_tier}</p>
+            <p className="text-xs text-cream/80">Total Readiness Score</p>
+            <p className="text-xs font-semibold text-gold">{d.readiness.band}</p>
           </div>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -114,6 +117,29 @@ export function FounderDashboard(d: DashboardData) {
           <p className={`text-xs font-semibold ${stats?.overdue ? "text-red-600" : "text-ink-soft"}`}>{stats ? (stats.overdue ? `${stats.overdue} overdue` : stats.total ? "Nothing overdue" : "Add actions to your plan") : "Build your plan"}</p>
         </div>
       </div>
+
+      {/* Readiness components: what makes up the total */}
+      <section aria-label="Readiness components" className="rounded-2xl bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-bold text-navy">What makes up your Total Readiness Score</h2>
+          <p className="text-xs text-ink-soft">Re-assess or update your plan to move these</p>
+        </div>
+        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {COMPONENTS.map((c) => {
+            const v = Math.round(d.readiness.components[c]);
+            return (
+              <li key={c} className="rounded-xl border border-line p-3" title={COMPONENT_HELP[c]}>
+                <p className="text-xs font-semibold text-ink-soft">{COMPONENT_LABELS[c]} readiness</p>
+                <p className="mt-1 font-mono text-2xl font-semibold text-navy">{v}</p>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-cream">
+                  <div className="h-full rounded-full bg-teal" style={{ width: `${v}%` }} />
+                </div>
+                {d.readiness.estimated.includes(c) && <p className="mt-1 text-[11px] text-ink-soft">Estimated: add evidence to firm this up</p>}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       {/* Next steps */}
       <section className="rounded-2xl bg-white p-5 shadow-sm">
@@ -388,7 +414,7 @@ function Extra({ k, d, goals, kpiList, runway }: { k: ExtraKey; d: DashboardData
           {d.scoreHistory.length < 2 ? (
             <p className="text-sm text-ink-soft">Re-assess after working your plan to see your score move.</p>
           ) : (
-            <LineChart label="Venture Score over time" points={d.scoreHistory.map((h) => ({ label: fmtDate(h.date).replace(/^\d+ /, ""), value: Math.round(h.score) }))} />
+            <LineChart label="Readiness over time" points={d.scoreHistory.map((h) => ({ label: fmtDate(h.date).replace(/^\d+ /, ""), value: Math.round(h.score) }))} />
           )}
         </Panel>
       );

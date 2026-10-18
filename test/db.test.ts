@@ -613,6 +613,18 @@ async function suite(label: string, files: string[]) {
   r = await U(A, `update ai_coach_messages set content='edited'`);
   assert(r.ok && r.n === 0, "founder cannot edit the coach's replies", r);
 
+  // Lorenzo · AI video sessions
+  r = await U(A, `insert into ai_clone_sessions (founder_id,conversation_id,consent_version,max_seconds) values ('${A}','c1','2026-10',600)`);
+  assert(!r.ok, "founder cannot log a clone session directly (the server enforces consent and limits)");
+  r = await SRV(`insert into ai_clone_sessions (founder_id,conversation_id,consent_version,max_seconds) values ('${A}','c1','2026-10',600)`);
+  assert(r.ok, "server logs a Lorenzo · AI session", r);
+  r = await SRV(`insert into ai_clone_sessions (founder_id,conversation_id,consent_version,max_seconds) values ('${A}','c2','2026-10',99999)`);
+  assert(!r.ok, "…with a sane session length");
+  r = await U(A, `select conversation_id from ai_clone_sessions`);
+  assert(r.ok && r.rows.length === 1, "founder reads own clone sessions", r);
+  r = await U(B, `select id from ai_clone_sessions`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot see them", r);
+
   // ------------------------------------------------------------------
   // "Is this founder subscribed?" — database and app must agree
   // ------------------------------------------------------------------
@@ -667,6 +679,8 @@ async function main() {
     "supabase/migrations/2026-10-17_cohort_names.sql",
     "supabase/migrations/2026-10-18_ai_coach.sql",
     "supabase/migrations/2026-10-18_ai_coach.sql",
+    "supabase/migrations/2026-10-19_ai_clone.sql",
+    "supabase/migrations/2026-10-19_ai_clone.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

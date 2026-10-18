@@ -5,6 +5,8 @@ import { entitlements } from "@/lib/membership";
 import { dailyLimit, remainingToday, starters } from "@/lib/ai-coach";
 import { loadCoachContext } from "@/lib/ai-coach-server";
 import { AiCoachChat, type ChatMessage } from "@/components/coaching/AiCoachChat";
+import { LorenzoAiPanel } from "@/components/coaching/LorenzoAiPanel";
+import { cloneConfig, SESSION_SECONDS, sessionLimit, sessionsLeft } from "@/lib/ai-clone";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +56,14 @@ export default async function AiCoachPage({ searchParams }: { searchParams?: { t
   const weekAgo = Date.now() - 7 * 864e5;
   const checkinDue = !list.some((t) => t.kind === "checkin" && new Date(t.updated_at).getTime() > weekAgo);
   const remaining = remainingToday(((sent ?? []) as any[]).map((r) => r.created_at), dailyLimit(m.tier));
+  const clone = cloneConfig();
+  let cloneLeft = 0;
+  const cloneLimit = sessionLimit(m.tier);
+  if (clone.enabled) {
+    const monthStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString();
+    const { data: sessions } = await supabase.from("ai_clone_sessions").select("created_at").gte("created_at", monthStart);
+    cloneLeft = sessionsLeft(((sessions ?? []) as any[]).map((r) => r.created_at), cloneLimit);
+  }
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl px-4 py-10 sm:px-6">
@@ -62,6 +72,11 @@ export default async function AiCoachPage({ searchParams }: { searchParams?: { t
       </a>
       <h1 className="mt-3 text-3xl font-bold text-navy">AI coach</h1>
       <p className="mt-1 max-w-2xl text-ink-soft">Built on your assessment, plan, goals and monthly numbers, with local to global insight for your market. Ask anything about growing your business, any time.</p>
+      {clone.enabled && (
+        <div className="mt-6">
+          <LorenzoAiPanel left={cloneLeft} limit={cloneLimit} minutes={SESSION_SECONDS / 60} />
+        </div>
+      )}
       <div className="mt-6 grid gap-6 lg:grid-cols-[240px_1fr]">
         <nav aria-label="Conversations" className="space-y-2">
           <a href="/ai-coach" className={`block rounded-lg px-3 py-2 text-sm font-semibold ${!current ? "bg-navy text-white" : "border border-navy text-navy"}`}>

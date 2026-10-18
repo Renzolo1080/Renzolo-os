@@ -21,6 +21,7 @@ import { ensureProfileExtras, readAttribution, publicAppUrl } from "@/lib/growth
 import { InviteCard } from "@/components/InviteCard";
 import { PurchaseTracker } from "@/components/PurchaseTracker";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
+import { readinessFromRows } from "@/lib/readiness";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -193,6 +194,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
       access,
       extras,
       score: latestScore,
+      readiness: readinessFromRows(latestScore, { completeness: planRow?.completeness ?? null, review: review?.overall ?? null }, planScore),
       plan: planRow?.data ?? null,
       planCompleteness: planRow?.completeness ?? null,
       checkins: (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })),
