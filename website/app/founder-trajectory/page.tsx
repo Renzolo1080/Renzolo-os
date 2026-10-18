@@ -2,6 +2,7 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
 import { Faq } from "@/components/Faq";
+import { OfferTabs, PageEndCta } from "@/components/Flow";
 
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
@@ -29,8 +30,9 @@ export default function FounderTrajectoryPage() {
             </a>
           </div>
         </PageHero>
+        <OfferTabs current="membership" />
 
-        <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
+        <section id="assessment" className="mx-auto max-w-6xl scroll-mt-24 px-5 py-16 md:py-24">
           <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">What the assessment looks at</h2>
           <div className="mt-10 grid gap-10 md:grid-cols-2">
             <div>
@@ -49,7 +51,7 @@ export default function FounderTrajectoryPage() {
           </div>
         </section>
 
-        <section className="bg-white">
+        <section id="membership" className="scroll-mt-24 bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Three levels of support</h2>
             <div className="mt-10 grid gap-6 lg:grid-cols-3">
@@ -79,12 +81,27 @@ export default function FounderTrajectoryPage() {
           </div>
         </section>
 
+        <section id="coaching" className="mx-auto max-w-6xl scroll-mt-24 px-5 pt-16 md:pt-24">
+          <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Your coaching team</h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <div className="rounded-card border border-line bg-surface-tint p-7">
+              <p className="font-display text-xl font-bold">Lorenzo · AI, any time</p>
+              <p className="mt-2 text-muted">Lorenzo · AI coaches you any time from Lorenzo&apos;s 20-year playbook, with local to global insight and dated actions. Included with Growth and Elevate.</p>
+            </div>
+            <div className="rounded-card border border-line bg-surface-tint p-7">
+              <p className="font-display text-xl font-bold">Live sessions with Lorenzo</p>
+              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Two sessions a quarter on Growth, two a month on Elevate, or from $59 a session for members.</p>
+            </div>
+          </div>
+        </section>
+
         <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
           <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Most asked questions</h2>
           <div className="mt-8">
             <Faq />
           </div>
         </section>
+        <PageEndCta campaign="ft_end" />
       </main>
       <Footer />
     </>

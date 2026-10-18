@@ -2,6 +2,7 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { InterestForm } from "@/components/Forms";
 import { appLink } from "@/lib/site";
+import { OfferTabs, PageEndCta } from "@/components/Flow";
 
 export const metadata = { title: "Founder Trajectory™ Academy", description: "Three development levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months)." };
 
@@ -20,6 +21,7 @@ export default function AcademyPage() {
           title="Grow alongside founders who are building too."
           intro="Founder Trajectory™ Academy cohorts are structured programs with live sessions and coaching. You work through your own growth and readiness plan, together with a group of founders at a similar stage."
         />
+        <OfferTabs current="academy" />
         <section className="mx-auto max-w-6xl px-5 py-16 md:py-24">
           <h2 className="mb-8 font-display text-3xl font-bold tracking-tight md:text-4xl">Founder Trajectory™ Academy: Development Levels</h2>
           <dl className="grid gap-px overflow-hidden rounded-3xl bg-mist md:grid-cols-3">
@@ -57,6 +59,7 @@ export default function AcademyPage() {
             </div>
           </div>
         </section>
+        <PageEndCta campaign="academy_end" />
       </main>
       <Footer />
     </>

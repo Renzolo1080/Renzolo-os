@@ -1,6 +1,7 @@
 import { Header, Footer } from "@/components/Chrome";
 import { OsStory, OutcomeFlipCards, PricingTable, ReadinessTicker, RevealOnScroll, SnapshotTaster, StickyMobileCta, type Tier } from "@/components/BrandClient";
 import { Button, DotGrid, Eyebrow, Glow, Portrait, TrajectoryBlocks } from "@/components/Visuals";
+import { ProofBand } from "@/components/Flow";
 import { AFFILIATION_NOTE, FOUNDER, RESULTS, TESTIMONIALS } from "@/lib/story";
 import { APP_URL, appLink } from "@/lib/site";
 
@@ -86,6 +87,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* 2b. Proof, straight after the ambition */}
+        <ProofBand />
 
         {/* 3. Three outcomes */}
         <section className="bg-surface-tint">
@@ -306,9 +310,14 @@ export default function Home() {
         <section className={`${WRAP} py-16 md:py-24`}>
           <div className="reveal flex flex-col gap-6 rounded-panel bg-brand p-8 text-on-brand md:flex-row md:items-center md:justify-between md:p-12">
             <p className={`max-w-2xl ${H2}`}>Know where you stand in seven minutes.</p>
-            <a href={appLink("/snapshot", "home_final_cta")} className="inline-flex shrink-0 justify-center rounded-pill bg-ink px-6 py-3 font-semibold text-surface transition-colors hover:bg-ink/85">
-              Start your assessment
-            </a>
+            <div className="flex shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <a href={appLink("/snapshot", "home_final_cta")} className="inline-flex justify-center rounded-pill bg-ink px-6 py-3 font-semibold text-surface transition-colors hover:bg-ink/85">
+                Start your assessment
+              </a>
+              <a href="/contact/" className="inline-flex justify-center rounded-pill border-2 border-ink/70 px-6 py-3 font-semibold text-on-brand transition-colors hover:border-ink">
+                Talk to Lorenzo
+              </a>
+            </div>
           </div>
         </section>
       </main>

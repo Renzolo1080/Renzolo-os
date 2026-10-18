@@ -2,6 +2,7 @@ import { Header, Footer } from "@/components/Chrome";
 import { Glow, OutcomeChips, Portrait, SignalBand } from "@/components/Visuals";
 import { AFFILIATION_NOTE, CREDENTIALS, FOUNDER, PROOF_STATS, TRACK_RECORD } from "@/lib/story";
 import { appLink } from "@/lib/site";
+import { PageEndCta } from "@/components/Flow";
 
 export const metadata = { title: "About", description: "Customer, capital and investor readiness for founders and suppliers, built by someone who has assessed and developed suppliers for large buyers. Founder Trajectory™, powered by RENZOLO OS™." };
 
@@ -31,6 +32,12 @@ export default function AboutPage() {
               readiness and growth plan, and coach them to reach at least one of three outcomes:
             </p>
             <OutcomeChips className="mt-6" />
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <a href={appLink("/snapshot", "about_hero")} className="btn-pop rounded-pill border-2 border-ink bg-brand px-7 py-4 font-semibold text-on-brand">
+                Start your assessment
+              </a>
+              <a href="#proof" className="font-semibold text-gold-soft underline-offset-4 hover:underline">See the track record</a>
+            </div>
           </div>
         </section>
         <SignalBand />
@@ -55,7 +62,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section data-theme="dark" className="relative overflow-hidden bg-night text-ink">
+        <section id="proof" data-theme="dark" className="relative scroll-mt-24 overflow-hidden bg-night text-ink">
           <Glow />
           <div className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The proof behind the method</h2>
@@ -82,7 +89,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="bg-white">
+        <section id="expertise" className="scroll-mt-24 bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Expertise behind every assessment</h2>
             <p className="mt-3 max-w-2xl text-lg text-muted">The readiness criteria in RENZOLO OS™ come from real supplier development and capital work.</p>
@@ -113,10 +120,8 @@ export default function AboutPage() {
               </li>
             ))}
           </ol>
-          <a href={appLink("/snapshot", "about")} className="mt-10 inline-block btn-pop rounded-pill border-2 border-ink bg-brand px-7 py-4 font-semibold text-on-brand">
-            Take the free Readiness Snapshot
-          </a>
         </section>
+        <PageEndCta campaign="about_end" />
       </main>
       <Footer />
     </>
