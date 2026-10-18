@@ -8,3 +8,7 @@ export function appLink(path: string, campaign: string): string {
 }
 
 export const STAGES = ["Discover", "Validate", "Build", "Acquire", "Prepare", "Fund", "Scale", "Exit"];
+
+/** WhatsApp chat link (e.g. https://wa.me/27XXXXXXXXX). The floating button
+ * and footer link appear only when NEXT_PUBLIC_WHATSAPP_URL is set. */
+export const WHATSAPP_URL = /^https:\/\/wa\.me\/\d+/.test(process.env.NEXT_PUBLIC_WHATSAPP_URL ?? "") ? process.env.NEXT_PUBLIC_WHATSAPP_URL! : null;

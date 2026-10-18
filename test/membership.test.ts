@@ -111,3 +111,16 @@ assert(lapsed.ok && lapsed.kind === "new" && lapsed.startsAt === now.toISOString
 assert(elevateSeatLimit({}) === 50 && elevateSeatLimit({ ELEVATE_SEAT_LIMIT: "40" }) === 40 && elevateSeatLimit({ ELEVATE_SEAT_LIMIT: "lots" }) === 50, "Elevate seat limit: 50 by default, settable");
 
 console.log("\nAll membership and pricing tests completed.");
+
+// Coaching price levels.
+{
+  const { coachingBuyerLevel } = require("../lib/pricing");
+  assert(getOneOffPrice("coaching_single", "starter", undefined, {})?.amount === 99 && getOneOffPrice("coaching_pack3", "starter", undefined, {})?.amount === 249, "starting with coaching: $99 one session, $249 for three");
+  assert(getOneOffPrice("coaching_single", "starter", undefined, { PRICE_COACHING_SINGLE_STARTER: "120" })?.amount === 120, "starter price can be changed in settings");
+  assert(getOneOffPrice("assessment", "starter", undefined, {})?.amount === 79, "the assessment price doesn't change by level");
+  assert(coachingBuyerLevel({ member: true, boughtAssessment: false, hadCoaching: false }) === "member", "members pay the member price");
+  assert(coachingBuyerLevel({ member: false, boughtAssessment: true, hadCoaching: false }) === "client", "assessment buyers pay the standard price");
+  assert(coachingBuyerLevel({ member: false, boughtAssessment: false, boughtCohort: true, hadCoaching: false }) === "client", "cohort buyers pay the standard price");
+  assert(coachingBuyerLevel({ member: false, boughtAssessment: false, hadCoaching: true }) === "client", "after a first coaching purchase, the standard price");
+  assert(coachingBuyerLevel({ member: false, boughtAssessment: false, hadCoaching: false }) === "starter", "starting with coaching: the starter price");
+}

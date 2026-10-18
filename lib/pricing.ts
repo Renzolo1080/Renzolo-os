@@ -14,8 +14,13 @@
  * ONE-TIME PURCHASES
  *   Readiness Assessment (full report, valuation, market insight, tier
  *   recommendation)                         $79
- *   One coaching session                     $79  ($59 for members)
- *   Three coaching sessions                  $199 ($149 for members)
+ *   Coaching has three price levels:
+ *     members (any tier)                     $59 one session · $149 for three
+ *     clients (bought the assessment or a
+ *     cohort, or have had coaching before)   $79 · $199
+ *     starting with coaching (first coaching
+ *     purchase, nothing else bought; covers
+ *     intake and session planning)           $99 · $249
  *
  * Settings (all optional; a missing or unusable value falls back to the
  * default above, never to free):
@@ -26,6 +31,7 @@
  *   PRICE_ASSESSMENT
  *   PRICE_COACHING_SINGLE, PRICE_COACHING_SINGLE_MEMBER
  *   PRICE_COACHING_PACK3, PRICE_COACHING_PACK3_MEMBER
+ *   PRICE_COACHING_SINGLE_STARTER, PRICE_COACHING_PACK3_STARTER
  *
  * LOCAL-CURRENCY PRICES. Flutterwave decides which payment methods to show
  * from the currency of the charge: M-Pesa only appears for a Kenyan
@@ -67,11 +73,22 @@ const DEFAULT_MEMBERSHIP: Record<Tier, Partial<Record<BillingInterval, number>>>
   elevate: { quarterly: 447, annual: 1490 },
 };
 
-const DEFAULT_ONE_OFF: Record<OneOffItem, { standard: number; member: number }> = {
-  assessment: { standard: 79, member: 79 },
-  coaching_single: { standard: 79, member: 59 },
-  coaching_pack3: { standard: 199, member: 149 },
+const DEFAULT_ONE_OFF: Record<OneOffItem, { standard: number; member: number; starter: number }> = {
+  assessment: { standard: 79, member: 79, starter: 79 },
+  coaching_single: { standard: 79, member: 59, starter: 99 },
+  coaching_pack3: { standard: 199, member: 149, starter: 249 },
 };
+
+/** Who is buying, for coaching prices: a member, a client (has bought the
+ * assessment or a cohort, or coaching before), or someone starting with
+ * coaching. `true`/`false` are kept for member/client. */
+export type BuyerLevel = "member" | "client" | "starter";
+const levelOf = (v: boolean | BuyerLevel): BuyerLevel => (v === true ? "member" : v === false ? "client" : v);
+
+export function coachingBuyerLevel(input: { member: boolean; boughtAssessment: boolean; boughtCohort?: boolean; hadCoaching: boolean }): BuyerLevel {
+  if (input.member) return "member";
+  return input.boughtAssessment || input.boughtCohort || input.hadCoaching ? "client" : "starter";
+}
 
 /** Coaching sessions bought in each one-off coaching item. */
 export const COACHING_QUANTITY: Record<Exclude<OneOffItem, "assessment">, number> = { coaching_single: 1, coaching_pack3: 3 };
@@ -146,20 +163,21 @@ export function getMembershipPrice(tier: Tier, interval: BillingInterval, curren
   return amount === null ? null : { amount, currency: wanted };
 }
 
-/** The price of a one-time purchase. Members (any active tier) get the
- * member price for coaching. */
-export function getOneOffPrice(item: OneOffItem, member: boolean, currency?: unknown, env: Env = process.env): Price | null {
+/** The price of a one-time purchase. Coaching depends on who is buying
+ * (BuyerLevel); the assessment is the same for everyone. */
+export function getOneOffPrice(item: OneOffItem, who: boolean | BuyerLevel, currency?: unknown, env: Env = process.env): Price | null {
   const main = mainCurrency(env);
   const wanted = currency === undefined ? main : cleanCurrency(currency);
   if (!wanted) return null;
+  const level = item === "assessment" ? "client" : levelOf(who);
   const base = `PRICE_${item.toUpperCase()}`;
-  const keys = member && item !== "assessment" ? [`${base}_MEMBER`, base] : [base];
+  const keys = level === "member" ? [`${base}_MEMBER`, base] : level === "starter" ? [`${base}_STARTER`, base] : [base];
   for (const key of keys) {
     const amount = readAmount(env[wanted === main ? key : `${key}_${wanted}`]);
     if (amount !== null) return { amount, currency: wanted };
-    // A member price that isn't set in settings falls through to its
-    // default, not to the standard setting.
-    if (wanted === main) return { amount: member ? DEFAULT_ONE_OFF[item].member : DEFAULT_ONE_OFF[item].standard, currency: main };
+    // A member or starter price that isn't set in settings falls through
+    // to its default, not to the standard setting.
+    if (wanted === main) return { amount: DEFAULT_ONE_OFF[item][level === "client" ? "standard" : level], currency: main };
   }
   return null;
 }
@@ -180,7 +198,7 @@ export function membershipCurrenciesFor(country: string | null | undefined, env:
 }
 
 /** Currencies a founder can pay in for a one-time purchase. */
-export function oneOffCurrenciesFor(item: OneOffItem, member: boolean, country: string | null | undefined, env: Env = process.env): string[] {
+export function oneOffCurrenciesFor(item: OneOffItem, member: boolean | BuyerLevel, country: string | null | undefined, env: Env = process.env): string[] {
   const main = mainCurrency(env);
   const local = currencyForCountry(country);
   const offered: string[] = [];

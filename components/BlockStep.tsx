@@ -1,5 +1,7 @@
 "use client";
-import { BlockPrompt } from "@/lib/blocks";
+import { MEASURE_CHOICES, type BlockPrompt } from "@/lib/blocks";
+
+export type MeasureKey = "clarity" | "evidence" | "economics" | "scalability" | "defensibility" | "risk";
 
 export interface BlockAnswer {
   currentState: string;
@@ -7,90 +9,90 @@ export interface BlockAnswer {
   goalTarget: string;
   targetDate: string;
   evidenceUploaded: boolean;
-  measures: { clarity: number; evidence: number; economics: number; scalability: number; defensibility: number; risk: number };
+  /** Chosen answer (0-3) for each measure, or null until answered. */
+  levels: Record<MeasureKey, number | null>;
 }
 
-const MEASURE_LABELS: [keyof BlockAnswer["measures"], string][] = [
-  ["clarity", "Clarity"],
-  ["evidence", "Evidence"],
-  ["economics", "Economics"],
-  ["scalability", "Scalability"],
-  ["defensibility", "Defensibility"],
-  ["risk", "Risk (100 = low risk)"],
-];
+export function answerComplete(a: BlockAnswer): boolean {
+  return a.currentState.trim().length > 0 && a.futureState.trim().length > 0 && MEASURE_CHOICES.every((m) => a.levels[m.key] !== null);
+}
 
+/** One business area of the full assessment: where it is today, where it
+ * needs to be, six quick multiple-choice measures, and an optional goal. */
 export function BlockStep({
   prompt,
   answer,
   onChange,
+  position,
 }: {
   prompt: BlockPrompt;
   answer: BlockAnswer;
   onChange: (next: BlockAnswer) => void;
+  position?: string;
 }) {
+  const set = (patch: Partial<BlockAnswer>) => onChange({ ...answer, ...patch });
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold text-navy">{prompt.label}</h2>
+    <div className="space-y-6">
+      <div>
+        {position && <p className="text-xs font-semibold uppercase tracking-wide text-teal">{position}</p>}
+        <h2 className="text-2xl font-bold text-navy">{prompt.label}</h2>
+      </div>
 
-      <label className="block text-sm font-medium">{prompt.currentStatePrompt}</label>
-      <textarea
-        className="w-full rounded border px-3 py-2"
-        rows={3}
-        value={answer.currentState}
-        onChange={(e) => onChange({ ...answer, currentState: e.target.value })}
-      />
+      <fieldset className="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
+        <legend className="sr-only">Today and where you want to be</legend>
+        <label className="block">
+          <span className="block font-semibold text-navy">Today</span>
+          <span className="block text-sm text-ink-soft">{prompt.currentStatePrompt}</span>
+          <textarea className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2" rows={3} value={answer.currentState} onChange={(e) => set({ currentState: e.target.value })} />
+        </label>
+        <label className="block">
+          <span className="block font-semibold text-navy">Where you want it to be</span>
+          <span className="block text-sm text-ink-soft">{prompt.futureStatePrompt}</span>
+          <textarea className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2" rows={3} value={answer.futureState} onChange={(e) => set({ futureState: e.target.value })} />
+        </label>
+      </fieldset>
 
-      <label className="block text-sm font-medium">{prompt.futureStatePrompt}</label>
-      <textarea
-        className="w-full rounded border px-3 py-2"
-        rows={3}
-        value={answer.futureState}
-        onChange={(e) => onChange({ ...answer, futureState: e.target.value })}
-      />
-
-      <label className="block text-sm font-medium">{prompt.goalPrompt}</label>
-      <input
-        className="w-full rounded border px-3 py-2"
-        value={answer.goalTarget}
-        onChange={(e) => onChange({ ...answer, goalTarget: e.target.value })}
-      />
-
-      <label className="block text-sm font-medium">Target date for this goal</label>
-      <input
-        type="date"
-        className="w-full rounded border px-3 py-2"
-        value={answer.targetDate}
-        onChange={(e) => onChange({ ...answer, targetDate: e.target.value })}
-      />
-      <p className="text-xs text-ink-soft -mt-2">
-        Powers your dashboard's progress reminders — it won't be shared or scored.
-      </p>
-
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={answer.evidenceUploaded}
-          onChange={(e) => onChange({ ...answer, evidenceUploaded: e.target.checked })}
-        />
-        I have supporting evidence for this block (customer, financial, contract, or market data)
-      </label>
-
-      <div className="grid grid-cols-2 gap-4 pt-2">
-        {MEASURE_LABELS.map(([key, label]) => (
-          <div key={key}>
-            <label className="block text-xs font-medium text-ink-soft">
-              {label}: {answer.measures[key]}
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={answer.measures[key]}
-              onChange={(e) => onChange({ ...answer, measures: { ...answer.measures, [key]: Number(e.target.value) } })}
-              className="w-full"
-            />
-          </div>
+      <div className="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
+        <p className="font-semibold text-navy">Six quick checks on {prompt.label.toLowerCase()}</p>
+        {MEASURE_CHOICES.map((m) => (
+          <fieldset key={m.key}>
+            <legend className="text-sm font-medium">{m.question}</legend>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {m.options.map((label, i) => {
+                const chosen = answer.levels[m.key] === i;
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    aria-pressed={chosen}
+                    onClick={() => set({ levels: { ...answer.levels, [m.key]: i } })}
+                    className={`rounded-lg border px-3 py-2 text-left text-sm ${chosen ? "border-navy bg-navy text-white" : "border-gray-300 bg-white hover:border-navy"}`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
         ))}
+        <label className="flex items-start gap-2 pt-1 text-sm">
+          <input type="checkbox" className="mt-1" checked={answer.evidenceUploaded} onChange={(e) => set({ evidenceUploaded: e.target.checked })} />
+          <span>I have records to back this up (customer, financial, contract or market data)</span>
+        </label>
+      </div>
+
+      <div className="space-y-3 rounded-2xl border border-dashed border-gray-300 p-5">
+        <p className="font-semibold text-navy">
+          A goal for this area <span className="text-sm font-normal text-ink-soft">(optional, carries into your plan)</span>
+        </p>
+        <label className="block text-sm">
+          <span className="text-ink-soft">{prompt.goalPrompt}</span>
+          <input className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" value={answer.goalTarget} onChange={(e) => set({ goalTarget: e.target.value })} />
+        </label>
+        <label className="block text-sm">
+          <span className="text-ink-soft">By when</span>
+          <input type="date" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 sm:w-56" value={answer.targetDate} onChange={(e) => set({ targetDate: e.target.value })} />
+        </label>
       </div>
     </div>
   );

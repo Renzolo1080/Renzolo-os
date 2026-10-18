@@ -1007,6 +1007,270 @@ grant execute on function grant_referral_reward(uuid, uuid, timestamptz) to serv
 grant execute on function apply_pending_referral_rewards(uuid, timestamptz) to service_role;
 grant execute on function fulfil_payment(uuid, text, numeric, text, text, timestamptz) to service_role;
 
+-- ===== 2026-10-15: full assessment, Plan Builder, plan review, Market Intelligence, dashboard views =====
+-- Full assessment, Plan Builder, AI plan review, Market Intelligence and
+-- the customisable dashboard. Safe to run more than once.
+
+-- Dashboard: which ready-made view a founder last chose ('custom' means
+-- their own cards, kept in dashboard_widgets in the order they picked).
+alter table profiles add column if not exists dashboard_view text not null default 'overview';
+do $$ begin
+  alter table profiles add constraint profiles_dashboard_view_check
+    check (dashboard_view in ('overview', 'investor', 'customer', 'operations', 'plan', 'custom'));
+exception when duplicate_object then null; end $$;
+grant update (dashboard_view) on profiles to authenticated;
+
+-- One living strategic plan per founder, built in the guided Plan Builder
+-- (no uploads: every plan has the same shape, so it can be reviewed and
+-- tracked). `data` is validated by the app (lib/plan.ts sanitizePlan).
+create table if not exists strategic_plans (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null unique references profiles(id) on delete cascade,
+  -- The assessment the plan was last checked against.
+  assessment_id uuid references assessments(id) on delete set null,
+  data jsonb not null default '{}'::jsonb,
+  completeness integer not null default 0 check (completeness between 0 and 100),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- AI reviews of a plan. Written by the server only, so a review can't be
+-- made up from the browser; founders read their own.
+create table if not exists plan_reviews (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  plan_id uuid not null references strategic_plans(id) on delete cascade,
+  -- The plan's updated_at when it was reviewed, to tell when it has
+  -- changed since.
+  plan_updated_at timestamptz not null,
+  overall integer not null check (overall between 0 and 100),
+  result jsonb not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists plan_reviews_founder_idx on plan_reviews (founder_id, created_at desc);
+
+-- Market Intelligence briefs (AI with live web research), refreshed
+-- monthly. Server-written, founder-readable.
+create table if not exists market_briefs (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  industry text not null,
+  country text not null,
+  markdown text not null,
+  sources jsonb not null default '[]'::jsonb,
+  -- Structured plan recommendations and target checks (lib/market.ts).
+  insights jsonb not null default '{}'::jsonb,
+  -- The plan's updated_at when the brief was written.
+  plan_updated_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists market_briefs_founder_idx on market_briefs (founder_id, created_at desc);
+
+alter table strategic_plans enable row level security;
+alter table plan_reviews enable row level security;
+alter table market_briefs enable row level security;
+
+do $$ begin
+  create policy "strategic_plans: owner" on strategic_plans for all
+    using (founder_id = auth.uid()) with check (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "strategic_plans: staff read" on strategic_plans for select using (is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "plan_reviews: self or staff" on plan_reviews for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "market_briefs: self or staff" on market_briefs for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+
+-- Progress against plan goals: each check-in records the actual value of
+-- a goal's measure on a date (goal_id is the goal's id inside the plan).
+create table if not exists goal_checkins (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  goal_id text not null check (length(goal_id) between 1 and 40),
+  value numeric not null,
+  note text check (note is null or length(note) <= 500),
+  checked_on date not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists goal_checkins_founder_idx on goal_checkins (founder_id, goal_id, checked_on);
+
+-- The founder's monthly update: key numbers plus wins, challenges and
+-- where they need help (the same shape as an investor update).
+create table if not exists founder_updates (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  -- First day of the month the update is for.
+  period date not null check (extract(day from period) = 1),
+  revenue numeric check (revenue is null or revenue >= 0),
+  customers integer check (customers is null or customers >= 0),
+  cash numeric,
+  wins text check (wins is null or length(wins) <= 1500),
+  challenges text check (challenges is null or length(challenges) <= 1500),
+  asks text check (asks is null or length(asks) <= 1000),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (founder_id, period)
+);
+
+alter table goal_checkins enable row level security;
+alter table founder_updates enable row level security;
+do $$ begin
+  create policy "goal_checkins: owner" on goal_checkins for all
+    using (founder_id = auth.uid()) with check (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "goal_checkins: staff read" on goal_checkins for select using (is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "founder_updates: owner" on founder_updates for all
+    using (founder_id = auth.uid()) with check (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "founder_updates: staff read" on founder_updates for select using (is_staff());
+exception when duplicate_object then null; end $$;
+
+-- ===== 2026-10-16: coaching cycle (same as supabase/migrations/2026-10-16_coaching.sql) =====
+-- Founder Trajectory(TM) Coaching Cycle: agreement, founder prep, coach
+-- prep brief, GROW notes, commitments, rating. Safe to run more than once.
+--
+-- Coaching sessions live in advisor_sessions (one row per session, created
+-- when a founder uses a coaching credit or buys a session). Founders can
+-- read their own sessions; every write goes through the server, which
+-- checks who is asking (founder: their own prep, commitment status and
+-- rating; coach/admin: everything else).
+
+alter table advisor_sessions add column if not exists kind text not null default 'coaching';
+do $$ begin
+  alter table advisor_sessions add constraint advisor_sessions_kind_check check (kind in ('coaching', 'quarterly_review'));
+exception when duplicate_object then null; end $$;
+-- What the founder wants from the session (focus, wins, challenge).
+alter table advisor_sessions add column if not exists founder_prep jsonb not null default '{}'::jsonb;
+-- AI-drafted brief for the coach, from the founder's report, plan and progress.
+alter table advisor_sessions add column if not exists prep_brief text;
+-- The coach's GROW notes: goal, reality, options, will. Coach-only.
+alter table advisor_sessions add column if not exists coach_notes jsonb not null default '{}'::jsonb;
+-- Notes the founder can see: a short summary of the session.
+alter table advisor_sessions add column if not exists summary text;
+-- Commitments agreed in the session: [{id, text, due, status, area}].
+alter table advisor_sessions add column if not exists commitments jsonb not null default '[]'::jsonb;
+alter table advisor_sessions add column if not exists completed_at timestamptz;
+alter table advisor_sessions add column if not exists rating integer;
+do $$ begin
+  alter table advisor_sessions add constraint advisor_sessions_rating_check check (rating is null or rating between 1 and 5);
+exception when duplicate_object then null; end $$;
+alter table advisor_sessions add column if not exists feedback text;
+
+-- Coach-only notes must never reach the founder's browser: signed-in
+-- users may read every column EXCEPT coach_notes and prep_brief. The coach
+-- pages read those with the service role after checking the coach's role.
+revoke select on advisor_sessions from authenticated, anon;
+grant select (id, founder_id, report_id, status, price, currency, flutterwave_tx_ref, advisor_id, scheduled_at, notes, paid_at, created_at,
+              coaching_credit_id, kind, founder_prep, summary, commitments, completed_at, rating, feedback)
+  on advisor_sessions to authenticated;
+
+-- The founder's acceptance of the coaching agreement (confidentiality,
+-- goals, rescheduling). One row per founder per agreement version.
+create table if not exists coaching_agreements (
+  founder_id uuid not null references profiles(id) on delete cascade,
+  version text not null,
+  accepted_at timestamptz not null default now(),
+  primary key (founder_id, version)
+);
+alter table coaching_agreements enable row level security;
+do $$ begin
+  create policy "coaching_agreements: self or staff" on coaching_agreements for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+
+-- ===== 2026-10-17: cohort names (same as supabase/migrations/2026-10-17_cohort_names.sql) =====
+-- Academy cohorts renamed so they can't be confused with membership
+-- levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months).
+-- Safe to run more than once.
+alter table cohort_applications drop constraint if exists cohort_applications_cohort_check;
+update cohort_applications set cohort = case cohort
+  when 'foundations' then 'launch'
+  when 'essentials_growth' then 'launch'
+  when 'growth' then 'build'
+  when 'elevate' then 'scale'
+  else cohort end
+where cohort in ('foundations', 'essentials_growth', 'growth', 'elevate');
+alter table cohort_applications add constraint cohort_applications_cohort_check
+  check (cohort in ('launch', 'build', 'scale'));
+
+-- ===== 2026-10-18: AI coaching (same as supabase/migrations/2026-10-18_ai_coach.sql) =====
+-- AI coaching: conversations and weekly check-ins with the Founder
+-- Trajectory(TM) AI coach. Every row is written by the server (which
+-- checks access and the daily limit); founders read their own.
+-- Safe to run more than once.
+create table if not exists ai_coach_threads (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  kind text not null default 'chat' check (kind in ('chat', 'checkin', 'insights')),
+  title text not null check (length(title) between 1 and 120),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists ai_coach_threads_founder_idx on ai_coach_threads (founder_id, updated_at desc);
+
+create table if not exists ai_coach_messages (
+  id uuid primary key default gen_random_uuid(),
+  thread_id uuid not null references ai_coach_threads(id) on delete cascade,
+  founder_id uuid not null references profiles(id) on delete cascade,
+  role text not null check (role in ('user', 'assistant')),
+  content text not null check (length(content) between 1 and 12000),
+  -- Plan actions the coach suggested in this reply: [{area, text, due}].
+  actions jsonb not null default '[]'::jsonb,
+  -- Web pages the coach read for this reply: [{title, url}].
+  sources jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists ai_coach_messages_thread_idx on ai_coach_messages (thread_id, created_at);
+create index if not exists ai_coach_messages_founder_idx on ai_coach_messages (founder_id, created_at desc);
+
+alter table ai_coach_threads enable row level security;
+alter table ai_coach_messages enable row level security;
+do $$ begin
+  create policy "ai_coach_threads: self or staff" on ai_coach_threads for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "ai_coach_messages: self or staff" on ai_coach_messages for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+
+-- Lorenzo · AI video sessions (Tavus). One row per session started; the
+-- server writes them after checking access, consent and the monthly
+-- limit. Founders read their own. Safe to run more than once.
+create table if not exists ai_clone_sessions (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  conversation_id text not null check (length(conversation_id) between 1 and 120),
+  consent_version text not null check (length(consent_version) between 1 and 20),
+  max_seconds integer not null check (max_seconds between 60 and 3600),
+  created_at timestamptz not null default now()
+);
+create index if not exists ai_clone_sessions_founder_idx on ai_clone_sessions (founder_id, created_at desc);
+
+alter table ai_clone_sessions enable row level security;
+do $$ begin
+  create policy "ai_clone_sessions: self or staff" on ai_clone_sessions for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+-- =====================================================================
+-- Function privileges (same as supabase/migrations/2026-10-16_function_privileges.sql).
+-- =====================================================================
+
+revoke execute on function handle_new_user() from public, anon, authenticated;
+
+-- is_staff(), is_admin() and has_active_subscription() are used by the
+-- access rules, which run as the signed-in founder, so signed-in founders
+-- keep access (each only ever answers about the caller). Signed-out
+-- visitors never need them: everything they submit goes through the server.
+revoke execute on function is_staff() from public, anon;
+revoke execute on function is_admin() from public, anon;
+revoke execute on function has_active_subscription() from public, anon;
+grant execute on function is_staff() to authenticated, service_role;
+grant execute on function is_admin() to authenticated, service_role;
+grant execute on function has_active_subscription() to authenticated, service_role;
 -- =====================================================================
 -- Statement acknowledgments (same as supabase/migrations/2026-10-16_acknowledgments.sql).
 -- =====================================================================

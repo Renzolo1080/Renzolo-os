@@ -12,12 +12,12 @@ export const TIER_FEATURES: { label: string; values: Record<Tier, boolean | stri
   { label: "Valuation range and Market, Customer and Investor readiness scores", values: { essentials: false, growth: true, elevate: true } },
   { label: "AI market insight for your industry and country", values: { essentials: false, growth: true, elevate: true } },
   { label: "Advisor review of your report", values: { essentials: false, growth: true, elevate: true } },
-  { label: "AI coaching", values: { essentials: false, growth: "Coming soon", elevate: "Coming soon" } },
+  { label: "Lorenzo · AI: coaching any time and weekly check-ins", values: { essentials: false, growth: true, elevate: true } },
   { label: "One-on-one coaching included", values: { essentials: false, growth: "2 per quarter", elevate: "2 per month" } },
   { label: "Pitch and investor readiness review", values: { essentials: false, growth: false, elevate: true } },
   { label: "Priority support", values: { essentials: false, growth: false, elevate: true } },
   { label: "Extra coaching sessions at member prices", values: { essentials: true, growth: true, elevate: true } },
-  { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Foundations", growth: "Foundations and Growth", elevate: "All levels, including Elevate" } },
+  { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Launch", growth: "Launch and Build", elevate: "Launch, Build and Scale" } },
 ];
 
 export const TIER_TAGLINES: Record<Tier, string> = {

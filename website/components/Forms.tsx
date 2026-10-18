@@ -74,14 +74,14 @@ export function InterestForm() {
       </label>
       <label className="grid gap-1.5 text-sm font-semibold">
         Cohort
-        <select name="cohort" className={field} defaultValue="foundations">
-          <option value="foundations">Foundations (8 weeks)</option>
-          <option value="growth">Growth (12 weeks)</option>
-          <option value="elevate">Elevate (6 months)</option>
+        <select name="cohort" className={field} defaultValue="launch">
+          <option value="launch">Launch (8 weeks)</option>
+          <option value="build">Build (12 weeks)</option>
+          <option value="scale">Scale (6 months)</option>
         </select>
       </label>
       {error && <p className="text-sm text-red-700">{error}</p>}
-      <button type="submit" disabled={state === "sending"} className="rounded-full bg-gold px-6 py-3.5 font-semibold text-white disabled:opacity-60">
+      <button type="submit" disabled={state === "sending"} className="btn-pop rounded-pill border-2 border-ink bg-brand px-6 py-3.5 font-semibold text-on-brand disabled:opacity-60">
         {state === "sending" ? "Sending…" : "Register my interest"}
       </button>
     </form>

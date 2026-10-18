@@ -1,0 +1,47 @@
+<!-- @dsCard group="Content" height=330 subtitle="Auto-scrolling proof, pausable, swipeable on phones" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Testimonials — preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:var(--surface);color:var(--ink);font-family:var(--font-sans);}
+  .wrap{padding:var(--space-6) 0;}
+  .head{display:flex;justify-content:space-between;align-items:center;padding:0 var(--space-6) var(--space-4);}
+  .eb{font:700 13px/18px var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--brand-text);margin:0;}
+  .pause{font:600 14px/20px var(--font-sans);background:var(--surface-raised);color:var(--ink);border:2px solid var(--ink);border-radius:var(--radius-pill);padding:var(--space-1) var(--space-4);cursor:pointer;}
+  .pause:focus-visible,.card:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+  .viewport{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);}
+  .track{display:flex;gap:var(--space-6);padding:var(--space-2) var(--space-6) var(--space-4);width:max-content;}
+  @media (prefers-reduced-motion:no-preference) and (hover:hover){
+    .viewport.auto{overflow:hidden;}
+    .viewport.auto .track{animation:slide 40s linear infinite;}
+    .viewport.auto:hover .track,.viewport.auto:focus-within .track,.viewport.paused .track{animation-play-state:paused;}
+  }
+  @keyframes slide{to{transform:translateX(-50%);}}
+  .card{scroll-snap-align:start;width:300px;flex:none;background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-4);}
+  .metric{align-self:flex-start;font:700 13px/18px var(--font-sans);background:var(--gold);color:var(--on-gold);border-radius:var(--radius-pill);padding:var(--space-1) var(--space-3);}
+  .quote{font:500 17px/26px var(--font-sans);margin:0;}
+  .who{display:flex;align-items:center;gap:var(--space-3);margin-top:auto;}
+  .ph{width:44px;height:44px;border-radius:var(--radius-pill);background:var(--surface-tint);border:1px dashed var(--ink-muted);flex:none;}
+  .name{font:700 15px/20px var(--font-sans);margin:0;}
+  .biz{font:500 13px/18px var(--font-sans);color:var(--ink-muted);margin:0;}
+</style></head>
+<body>
+<div class="wrap">
+  <div class="head"><p class="eb">Founders on RENZOLO</p><button class="pause" id="p" aria-pressed="false">Pause</button></div>
+  <div class="viewport auto" id="v" role="region" aria-label="Founder testimonials, scrolling">
+    <div class="track" id="t">
+      <article class="card" tabindex="0"><span class="metric">[Real result, e.g. loan approved]</span><p class="quote">"[Founder's own words about their outcome, one or two sentences.]"</p><div class="who"><span class="ph" aria-hidden="true"></span><div><p class="name">[Founder name]</p><p class="biz">[Business] · [City, Country]</p></div></div></article>
+      <article class="card" tabindex="0"><span class="metric">[Real result]</span><p class="quote">"[Founder's own words about their outcome.]"</p><div class="who"><span class="ph" aria-hidden="true"></span><div><p class="name">[Founder name]</p><p class="biz">[Business] · [City, Country]</p></div></div></article>
+      <article class="card" tabindex="0"><span class="metric">[Real result]</span><p class="quote">"[Founder's own words about their outcome.]"</p><div class="who"><span class="ph" aria-hidden="true"></span><div><p class="name">[Founder name]</p><p class="biz">[Business] · [City, Country]</p></div></div></article>
+      <article class="card" tabindex="0"><span class="metric">[Real result]</span><p class="quote">"[Founder's own words about their outcome.]"</p><div class="who"><span class="ph" aria-hidden="true"></span><div><p class="name">[Founder name]</p><p class="biz">[Business] · [City, Country]</p></div></div></article>
+    </div>
+  </div>
+</div>
+<script>
+  var t=document.getElementById('t'),v=document.getElementById('v'),p=document.getElementById('p');
+  Array.prototype.slice.call(t.children).forEach(function(c){var d=c.cloneNode(true);d.setAttribute('aria-hidden','true');d.removeAttribute('tabindex');t.appendChild(d);});
+  p.addEventListener('click',function(){var on=v.classList.toggle('paused');p.textContent=on?'Play':'Pause';p.setAttribute('aria-pressed',on);});
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 export function TierCheck({ value, dark = false }: { value: boolean | string; dark?: boolean }) {
   if (value === true)
     return (
-      <span className="font-bold text-gold" aria-label="Included">
+      <span className="font-bold text-teal-text" aria-label="Included">
         ✓
       </span>
     );

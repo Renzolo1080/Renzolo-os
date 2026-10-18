@@ -21,7 +21,7 @@ export default function PricingPage() {
             Every membership starts with your full Readiness Assessment and a growth and readiness plan. Not sure which fits? Start with the free
             Readiness Snapshot.
           </p>
-          <a href="/snapshot" className="mt-6 inline-block rounded-lg bg-gold px-6 py-3 font-semibold text-white">
+          <a href="/snapshot" className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand">
             Take the free Snapshot first
           </a>
         </div>
@@ -62,14 +62,19 @@ export default function PricingPage() {
               <p className="text-ink-soft">1 session</p>
               <p className="text-2xl font-bold text-navy">{f(getOneOffPrice("coaching_single", false))}</p>
               <p className="text-ink-soft">Members {f(getOneOffPrice("coaching_single", true))}</p>
+              <p className="text-ink-soft">Starting with coaching {f(getOneOffPrice("coaching_single", "starter"))}</p>
             </div>
             <div className="rounded-lg bg-cream p-3">
               <p className="text-ink-soft">3 sessions</p>
               <p className="text-2xl font-bold text-navy">{f(getOneOffPrice("coaching_pack3", false))}</p>
               <p className="text-ink-soft">Members {f(getOneOffPrice("coaching_pack3", true))}</p>
+              <p className="text-ink-soft">Starting with coaching {f(getOneOffPrice("coaching_pack3", "starter"))}</p>
             </div>
           </div>
-          <p className="mt-3 text-sm text-ink-soft">Growth and Elevate include coaching sessions every period.</p>
+          <p className="mt-3 text-sm text-ink-soft">
+            Standard prices are for assessment and cohort clients. Starting with coaching includes an intake review and session plan on your first purchase.
+            Growth and Elevate include coaching sessions every period.
+          </p>
         </div>
       </section>
 
@@ -79,12 +84,12 @@ export default function PricingPage() {
           <ul className="mt-3 space-y-2 text-sm text-ink-soft">
             {MEMBERSHIP_POLICIES.map((p) => (
               <li key={p} className="flex gap-2">
-                <span className="text-gold">•</span>
+                <span className="text-brand-text">•</span>
                 <span>{p}</span>
               </li>
             ))}
             <li className="flex gap-2">
-              <span className="text-gold">•</span>
+              <span className="text-brand-text">•</span>
               <span>Cohorts and accelerators are priced separately. Members get priority when applying, and every founder must qualify.</span>
             </li>
           </ul>

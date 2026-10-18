@@ -143,7 +143,7 @@ export function MembershipPlans({
               key={tier}
               className={`relative flex flex-col rounded-2xl p-6 shadow-sm ${featured ? "bg-navy text-white ring-2 ring-gold" : "bg-white"}`}
             >
-              {featured && <span className="absolute -top-3 left-6 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-white">Most popular</span>}
+              {featured && <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-on-brand">Most popular</span>}
               <div className="flex items-center justify-between">
                 <p className={`text-xl font-bold ${featured ? "text-white" : "text-navy"}`}>{NAMES[tier]}</p>
                 {isCurrent && <span className="rounded-full bg-teal px-3 py-1 text-xs font-semibold text-white">Your plan</span>}
@@ -159,7 +159,7 @@ export function MembershipPlans({
                       aria-pressed={c.interval === cell.interval}
                       onClick={() => setChosen((s) => ({ ...s, [tier]: c.interval }))}
                       className={`rounded-md px-3 py-1.5 text-xs font-semibold ${
-                        c.interval === cell.interval ? "bg-gold text-white" : featured ? "text-cream" : "text-navy"
+                        c.interval === cell.interval ? "bg-brand text-on-brand" : featured ? "text-cream" : "text-navy"
                       }`}
                     >
                       {c.intervalName}
@@ -173,7 +173,7 @@ export function MembershipPlans({
                 <span className={featured ? "text-cream/70" : "text-ink-soft"}>{cell.perMonth ? " /month" : ` ${cell.per}`}</span>
               </p>
               <p className={`text-sm ${featured ? "text-cream/70" : "text-ink-soft"}`}>{cell.perMonth ? `${cell.price} ${cell.per}` : " "}</p>
-              <p className="mt-1 min-h-[1.25rem] text-sm font-semibold text-gold">{cell.note ?? ""}</p>
+              <p className={`mt-1 min-h-[1.25rem] text-sm font-semibold ${featured ? "text-gold" : "text-brand-text"}`}>{cell.note ?? ""}</p>
 
               {cell.quote && cell.quote.kind === "upgrade" && cell.quote.credit && (
                 <p className={`mt-2 text-xs ${featured ? "text-cream/80" : "text-ink-soft"}`}>
@@ -192,14 +192,14 @@ export function MembershipPlans({
 
               <div className="mt-auto pt-5">
                 {mode === "public" ? (
-                  <a href={signupHref} className={`block rounded-lg px-5 py-3 text-center font-semibold ${featured ? "bg-gold text-white" : "bg-navy text-white"}`}>
+                  <a href={signupHref} className={`block rounded-lg px-5 py-3 text-center font-semibold ${featured ? "bg-brand text-on-brand" : "bg-navy text-on-brand"}`}>
                     Get started
                   </a>
                 ) : full ? (
                   waitlisted ? (
                     <p className="rounded-lg border border-gold px-4 py-3 text-center text-sm">You're on the Elevate waitlist. We'll be in touch when a seat opens.</p>
                   ) : (
-                    <button type="button" onClick={joinWaitlist} disabled={busy !== null} className="w-full rounded-lg border border-gold px-5 py-3 font-semibold text-gold disabled:opacity-50">
+                    <button type="button" onClick={joinWaitlist} disabled={busy !== null} className="w-full rounded-lg border border-brand-text px-5 py-3 font-semibold text-brand-text disabled:opacity-50">
                       {busy === "waitlist" ? "Adding you…" : "Elevate is full: join the waitlist"}
                     </button>
                   )
@@ -210,7 +210,7 @@ export function MembershipPlans({
                     type="button"
                     onClick={() => checkout(tier, cell)}
                     disabled={busy !== null}
-                    className={`w-full rounded-lg px-5 py-3 font-semibold disabled:opacity-50 ${featured ? "bg-gold text-white" : "bg-navy text-white"}`}
+                    className={`w-full rounded-lg px-5 py-3 font-semibold disabled:opacity-50 ${featured ? "bg-brand text-on-brand" : "bg-navy text-on-brand"}`}
                   >
                     {busy === tier ? "Taking you to payment…" : actionLabel(tier, cell)}
                   </button>
