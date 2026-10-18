@@ -21,7 +21,7 @@ export default function PricingPage() {
             Every membership starts with your full Readiness Assessment and a growth and readiness plan. Not sure which fits? Start with the free
             Readiness Snapshot.
           </p>
-          <a href="/snapshot" className="mt-6 inline-block rounded-lg bg-gold px-6 py-3 font-semibold text-white">
+          <a href="/snapshot" className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand">
             Take the free Snapshot first
           </a>
         </div>
@@ -84,12 +84,12 @@ export default function PricingPage() {
           <ul className="mt-3 space-y-2 text-sm text-ink-soft">
             {MEMBERSHIP_POLICIES.map((p) => (
               <li key={p} className="flex gap-2">
-                <span className="text-gold">•</span>
+                <span className="text-brand-text">•</span>
                 <span>{p}</span>
               </li>
             ))}
             <li className="flex gap-2">
-              <span className="text-gold">•</span>
+              <span className="text-brand-text">•</span>
               <span>Cohorts and accelerators are priced separately. Members get priority when applying, and every founder must qualify.</span>
             </li>
           </ul>

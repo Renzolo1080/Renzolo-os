@@ -175,7 +175,7 @@ export function CoachSession({
                 return `Session completed.${d.addedToPlan ? ` ${d.addedToPlan} commitment${d.addedToPlan > 1 ? "s" : ""} added to their plan.` : ""}`;
               })
             }
-            className="rounded-lg bg-gold px-5 py-2.5 font-semibold text-white disabled:opacity-50"
+            className="rounded-lg bg-brand px-5 py-2.5 font-semibold text-on-brand disabled:opacity-50"
           >
             {busy === "complete" ? "Completing…" : "Complete session"}
           </button>

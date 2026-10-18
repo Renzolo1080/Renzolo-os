@@ -95,7 +95,7 @@ export function CohortForm({ defaultCohort = "launch" }: { defaultCohort?: "laun
         <textarea name="message" rows={3} className={input} />
       </label>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={status === "sending"} className="w-full rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+      <button type="submit" disabled={status === "sending"} className="w-full rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
         {status === "sending" ? "Sending…" : "Register my interest"}
       </button>
       <p className="text-xs text-ink-soft">

@@ -54,7 +54,7 @@ export function PlanReviewPanel({
           Get your plan scored on whether it's up to date, fixes your weakest areas, has measurable goals, is doable, is funded and covers the whole business, with
           specific fixes. Included with Growth, Elevate and the one-time Readiness Assessment.
         </p>
-        <a href="/dashboard/subscribe" className="mt-4 inline-block rounded-lg bg-gold px-5 py-3 font-semibold text-white">
+        <a href="/dashboard/subscribe" className="mt-4 inline-block rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand">
           See Growth
         </a>
       </div>
@@ -70,7 +70,7 @@ export function PlanReviewPanel({
           <h2 className="text-2xl font-bold text-navy">AI plan review</h2>
           <p className="mt-1 text-sm text-ink-soft">Judged against your latest assessment. Takes about a minute.</p>
         </div>
-        <button type="button" onClick={run} disabled={busy || !ready.ready} className="rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+        <button type="button" onClick={run} disabled={busy || !ready.ready} className="rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
           {busy ? "Reviewing your plan…" : r ? "Review my plan again" : "Review my plan"}
         </button>
       </div>

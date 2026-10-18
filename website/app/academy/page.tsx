@@ -6,7 +6,7 @@ import { appLink } from "@/lib/site";
 export const metadata = { title: "Founder Trajectory™ Academy", description: "Three development levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months)." };
 
 const PROGRAMS = [
-  { name: "Launch", length: "8 weeks", text: "Self-paced, high-volume programme for early-stage founders: all nine parts of your business model in 8 weeks, AI coaching and one 30-minute session, ending with a written plan." },
+  { name: "Launch", length: "8 weeks", text: "Self-paced, high-volume programme for early-stage founders: all nine parts of your business model in 8 weeks, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan." },
   { name: "Build", length: "12 weeks", text: "For businesses with customers: traction first (channels, pricing, cash flow, operations), then readiness for loans, grants, contracts and investors. Live group sessions and coaching." },
   { name: "Scale", length: "6 months", text: "Selective, hands-on programme to raise capital, scale or win large contracts, with introductions to investors, lenders and buyers. Once a year." },
 ];

@@ -21,6 +21,7 @@ import { ensureProfileExtras, readAttribution, publicAppUrl } from "@/lib/growth
 import { InviteCard } from "@/components/InviteCard";
 import { PurchaseTracker } from "@/components/PurchaseTracker";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
+import { readinessFromRows } from "@/lib/readiness";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -193,6 +194,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
       access,
       extras,
       score: latestScore,
+      readiness: readinessFromRows(latestScore, { completeness: planRow?.completeness ?? null, review: review?.overall ?? null }, planScore),
       plan: planRow?.data ?? null,
       planCompleteness: planRow?.completeness ?? null,
       checkins: (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })),
@@ -214,7 +216,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 
   return (
     <main className={`mx-auto min-h-screen px-4 py-10 sm:px-6 ${hasAccess && latestScore ? "max-w-6xl" : "max-w-2xl"}`}>
-      <h1 className="mb-6 text-2xl font-bold text-navy">Your Founder Trajectory™</h1>
+      <h1 className="text-2xl font-bold text-navy">Your Founder Trajectory™</h1>
+      <span aria-hidden="true" className="mb-6 mt-2 block h-1 w-24 rounded-full bg-brand" />
 
       <PaymentBanner payment={paymentResult} product={paymentProduct} />
       {lastPaid && <PurchaseTracker id={lastPaid.id} value={Number(lastPaid.amount)} currency={lastPaid.currency} item={lastPaid.product} />}
@@ -261,7 +264,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
                   ? `Join a membership within ${carryDaysLeft} day${carryDaysLeft === 1 ? "" : "s"} and this assessment carries straight into it.`
                   : "Join a membership to keep building on this assessment with a plan, tools and coaching."}
               </p>
-              <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-gold px-4 py-2 font-semibold text-white">
+              <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
                 See membership options
               </a>
             </div>
@@ -308,11 +311,11 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
           {ent.aiCoaching && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold bg-white p-5">
               <p className="text-sm">
-                <span className="font-semibold text-navy">AI coach: </span>
-                ask anything about your plan, customers or money, and get your weekly check-in.
+                <span className="font-semibold text-navy">Lorenzo · AI: </span>
+                coaching from Lorenzo&apos;s playbook any time, built on your plan, plus your weekly check-in.
               </p>
-              <a href="/ai-coach" className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white">
-                Talk to your coach
+              <a href="/ai-coach" className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
+                Talk to Lorenzo · AI
               </a>
             </div>
           )}
@@ -343,7 +346,7 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
             {score}
             <span className="text-lg font-normal text-ink-soft"> / 100</span>
           </p>
-          <p className="text-gold font-semibold mt-1">{tier}</p>
+          <p className="text-brand-text font-semibold mt-1">{tier}</p>
         </div>
         {planScore !== null && (
           <div className="rounded border p-6">
@@ -379,7 +382,7 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
           <SubscriptionFeatures dark />
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href="/dashboard/subscribe" className="inline-block rounded bg-gold px-6 py-3 text-center font-semibold text-white">
+          <a href="/dashboard/subscribe" className="inline-block rounded bg-brand px-6 py-3 text-center font-semibold text-on-brand">
             {lapsed ? "Renew my membership" : "Become a member"}
           </a>
           {!lapsed && (

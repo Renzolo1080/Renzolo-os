@@ -87,7 +87,7 @@ export function OneOffPurchases({
                 "Join within 30 days and your assessment carries straight into your membership",
               ].map((t) => (
                 <li key={t} className="flex gap-2">
-                  <span className="font-bold text-gold">✓</span>
+                  <span className="font-bold text-teal-text">✓</span>
                   <span>{t}</span>
                 </li>
               ))}
@@ -139,7 +139,7 @@ export function OneOffPurchases({
                 <p className="font-semibold text-navy">
                   You have {coachingAvailable} coaching session{coachingAvailable > 1 ? "s" : ""} to book.
                 </p>
-                <a href="/coaching" className="mt-2 inline-block rounded-lg bg-gold px-4 py-2 font-semibold text-white">
+                <a href="/coaching" className="mt-2 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
                   Book a session
                 </a>
               </>

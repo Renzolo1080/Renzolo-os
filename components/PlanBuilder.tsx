@@ -118,7 +118,7 @@ export function PlanBuilder({
           <p className="text-sm text-cream/80">Plan complete</p>
           <p className="text-2xl font-bold">{pct}%</p>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-navy-panel" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Plan complete">
-            <div className="h-2 bg-gold" style={{ width: `${pct}%` }} />
+            <div className="h-2 bg-teal" style={{ width: `${pct}%` }} />
           </div>
           <p className="mt-2 text-xs text-cream/70">{saving ? "Saving…" : dirty ? "Unsaved changes" : savedAt ? `Saved ${new Date(savedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "Not saved yet"}</p>
         </div>
@@ -157,7 +157,7 @@ export function PlanBuilder({
                 {checks.map((c) => (
                   <li key={c.key}>
                     <button type="button" onClick={() => go(c.step)} className="flex w-full items-start gap-3 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-cream">
-                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${c.done ? "bg-teal text-white" : "border-2 border-gold text-gold"}`}>{c.done ? "✓" : "!"}</span>
+                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${c.done ? "bg-teal text-white" : "border-2 border-brand-text text-brand-text"}`}>{c.done ? "✓" : "!"}</span>
                       <span className={c.done ? "text-ink-soft" : "font-medium"}>{c.label}</span>
                     </button>
                   </li>

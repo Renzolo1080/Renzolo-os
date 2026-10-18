@@ -24,7 +24,7 @@ export function AgreementCard() {
       <ul className="mt-4 space-y-2 text-sm">
         {AGREEMENT_POINTS.map((p) => (
           <li key={p} className="flex gap-2">
-            <span className="font-bold text-gold">✓</span>
+            <span className="font-bold text-teal-text">✓</span>
             <span>{p}</span>
           </li>
         ))}
@@ -80,7 +80,7 @@ export function RequestSession({ options, available }: { options: FocusOption[];
         {booked.url ? (
           <>
             <p className="mt-1 text-sm text-ink-soft">Now pick a time that suits you. Your coach will have your notes before the session.</p>
-            <a href={booked.url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-lg bg-gold px-5 py-3 font-semibold text-white">
+            <a href={booked.url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand">
               Pick a time
             </a>
           </>
@@ -148,7 +148,7 @@ export function RequestSession({ options, available }: { options: FocusOption[];
         <textarea className={field} rows={2} value={challenge} onChange={(e) => setChallenge(e.target.value)} maxLength={600} />
       </label>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={busy || !focus || !outcome.trim()} className="rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+      <button type="submit" disabled={busy || !focus || !outcome.trim()} className="rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
         {busy ? "Booking…" : "Request session and pick a time"}
       </button>
     </form>
@@ -198,7 +198,7 @@ export function RateSession({ sessionId }: { sessionId: string }) {
       <p className="text-sm font-semibold text-navy">How useful was this session?</p>
       <div className="mt-1 flex gap-1" role="radiogroup" aria-label="Rating">
         {[1, 2, 3, 4, 5].map((n) => (
-          <button key={n} type="button" role="radio" aria-checked={rating === n} aria-label={`${n} out of 5`} onClick={() => setRating(n)} className={`text-2xl ${n <= rating ? "text-gold" : "text-gray-300"}`}>
+          <button key={n} type="button" role="radio" aria-checked={rating === n} aria-label={`${n} out of 5`} onClick={() => setRating(n)} className={`text-2xl ${n <= rating ? "text-brand" : "text-gray-300"}`}>
             ★
           </button>
         ))}

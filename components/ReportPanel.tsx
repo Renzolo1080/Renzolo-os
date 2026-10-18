@@ -54,7 +54,7 @@ export function ReportPanel({ assessmentId, scoreId, initialReport = null, canUp
       <div className="rounded-2xl border border-gold bg-white p-6">
         <p className="font-semibold text-navy">Your Readiness Report is ready to create</p>
         <p className="mt-1 text-sm text-ink-soft">It takes a minute or two: we research your market and write your growth and readiness plan.</p>
-        <button onClick={() => generate()} disabled={loading} className="mt-4 rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+        <button onClick={() => generate()} disabled={loading} className="mt-4 rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
           {loading ? "Creating your report…" : "Create my Readiness Report"}
         </button>
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -94,7 +94,7 @@ export function ReportPanel({ assessmentId, scoreId, initialReport = null, canUp
             <>
               <p className="font-semibold">Your membership now includes the full report</p>
               <p className="mt-1 text-sm text-cream/80">Create it to add your market insight, growth scenarios and a downloadable copy.</p>
-              <button onClick={() => generate(true)} disabled={loading} className="mt-4 rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+              <button onClick={() => generate(true)} disabled={loading} className="mt-4 rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
                 {loading ? "Creating your full report…" : "Create my full report"}
               </button>
               {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
@@ -106,7 +106,7 @@ export function ReportPanel({ assessmentId, scoreId, initialReport = null, canUp
                 Growth adds the full, downloadable report with an AI market insight, your valuation range, readiness scores and 2 coaching sessions
                 a quarter.
               </p>
-              <a href="/dashboard/subscribe" className="mt-4 inline-block rounded-lg bg-gold px-5 py-3 font-semibold text-white">
+              <a href="/dashboard/subscribe" className="mt-4 inline-block rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand">
                 See Growth
               </a>
             </>

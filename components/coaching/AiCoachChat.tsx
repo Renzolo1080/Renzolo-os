@@ -94,7 +94,7 @@ export function AiCoachChat({
                 <span className="text-sm">
                   <span className="font-semibold">Your weekly check-in is ready.</span> Two minutes: how you're tracking and the one thing that matters this week.
                 </span>
-                <button type="button" disabled={busy || remaining <= 0} onClick={() => send({ checkin: true })} className="rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                <button type="button" disabled={busy || remaining <= 0} onClick={() => send({ checkin: true })} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand disabled:opacity-50">
                   Start check-in
                 </button>
               </div>
@@ -107,8 +107,8 @@ export function AiCoachChat({
                 Get my insight
               </button>
             </div>
-            <p className="font-semibold text-navy">Ask your coach anything about your business</p>
-            <p className="mt-1 text-sm text-ink-soft">Your coach knows your assessment, plan, goals and numbers. Try one of these:</p>
+            <p className="font-semibold text-navy">Ask Lorenzo · AI anything about your business</p>
+            <p className="mt-1 text-sm text-ink-soft">Lorenzo · AI knows your assessment, plan, goals and numbers. Try one of these:</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {starters.map((s) => (
                 <button key={s} type="button" disabled={busy} onClick={() => send({ message: s })} className="rounded-full border border-navy px-3 py-1.5 text-left text-sm text-navy hover:bg-navy hover:text-white disabled:opacity-50">
@@ -164,7 +164,7 @@ export function AiCoachChat({
             </div>
           )
         )}
-        {busy && <p className="text-sm text-ink-soft">Your coach is thinking…</p>}
+        {busy && <p className="text-sm text-ink-soft">Lorenzo · AI is thinking…</p>}
         <div ref={endRef} />
       </div>
       <form
@@ -194,14 +194,14 @@ export function AiCoachChat({
               }
             }}
             disabled={busy || remaining <= 0}
-            aria-label="Message your coach"
+            aria-label="Message Lorenzo · AI"
           />
-          <button type="submit" disabled={busy || !draft.trim() || remaining <= 0} className="self-end rounded-lg bg-gold px-5 py-3 font-semibold text-white disabled:opacity-50">
+          <button type="submit" disabled={busy || !draft.trim() || remaining <= 0} className="self-end rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
             Send
           </button>
         </div>
         <p className="mt-2 text-xs text-ink-soft">
-          {remaining} message{remaining === 1 ? "" : "s"} left today. {COACH_DISCLAIMER} For big decisions, book a session with your coach.
+          {remaining} message{remaining === 1 ? "" : "s"} left today. {COACH_DISCLAIMER} For big decisions, book a live session with Lorenzo.
         </p>
       </form>
     </div>

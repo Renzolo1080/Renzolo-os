@@ -39,11 +39,17 @@ export default function PrivacyPage() {
         legitimate interests in running and improving the Service; and complying with the law.
       </p>
 
-      <H>AI-generated reports</H>
+      <H>AI-generated reports and AI coaching</H>
       <p>
-        Your Readiness Report is drafted by an AI model provided by Anthropic. To create it, we send the model your name, company name and
-        assessment answers and results. We do not send your email address or payment details. Anthropic processes this to produce the report
-        under its commercial terms, which do not permit training its models on this data. An advisor may review reports for quality.
+        Your Readiness Report, plan review, Market Intelligence and AI coach replies are drafted by an AI model provided by Anthropic. To create
+        them, we send the model your name, company name, assessment answers and results, your plan, goals and the messages you write. We do not
+        send your email address or payment details. Anthropic processes this under its commercial terms, which do not permit training its models
+        on this data. An advisor may review reports for quality.
+      </p>
+      <p>
+        Lorenzo · AI is an AI video version of our founder, run by our video provider Tavus. It is always labelled as AI. When you start a video
+        session, which you choose to do, Tavus processes your video and voice for that session to run the conversation, and we share a short
+        summary of your plan, goals and scores so it can coach you. Sessions are limited to 10 minutes. You can use text coaching instead at any time.
       </p>
 
       <H>Who we share it with</H>
@@ -53,7 +59,8 @@ export default function PrivacyPage() {
           "Supabase (database and sign-in), hosted in the United States",
           "Vercel (website and app hosting)",
           "Flutterwave (payments)",
-          "Anthropic (AI report drafting)",
+          "Anthropic (AI reports and AI coaching)",
+          "Tavus (Lorenzo · AI video sessions, only if you start one)",
           "Resend (sending email)",
           "Google and Meta (analytics, only if you accept cookies)",
           "Our coaches and advisors, for the sessions and reviews you use",

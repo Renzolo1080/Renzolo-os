@@ -12,7 +12,7 @@ import { MarketGenerate, AddToPlan } from "@/components/MarketActions";
 export const dynamic = "force-dynamic";
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-const VERDICT: Record<string, string> = { realistic: "bg-teal text-white", stretch: "bg-gold text-white", unrealistic: "bg-red-600 text-white" };
+const VERDICT: Record<string, string> = { realistic: "bg-teal text-on-brand", stretch: "bg-brand text-on-brand", unrealistic: "bg-red-600 text-on-brand" };
 
 /** Market Intelligence: a researched brief on the founder's industry in
  * their country, written to strengthen their strategic plan. */
@@ -46,7 +46,7 @@ export default async function MarketPage() {
             <li>A reality check on each of your targets</li>
             <li>Refreshed every month</li>
           </ul>
-          <a href="/dashboard/subscribe" className="mt-5 inline-block rounded-lg bg-gold px-5 py-3 font-semibold text-white">
+          <a href="/dashboard/subscribe" className="mt-5 inline-block rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand">
             See Growth
           </a>
           <p className="mt-3 text-xs text-cream/70">Included with Growth, Elevate and the one-time Readiness Assessment.</p>

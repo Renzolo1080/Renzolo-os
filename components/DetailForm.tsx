@@ -97,7 +97,7 @@ export function DetailForm({
             {doneCount} of {areas.length} areas
           </p>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-navy-panel" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Areas done">
-            <div className="h-2 bg-gold" style={{ width: `${pct}%` }} />
+            <div className="h-2 bg-teal" style={{ width: `${pct}%` }} />
           </div>
           <p className="mt-2 text-xs text-cream/70">{doneCount >= required ? "Enough for your report. Each extra area sharpens it." : `${required - doneCount} more for your report.`}</p>
         </div>
@@ -124,7 +124,7 @@ export function DetailForm({
               onClick={() => setStep(areas.length)}
               className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${onSummary ? "bg-white font-semibold text-navy shadow-sm" : "text-ink hover:bg-white"}`}
             >
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gold text-xs text-gold">★</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-brand-text text-xs text-brand-text">★</span>
               <span>Finish and your plan</span>
             </button>
           </li>
@@ -191,7 +191,7 @@ export function DetailForm({
                   {error}
                 </p>
               )}
-              <button type="button" className="mt-5 rounded-lg bg-gold px-6 py-3 font-semibold text-white disabled:opacity-50" disabled={doneCount < required || busy !== null} onClick={finish}>
+              <button type="button" className="mt-5 rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand disabled:opacity-50" disabled={doneCount < required || busy !== null} onClick={finish}>
                 {busy === "finish" ? "Updating your score…" : "Update my score"}
               </button>
             </div>

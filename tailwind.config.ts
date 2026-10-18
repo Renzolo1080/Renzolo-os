@@ -1,19 +1,47 @@
 import type { Config } from "tailwindcss";
 
+/** RENZOLO Vibrant design system. Colours come from CSS custom properties
+ * generated from design/renzolo-vibrant/tokens.json (app/brand-tokens.css),
+ * so light and dark themes flip together. Legacy names (navy, cream,
+ * ink-soft, navy-panel) map onto the new tokens so older screens follow. */
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        // Sourced directly from the RENZOLO brand mockup decks (Sept 2026)
-        navy: "#071727", // primary dark navy (site background, footer, headings)
-        "navy-panel": "#122D44", // lighter navy for cards/panels on a dark background
-        gold: "#C18B2C", // primary accent (buttons, highlights)
-        teal: "#087F77", // secondary accent (data viz, icons, links)
-        cream: "#F7F4EE", // page background
-        ink: "#111111", // primary text on light backgrounds
-        "ink-soft": "#68737D", // secondary/muted text (was previously undefined — fixes invisible-color bug)
+        "surface": "rgb(var(--surface-rgb) / <alpha-value>)",
+        "surface-raised": "rgb(var(--surface-raised-rgb) / <alpha-value>)",
+        "surface-tint": "rgb(var(--surface-tint-rgb) / <alpha-value>)",
+        "ink": "rgb(var(--ink-rgb) / <alpha-value>)",
+        "ink-muted": "rgb(var(--ink-muted-rgb) / <alpha-value>)",
+        "line": "rgb(var(--line-rgb) / <alpha-value>)",
+        "brand": "rgb(var(--brand-rgb) / <alpha-value>)",
+        "brand-text": "rgb(var(--brand-text-rgb) / <alpha-value>)",
+        "on-brand": "rgb(var(--on-brand-rgb) / <alpha-value>)",
+        "gold": "rgb(var(--gold-rgb) / <alpha-value>)",
+        "on-gold": "rgb(var(--on-gold-rgb) / <alpha-value>)",
+        "teal": "rgb(var(--teal-rgb) / <alpha-value>)",
+        "on-teal": "rgb(var(--on-teal-rgb) / <alpha-value>)",
+        "teal-text": "rgb(var(--teal-text-rgb) / <alpha-value>)",
+        "night": "rgb(var(--night-rgb) / <alpha-value>)",
+        "night-raised": "rgb(var(--night-raised-rgb) / <alpha-value>)",
+        heritage: "rgb(var(--heritage-rgb) / <alpha-value>)",
+        "focus": "rgb(var(--focus-rgb) / <alpha-value>)",
+        "tick-up": "rgb(var(--tick-up-rgb) / <alpha-value>)",
+        "tick-down": "rgb(var(--tick-down-rgb) / <alpha-value>)",
+        // Legacy names, mapped onto the system
+        navy: "rgb(var(--night-rgb) / <alpha-value>)",
+        "navy-panel": "rgb(var(--night-raised-rgb) / <alpha-value>)",
+        cream: "rgb(var(--surface-rgb) / <alpha-value>)",
+        "ink-soft": "rgb(var(--ink-muted-rgb) / <alpha-value>)",
       },
+      fontFamily: {
+        display: ["var(--font-display)"],
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
+      },
+      borderRadius: { pill: "var(--radius-pill)", card: "var(--radius-md)", panel: "var(--radius-lg)" },
+      boxShadow: { pop: "var(--shadow-pop)", card: "var(--shadow-card)", "card-hover": "var(--shadow-card-hover)", soft: "var(--shadow-soft)", glow: "var(--glow-brand)" },
     },
   },
   plugins: [],
