@@ -6,7 +6,7 @@ import { TIER_FEATURES, TIER_TAGLINES, MEMBERSHIP_POLICIES } from "@/lib/tier-fe
 import { buildCurrencyBlocks } from "@/lib/membership-view";
 import { loadMembership, countElevateMembers } from "@/lib/membership-server";
 import { entitlements, upcomingTier, elevateSeatLimit } from "@/lib/membership";
-import { getOneOffPrice, oneOffCurrenciesFor, formatPrice, TIER_NAMES, INTERVAL_NAMES, isBillingInterval } from "@/lib/pricing";
+import { getOneOffPrice, oneOffCurrenciesFor, formatPrice, coachingBuyerLevel, TIER_NAMES, INTERVAL_NAMES, isBillingInterval } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -36,12 +36,14 @@ export default async function MembershipPage() {
 
   const blocks = buildCurrencyBlocks(profile?.country, m.current, m.tier);
   const member = !!m.tier;
+  const { data: pastCoaching } = await supabase.from("payments").select("id").eq("product", "coaching").eq("status", "successful").limit(1);
+  const level = coachingBuyerLevel({ member, boughtAssessment: m.purchases.length > 0, hadCoaching: (pastCoaching ?? []).length > 0 });
   const oneOffCurrencies = Array.from(
-    new Set([...oneOffCurrenciesFor("assessment", false, profile?.country), ...oneOffCurrenciesFor("coaching_single", member, profile?.country)])
+    new Set([...oneOffCurrenciesFor("assessment", false, profile?.country), ...oneOffCurrenciesFor("coaching_single", level, profile?.country)])
   );
   const prices: OneOffPrices[] = oneOffCurrencies.map((c) => {
     const f = (p: ReturnType<typeof getOneOffPrice>) => (p ? formatPrice(p) : null);
-    return { currency: c, assessment: f(getOneOffPrice("assessment", false, c)), single: f(getOneOffPrice("coaching_single", member, c)), pack: f(getOneOffPrice("coaching_pack3", member, c)) };
+    return { currency: c, assessment: f(getOneOffPrice("assessment", false, c)), single: f(getOneOffPrice("coaching_single", level, c)), pack: f(getOneOffPrice("coaching_pack3", level, c)) };
   });
   const std = (item: "coaching_single" | "coaching_pack3") => {
     const p = getOneOffPrice(item, false);
@@ -105,6 +107,7 @@ export default async function MembershipPage() {
             prices={prices}
             showAssessment={!ent.fullReport}
             member={member}
+            level={level}
             coachingAvailable={m.coachingAvailable}
             nextCoachingFrom={m.nextCoachingFrom}
             standardSingle={std("coaching_single")}

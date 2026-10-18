@@ -33,7 +33,7 @@ const OFFERS = [
   },
   {
     name: "Founder Trajectory™ Academy",
-    what: "Three development levels: Foundations (8 weeks), Growth (12 weeks) and Elevate (6 months). Founders work through their plans together, with live sessions and coaching.",
+    what: "Three development levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months). Founders work through their plans together, with live sessions and coaching.",
     price: "Applications by cohort",
     action: "Explore the Academy",
     href: "/academy/",

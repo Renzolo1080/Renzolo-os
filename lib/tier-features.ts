@@ -17,7 +17,7 @@ export const TIER_FEATURES: { label: string; values: Record<Tier, boolean | stri
   { label: "Pitch and investor readiness review", values: { essentials: false, growth: false, elevate: true } },
   { label: "Priority support", values: { essentials: false, growth: false, elevate: true } },
   { label: "Extra coaching sessions at member prices", values: { essentials: true, growth: true, elevate: true } },
-  { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Foundations", growth: "Foundations and Growth", elevate: "All levels, including Elevate" } },
+  { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Launch", growth: "Launch and Build", elevate: "Launch, Build and Scale" } },
 ];
 
 export const TIER_TAGLINES: Record<Tier, string> = {

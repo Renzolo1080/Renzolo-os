@@ -487,8 +487,10 @@ async function suite(label: string, files: string[]) {
   assert(r.ok && r.rows.length === 0, "shared scores, applications, messages and email lists are not readable from the browser", r);
   r = await run("anon", null, `insert into cohort_applications (full_name,email,cohort) values ('x','x@x','elevate')`);
   assert(!r.ok, "…and can't be written from the browser either (the server validates them)");
+  r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','build')`);
+  assert(r.ok, "the server can record a Build cohort application", r);
   r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','growth')`);
-  assert(r.ok, "the server can record a Growth Cohort application", r);
+  assert(!r.ok, "…old cohort names are no longer stored");
   r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','bootcamp')`);
   assert(!r.ok, "…but not an unknown cohort");
 
@@ -558,6 +560,35 @@ async function suite(label: string, files: string[]) {
   assert(!r.ok, "founder still cannot change own role");
 
   // ------------------------------------------------------------------
+  // Coaching cycle
+  // ------------------------------------------------------------------
+  r = await SRV(`insert into advisor_sessions (founder_id,price,paid_at,kind,founder_prep,coach_notes,prep_brief,commitments) values ('${A}',0,now(),'coaching','{"focus":"Channels"}','{"reality":"private"}','brief','[{"id":"c1","text":"Call 5 shops"}]') returning id`);
+  assert(r.ok, "server records a coaching session with notes and commitments", r);
+  const csid = r.rows[0]?.id;
+  r = await U(A, `select id, founder_prep, commitments, summary from advisor_sessions where id='${csid}'`);
+  assert(r.ok && r.rows.length === 1 && r.rows[0].commitments?.[0]?.id === "c1", "founder reads own session, prep and commitments", r);
+  r = await U(A, `select coach_notes from advisor_sessions where id='${csid}'`);
+  assert(!r.ok, "founder cannot read the coach's private notes");
+  r = await U(A, `select prep_brief from advisor_sessions where id='${csid}'`);
+  assert(!r.ok, "founder cannot read the coach's prep brief");
+  r = await U(A, `select * from advisor_sessions where id='${csid}'`);
+  assert(!r.ok, "select * is refused rather than leaking private columns");
+  r = await U(A, `update advisor_sessions set rating=5 where id='${csid}'`);
+  assert(r.ok && r.n === 0, "founder cannot change a session directly (the server does it)", r);
+  r = await SRV(`update advisor_sessions set rating=9 where id='${csid}'`);
+  assert(!r.ok, "rating stays 1-5");
+  r = await SRV(`update advisor_sessions set kind='party' where id='${csid}'`);
+  assert(!r.ok, "only known session kinds");
+  r = await U(B, `select id from advisor_sessions where id='${csid}'`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot see the session", r);
+  r = await U(A, `insert into coaching_agreements (founder_id,version) values ('${A}','v1')`);
+  assert(!r.ok, "agreement acceptance is recorded by the server");
+  r = await SRV(`insert into coaching_agreements (founder_id,version) values ('${A}','v1')`);
+  assert(r.ok, "server records the agreement", r);
+  r = await U(A, `select version from coaching_agreements`);
+  assert(r.ok && r.rows.length === 1, "founder sees own agreement", r);
+
+  // ------------------------------------------------------------------
   // "Is this founder subscribed?" — database and app must agree
   // ------------------------------------------------------------------
   const cases: { name: string; status: string; end: string | null; autoRenew: boolean }[] = [
@@ -605,6 +636,10 @@ async function main() {
     "supabase/migrations/2026-10-14_cohorts.sql",
     "supabase/migrations/2026-10-15_plans_market.sql",
     "supabase/migrations/2026-10-15_plans_market.sql",
+    "supabase/migrations/2026-10-16_coaching.sql",
+    "supabase/migrations/2026-10-16_coaching.sql",
+    "supabase/migrations/2026-10-17_cohort_names.sql",
+    "supabase/migrations/2026-10-17_cohort_names.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

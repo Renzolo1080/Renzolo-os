@@ -4,6 +4,7 @@ import { buildTxRef, createHostedCheckout, FlutterwaveError, type FlutterwavePro
 import {
   getMembershipPrice,
   getOneOffPrice,
+  coachingBuyerLevel,
   membershipCurrenciesFor,
   oneOffCurrenciesFor,
   mainCurrency,
@@ -111,10 +112,11 @@ export async function POST(req: NextRequest) {
   } else if (kind === "coaching") {
     const item = body?.item;
     if (!isOneOffItem(item) || item === "assessment") return NextResponse.json({ error: "Choose one session or three." }, { status: 400 });
-    const member = !!m.tier;
-    const currencies = oneOffCurrenciesFor(item, member, profile?.country);
+    const { data: pastCoaching } = await supabase.from("payments").select("id").eq("founder_id", user.id).eq("product", "coaching").eq("status", "successful").limit(1);
+    const level = coachingBuyerLevel({ member: !!m.tier, boughtAssessment: m.purchases.length > 0, hadCoaching: (pastCoaching ?? []).length > 0 });
+    const currencies = oneOffCurrenciesFor(item, level, profile?.country);
     const currency = requested ?? currencies[currencies.length - 1];
-    const p = currencies.includes(currency) ? getOneOffPrice(item, member, currency) : null;
+    const p = currencies.includes(currency) ? getOneOffPrice(item, level, currency) : null;
     if (!p) return NextResponse.json({ error: "That currency isn't available for your account." }, { status: 400 });
     product = "coaching";
     price = p;

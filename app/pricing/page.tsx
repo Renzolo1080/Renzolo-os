@@ -62,14 +62,19 @@ export default function PricingPage() {
               <p className="text-ink-soft">1 session</p>
               <p className="text-2xl font-bold text-navy">{f(getOneOffPrice("coaching_single", false))}</p>
               <p className="text-ink-soft">Members {f(getOneOffPrice("coaching_single", true))}</p>
+              <p className="text-ink-soft">Starting with coaching {f(getOneOffPrice("coaching_single", "starter"))}</p>
             </div>
             <div className="rounded-lg bg-cream p-3">
               <p className="text-ink-soft">3 sessions</p>
               <p className="text-2xl font-bold text-navy">{f(getOneOffPrice("coaching_pack3", false))}</p>
               <p className="text-ink-soft">Members {f(getOneOffPrice("coaching_pack3", true))}</p>
+              <p className="text-ink-soft">Starting with coaching {f(getOneOffPrice("coaching_pack3", "starter"))}</p>
             </div>
           </div>
-          <p className="mt-3 text-sm text-ink-soft">Growth and Elevate include coaching sessions every period.</p>
+          <p className="mt-3 text-sm text-ink-soft">
+            Standard prices are for assessment and cohort clients. Starting with coaching includes an intake review and session plan on your first purchase.
+            Growth and Elevate include coaching sessions every period.
+          </p>
         </div>
       </section>
 

@@ -74,10 +74,10 @@ export function InterestForm() {
       </label>
       <label className="grid gap-1.5 text-sm font-semibold">
         Cohort
-        <select name="cohort" className={field} defaultValue="foundations">
-          <option value="foundations">Foundations (8 weeks)</option>
-          <option value="growth">Growth (12 weeks)</option>
-          <option value="elevate">Elevate (6 months)</option>
+        <select name="cohort" className={field} defaultValue="launch">
+          <option value="launch">Launch (8 weeks)</option>
+          <option value="build">Build (12 weeks)</option>
+          <option value="scale">Scale (6 months)</option>
         </select>
       </label>
       {error && <p className="text-sm text-red-700">{error}</p>}

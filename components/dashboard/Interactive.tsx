@@ -61,6 +61,30 @@ export function CheckinForm({ goalId, unit }: { goalId: string; unit: string }) 
   );
 }
 
+/** Marks a coaching commitment done from the dashboard. */
+export function CommitmentDone({ sessionId, id }: { sessionId: string; id: string }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      className="shrink-0 rounded-lg border border-teal px-2 py-1 text-xs font-semibold text-teal disabled:opacity-50"
+      onClick={async () => {
+        setBusy(true);
+        try {
+          await send(`/api/coaching/sessions/${sessionId}`, "PATCH", { commitment: { id, status: "done" } });
+          router.refresh();
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      {busy ? "…" : "Done"}
+    </button>
+  );
+}
+
 /** Marks a plan action done from the dashboard. */
 export function MarkDone({ area, id }: { area: string; id: string }) {
   const router = useRouter();
