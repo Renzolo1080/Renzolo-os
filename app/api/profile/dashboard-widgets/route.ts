@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { MAX_EXTRAS, MIN_EXTRAS, setFor, validExtras } from "@/lib/dashboard";
 
-const VALID_WIDGETS = ["reminders", "valuation", "goalsProgress", "progressOverview"];
-
-/** PATCH /api/profile/dashboard-widgets { widgets: string[] }
- * Lets a founder choose which OPTIONAL widgets appear on their own
- * dashboard, beyond the standard view (Venture Score, sub-scores,
- * Health Index, report/subscribe, and Founder Tools, which are always
- * shown to everyone). RLS ("profiles: self update") already scopes
- * this to the caller's own row. */
+/** PATCH /api/profile/dashboard-widgets { extras: string[] }
+ * Saves the 3 to 5 extra views a founder has added to the standard
+ * dashboard, in their chosen order. RLS ("profiles: self update") scopes
+ * this to the caller's own row; the column grant limits what can change. */
 export async function PATCH(req: NextRequest) {
   const supabase = createClient();
   const {
@@ -16,18 +13,16 @@ export async function PATCH(req: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const { widgets } = await req.json();
-  if (!Array.isArray(widgets) || widgets.some((w) => !VALID_WIDGETS.includes(w))) {
-    return NextResponse.json({ error: `widgets must be a subset of: ${VALID_WIDGETS.join(", ")}` }, { status: 400 });
-  }
+  const body = (await req.json().catch(() => null)) as { extras?: unknown } | null;
+  const extras = validExtras(body?.extras);
+  if (!extras) return NextResponse.json({ error: `Choose between ${MIN_EXTRAS} and ${MAX_EXTRAS} different views.` }, { status: 400 });
 
   const { data, error } = await supabase
     .from("profiles")
-    .update({ dashboard_widgets: widgets })
+    .update({ dashboard_widgets: extras, dashboard_view: setFor(extras) })
     .eq("id", user.id)
-    .select("dashboard_widgets")
+    .select("dashboard_widgets, dashboard_view")
     .single();
-
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ dashboardWidgets: data.dashboard_widgets });
+  return NextResponse.json({ extras: data.dashboard_widgets, set: data.dashboard_view });
 }

@@ -1,21 +1,82 @@
-@import "@fontsource/bricolage-grotesque/500.css";
+@import "@fontsource/bricolage-grotesque/600.css";
 @import "@fontsource/bricolage-grotesque/700.css";
 @import "@fontsource/bricolage-grotesque/800.css";
-@import "@fontsource/public-sans/400.css";
-@import "@fontsource/public-sans/600.css";
-@import "@fontsource/public-sans/700.css";
+@import "@fontsource/dm-sans/400.css";
+@import "@fontsource/dm-sans/500.css";
+@import "@fontsource/dm-sans/600.css";
+@import "@fontsource/dm-sans/700.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "./brand-tokens.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html { scroll-behavior: smooth; }
-body { background: #F7F4EE; color: #0E1A26; font-family: "Public Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-:focus-visible { outline: 3px solid #C18B2C; outline-offset: 3px; border-radius: 4px; }
+body { background: var(--surface); color: var(--ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); }
+
+/* RENZOLO Vibrant motion (brand book: Motion, Transitions). Everything moves
+   only with prefers-reduced-motion: no-preference; otherwise end states show. */
+.btn-pop { box-shadow: var(--glow-brand); transition: transform 150ms ease-out, box-shadow 150ms ease-out; }
+.btn-pop:hover { transform: translateY(-2px); box-shadow: var(--shadow-pop); }
+.btn-pop:active { transform: translateY(1px); box-shadow: none; }
+.card-pop { box-shadow: var(--shadow-card); transition: transform 200ms ease-out, box-shadow 200ms ease-out; }
+.card-pop:hover { transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
+/* Signature motion, used sparingly: outcome cards flip, the hero score card
+   tilts, the hero blocks rise. Nothing moves on its own. */
+.flip { perspective: 1200px; }
+.flip-inner { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 600ms cubic-bezier(.2,.7,.2,1); }
+.flip-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-back { transform: rotateY(180deg); }
+@media (hover: hover) { .flip:hover .flip-inner { transform: rotateY(180deg); } }
+.flip-inner[aria-pressed="true"] { transform: rotateY(180deg); }
+.tilt { transition: transform 400ms cubic-bezier(.2,.7,.2,1), box-shadow 400ms; }
+@media (hover: hover) { .tilt:hover { transform: perspective(1000px) rotateX(4deg) rotateY(-7deg) translateY(-6px); } }
+.blk { transition: transform 350ms cubic-bezier(.2,.7,.2,1); }
+@media (hover: hover) {
+  .blocks:hover .blk:nth-child(1) { transform: translateY(-12px); }
+  .blocks:hover .blk:nth-child(2) { transform: translateY(-22px); }
+  .blocks:hover .blk:nth-child(3) { transform: translateY(-32px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner, .tilt, .blk, .btn-pop, .card-pop { transition: none; }
+  .tilt:hover, .blocks:hover .blk, .card-pop:hover { transform: none; }
+}
+.glass { background: var(--glass); border: 1px solid var(--glass-edge); }
+@supports (backdrop-filter: blur(16px)) { .glass { backdrop-filter: blur(16px); } }
+@media (prefers-reduced-transparency: reduce) { .glass { background: var(--surface-raised); backdrop-filter: none; } }
 
 @media (prefers-reduced-motion: no-preference) {
+  .hero-in > * { animation: fadeUp 400ms ease-out both; }
+  .hero-in > *:nth-child(2) { animation-delay: 80ms; }
+  .hero-in > *:nth-child(3) { animation-delay: 160ms; }
+  .hero-in > *:nth-child(4) { animation-delay: 240ms; }
+  .rise-block { animation: rise 600ms cubic-bezier(.2,.7,.2,1) backwards; }
+  .float-in { animation: fadeUp 500ms ease-out 700ms both; }
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 400ms ease-out, transform 400ms ease-out; }
+  .reveal.in { opacity: 1; transform: none; }
+  .premium .reveal { transform: none; transition: opacity 600ms ease-out; }
+  .ambient { animation: drift 20s ease-in-out infinite alternate; }
+  .ambient-2 { animation-delay: -10s; }
+  .live-dot { animation: pulse 1.6s ease-in-out infinite; }
+  .pop-in { animation: pop 150ms ease-out both; }
   .trajectory-path { stroke-dasharray: 1600; stroke-dashoffset: 1600; animation: draw 2.4s cubic-bezier(.6,.05,.2,1) .3s forwards; }
-  .trajectory-dot { opacity: 0; animation: pop .35s ease-out forwards; }
+  .trajectory-dot { opacity: 0; animation: popdot .35s ease-out forwards; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 200ms; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+  @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(40px, -30px); } }
+  @keyframes pulse { 50% { opacity: .35; transform: scale(.8); } }
+  @keyframes pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
   @keyframes draw { to { stroke-dashoffset: 0; } }
-  @keyframes pop { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
+  @keyframes popdot { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
 }
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: no-preference) {
+  .reveal .method-line { transform: scaleX(0); transition: transform 1.2s cubic-bezier(.6,.05,.2,1) .2s; }
+  .reveal.in .method-line { transform: scaleX(1); }
+}
+[data-theme="dark"] .eyebrow { color: var(--heritage); }

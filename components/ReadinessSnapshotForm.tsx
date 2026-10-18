@@ -216,7 +216,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
           ))}
         </div>
         <div className="h-2 rounded bg-white overflow-hidden" aria-hidden="true">
-          <div className="h-full bg-gold transition-all" style={{ width: `${((screen + 1) / TOTAL) * 100}%` }} />
+          <div className="h-full bg-teal transition-all" style={{ width: `${((screen + 1) / TOTAL) * 100}%` }} />
         </div>
       </div>
 
@@ -313,7 +313,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
             const q = QUICK_QUESTIONS[i];
             return (
               <section className="space-y-4">
-                <p className="text-sm font-semibold text-gold">
+                <p className="text-sm font-semibold text-brand-text">
                   {q.area} · {i + 1} of {QUICK_QUESTIONS.length}
                 </p>
                 <h1 className="text-2xl font-bold text-navy">{q.question}</h1>
@@ -413,7 +413,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
               Next
             </button>
           ) : (
-            <button type="button" className="rounded-lg bg-gold px-6 py-3 text-white font-semibold disabled:opacity-50" disabled={!canContinue || submitting} onClick={submit}>
+            <button type="button" className="rounded-lg bg-brand px-6 py-3 text-on-brand font-semibold disabled:opacity-50" disabled={!canContinue || submitting} onClick={submit}>
               {submitting ? "Scoring…" : "See my results"}
             </button>
           )}

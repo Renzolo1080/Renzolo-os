@@ -3,12 +3,12 @@ import { PageHero } from "@/components/PageHero";
 import { InterestForm } from "@/components/Forms";
 import { appLink } from "@/lib/site";
 
-export const metadata = { title: "Founder Trajectory™ Academy", description: "Three development levels: Foundations (8 weeks), Growth (12 weeks) and Elevate (6 months)." };
+export const metadata = { title: "Founder Trajectory™ Academy", description: "Three development levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months)." };
 
 const PROGRAMS = [
-  { name: "Foundations", length: "8 weeks", text: "Your customers, your offer, your numbers and a written growth plan. For Essentials members." },
-  { name: "Growth", length: "12 weeks", text: "Traction and readiness: channels, pricing, cash flow and operations, then investor, lender and contract readiness. For Growth members." },
-  { name: "Elevate", length: "6 months", text: "Hands-on support to raise, scale or win big contracts. For Elevate members, once a year." },
+  { name: "Launch", length: "8 weeks", text: "Self-paced, high-volume programme for early-stage founders: all nine parts of your business model in 8 weeks, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan." },
+  { name: "Build", length: "12 weeks", text: "For businesses with customers: traction first (channels, pricing, cash flow, operations), then readiness for loans, grants, contracts and investors. Live group sessions and coaching." },
+  { name: "Scale", length: "6 months", text: "Selective, hands-on programme to raise capital, scale or win large contracts, with introductions to investors, lenders and buyers. Once a year." },
 ];
 
 export default function AcademyPage() {
@@ -38,8 +38,8 @@ export default function AcademyPage() {
             <div>
               <h2 className="font-display text-3xl font-bold tracking-tight">How cohorts work</h2>
               <ul className="mt-6 space-y-4 text-lg">
-                <li>Foundations and Growth open three times a year. Elevate runs once a year.</li>
-                <li>Cohorts have their own fee, separate from membership.</li>
+                <li>Launch and Build open three times a year. Scale runs once a year.</li>
+                <li>Cohorts run for a set time and have their own fee. Membership is separate and lasts as long as you like.</li>
                 <li>Members get priority when applying. Every founder applies and must qualify, so each group is strong.</li>
                 <li>You arrive with your Readiness Assessment and plan, so you know exactly what to work on from week one.</li>
               </ul>

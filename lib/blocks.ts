@@ -84,3 +84,58 @@ export function getBlockPrompt(key: BlockKey): BlockPrompt {
 }
 
 export { BLOCK_KEYS };
+
+/** The six measures, asked as plain multiple-choice questions instead of
+ * 0-100 sliders. Each answer maps to the same score levels the Readiness
+ * Snapshot uses (LEVEL_SCORES in lib/quickcheck.ts), so scores stay
+ * comparable between the Snapshot and the full assessment. */
+export const MEASURE_CHOICES: { key: "clarity" | "evidence" | "economics" | "scalability" | "defensibility" | "risk"; question: string; options: [string, string, string, string] }[] = [
+  {
+    key: "clarity",
+    question: "How clearly is this defined today?",
+    options: ["Not defined yet", "A rough idea", "Clearly defined", "Defined, written down and shared with the team"],
+  },
+  {
+    key: "evidence",
+    question: "What proof do you have that it works?",
+    options: ["None yet", "A few conversations or anecdotes", "Some data: sales, surveys, contracts", "Strong, recent data you could show an investor"],
+  },
+  {
+    key: "economics",
+    question: "Does it make financial sense?",
+    options: ["Unknown, or losing money", "Breaking even at best", "Profitable on a small scale", "Profitable, and better with volume"],
+  },
+  {
+    key: "scalability",
+    question: "Could it handle three times the volume?",
+    options: ["No, it would break", "Only with a lot of extra effort", "Yes, with some investment", "Yes, with little extra cost"],
+  },
+  {
+    key: "defensibility",
+    question: "How hard would it be for someone to copy?",
+    options: ["Easy to copy", "Some advantage, e.g. relationships or location", "A clear advantage, e.g. brand, contracts or know-how", "Strong protection, e.g. IP or exclusive deals"],
+  },
+  {
+    key: "risk",
+    question: "How exposed is it if something goes wrong?",
+    options: ["Very exposed, e.g. one customer, supplier or person", "Quite exposed", "Some protection in place", "Well protected, with backups"],
+  },
+];
+
+export const MEASURE_LEVELS = [15, 40, 65, 90] as const;
+
+/** The answer (0-3) closest to a stored 0-100 measure. */
+export function levelFor(value: unknown): number | null {
+  const n = Number(value);
+  if (value === null || value === undefined || !Number.isFinite(n)) return null;
+  let best = 0;
+  for (let i = 1; i < MEASURE_LEVELS.length; i++) if (Math.abs(MEASURE_LEVELS[i] - n) < Math.abs(MEASURE_LEVELS[best] - n)) best = i;
+  return best;
+}
+
+/** Areas in the order a founder should work through them: weakest score
+ * first, ties in the usual business-model order. */
+export function areasWeakestFirst(blockScores: Record<string, number> | null | undefined): BlockKey[] {
+  const scores = blockScores ?? {};
+  return BLOCK_KEYS.slice().sort((a, b) => (Number(scores[a] ?? 50) - Number(scores[b] ?? 50)) || BLOCK_KEYS.indexOf(a) - BLOCK_KEYS.indexOf(b));
+}

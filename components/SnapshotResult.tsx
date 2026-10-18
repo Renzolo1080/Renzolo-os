@@ -35,7 +35,7 @@ export function SnapshotResult({
             {overview.ventureScore}
             <span className="text-lg font-normal text-ink-soft"> / 100</span>
           </p>
-          <p className="mt-1 font-semibold text-gold">{overview.tier}</p>
+          <p className="mt-1 font-semibold text-brand-text">{overview.tier}</p>
         </div>
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="text-sm text-ink-soft">Strategic Plan Readiness</p>
@@ -89,7 +89,7 @@ export function SnapshotResult({
         <div className="mt-5">
           <SubscriptionFeatures dark />
         </div>
-        <a href={registerHref} className="mt-6 inline-block rounded-lg bg-gold px-6 py-3 font-semibold text-white">
+        <a href={registerHref} className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand">
           Create my account and become a member
         </a>
         <p className="mt-3 text-xs text-cream/70">Sign up with {email.trim() || "the same email"} and this Snapshot will be waiting in your account.</p>

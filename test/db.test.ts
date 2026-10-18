@@ -489,10 +489,143 @@ async function suite(label: string, files: string[]) {
   assert(r.ok && r.rows.length === 0, "shared scores, applications, messages and email lists are not readable from the browser", r);
   r = await run("anon", null, `insert into cohort_applications (full_name,email,cohort) values ('x','x@x','elevate')`);
   assert(!r.ok, "…and can't be written from the browser either (the server validates them)");
+  r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','build')`);
+  assert(r.ok, "the server can record a Build cohort application", r);
   r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','growth')`);
-  assert(r.ok, "the server can record a Growth Cohort application", r);
+  assert(!r.ok, "…old cohort names are no longer stored");
   r = await SRV(`insert into cohort_applications (full_name,email,cohort) values ('x','x@x','bootcamp')`);
   assert(!r.ok, "…but not an unknown cohort");
+
+  // ------------------------------------------------------------------
+  // Plan Builder, plan reviews, Market Intelligence, dashboard view
+  // ------------------------------------------------------------------
+  r = await U(A, `insert into strategic_plans (founder_id,data,completeness) values ('${A}','{"vision":{}}',20) returning id`);
+  assert(r.ok, "founder saves own strategic plan", r);
+  const planId = r.rows[0]?.id;
+  r = await U(A, `insert into strategic_plans (founder_id,data) values ('${B}','{}')`);
+  assert(!r.ok, "founder cannot create a plan for someone else");
+  r = await U(A, `insert into strategic_plans (founder_id,data) values ('${A}','{}')`);
+  assert(!r.ok, "one plan per founder");
+  r = await U(A, `update strategic_plans set data='{"goals":[]}', updated_at=now() where founder_id='${A}'`);
+  assert(r.ok && r.n === 1, "founder updates own plan", r);
+  r = await U(B, `select id from strategic_plans`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read the plan", r);
+  r = await U(B, `update strategic_plans set data='{}' where founder_id='${A}'`);
+  assert(r.ok && r.n === 0, "other founder cannot change the plan", r);
+  r = await U(S, `select id from strategic_plans`);
+  assert(r.ok && r.rows.length === 1, "advisor can read plans", r);
+  r = await U(A, `update strategic_plans set completeness=150 where founder_id='${A}'`);
+  assert(!r.ok, "completeness stays between 0 and 100");
+
+  const reviewSql = `insert into plan_reviews (founder_id,plan_id,plan_updated_at,overall,result) values ('${A}','${planId}',now(),70,'{}')`;
+  r = await U(A, reviewSql);
+  assert(!r.ok, "founder cannot write a plan review from the browser");
+  r = await SRV(reviewSql);
+  assert(r.ok, "server writes the plan review", r);
+  r = await U(A, `select overall from plan_reviews`);
+  assert(r.ok && r.rows.length === 1, "founder reads own plan review", r);
+  r = await U(B, `select overall from plan_reviews`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read the plan review", r);
+
+  const briefSql = `insert into market_briefs (founder_id,industry,country,markdown) values ('${A}','Retail','Kenya','x')`;
+  r = await U(A, briefSql);
+  assert(!r.ok, "founder cannot write a market brief from the browser");
+  r = await SRV(briefSql);
+  assert(r.ok, "server writes the market brief", r);
+  r = await U(A, `select id from market_briefs`);
+  assert(r.ok && r.rows.length === 1, "founder reads own market brief", r);
+  r = await U(B, `select id from market_briefs`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read the market brief", r);
+
+  r = await U(A, `insert into goal_checkins (founder_id,goal_id,value,checked_on) values ('${A}','g1',120,'2026-10-01')`);
+  assert(r.ok, "founder logs a goal check-in", r);
+  r = await U(A, `insert into goal_checkins (founder_id,goal_id,value,checked_on) values ('${B}','g1',1,'2026-10-01')`);
+  assert(!r.ok, "…but not for someone else");
+  r = await U(B, `select id from goal_checkins`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read check-ins", r);
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue,customers,cash,wins) values ('${A}','2026-10-01',5000,40,12000,'First distributor signed')`);
+  assert(r.ok, "founder saves a monthly update", r);
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue) values ('${A}','2026-10-01',1)`);
+  assert(!r.ok, "one update per month");
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue) values ('${A}','2026-10-15',1)`);
+  assert(!r.ok, "an update's period is the first of a month");
+  r = await U(A, `insert into founder_updates (founder_id,period,revenue) values ('${A}','2026-11-01',-5)`);
+  assert(!r.ok, "revenue can't be negative");
+  r = await U(B, `select id from founder_updates`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read monthly updates", r);
+
+  r = await U(A, `update profiles set dashboard_view='investor', dashboard_widgets='["score","valuation"]' where id='${A}'`);
+  assert(r.ok && r.n === 1, "founder chooses a dashboard view and cards", r);
+  r = await U(A, `update profiles set dashboard_view='everything' where id='${A}'`);
+  assert(!r.ok, "…but only a known view");
+  r = await U(A, `update profiles set role='admin' where id='${A}'`);
+  assert(!r.ok, "founder still cannot change own role");
+
+  // ------------------------------------------------------------------
+  // Coaching cycle
+  // ------------------------------------------------------------------
+  r = await SRV(`insert into advisor_sessions (founder_id,price,paid_at,kind,founder_prep,coach_notes,prep_brief,commitments) values ('${A}',0,now(),'coaching','{"focus":"Channels"}','{"reality":"private"}','brief','[{"id":"c1","text":"Call 5 shops"}]') returning id`);
+  assert(r.ok, "server records a coaching session with notes and commitments", r);
+  const csid = r.rows[0]?.id;
+  r = await U(A, `select id, founder_prep, commitments, summary from advisor_sessions where id='${csid}'`);
+  assert(r.ok && r.rows.length === 1 && r.rows[0].commitments?.[0]?.id === "c1", "founder reads own session, prep and commitments", r);
+  r = await U(A, `select coach_notes from advisor_sessions where id='${csid}'`);
+  assert(!r.ok, "founder cannot read the coach's private notes");
+  r = await U(A, `select prep_brief from advisor_sessions where id='${csid}'`);
+  assert(!r.ok, "founder cannot read the coach's prep brief");
+  r = await U(A, `select * from advisor_sessions where id='${csid}'`);
+  assert(!r.ok, "select * is refused rather than leaking private columns");
+  r = await U(A, `update advisor_sessions set rating=5 where id='${csid}'`);
+  assert(r.ok && r.n === 0, "founder cannot change a session directly (the server does it)", r);
+  r = await SRV(`update advisor_sessions set rating=9 where id='${csid}'`);
+  assert(!r.ok, "rating stays 1-5");
+  r = await SRV(`update advisor_sessions set kind='party' where id='${csid}'`);
+  assert(!r.ok, "only known session kinds");
+  r = await U(B, `select id from advisor_sessions where id='${csid}'`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot see the session", r);
+  r = await U(A, `insert into coaching_agreements (founder_id,version) values ('${A}','v1')`);
+  assert(!r.ok, "agreement acceptance is recorded by the server");
+  r = await SRV(`insert into coaching_agreements (founder_id,version) values ('${A}','v1')`);
+  assert(r.ok, "server records the agreement", r);
+  r = await U(A, `select version from coaching_agreements`);
+  assert(r.ok && r.rows.length === 1, "founder sees own agreement", r);
+
+  // ------------------------------------------------------------------
+  // AI coaching
+  // ------------------------------------------------------------------
+  r = await U(A, `insert into ai_coach_threads (founder_id,title) values ('${A}','Pricing')`);
+  assert(!r.ok, "founder cannot create AI coach threads directly (the server enforces access and limits)");
+  r = await SRV(`insert into ai_coach_threads (founder_id,title) values ('${A}','Pricing') returning id`);
+  assert(r.ok, "server creates an AI coach thread", r);
+  const tid = r.rows[0]?.id;
+  r = await SRV(`insert into ai_coach_messages (thread_id,founder_id,role,content) values ('${tid}','${A}','user','How do I price?'),('${tid}','${A}','assistant','Start from cost.')`);
+  assert(r.ok, "server records the conversation", r);
+  r = await SRV(`insert into ai_coach_threads (founder_id,title,kind) values ('${A}','Insight','insights')`);
+  assert(r.ok, "insight conversations are a thread kind", r);
+  r = await SRV(`insert into ai_coach_threads (founder_id,title,kind) values ('${A}','x','gossip')`);
+  assert(!r.ok, "…but only known kinds");
+  r = await SRV(`insert into ai_coach_messages (thread_id,founder_id,role,content) values ('${tid}','${A}','system','x')`);
+  assert(!r.ok, "only user and assistant messages");
+  r = await U(A, `select role from ai_coach_messages order by created_at`);
+  assert(r.ok && r.rows.length === 2, "founder reads own conversation", r);
+  r = await U(B, `select id from ai_coach_messages`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot read it", r);
+  r = await U(B, `select id from ai_coach_threads`);
+  assert(r.ok && r.rows.length === 0, "…nor the thread", r);
+  r = await U(A, `update ai_coach_messages set content='edited'`);
+  assert(r.ok && r.n === 0, "founder cannot edit the coach's replies", r);
+
+  // Lorenzo · AI video sessions
+  r = await U(A, `insert into ai_clone_sessions (founder_id,conversation_id,consent_version,max_seconds) values ('${A}','c1','2026-10',600)`);
+  assert(!r.ok, "founder cannot log a clone session directly (the server enforces consent and limits)");
+  r = await SRV(`insert into ai_clone_sessions (founder_id,conversation_id,consent_version,max_seconds) values ('${A}','c1','2026-10',600)`);
+  assert(r.ok, "server logs a Lorenzo · AI session", r);
+  r = await SRV(`insert into ai_clone_sessions (founder_id,conversation_id,consent_version,max_seconds) values ('${A}','c2','2026-10',99999)`);
+  assert(!r.ok, "…with a sane session length");
+  r = await U(A, `select conversation_id from ai_clone_sessions`);
+  assert(r.ok && r.rows.length === 1, "founder reads own clone sessions", r);
+  r = await U(B, `select id from ai_clone_sessions`);
+  assert(r.ok && r.rows.length === 0, "other founder cannot see them", r);
 
   // ------------------------------------------------------------------
   // "Is this founder subscribed?" — database and app must agree
@@ -556,6 +689,16 @@ async function main() {
     "supabase/migrations/2026-10-14_growth.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
     "supabase/migrations/2026-10-14_cohorts.sql",
+    "supabase/migrations/2026-10-15_plans_market.sql",
+    "supabase/migrations/2026-10-15_plans_market.sql",
+    "supabase/migrations/2026-10-16_coaching.sql",
+    "supabase/migrations/2026-10-16_coaching.sql",
+    "supabase/migrations/2026-10-17_cohort_names.sql",
+    "supabase/migrations/2026-10-17_cohort_names.sql",
+    "supabase/migrations/2026-10-18_ai_coach.sql",
+    "supabase/migrations/2026-10-18_ai_coach.sql",
+    "supabase/migrations/2026-10-19_ai_clone.sql",
+    "supabase/migrations/2026-10-19_ai_clone.sql",
     "supabase/migrations/2026-10-16_function_privileges.sql",
     "supabase/migrations/2026-10-16_function_privileges.sql",
   ]);

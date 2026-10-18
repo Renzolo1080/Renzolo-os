@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { track } from "@/lib/track";
 
 export interface OneOffPrices {
@@ -16,6 +15,7 @@ export function OneOffPurchases({
   prices,
   showAssessment,
   member,
+  level = member ? "member" : "client",
   coachingAvailable,
   nextCoachingFrom,
   standardSingle,
@@ -24,17 +24,17 @@ export function OneOffPurchases({
   prices: OneOffPrices[];
   showAssessment: boolean;
   member: boolean;
+  /** Coaching price level: member, client, or starting with coaching. */
+  level?: "member" | "client" | "starter";
   coachingAvailable: number;
   nextCoachingFrom: string | null;
   standardSingle: string | null;
   standardPack: string | null;
 }) {
-  const router = useRouter();
   const [currency, setCurrency] = useState(prices[0]?.currency ?? "USD");
   const p = prices.find((x) => x.currency === currency) ?? prices[0];
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [booked, setBooked] = useState(false);
 
   async function buy(body: Record<string, unknown>, key: string) {
     setBusy(key);
@@ -51,16 +51,6 @@ export function OneOffPurchases({
     }
   }
 
-  async function book() {
-    setBusy("book");
-    setError(null);
-    const res = await fetch("/api/coaching/book", { method: "POST" });
-    const data = await res.json().catch(() => ({}));
-    setBusy(null);
-    if (!res.ok) return setError(data.error ?? "Could not book right now.");
-    setBooked(true);
-    router.refresh();
-  }
 
   if (!p) return null;
   return (
@@ -97,7 +87,7 @@ export function OneOffPurchases({
                 "Join within 30 days and your assessment carries straight into your membership",
               ].map((t) => (
                 <li key={t} className="flex gap-2">
-                  <span className="font-bold text-gold">✓</span>
+                  <span className="font-bold text-teal-text">✓</span>
                   <span>{t}</span>
                 </li>
               ))}
@@ -109,8 +99,17 @@ export function OneOffPurchases({
         )}
 
         <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-teal">{member ? "Member prices" : "No minimum"}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal">{level === "member" ? "Member prices" : level === "starter" ? "Starting with coaching" : "No minimum"}</p>
           <p className="mt-1 text-xl font-bold text-navy">One-on-one coaching</p>
+          {level === "starter" && (
+            <p className="mt-1 rounded-lg bg-cream p-2 text-xs">
+              Your first coaching purchase includes an intake review and a session plan. Take the free{" "}
+              <a href="/assessment" className="font-semibold text-teal underline">
+                Readiness Snapshot
+              </a>{" "}
+              first so your coach can prepare. After that, sessions are at the standard price, and members pay less.
+            </p>
+          )}
           <p className="mt-1 text-sm text-ink-soft">With a Founder Trajectory™ coach. Sessions are valid for a year; we arrange the time with you by email.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
@@ -140,13 +139,9 @@ export function OneOffPurchases({
                 <p className="font-semibold text-navy">
                   You have {coachingAvailable} coaching session{coachingAvailable > 1 ? "s" : ""} to book.
                 </p>
-                {booked ? (
-                  <p className="mt-1 text-teal">Requested. We'll email you to arrange a time.</p>
-                ) : (
-                  <button type="button" onClick={book} disabled={busy !== null} className="mt-2 rounded-lg bg-gold px-4 py-2 font-semibold text-white disabled:opacity-50">
-                    {busy === "book" ? "Booking…" : "Book a session"}
-                  </button>
-                )}
+                <a href="/coaching" className="mt-2 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
+                  Book a session
+                </a>
               </>
             ) : (
               <p className="text-ink-soft">

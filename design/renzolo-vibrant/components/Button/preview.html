@@ -1,0 +1,26 @@
+<!-- @dsCard group="Actions" height=120 subtitle="Primary, secondary and link" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Button — preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:var(--surface);color:var(--ink);font-family:var(--font-sans);}
+  .row{display:flex;flex-wrap:wrap;gap:var(--space-6);align-items:center;padding:var(--space-6);}
+  .btn{font:600 16px/24px var(--font-sans);border-radius:var(--radius-pill);padding:var(--space-3) var(--space-6);border:2px solid var(--ink);cursor:pointer;box-shadow:var(--shadow-pop);transition:transform 150ms ease-out, box-shadow 150ms ease-out;}
+  .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-pop-hover);}
+  .btn:active{transform:translateY(2px);box-shadow:none;}
+  .btn:focus-visible,.link:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+  .primary{background:var(--brand);color:var(--on-brand);}
+  .secondary{background:var(--surface-raised);color:var(--ink);}
+  .link{font:600 16px/24px var(--font-sans);color:var(--teal-text);background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:4px;cursor:pointer;}
+  .btn[disabled]{opacity:.45;box-shadow:none;cursor:not-allowed;transform:none;}
+</style></head>
+<body>
+<div class="row">
+  <button class="btn primary">Start your assessment</button>
+  <button class="btn secondary">See pricing</button>
+  <button class="link">How it works</button>
+  <button class="btn primary" disabled>Processing…</button>
+</div>
+</body>
+</html>

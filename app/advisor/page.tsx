@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReviewButton } from "@/components/ReviewButton";
-import { ScheduleButton } from "@/components/ScheduleButton";
 import { QAToggle } from "@/components/QAToggle";
 import { AdvisorRecommendationForm } from "@/components/AdvisorRecommendationForm";
 
@@ -22,15 +21,6 @@ export default async function AdvisorQueuePage() {
     .select("*, assessments(founder_id, venture_stage, industry, profiles(full_name))")
     .eq("advisor_reviewed", false)
     .order("review_due_by", { ascending: true });
-
-  const { data: pendingSessions } = await supabase
-    .from("advisor_sessions")
-    .select("*, profiles!advisor_sessions_founder_id_fkey(full_name)")
-    .eq("status", "requested")
-    // Only sessions Flutterwave has confirmed as paid — a founder who
-    // started checkout and never paid must not land in this queue.
-    .not("paid_at", "is", null)
-    .order("paid_at", { ascending: true });
 
   const now = Date.now();
 
@@ -76,32 +66,13 @@ export default async function AdvisorQueuePage() {
         </div>
       )}
 
-      <h2 className="text-xl font-bold text-navy mt-12 mb-2">Paid 1:1 Advisor Sessions — Awaiting Scheduling</h2>
-      <p className="text-sm text-ink-soft mb-6">
-        Founders who purchased a paid 1:1 session. Coordinate the actual time by email or call, then mark it
-        scheduled here — this queue does not book calendar time automatically (Keep Manual for launch).
-      </p>
-
-      {!pendingSessions || pendingSessions.length === 0 ? (
-        <p>No paid sessions awaiting scheduling.</p>
-      ) : (
-        <div className="space-y-4">
-          {pendingSessions.map((s: any) => (
-            <div key={s.id} className="rounded border p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-semibold">{s.profiles?.full_name ?? "Unknown founder"}</p>
-                  <p className="text-sm text-ink-soft">
-                    {s.coaching_credit_id ? "Coaching session credit" : `${s.currency} ${s.price}`} · paid {new Date(s.paid_at).toLocaleString()}
-                  </p>
-                  {s.report_id && <p className="text-xs text-ink-soft mt-1">Linked report: {s.report_id}</p>}
-                </div>
-                <ScheduleButton sessionId={s.id} />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="mt-12 rounded-2xl bg-navy p-5 text-white">
+        <p className="font-semibold">Coaching sessions</p>
+        <p className="mt-1 text-sm text-cream/80">Requested and upcoming sessions, prep briefs, notes and founders who need attention.</p>
+        <a href="/coach" className="mt-3 inline-block rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
+          Open coaching
+        </a>
+      </div>
     </main>
   );
 }

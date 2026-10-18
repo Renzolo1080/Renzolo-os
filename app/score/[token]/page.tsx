@@ -41,7 +41,7 @@ export default async function SharedScorePage({ params }: { params: { token: str
             </div>
           </div>
           <p className="mx-auto mt-8 max-w-xl text-lg text-cream/85">What's your Venture Readiness Score? Take the free Readiness Snapshot: 5 to 7 minutes, no account needed.</p>
-          <a href={href} className="mt-6 inline-block rounded-lg bg-gold px-7 py-4 text-lg font-semibold text-white">
+          <a href={href} className="mt-6 inline-block rounded-lg bg-brand px-7 py-4 text-lg font-semibold text-on-brand">
             Get my Venture Readiness Score
           </a>
         </div>

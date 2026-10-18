@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 
-const MEMBER_AREAS = ["/dashboard", "/assessment", "/tools", "/advisor", "/report"];
+const MEMBER_AREAS = ["/dashboard", "/assessment", "/tools", "/advisor", "/report", "/plan", "/market", "/coaching", "/coach", "/ai-coach"];
 
 /** Top bar on every page. Signed-in areas get Dashboard / Tools / Log out;
  * public pages get Log in and the free Snapshot. */
@@ -22,7 +22,16 @@ export function SiteHeader() {
             <a href="/dashboard" className="text-cream hover:text-white">
               Dashboard
             </a>
-            <a href="/tools" className="hidden text-cream hover:text-white sm:inline">
+            <a href="/plan" className="hidden text-cream hover:text-white sm:inline">
+              Plan
+            </a>
+            <a href="/market" className="hidden text-cream hover:text-white sm:inline">
+              Market
+            </a>
+            <a href="/coaching" className="hidden text-cream hover:text-white sm:inline">
+              Coaching
+            </a>
+            <a href="/tools" className="hidden text-cream hover:text-white md:inline">
               Tools
             </a>
             <a href="/dashboard/subscribe" className="text-cream hover:text-white">
@@ -45,7 +54,7 @@ export function SiteHeader() {
             <a href="/login" className="text-cream hover:text-white">
               Log in
             </a>
-            <a href="/snapshot" className="hidden rounded-lg bg-gold px-4 py-2 font-semibold text-white sm:inline-block">
+            <a href="/snapshot" className="hidden rounded-pill bg-cream px-4 py-2 font-semibold text-navy transition-colors hover:bg-gold sm:inline-block">
               Free Snapshot
             </a>
           </nav>
