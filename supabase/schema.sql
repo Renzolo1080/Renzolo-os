@@ -1255,3 +1255,19 @@ alter table ai_clone_sessions enable row level security;
 do $$ begin
   create policy "ai_clone_sessions: self or staff" on ai_clone_sessions for select using (founder_id = auth.uid() or is_staff());
 exception when duplicate_object then null; end $$;
+-- =====================================================================
+-- Function privileges (same as supabase/migrations/2026-10-16_function_privileges.sql).
+-- =====================================================================
+
+revoke execute on function handle_new_user() from public, anon, authenticated;
+
+-- is_staff(), is_admin() and has_active_subscription() are used by the
+-- access rules, which run as the signed-in founder, so signed-in founders
+-- keep access (each only ever answers about the caller). Signed-out
+-- visitors never need them: everything they submit goes through the server.
+revoke execute on function is_staff() from public, anon;
+revoke execute on function is_admin() from public, anon;
+revoke execute on function has_active_subscription() from public, anon;
+grant execute on function is_staff() to authenticated, service_role;
+grant execute on function is_admin() to authenticated, service_role;
+grant execute on function has_active_subscription() to authenticated, service_role;
