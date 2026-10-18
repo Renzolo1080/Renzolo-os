@@ -61,9 +61,9 @@ export default async function CoachingPage() {
         {ent.aiCoaching && (
           <>
             {" "}
-            Between sessions, your{" "}
+            Between sessions,{" "}
             <a href="/ai-coach" className="font-semibold text-teal underline">
-              AI coach
+              Lorenzo · AI
             </a>{" "}
             is there any time.
           </>

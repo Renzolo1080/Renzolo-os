@@ -6,7 +6,7 @@ export const metadata = {
 };
 
 const FORMATS = [
-  { name: "Launch", weeks: "8 weeks", focus: "Self-paced, high-volume programme for early-stage founders: all nine parts of your business model in 8 weeks, AI coaching and one 30-minute session, ending with a written plan." },
+  { name: "Launch", weeks: "8 weeks", focus: "Self-paced, high-volume programme for early-stage founders: all nine parts of your business model in 8 weeks, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan." },
   { name: "Build", weeks: "12 weeks", focus: "For businesses with customers: traction first (channels, pricing, cash flow, operations), then readiness for loans, grants, contracts and investors. Live group sessions and coaching." },
   { name: "Scale", weeks: "6 months", focus: "Selective, hands-on programme to raise capital, scale or win large contracts, with introductions to investors, lenders and buyers. Once a year." },
 ];

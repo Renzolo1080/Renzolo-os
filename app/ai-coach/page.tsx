@@ -26,9 +26,9 @@ export default async function AiCoachPage({ searchParams }: { searchParams?: { t
         <a href="/dashboard" className="text-sm text-teal">
           ← Back to dashboard
         </a>
-        <h1 className="mt-3 text-3xl font-bold text-navy">AI coach</h1>
+        <h1 className="mt-3 text-3xl font-bold text-navy">Your coaching team</h1>
         <div className="mt-6 rounded-2xl bg-navy p-6 text-white">
-          <p className="text-lg font-semibold">A coach that knows your business, any time</p>
+          <p className="text-lg font-semibold">Lorenzo · AI: coaching from Lorenzo&apos;s 20-year playbook, any time</p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-cream/90">
             <li>Ask about pricing, customers, money, hiring or a meeting, and get answers built on your own assessment, plan and numbers</li>
             <li>Local, national, regional, international and global insight tied to your plan, targets and goals</li>
@@ -70,8 +70,8 @@ export default async function AiCoachPage({ searchParams }: { searchParams?: { t
       <a href="/dashboard" className="text-sm text-teal">
         ← Back to dashboard
       </a>
-      <h1 className="mt-3 text-3xl font-bold text-navy">AI coach</h1>
-      <p className="mt-1 max-w-2xl text-ink-soft">Built on your assessment, plan, goals and monthly numbers, with local to global insight for your market. Ask anything about growing your business, any time.</p>
+      <h1 className="mt-3 text-3xl font-bold text-navy">Your coaching team</h1>
+      <p className="mt-1 max-w-2xl text-ink-soft"><strong className="text-navy">Lorenzo · AI</strong> coaches you any time from Lorenzo&apos;s 20-year playbook. It knows your assessment, plan, goals and monthly numbers, and brings local to global insight for your market. When the decision is big, <a href="/coaching" className="font-semibold text-teal underline">book a live session with Lorenzo</a>.</p>
       {clone.enabled && (
         <div className="mt-6">
           <LorenzoAiPanel left={cloneLeft} limit={cloneLimit} minutes={SESSION_SECONDS / 60} />

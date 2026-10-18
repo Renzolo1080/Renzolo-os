@@ -15,7 +15,7 @@ const H2 = "font-display text-[34px] font-bold leading-[40px] tracking-[-0.015em
 const STAGES = [
   ["Evaluate", "Take the free Snapshot, then your full Readiness Assessment, and see exactly where you stand and why."],
   ["Evolve", "Turn the results into a growth and readiness plan of 90 days to 36 months, built around the gaps that matter."],
-  ["Execute", "Work the plan from your dashboard with goals, reminders, your AI coach and one-on-one coaching."],
+  ["Execute", "Work the plan from your dashboard with goals, reminders, Lorenzo · AI and live sessions with Lorenzo."],
   ["Elevate", "Re-assess, measure your progress and move to your next stage."],
 ];
 
@@ -23,13 +23,13 @@ const OS_MODULES = [
   { title: "Your dashboard", text: "Revenue, customers, cash and your score in one view, with goals tracked target against actual.", src: "/img/screen-dashboard.jpg", alt: "RENZOLO OS dashboard showing revenue, customers, cash, Venture Score and goals" },
   { title: "Your strategic plan", text: "A guided plan built from your assessment: where you are, where you're going, and dated actions for every gap.", src: "/img/screen-plan.jpg", alt: "The Plan Builder checking a strategic plan for goals, measures and dated actions" },
   { title: "Market Intelligence", text: "Your industry and country researched each month, tied to your plan and targets, with sources.", src: "/img/screen-market.jpg", alt: "A Market Intelligence brief with recommendations for the founder's plan" },
-  { title: "Your AI coach", text: "Questions answered any time with local, national, regional and global insight, plus dated actions for your plan.", src: "/img/screen-aicoach.jpg", alt: "The AI coach answering a pricing question with suggested actions" },
+  { title: "Your coaching team", text: "Lorenzo · AI coaches you any time from Lorenzo's 20-year playbook, with local to global insight and dated actions. Book Lorenzo live when the decision is big.", src: "/img/screen-aicoach.jpg", alt: "The AI coach answering a pricing question with suggested actions" },
 ];
 
 /** The five reasons, each with its proof (brand book: Why RENZOLO). */
 const REASONS = [
   ["Experience", "Built by someone who has done this across Africa for 20 years.", "Lorenzo's 20+ years developing suppliers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean, and six years leading the EY Africa Enterprise Impact Program."],
-  ["Capability", "A platform and a coach, working together.", "RENZOLO OS™ (assessment, plan, dashboard, reports, AI coach) plus one-on-one coaching."],
+  ["Capability", "A platform and a coach, working together.", "RENZOLO OS™ (assessment, plan, dashboard, reports) plus your coaching team: Lorenzo · AI any time and live sessions with Lorenzo."],
   ["Value", "Know exactly where you stand for $79.", "The standalone assessment with AI market insight; membership from $15 a month, every tier priced in plain numbers below."],
   ["Solution", "One path from where you are to customer, capital and investor ready.", "Evaluate. Evolve. Execute. Elevate., a plan length you choose (90 days to 36 months) and a dashboard that tracks it."],
   ["Differentiator", "Readiness that leads somewhere.", "One Readiness Score per outcome, and introductions to buyers, lenders and investors curated by the RENZOLO team."],
@@ -37,12 +37,12 @@ const REASONS = [
 
 const TIERS: Tier[] = [
   { name: "Essentials", for: "Know where you stand and work your plan.", prices: { monthly: 15, quarterly: 45, annual: 150 }, gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools"] },
-  { name: "Growth", for: "Go deeper, with coaching to carry out your plan.", prices: { quarterly: 117, annual: 390 }, gets: ["Everything in Essentials", "Full report with valuation range and market insight", "AI coach and plan review", "Two one-on-one coaching sessions a quarter"], popular: true },
+  { name: "Growth", for: "Go deeper, with coaching to carry out your plan.", prices: { quarterly: 117, annual: 390 }, gets: ["Everything in Essentials", "Full report with valuation range and market insight", "Lorenzo · AI any time, plus plan review", "Two one-on-one coaching sessions a quarter"], popular: true },
   { name: "Elevate", for: "Hands-on support to raise, scale or win big contracts.", prices: { quarterly: 447, annual: 1490 }, gets: ["Everything in Growth", "Two one-on-one coaching sessions a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
 ];
 
 const ACADEMY = [
-  ["Launch", "8 weeks", "Self-paced for early-stage founders: all nine parts of your business model, AI coaching and one 30-minute session, ending with a written plan."],
+  ["Launch", "8 weeks", "Self-paced for early-stage founders: all nine parts of your business model, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan."],
   ["Build", "12 weeks", "For businesses with customers: traction first, then readiness for loans, grants, contracts and investors. Live group sessions and coaching."],
   ["Scale", "6 months", "Selective and hands-on: raise capital, scale or win large contracts, with curated introductions to investors, lenders and buyers."],
 ];
@@ -50,7 +50,7 @@ const ACADEMY = [
 const FAQ = [
   ["How do I pay?", "Prices are in US dollars. You pay by card or mobile money, including M-Pesa, through Flutterwave."],
   ["What does the free Snapshot give me?", "Your Venture Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back and a recommended next move, in about seven minutes, with no account needed."],
-  ["What is the difference between the $79 assessment and membership?", "The assessment gives you the full report once, with a valuation range and AI market insight. Membership adds the plan, the dashboard, your AI coach and, on Growth and Elevate, one-on-one coaching."],
+  ["What is the difference between the $79 assessment and membership?", "The assessment gives you the full report once, with a valuation range and AI market insight. Membership adds the plan, the dashboard and, on Growth and Elevate, your coaching team: Lorenzo · AI any time and live sessions with Lorenzo."],
   ["How does coaching work?", "You prepare a short brief, book a time on your coach's calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan."],
   ["Can I get a refund?", "Our refund policy sets out exactly when and how refunds apply."],
 ];

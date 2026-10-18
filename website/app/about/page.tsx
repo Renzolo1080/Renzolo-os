@@ -8,7 +8,7 @@ export const metadata = { title: "About", description: "Customer, capital and in
 const STEPS = [
   ["Evaluate", "See exactly where your business stands with the Readiness Snapshot and your full Readiness Assessment."],
   ["Evolve", "Turn the results into a growth and readiness plan, and update your strategy around the gaps that matter most."],
-  ["Execute", "Work the plan with your dashboard, goals, AI coach, tools and one-on-one coaching."],
+  ["Execute", "Work the plan with your dashboard, goals, Lorenzo · AI, tools and live coaching with Lorenzo."],
   ["Elevate", "Re-assess, measure your progress and move your business to its next stage."],
 ];
 

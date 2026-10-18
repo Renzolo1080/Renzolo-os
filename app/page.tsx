@@ -16,7 +16,7 @@ const WHY = [
   },
   {
     title: "AI and human coaching, at founder prices",
-    text: "One founder, one price in US dollars, from $15 a month. An AI coach that knows your plan, plus one-on-one coaching for the big decisions.",
+    text: "One founder, one price in US dollars, from $15 a month. Lorenzo · AI any time, built on Lorenzo's 20-year playbook, plus live sessions with Lorenzo for the big decisions.",
   },
 ];
 

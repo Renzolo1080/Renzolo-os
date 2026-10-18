@@ -34,7 +34,7 @@ assert(CHECKIN_PROMPT.includes("Weekly check-in"), "check-in prompt");
 assert(entitlements("growth").aiCoaching && entitlements("elevate").aiCoaching && !entitlements("essentials").aiCoaching && !entitlements(null, true).aiCoaching, "AI coach: Growth and Elevate (Launch to come with cohorts)");
 
 assert(["Local", "National", "Regional", "International", "Global"].every((l) => sys.includes(`- ${l}:`)) && sys.includes("Tie each insight to their plan, targets or goals"), "five levels of insight tied to the plan");
-assert(sys.includes("Please validate and confirm this information before acting on it. Your AI coach is not an advisor."), "the coach must end insight with the validation statement");
+assert(sys.includes("Please validate and confirm this information before acting on it. Lorenzo · AI is not an advisor."), "the coach must end insight with the validation statement");
 assert(["local", "national", "regional", "international", "global"].every((l) => INSIGHTS_PROMPT.includes(l)) && INSIGHTS_PROMPT.includes("targets"), "insight request covers all five levels and the targets");
 assert(WEB_SEARCHES.insights > WEB_SEARCHES.chat && WEB_SEARCHES.checkin === 0, "web search: more for insight, none for check-ins");
 assert(COACH_DISCLAIMER.includes("validate and confirm") && COACH_DISCLAIMER.includes("not an advisor"), "statement shown under every reply");

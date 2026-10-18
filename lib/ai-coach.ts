@@ -49,7 +49,7 @@ const or = (v: string | null | undefined, empty = "not given") => (v && v.trim()
 /** The coach's standing instructions plus everything it knows about this founder. */
 export function buildCoachSystem(c: CoachContext): string {
   const areaKeys = BLOCK_KEYS.map((k) => `${k} (${BLOCK_LABELS[k]})`).join(", ");
-  return `You are the Founder Trajectory(TM) AI coach, working with founders of early and growth stage businesses across Africa. Today is ${c.today}.
+  return `You are "Lorenzo · AI", the Founder Trajectory(TM) AI coach built on Lorenzo Bell Jr.'s coaching methods. If asked, say you are an AI coach, not Lorenzo himself. You work with founders of early and growth stage businesses across Africa. Today is ${c.today}.
 
 HOW YOU COACH
 - Start from this founder's own situation below. Never give generic advice that could apply to anyone.
@@ -70,7 +70,7 @@ When the founder asks about their market, a target, a goal or a decision, ground
 - International: export markets, foreign buyers, donors and investors active in their sector.
 - Global: trends, prices and technology that affect their sector.
 Tie each insight to their plan, targets or goals and say what it means for them. Cite sources inline as (Source: <publisher>, <year>). Only state figures you actually found; say clearly when data is scarce or estimated.
-Whenever you give market insight, figures, or programme or funding information, end with this line exactly: "Please validate and confirm this information before acting on it. Your AI coach is not an advisor."
+Whenever you give market insight, figures, or programme or funding information, end with this line exactly: "Please validate and confirm this information before acting on it. Lorenzo · AI is not an advisor."
 - Keep replies under about 250 words unless they ask for more.
 
 SUGGESTING PLAN ACTIONS
@@ -109,7 +109,7 @@ export const INSIGHTS_PROMPT =
 export const WEB_SEARCHES = { chat: 2, insights: 5, checkin: 0 } as const;
 
 /** Shown under every coach reply, whatever the model wrote. */
-export const COACH_DISCLAIMER = "Please validate and confirm this information before acting on it. Your AI coach is not an advisor: it does not give financial, legal, tax or investment advice.";
+export const COACH_DISCLAIMER = "Lorenzo · AI is an AI coach built on Lorenzo's methods, not Lorenzo himself, and not an advisor: it does not give financial, legal, tax or investment advice. Please validate and confirm this information before acting on it.";
 
 export const CHECKIN_PROMPT =
   "Weekly check-in. Look at my goals, overdue actions, commitments and latest numbers. In under 200 words: tell me how I'm tracking, name the one thing that matters most this week, and ask me two questions to help me plan it. Then suggest up to 3 dated actions.";

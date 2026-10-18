@@ -311,11 +311,11 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
           {ent.aiCoaching && (
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gold bg-white p-5">
               <p className="text-sm">
-                <span className="font-semibold text-navy">AI coach: </span>
-                ask anything about your plan, customers or money, and get your weekly check-in.
+                <span className="font-semibold text-navy">Lorenzo · AI: </span>
+                coaching from Lorenzo&apos;s playbook any time, built on your plan, plus your weekly check-in.
               </p>
               <a href="/ai-coach" className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
-                Talk to your coach
+                Talk to Lorenzo · AI
               </a>
             </div>
           )}
