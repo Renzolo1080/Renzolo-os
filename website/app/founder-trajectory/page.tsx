@@ -2,7 +2,8 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
 import { Faq } from "@/components/Faq";
-import { OfferTabs, PageEndCta } from "@/components/Flow";
+import { PageEndCta } from "@/components/Flow";
+import { OfferTabs } from "@/components/OfferTabs";
 
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
@@ -30,9 +31,9 @@ export default function FounderTrajectoryPage() {
             </a>
           </div>
         </PageHero>
-        <OfferTabs current="membership" />
+        <OfferTabs current="assessment" spy />
 
-        <section id="assessment" className="mx-auto max-w-6xl scroll-mt-24 px-5 py-16 md:py-24">
+        <section id="assessment" className="mx-auto max-w-6xl scroll-mt-36 px-5 py-16 md:py-24">
           <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">What the assessment looks at</h2>
           <div className="mt-10 grid gap-10 md:grid-cols-2">
             <div>
@@ -51,7 +52,7 @@ export default function FounderTrajectoryPage() {
           </div>
         </section>
 
-        <section id="membership" className="scroll-mt-24 bg-white">
+        <section id="membership" className="scroll-mt-36 bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Three levels of support</h2>
             <div className="mt-10 grid gap-6 lg:grid-cols-3">
@@ -81,7 +82,7 @@ export default function FounderTrajectoryPage() {
           </div>
         </section>
 
-        <section id="coaching" className="mx-auto max-w-6xl scroll-mt-24 px-5 pt-16 md:pt-24">
+        <section id="coaching" className="mx-auto max-w-6xl scroll-mt-36 px-5 pt-16 md:pt-24">
           <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Your coaching team</h2>
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             <div className="rounded-card border border-line bg-surface-tint p-7">

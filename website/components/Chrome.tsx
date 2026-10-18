@@ -4,7 +4,6 @@ import { APP_URL, appLink, WHATSAPP_URL } from "@/lib/site";
 /** Header links, per the brand book's page flow. */
 const NAV = [
   ["Founder Trajectory™", "/founder-trajectory/"],
-  ["RENZOLO OS™", "/#os"],
   ["Academy", "/academy/"],
   ["Pricing", "/#pricing"],
 ];
@@ -93,6 +92,7 @@ export function Footer() {
           </div>
           <div className="flex flex-col gap-2">
             <a href="/founder-trajectory/" className="hover:text-ink">Founder Trajectory™</a>
+            <a href="/#os" className="hover:text-ink">RENZOLO OS™</a>
             <a href="/academy/" className="hover:text-ink">Academy</a>
             <a href="/#pricing" className="hover:text-ink">Pricing</a>
             <a href="/about/" className="hover:text-ink">About</a>

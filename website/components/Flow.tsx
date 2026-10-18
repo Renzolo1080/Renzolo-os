@@ -21,7 +21,7 @@ export function ProofBand() {
   return (
     <section aria-label="Lorenzo's track record" className="border-y border-line bg-surface">
       <div className={`${WRAP} grid items-center gap-6 py-6 md:grid-cols-[auto_1fr_auto] md:gap-10`}>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-text md:max-w-[9rem]">Lorenzo&apos;s track record</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-text md:max-w-[11rem]">Lorenzo&apos;s track record, before RENZOLO</p>
         <ul className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4">
           {PROOF_STATS.map((p) => (
             <li key={p.figure}>
@@ -35,37 +35,6 @@ export function ProofBand() {
         </a>
       </div>
     </section>
-  );
-}
-
-/** 3. Tabs across the offer pages, so founders compare without the menu. */
-export const OFFERS = [
-  ["assessment", "Assessment", "/founder-trajectory/#assessment"],
-  ["membership", "Membership", "/founder-trajectory/#membership"],
-  ["coaching", "Coaching", "/founder-trajectory/#coaching"],
-  ["academy", "Academy", "/academy/"],
-] as const;
-
-export function OfferTabs({ current }: { current: (typeof OFFERS)[number][0] }) {
-  return (
-    <nav aria-label="Our offers" className="border-b border-line bg-surface">
-      <ul className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-3 py-2">
-        {OFFERS.map(([key, label, href]) => {
-          const on = key === current;
-          return (
-            <li key={key} className="shrink-0">
-              <a
-                href={href}
-                aria-current={on ? "page" : undefined}
-                className={`inline-flex rounded-pill px-4 py-2 text-sm font-semibold transition-colors ${on ? "bg-ink text-surface" : "text-ink-muted hover:bg-surface-tint hover:text-ink"}`}
-              >
-                {label}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
   );
 }
 

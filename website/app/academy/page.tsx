@@ -2,7 +2,8 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { InterestForm } from "@/components/Forms";
 import { appLink } from "@/lib/site";
-import { OfferTabs, PageEndCta } from "@/components/Flow";
+import { PageEndCta } from "@/components/Flow";
+import { OfferTabs } from "@/components/OfferTabs";
 
 export const metadata = { title: "Founder Trajectory™ Academy", description: "Three development levels: Launch (8 weeks), Build (12 weeks) and Scale (6 months)." };
 
