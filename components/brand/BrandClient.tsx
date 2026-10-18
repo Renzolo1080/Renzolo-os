@@ -354,7 +354,7 @@ const OUTCOME_FLIP = [
   },
 ];
 
-export function OutcomeFlipCards({ hrefFor }: { hrefFor: (key: string) => string }) {
+export function OutcomeFlipCards({ hrefs }: { hrefs: Record<string, string> }) {
   const [open, setOpen] = useState<string | null>(null);
   return (
     <div className="grid gap-6 md:grid-cols-3">
@@ -384,7 +384,7 @@ export function OutcomeFlipCards({ hrefFor }: { hrefFor: (key: string) => string
                 ))}
               </ul>
               <div className="mt-auto flex items-center justify-between gap-3">
-                <a href={hrefFor(o.key)} className="font-bold underline underline-offset-4">Start your assessment</a>
+                <a href={hrefs[o.key]} className="font-bold underline underline-offset-4">Start your assessment</a>
                 <button type="button" onClick={() => setOpen(null)} className="text-sm font-semibold underline underline-offset-4 md:hidden">Back</button>
               </div>
             </div>

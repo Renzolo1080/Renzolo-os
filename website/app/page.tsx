@@ -93,7 +93,7 @@ export default function Home() {
             <Eyebrow className="reveal">Three outcomes</Eyebrow>
             <h2 className={`reveal mt-2 max-w-3xl ${H2}`}>Pick the yes you need next.</h2>
             <div className="reveal mt-12">
-              <OutcomeFlipCards hrefFor={(k) => appLink(`/snapshot?goal=${k}`, `home_outcome_${k}`)} />
+              <OutcomeFlipCards hrefs={Object.fromEntries(["customers", "capital", "investors"].map((k) => [k, appLink(`/snapshot?goal=${k}`, `home_outcome_${k}`)]))} />
             </div>
           </div>
         </section>

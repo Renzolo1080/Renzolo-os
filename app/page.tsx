@@ -82,7 +82,7 @@ export default function HomePage() {
             <Eyebrow>Three outcomes</Eyebrow>
             <h2 className="mt-2 text-3xl font-bold text-ink sm:text-4xl">Pick the yes you need next.</h2>
             <div className="mt-10">
-              <OutcomeFlipCards hrefFor={(k) => `/snapshot?goal=${k}`} />
+              <OutcomeFlipCards hrefs={{ customers: "/snapshot?goal=customers", capital: "/snapshot?goal=capital", investors: "/snapshot?goal=investors" }} />
             </div>
           </div>
         </section>
