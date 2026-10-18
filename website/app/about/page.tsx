@@ -2,7 +2,7 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
 
-export const metadata = { title: "About", description: "RENZOLO™ gets businesses ready for customers and investors with Founder Trajectory™, powered by RENZOLO OS™." };
+export const metadata = { title: "About", description: "Customer, capital and investor readiness for founders and suppliers: Founder Trajectory™, powered by RENZOLO OS™." };
 
 /** Experience and impact: bullet points with real figures, supplied by
  * Lorenzo. The section stays hidden until this list has entries, so the
@@ -23,8 +23,8 @@ export default function AboutPage() {
       <Header campaign="about_header" />
       <main>
         <PageHero
-          title="Ready for partners, investors and customers."
-          intro="RENZOLO™ is a venture development firm. We give founders and suppliers a comprehensive view of where their business stands, help them develop a readiness and growth plan, and coach them to elevate their business to the level partners, investors and customers look for."
+          title="Customer, capital and investor readiness."
+          intro="RENZOLO™ is a venture development firm. We give founders and suppliers a comprehensive view of where their business stands, help them develop a readiness and growth plan, and coach them to reach at least one of three outcomes: win more customers, qualify for capital such as loans, credit and grants, or attract investors and partners."
         />
 
         {CREDIBILITY.length > 0 && (

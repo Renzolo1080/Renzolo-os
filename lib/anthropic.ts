@@ -42,9 +42,27 @@ export interface ReportInput {
   } | null;
   diagnostic: DiagnosticResult;
   blockNarratives: Record<string, { currentState: string; futureState: string; goalTarget: string }>;
+  /** The founder's strategic plan from the Plan Builder, as text (lib/plan.ts planAsText). */
+  planText?: string | null;
+  /** The latest AI plan review, as text (lib/plan-review.ts reviewAsText). */
+  planReviewText?: string | null;
+  /** Recommendations from the founder's latest Market Intelligence brief. */
+  marketHighlights?: string | null;
 }
 
 const orUnspecified = (v: string | null | undefined) => (v && v.trim() ? v : "not specified");
+const AREA_LABELS: Record<string, string> = {
+  customerSegments: "Customer Segments",
+  valueProposition: "Value Proposition",
+  channels: "Channels",
+  customerRelationships: "Customer Relationships",
+  revenueStreams: "Revenue Streams",
+  keyResources: "Key Resources",
+  keyActivities: "Key Activities",
+  keyPartnerships: "Key Partnerships",
+  costStructure: "Cost Structure",
+};
+const labelFor = (k: string) => AREA_LABELS[k] ?? k;
 
 export interface ReportOptions {
   /** "summary" for Essentials; "full" for Growth, Elevate and the one-time assessment. */
@@ -85,6 +103,11 @@ export function buildReportPrompt(input: ReportInput, options: ReportOptions): s
       return `- ${g.label}: score ${g.score}/100, weakest measure: ${g.weakestMeasure}${narrativeText}`;
     })
     .join("\n");
+  const gapKeys = new Set<string>(input.diagnostic.gaps.map((g) => g.block));
+  const otherAreas = Object.entries(input.blockNarratives)
+    .filter(([k, n]) => !gapKeys.has(k) && n.currentState.trim())
+    .map(([k, n]) => `- ${labelFor(k)} (score ${Math.round(Number((input.diagnostic.blockScores as any)?.[k] ?? 0))}/100): today: ${n.currentState} → wants: ${orUnspecified(n.futureState)}`)
+    .join("\n");
   const plan = input.extra?.plan;
   const planLines = plan
     ? Object.entries(PLAN_LABELS)
@@ -97,7 +120,7 @@ export function buildReportPrompt(input: ReportInput, options: ReportOptions): s
   sections.push(`## Overall Assessment
 A short overall assessment (2-3 sentences).`);
   sections.push(`## Strategic Plan Review
-${full ? "3-5 sentences" : "2-3 sentences"} on how solid the founder's strategic plan is (from the answers above) and what it most needs to cover.`);
+${input.planText ? `${full ? "4-6 sentences" : "2-3 sentences"} on the founder's actual strategic plan (given in full above${input.planReviewText ? ", with its AI review" : ""}): whether it starts from where the business is today, whether its goals are measurable and realistic, whether it tackles the weakest areas, and the most important changes to make. Build the Growth and Readiness Plan below on THEIR plan: keep its goals, owners and dates where sound, and say clearly where you change them.` : `${full ? "3-5 sentences" : "2-3 sentences"} on how solid the founder's strategic plan is (from the answers above) and what it most needs to cover. They have not built a plan in the Plan Builder yet: recommend they do.`}`);
   sections.push(`## Gap-to-Target Analysis
 For each of the three weakest blocks listed above${full ? " — reference what the founder said about their current state, future state, and goal/timeline directly, and where relevant connect it to a cited market data point from your research. Cite each source inline as (Source: <title>)." : ", one short paragraph: why it is holding the venture back and what good looks like."}`);
   if (full) {
@@ -147,7 +170,7 @@ Investor Readiness: ${input.diagnostic.subScores.investor}/100
 
 Weakest blocks (gap-to-target priorities), with what the founder said about each:
 ${gapDetail}
-
+${otherAreas ? `\nOther business areas the founder described in the full assessment:\n${otherAreas}\n` : ""}${input.planText ? `\nTHE FOUNDER'S STRATEGIC PLAN (from the Plan Builder):\n${input.planText}\n` : ""}${input.planReviewText ? `\nLatest AI review of that plan:\n${input.planReviewText}\n` : ""}${input.marketHighlights ? `\nFrom the founder's latest Market Intelligence brief:\n${input.marketHighlights}\n` : ""}
 Before writing, use web search to find ${full ? "2-4" : "1-2"} current, real, relevant data points for THIS founder specifically,
 based on their industry, business type, location, size and years in business. Only cite what you actually find; do not invent statistics.
 
@@ -159,6 +182,40 @@ ${sections.join("\n\n")}
 Make the plan and the Recommended Next Steps serve the founder's stated main goal and address their stated biggest
 challenges where the evidence supports it. Keep it direct and specific to this founder's stage, industry, business type,
 location and size — avoid generic advice that could apply to anyone.${full ? "" : " Keep the whole report concise."}`;
+}
+
+export interface WebSource {
+  title: string;
+  url: string;
+}
+
+/** One request to the AI, optionally with live web search. Returns the
+ * text and the web pages the search actually read (deduplicated). */
+export async function askClaude(prompt: string, opts: { maxTokens: number; webSearches?: number }): Promise<{ text: string; sources: WebSource[] }> {
+  const response = await getClient().messages.create({
+    model: "claude-sonnet-4-5",
+    max_tokens: opts.maxTokens,
+    ...(opts.webSearches ? { tools: [{ type: "web_search_20250305", name: "web_search", max_uses: opts.webSearches } as any] } : {}),
+    messages: [{ role: "user", content: prompt }],
+  });
+  const text = response.content
+    .filter((b: any) => b.type === "text")
+    .map((b: any) => b.text)
+    .join("");
+  return { text, sources: extractWebSources(response.content as any[]) };
+}
+
+/** The pages a web search returned, from the response's tool results. */
+export function extractWebSources(content: any[]): WebSource[] {
+  const seen = new Map<string, WebSource>();
+  for (const block of content ?? []) {
+    if (block?.type !== "web_search_tool_result" || !Array.isArray(block.content)) continue;
+    for (const r of block.content) {
+      if (r?.type !== "web_search_result" || typeof r.url !== "string" || !/^https?:\/\//.test(r.url)) continue;
+      if (!seen.has(r.url)) seen.set(r.url, { title: String(r.title ?? r.url).slice(0, 200), url: r.url });
+    }
+  }
+  return [...seen.values()].slice(0, 20);
 }
 
 /** Generates the Readiness Report from a scored assessment. This is
