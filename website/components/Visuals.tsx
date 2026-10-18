@@ -11,7 +11,7 @@ export const OUTCOMES = [
 
 /** Uppercase label above a section headline. `dark` for night bands. */
 export function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <p className={`text-[13px] font-bold uppercase leading-[18px] tracking-[0.08em] text-brand-text ${className}`}>{children}</p>;
+  return <p className={`eyebrow text-[13px] font-bold uppercase leading-[18px] tracking-[0.08em] text-brand-text ${className}`}>{children}</p>;
 }
 
 /** Pill button with the playful offset shadow (primary / secondary) or a link. */
@@ -33,12 +33,12 @@ export function Button({
       </a>
     );
   }
-  const fill = variant === "primary" ? "bg-brand text-on-brand" : "bg-surface-raised text-ink";
+  const look =
+    variant === "primary"
+      ? "btn-pop border-2 border-ink bg-brand text-on-brand"
+      : "border-[1.5px] border-ink/35 bg-transparent text-ink transition-colors hover:border-ink hover:bg-surface-raised";
   return (
-    <a
-      href={href}
-      className={`btn-pop inline-flex items-center justify-center gap-2 rounded-pill border-2 border-ink px-6 py-3 text-base font-semibold ${fill} ${className}`}
-    >
+    <a href={href} className={`inline-flex items-center justify-center gap-2 rounded-pill px-6 py-3 text-base font-semibold ${look} ${className}`}>
       {children}
     </a>
   );
@@ -66,13 +66,14 @@ export function DotGrid() {
   );
 }
 
-/** The hero motif: staggered brand / gold / teal blocks rising left to right. */
+/** The hero motif: full-colour brand / gold / teal blocks, kept low behind
+ * the score card; they step up when hovered. */
 export function TrajectoryBlocks({ className = "" }: { className?: string }) {
   return (
-    <div aria-hidden="true" className={`pointer-events-none flex items-end gap-3 ${className}`}>
-      <span className="rise-block block h-24 w-1/3 rounded-panel bg-brand" style={{ animationDelay: "0.35s" }} />
-      <span className="rise-block block h-40 w-1/3 rounded-panel bg-gold" style={{ animationDelay: "0.45s" }} />
-      <span className="rise-block block h-56 w-1/3 rounded-panel bg-teal" style={{ animationDelay: "0.55s" }} />
+    <div aria-hidden="true" className={`blocks flex items-end gap-3 ${className}`}>
+      <span className="blk rise-block block h-14 w-1/3 rounded-[20px] bg-brand" style={{ animationDelay: "0.35s" }} />
+      <span className="blk rise-block block h-[92px] w-1/3 rounded-[20px] bg-gold" style={{ animationDelay: "0.45s" }} />
+      <span className="blk rise-block block h-32 w-1/3 rounded-[20px] bg-teal" style={{ animationDelay: "0.55s" }} />
     </div>
   );
 }

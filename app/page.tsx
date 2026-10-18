@@ -1,7 +1,7 @@
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { QUICK_QUESTIONS, STAGES } from "@/lib/quickcheck";
-import { Button, Eyebrow, Glow, OutcomeCards, TrajectoryBlocks } from "@/components/brand/Visuals";
-import { ReadinessTicker } from "@/components/brand/BrandClient";
+import { Button, Eyebrow, Glow, TrajectoryBlocks } from "@/components/brand/Visuals";
+import { OutcomeFlipCards, ReadinessTicker } from "@/components/brand/BrandClient";
 
 /** Why founders choose RENZOLO (brand book: never name competitors; contrast
  * with categories and show the proof). */
@@ -68,9 +68,9 @@ export default function HomePage() {
               </p>
             </div>
             <div className="relative">
-              <TrajectoryBlocks className="absolute -bottom-6 left-6 right-6 opacity-90" />
+              <TrajectoryBlocks className="absolute -bottom-6 left-6 right-6" />
               <div className="float-in relative mx-auto max-w-[420px]">
-                <ReadinessTicker />
+                <ReadinessTicker className="tilt" />
               </div>
             </div>
           </div>
@@ -82,7 +82,7 @@ export default function HomePage() {
             <Eyebrow>Three outcomes</Eyebrow>
             <h2 className="mt-2 text-3xl font-bold text-ink sm:text-4xl">Pick the yes you need next.</h2>
             <div className="mt-10">
-              <OutcomeCards hrefFor={(k) => `/snapshot?goal=${k}`} />
+              <OutcomeFlipCards hrefFor={(k) => `/snapshot?goal=${k}`} />
             </div>
           </div>
         </section>

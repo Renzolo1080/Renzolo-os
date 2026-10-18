@@ -43,7 +43,7 @@ export function ReadinessTicker({ className = "" }: { className?: string }) {
   const mx = Math.max(...p) + 0.5;
   const d = p.map((v, i) => `${i ? "L" : "M"}${((i * 300) / (p.length - 1)).toFixed(1)} ${(68 - ((v - mn) / (mx - mn)) * 62).toFixed(1)}`).join("");
   return (
-    <section aria-label="Readiness Score, sample data" className={`rounded-panel border border-line bg-surface-raised p-6 shadow-glow ${className}`}>
+    <section aria-label="Readiness Score, sample data" className={`rounded-panel border border-line bg-surface-raised p-6 shadow-soft ${className}`}>
       <div className="flex items-center justify-between text-[13px] font-semibold text-ink-muted">
         <span className="inline-flex items-center gap-2 text-ink">
           <span aria-hidden="true" className="live-dot h-2 w-2 rounded-pill bg-teal" />
@@ -274,7 +274,7 @@ export function PricingTable({ tiers, appUrl }: { tiers: Tier[]; appUrl: string 
               </ul>
               <a
                 href={`${appUrl}/pricing?tier=${t.name.toLowerCase()}&interval=${price ? iv : fallback}&utm_source=website&utm_medium=referral&utm_campaign=home_pricing`}
-                className={`btn-pop mt-8 inline-flex justify-center rounded-pill border-2 border-ink px-6 py-3 font-semibold ${t.popular ? "bg-brand text-on-brand" : "bg-surface-raised text-ink"}`}
+                className={`mt-8 inline-flex justify-center rounded-pill px-6 py-3 font-semibold ${t.popular ? "btn-pop border-2 border-ink bg-brand text-on-brand" : "border-[1.5px] border-ink/35 text-ink transition-colors hover:border-ink hover:bg-surface"}`}
               >
                 Choose {t.name}
               </a>
@@ -330,4 +330,67 @@ export function RevealOnScroll() {
     return () => io.disconnect();
   }, []);
   return null;
+}
+
+/* ---------- Outcome cards that flip (hover on desktop, tap on phones) ---------- */
+const OUTCOME_FLIP = [
+  {
+    key: "customers", num: "01", label: "Customers", title: "Win more customers", text: "Get ready for buyers, tenders and supplier programmes.",
+    tile: "bg-brand text-on-brand", back: "bg-brand text-on-brand", backTitle: "Your path to buyer-ready",
+    gets: ["Your Customer readiness score", "A plan for the gaps buyers check", "Coaching for your next big contract"],
+    icon: <path d="M3 9h18l-1.5 11h-15zM8 9V6a4 4 0 0 1 8 0v3" />,
+  },
+  {
+    key: "capital", num: "02", label: "Capital", title: "Access credit and grants", text: "Get your plan, numbers and records lender-ready.",
+    tile: "bg-gold text-on-gold", back: "bg-gold text-on-gold", backTitle: "Lender-ready numbers",
+    gets: ["Your Venture and plan readiness scores", "Cash flow, records and plan gaps named", "Market Intelligence for your country"],
+    icon: <path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18" />,
+  },
+  {
+    key: "investors", num: "03", label: "Investors", title: "Attract investment", text: "Show investors and partners a business ready to grow.",
+    tile: "bg-teal text-on-teal", back: "bg-teal text-on-teal", backTitle: "Investor-ready story",
+    gets: ["Your Investor readiness score", "Valuation range and market insight", "Pitch and investor readiness review"],
+    icon: <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />,
+  },
+];
+
+export function OutcomeFlipCards({ hrefFor }: { hrefFor: (key: string) => string }) {
+  const [open, setOpen] = useState<string | null>(null);
+  return (
+    <div className="grid gap-6 md:grid-cols-3">
+      {OUTCOME_FLIP.map((o) => (
+        <div key={o.key} className="flip h-[300px]">
+          <div className="flip-inner" aria-pressed={open === o.key}>
+            <button
+              type="button"
+              onClick={() => setOpen(open === o.key ? null : o.key)}
+              aria-label={`${o.label}: see what you get`}
+              className="flip-face flex flex-col gap-2 rounded-card border border-line bg-surface-raised p-7 text-left shadow-card"
+            >
+              <span className={`flex h-12 w-12 items-center justify-center rounded-card ${o.tile}`}>
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{o.icon}</svg>
+              </span>
+              <span className="mt-2 text-[13px] font-bold uppercase tracking-[0.08em] text-brand-text">{o.label}</span>
+              <span className="font-display text-[22px] font-bold leading-7 text-ink">{o.title}</span>
+              <span className="text-ink-muted">{o.text}</span>
+              <span className="mt-auto text-[13px] font-semibold text-teal-text">Hover or tap to see what you get</span>
+            </button>
+            <div className={`flip-face flip-back flex flex-col gap-2 rounded-card p-7 ${o.back}`}>
+              <span className="text-[13px] font-bold uppercase tracking-[0.08em]">What you get</span>
+              <span className="font-display text-[22px] font-bold leading-7">{o.backTitle}</span>
+              <ul className="mt-1 space-y-1">
+                {o.gets.map((g) => (
+                  <li key={g}>✓ {g}</li>
+                ))}
+              </ul>
+              <div className="mt-auto flex items-center justify-between gap-3">
+                <a href={hrefFor(o.key)} className="font-bold underline underline-offset-4">Start your assessment</a>
+                <button type="button" onClick={() => setOpen(null)} className="text-sm font-semibold underline underline-offset-4 md:hidden">Back</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }

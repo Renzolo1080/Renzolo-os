@@ -27,7 +27,7 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
             Log in
           </a>
         </nav>
-        <a href={appLink("/snapshot", campaign)} className="btn-pop rounded-pill border-2 border-ink bg-brand px-5 py-2 text-sm font-semibold text-on-brand">
+        <a href={appLink("/snapshot", campaign)} className="rounded-pill bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-colors hover:bg-ink/85">
           Start your assessment
         </a>
       </div>

@@ -1,6 +1,6 @@
 import { Header, Footer } from "@/components/Chrome";
-import { OsStory, PricingTable, ReadinessTicker, RevealOnScroll, SnapshotTaster, StickyMobileCta, type Tier } from "@/components/BrandClient";
-import { Button, DotGrid, Eyebrow, Glow, OutcomeCards, Portrait, TrajectoryBlocks } from "@/components/Visuals";
+import { OsStory, OutcomeFlipCards, PricingTable, ReadinessTicker, RevealOnScroll, SnapshotTaster, StickyMobileCta, type Tier } from "@/components/BrandClient";
+import { Button, DotGrid, Eyebrow, Glow, Portrait, TrajectoryBlocks } from "@/components/Visuals";
 import { AFFILIATION_NOTE, FOUNDER, RESULTS, TESTIMONIALS } from "@/lib/story";
 import { APP_URL, appLink } from "@/lib/site";
 
@@ -79,9 +79,9 @@ export default function Home() {
               </div>
             </div>
             <div className="relative">
-              <TrajectoryBlocks className="absolute -bottom-6 left-6 right-6 opacity-90" />
+              <TrajectoryBlocks className="absolute -bottom-6 left-6 right-6" />
               <div className="float-in relative mx-auto max-w-[420px]">
-                <ReadinessTicker />
+                <ReadinessTicker className="tilt" />
               </div>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function Home() {
             <Eyebrow className="reveal">Three outcomes</Eyebrow>
             <h2 className={`reveal mt-2 max-w-3xl ${H2}`}>Pick the yes you need next.</h2>
             <div className="reveal mt-12">
-              <OutcomeCards hrefFor={(k) => appLink(`/snapshot?goal=${k}`, `home_outcome_${k}`)} />
+              <OutcomeFlipCards hrefFor={(k) => appLink(`/snapshot?goal=${k}`, `home_outcome_${k}`)} />
             </div>
           </div>
         </section>
@@ -306,7 +306,7 @@ export default function Home() {
         <section className={`${WRAP} py-16 md:py-24`}>
           <div className="reveal flex flex-col gap-6 rounded-panel bg-brand p-8 text-on-brand md:flex-row md:items-center md:justify-between md:p-12">
             <p className={`max-w-2xl ${H2}`}>Know where you stand in seven minutes.</p>
-            <a href={appLink("/snapshot", "home_final_cta")} className="btn-pop inline-flex shrink-0 justify-center rounded-pill border-2 border-ink bg-surface-raised px-6 py-3 font-semibold text-ink">
+            <a href={appLink("/snapshot", "home_final_cta")} className="inline-flex shrink-0 justify-center rounded-pill bg-ink px-6 py-3 font-semibold text-surface transition-colors hover:bg-ink/85">
               Start your assessment
             </a>
           </div>
