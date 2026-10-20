@@ -1,6 +1,17 @@
 -- RENZOLO OS™ — Phase 1 Launch MVP schema
 -- Run this in the Supabase SQL editor for a new project.
 
+-- Table access for the API roles, stated explicitly.
+-- From 30 Oct 2026 Supabase no longer grants anon, authenticated and
+-- service_role access to new tables in "public" automatically. This script
+-- was written and tested against the old behaviour: the API roles hold
+-- table privileges, and row level security plus the explicit revokes below
+-- decide what each role can actually do. These lines keep that model for
+-- every table this script creates; the last lines of the file switch the
+-- automatic grants off again, so tables added later by migrations must
+-- grant access themselves (see supabase/migrations/README.md).
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+
 create type user_role as enum ('founder', 'advisor', 'admin');
 create type assessment_status as enum ('in_progress', 'submitted', 'scored', 'reviewed');
 create type subscription_status as enum ('none', 'active', 'past_due', 'canceled');
@@ -1300,3 +1311,7 @@ exception when duplicate_object then null; end $$;
 
 -- A record of agreement must not change after the fact.
 revoke update, delete on acknowledgments from authenticated, anon;
+
+-- End of the tables this script creates: from here on, new tables in
+-- "public" get no automatic access (Supabase's behaviour from 30 Oct 2026).
+alter default privileges in schema public revoke all on tables from anon, authenticated, service_role;
