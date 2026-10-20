@@ -47,7 +47,11 @@ const J = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"; // founder referred by H
 
 type Result = { ok: true; rows: any[]; n: number } | { ok: false; err: string; rows: any[]; n: number };
 
-async function suite(label: string, files: string[]) {
+/** Marker for the file lists below: from this point on, behave like Supabase
+ * after 30 Oct 2026 — new tables in "public" get no automatic grants. */
+const OCT30 = "@supabase-stops-automatic-table-grants";
+
+async function suite(label: string, files: string[], opts: { automaticTableGrants?: boolean } = {}) {
   console.log(`\n===== ${label} =====`);
   const db = new PGlite();
 
@@ -62,10 +66,23 @@ async function suite(label: string, files: string[]) {
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
     grant usage on schema auth to authenticated, anon, service_role;
     grant usage on schema public to authenticated, anon, service_role;
-    alter default privileges in schema public grant all on tables to authenticated, anon, service_role;
     alter default privileges in schema public grant execute on functions to authenticated, anon, service_role;
   `);
-  for (const f of files) await db.exec(sql(f));
+  const stopAutomaticGrants = `alter default privileges in schema public revoke all on tables from authenticated, anon, service_role;`;
+  await db.exec(
+    opts.automaticTableGrants === false
+      ? stopAutomaticGrants
+      : `alter default privileges in schema public grant all on tables to authenticated, anon, service_role;`,
+  );
+  for (const f of files) await db.exec(f === OCT30 ? stopAutomaticGrants : sql(f));
+
+  // After the files run, no table in "public" may be left without grants
+  // for the server role: that is the "permission denied" Supabase warns about.
+  const ungranted = (
+    await db.query<{ t: string }>(`select c.relname as t from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'public' and c.relkind = 'r' and not has_table_privilege('service_role', c.oid, 'select')`)
+  ).rows.map((r) => r.t);
+  assert(ungranted.length === 0, "every table in public has explicit grants for the API", ungranted);
 
   await db.exec(`
     insert into auth.users values
@@ -713,6 +730,9 @@ async function suite(label: string, files: string[]) {
 
 async function main() {
   await suite("Fresh install: supabase/schema.sql", ["supabase/schema.sql"]);
+  await suite("Fresh install after 30 Oct 2026 (no automatic table grants): supabase/schema.sql", ["supabase/schema.sql"], {
+    automaticTableGrants: false,
+  });
   await suite("Upgrade: schema before 2026-10-08 + migrations (each applied twice)", [
     "test/fixtures/schema-before-2026-10-08.sql",
     "supabase/migrations/2026-10-08_fix_access_rules.sql",
@@ -745,6 +765,7 @@ async function main() {
     "supabase/migrations/2026-10-16_function_privileges.sql",
     "supabase/migrations/2026-10-16_acknowledgments.sql",
     "supabase/migrations/2026-10-16_acknowledgments.sql",
+    OCT30, // guide_leads is created after Supabase's change
     "supabase/migrations/2026-10-20_guide_leads.sql",
     "supabase/migrations/2026-10-20_guide_leads.sql",
   ]);

@@ -16,4 +16,9 @@ alter table guide_leads enable row level security;
 do $$ begin
   create policy "guide_leads: staff read" on guide_leads for select using (is_staff());
 exception when duplicate_object then null; end $$;
+-- Explicit grants (Supabase stops adding them automatically on 30 Oct 2026):
+-- the server writes, signed-in staff read (the policy above), visitors get nothing.
+grant select, insert, update, delete on guide_leads to service_role;
+grant select on guide_leads to authenticated;
+revoke all on guide_leads from anon;
 revoke insert, update, delete on guide_leads from anon, authenticated;
