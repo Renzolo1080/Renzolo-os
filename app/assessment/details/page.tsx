@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { loadMembership } from "@/lib/membership-server";
 import { entitlements } from "@/lib/membership";
 import { BLOCK_PROMPTS, MEASURE_CHOICES, areasWeakestFirst, levelFor } from "@/lib/blocks";
-import { DETAIL_AREAS_REQUIRED, TIME_HORIZONS } from "@/lib/quickcheck";
+import { DETAIL_AREAS_REQUIRED, TIME_HORIZONS, normalizeHorizon } from "@/lib/quickcheck";
 import { DetailForm, type DetailArea } from "@/components/DetailForm";
 import type { MeasureKey } from "@/components/BlockStep";
 
@@ -91,8 +91,5 @@ export default async function DetailsPage() {
 }
 
 function initialPlanLength(a: any): string {
-  const list = TIME_HORIZONS as readonly string[];
-  if (typeof a?.extra?.planLength === "string" && list.includes(a.extra.planLength)) return a.extra.planLength;
-  if (typeof a?.time_horizon === "string" && list.includes(a.time_horizon)) return a.time_horizon;
-  return "12 months";
+  return normalizeHorizon(a?.extra?.planLength) ?? normalizeHorizon(a?.time_horizon) ?? "12 months";
 }

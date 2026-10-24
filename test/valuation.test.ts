@@ -1,3 +1,4 @@
+import { REVENUE_BANDS } from "../lib/quickcheck";
 import { computeValuation, revenueBucketMidpoint, BLOCK_KEYS } from "../lib/valuation";
 import type { BlockKey } from "../lib/scoring";
 
@@ -44,5 +45,9 @@ assert(strong.low > weak.low && strong.high > weak.high, "stronger BMC scores pr
 assert(revenueBucketMidpoint("Pre-revenue") === 0, "Pre-revenue bucket midpoint is 0");
 assert(revenueBucketMidpoint(undefined) === 0, "missing bucket defaults to 0");
 assert(revenueBucketMidpoint("$1M+") > 0, "$1M+ bucket has a positive representative midpoint");
+{
+  for (const b of REVENUE_BANDS) if (b !== "Pre-revenue") assert(revenueBucketMidpoint(b) > 0, `${b} has a midpoint`);
+  assert(revenueBucketMidpoint("$1M-$5M") < revenueBucketMidpoint("$5M-$10M") && revenueBucketMidpoint("$10M-$50M") < revenueBucketMidpoint("$50M-$100M+"), "midpoints rise with the band");
+}
 
 console.log("\nSample valuation (revenue venture):", JSON.stringify(revenueVenture, null, 2));

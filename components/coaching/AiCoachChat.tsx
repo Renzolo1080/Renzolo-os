@@ -201,7 +201,7 @@ export function AiCoachChat({
           </button>
         </div>
         <p className="mt-2 text-xs text-ink-soft">
-          {remaining} message{remaining === 1 ? "" : "s"} left today. {COACH_DISCLAIMER} For big decisions, book a live session with Lorenzo.
+          {remaining} message{remaining === 1 ? "" : "s"} left today. {COACH_DISCLAIMER} For big decisions, book a live session with a Founder Coach.
         </p>
       </form>
     </div>

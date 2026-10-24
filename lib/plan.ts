@@ -1,5 +1,5 @@
 import { BLOCK_KEYS, BLOCK_LABELS, type BlockKey } from "./scoring";
-import { TIME_HORIZONS } from "./quickcheck";
+import { normalizeHorizon } from "./quickcheck";
 
 /** The strategic plan a founder builds in the guided Plan Builder.
  *
@@ -152,7 +152,7 @@ export function sanitizePlan(raw: unknown): StrategicPlan {
   plan.vision = {
     current: str(r.vision?.current, 1500),
     desired: str(r.vision?.desired, 1500),
-    horizon: oneOf(r.vision?.horizon, TIME_HORIZONS as readonly string[], "12 months"),
+    horizon: normalizeHorizon(r.vision?.horizon) ?? "12 months",
   };
   plan.goals = arr(r.goals)
     .slice(0, MAX_GOALS)
@@ -215,7 +215,8 @@ export function planFromAssessment(input: {
   gapKeys: string[];
 }): StrategicPlan {
   const plan = emptyPlan();
-  if (input.planLength && (TIME_HORIZONS as readonly string[]).includes(input.planLength)) plan.vision.horizon = input.planLength;
+  const len = normalizeHorizon(input.planLength);
+  if (len) plan.vision.horizon = len;
   const keys = new Set<string>(input.gapKeys.slice(0, 3));
   for (const b of input.blocks) if ((b.current_state ?? "").trim()) keys.add(b.block_key);
   for (const key of BLOCK_KEYS) {

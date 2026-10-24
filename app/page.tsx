@@ -1,6 +1,6 @@
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { QUICK_QUESTIONS, STAGES } from "@/lib/quickcheck";
-import { Button, Eyebrow, Glow, TrajectoryBlocks } from "@/components/brand/Visuals";
+import { Button, Eyebrow, Glow } from "@/components/brand/Visuals";
 import { OutcomeFlipCards, ReadinessTicker } from "@/components/brand/BrandClient";
 
 /** Why founders choose RENZOLO (brand book: never name competitors; contrast
@@ -16,7 +16,7 @@ const WHY = [
   },
   {
     title: "AI and human coaching, at founder prices",
-    text: "One founder, one price in US dollars, from $15 a month. Lorenzo · AI any time, built on Lorenzo's 20-year playbook, plus live sessions with Lorenzo for the big decisions.",
+    text: "One founder, one price in US dollars, from $15 a month. Lorenzo · AI any time, built on Lorenzo's 20-year playbook, plus live sessions with a Founder Coach for the big decisions.",
   },
 ];
 
@@ -68,9 +68,8 @@ export default function HomePage() {
               </p>
             </div>
             <div className="relative">
-              <TrajectoryBlocks className="absolute -bottom-6 left-6 right-6" />
               <div className="float-in relative mx-auto max-w-[420px]">
-                <ReadinessTicker className="tilt" />
+                <ReadinessTicker className="card-pulse" />
               </div>
             </div>
           </div>

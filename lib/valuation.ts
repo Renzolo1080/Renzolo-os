@@ -44,7 +44,7 @@ export interface ValuationResult {
 
 /** Representative midpoint (USD) for each annual-revenue bucket offered
  * in app/assessment/page.tsx. Approved for launch (see file header); a
- * deliberately rough figure, especially for the open-ended "$1M+"
+ * deliberately rough figure, especially for the open-ended top
  * bucket, and still open to revision as real data comes in. */
 const REVENUE_BUCKET_MIDPOINT: Record<string, number> = {
   "Pre-revenue": 0,
@@ -52,6 +52,11 @@ const REVENUE_BUCKET_MIDPOINT: Record<string, number> = {
   "$10k-$50k": 30_000,
   "$50k-$250k": 150_000,
   "$250k-$1M": 625_000,
+  "$1M-$5M": 3_000_000,
+  "$5M-$10M": 7_500_000,
+  "$10M-$50M": 30_000_000,
+  "$50M-$100M+": 75_000_000,
+  // Older answers, from before the $1M+ band was split (October 2026).
   "$1M+": 1_500_000,
 };
 

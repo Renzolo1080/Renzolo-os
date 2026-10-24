@@ -1,3 +1,5 @@
+import * as QC from "../lib/quickcheck";
+import { COUNTRIES as site } from "../website/lib/countries";
 import { BLOCK_KEYS, runDiagnostic } from "../lib/scoring";
 import {
   QUICK_QUESTIONS,
@@ -35,7 +37,7 @@ const goodProfile = {
   annualRevenue: "$10k-$50k",
   primaryGoal: "Grow revenue",
   timeHorizon: "12 months",
-  fundingNeed: "Yes, $10k-$50k",
+  fundingNeed: "Yes",
   registration: "Registered and tax compliant",
   challenges: ["Cash flow"],
   heardFrom: "WhatsApp",
@@ -150,3 +152,14 @@ assert(ct.ok && ct.value.email === "ama@example.com" && ct.value.fullName === "A
 import { snapshotRecommendation } from "../lib/quickcheck";
 const rec = snapshotRecommendation({ planScore: 20, weakest: ["Channels"], primaryGoal: "Get my first paying customers", challenges: [] });
 assert(rec.includes("get your first paying customers") && !/\bmy\b/.test(rec), "the recommendation speaks to the founder ('your', not 'my')");
+
+{
+  assert(QC.normalizeHorizon("90 days") === "3 months" && QC.normalizeHorizon("6 months") === "6 months" && QC.normalizeHorizon("2 weeks") === null, "old \"90 days\" answers read as 3 months");
+  assert(QC.TIME_HORIZONS[0] === "3 months" && QC.FUNDING_NEEDS.join("|") === "Yes|No", "Snapshot timeframe and funding choices");
+  assert(QC.COUNTRIES.length > 190 && new Set(QC.COUNTRIES).size === QC.COUNTRIES.length && QC.COUNTRIES.includes("Côte d'Ivoire" as any), "every country, no repeats");
+  const old = QC.parseProfile({ ...goodProfile, timeHorizon: "90 days", fundingNeed: "Yes, $10k-$50k", annualRevenue: "$1M+", country: "Other African country" });
+  assert(old.ok && old.value.timeHorizon === "3 months" && old.value.fundingNeed === "Yes" && old.value.annualRevenue === "$1M+" && old.value.country === "Other African country", "a Snapshot saved before the changes still reads");
+  const keys = QC.QUICK_QUESTIONS.map((q) => q.key);
+  assert(keys.indexOf("costStructure") === 7 && keys.indexOf("keyPartnerships") === 8, "question 8 is costs, 9 is partners");
+  assert(site.join("|") === QC.COUNTRIES.join("|"), "the website's country list matches the app's");
+}

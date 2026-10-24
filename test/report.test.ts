@@ -33,7 +33,7 @@ for (const p of [summary, full]) {
 assert(full.includes("## Recommended Membership") && full.includes("$39/month") && !summary.includes("## Recommended Membership"), "tier recommendation only when asked for (the one-time assessment)");
 assert(full.includes("covering 36 months") && summary.includes("covering 6 months"), "the plan length the founder chose is used");
 assert(full.includes("Owusu Farms") && full.includes("Strategic Plan Readiness 30/100") && full.includes("Written but out of date") === false && full.includes("mostly in the founder's head"), "company and strategic plan answers reach the prompt");
-assert(planPhasing("90 days").includes("whole plan"), "90-day plan: all detail");
+assert(planPhasing("3 months").includes("whole plan") && planPhasing("90 days").includes("whole plan"), "3-month plan (and the old 90 days): all detail");
 assert(planPhasing("12 months").includes("quarterly"), "12-month plan: quarterly milestones after 90 days");
 assert(planPhasing("36 months").includes("6-month milestones up to month 36"), "36-month plan: quarterly to month 12, then 6-month milestones");
 assert(extractNextSteps("## Growth and Readiness Plan\n### First 90 days\n- Month 1 thing\n## Recommended Next Steps\n- Do A\n- Do B\n## Recommended Membership\nGrowth") .join("|") === "Do A|Do B", "next steps are still parsed with the new sections around them");

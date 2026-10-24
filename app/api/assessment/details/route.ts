@@ -3,7 +3,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { runDiagnostic, BLOCK_KEYS, MEASURE_KEYS, type AllBlockScores, type BlockKey, type BlockMeasureScores } from "@/lib/scoring";
 import { computeValuation } from "@/lib/valuation";
 import { loadMembership } from "@/lib/membership-server";
-import { TIME_HORIZONS, DETAIL_AREAS_REQUIRED } from "@/lib/quickcheck";
+import { normalizeHorizon, DETAIL_AREAS_REQUIRED } from "@/lib/quickcheck";
 import { MEASURE_LEVELS } from "@/lib/blocks";
 
 const clampScore = (v: unknown) => {
@@ -45,9 +45,10 @@ export async function POST(req: NextRequest) {
   const { data: assessment } = await supabase.from("assessments").select("id, annual_revenue, extra").eq("id", assessmentId).maybeSingle();
   if (!assessment) return NextResponse.json({ error: "Assessment not found" }, { status: 404 });
 
-  // How far ahead the growth and readiness plan should go (90 days to 36 months).
-  if (typeof body.planLength === "string" && (TIME_HORIZONS as readonly string[]).includes(body.planLength)) {
-    const extra = { ...((assessment as any).extra ?? {}), planLength: body.planLength };
+  // How far ahead the growth and readiness plan should go (3 to 36 months).
+  const planLength = normalizeHorizon(body.planLength);
+  if (planLength) {
+    const extra = { ...((assessment as any).extra ?? {}), planLength };
     await supabase.from("assessments").update({ extra }).eq("id", assessment.id);
   }
 

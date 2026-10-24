@@ -25,4 +25,8 @@ assert(isAfricanCountry(undefined) === true, "undefined country defaults to true
 assert(isAfricanCountry("") === true, "empty string defaults to true");
 assert(isAfricanCountry("   ") === true, "whitespace-only string defaults to true");
 
+assert(isAfricanCountry("Papua New Guinea") === false, "Papua New Guinea is not African (despite containing 'guinea')");
+assert(isAfricanCountry("São Tomé and Príncipe") === true, "accented names still match");
+assert(isAfricanCountry("Guinea") === true && isAfricanCountry("Equatorial Guinea") === true, "the Guineas still match");
+
 console.log("\nAll geo (African-market detection) tests completed.");

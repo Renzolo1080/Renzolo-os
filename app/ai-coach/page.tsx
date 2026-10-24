@@ -72,7 +72,7 @@ export default async function AiCoachPage({ searchParams: searchParamsPromise }:
         ← Back to dashboard
       </a>
       <h1 className="mt-3 text-3xl font-bold text-navy">Your coaching team</h1>
-      <p className="mt-1 max-w-2xl text-ink-soft"><strong className="text-navy">Lorenzo · AI</strong> coaches you any time from Lorenzo&apos;s 20-year playbook. It knows your assessment, plan, goals and monthly numbers, and brings local to global insight for your market. When the decision is big, <a href="/coaching" className="font-semibold text-teal underline">book a live session with Lorenzo</a>.</p>
+      <p className="mt-1 max-w-2xl text-ink-soft"><strong className="text-navy">Lorenzo · AI</strong> coaches you any time from Lorenzo&apos;s 20-year playbook. It knows your assessment, plan, goals and monthly numbers, and brings local to global insight for your market. When the decision is big, <a href="/coaching" className="font-semibold text-teal underline">book a live session with a Founder Coach</a>.</p>
       {clone.enabled && (
         <div className="mt-6">
           <LorenzoAiPanel left={cloneLeft} limit={cloneLimit} minutes={SESSION_SECONDS / 60} />
