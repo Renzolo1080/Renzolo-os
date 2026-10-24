@@ -60,7 +60,7 @@ export function LorenzoAiPanel({ left, limit, minutes }: { left: number; limit: 
           <div className="flex flex-wrap items-center justify-between gap-3 px-2 pt-3 text-sm">
             <p className="text-cream/80">Captions are on. You&apos;re talking to an AI, not Lorenzo.</p>
             <div className="flex gap-4">
-              <a href="/coaching" className="font-semibold text-gold underline underline-offset-4">Talk to the real Lorenzo</a>
+              <a href="/coaching" className="font-semibold text-gold underline underline-offset-4">Talk to a Founder Coach</a>
               <button type="button" onClick={() => setUrl(null)} className="font-semibold text-white underline underline-offset-4">
                 End session
               </button>
@@ -90,7 +90,7 @@ export function LorenzoAiPanel({ left, limit, minutes }: { left: number; limit: 
             >
               {busy ? "Starting…" : remaining <= 0 ? "No video sessions left this month" : "Start a video session"}
             </button>
-            <a href="/coaching" className="text-sm font-semibold text-gold underline underline-offset-4">Talk to the real Lorenzo instead</a>
+            <a href="/coaching" className="text-sm font-semibold text-gold underline underline-offset-4">Talk to a Founder Coach instead</a>
           </div>
           <p className="mt-3 text-xs text-cream/70">Uses your camera and microphone. On a slow or costly connection, use text coaching below instead.</p>
           {error && (

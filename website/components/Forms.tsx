@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { APP_URL } from "@/lib/site";
+import { COUNTRIES } from "@/lib/countries";
 
 const field = "w-full rounded-xl border border-mist bg-white px-4 py-3 text-ink focus:border-navy focus:outline-none";
 const STAGES = [
@@ -130,7 +131,6 @@ export function ContactForm() {
 
 /** 2. The free Founder Trajectory(TM) Method guide: name, email and consent,
  * then the download. Posts to the app's /api/guide. */
-const GUIDE_COUNTRIES = ["Kenya", "South Africa", "Nigeria", "Ghana", "Uganda", "Rwanda", "Tanzania", "Ethiopia", "Zambia", "Zimbabwe", "Botswana", "Egypt", "Morocco", "Senegal", "Côte d'Ivoire", "Other African country", "United States", "United Kingdom"];
 export function GuideForm({ source = "website", pdf = "/guides/founder-trajectory-method.pdf" }: { source?: string; pdf?: string }) {
   const { state, error, onSubmit } = useSend("/api/guide");
   if (state === "sent")
@@ -156,7 +156,7 @@ export function GuideForm({ source = "website", pdf = "/guides/founder-trajector
           Country
           <select name="country" className={field} defaultValue="">
             <option value="">Choose…</option>
-            {GUIDE_COUNTRIES.map((c) => (
+            {COUNTRIES.map((c) => (
               <option key={c}>{c}</option>
             ))}
           </select>

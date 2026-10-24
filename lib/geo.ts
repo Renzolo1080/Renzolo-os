@@ -41,7 +41,10 @@ const AFRICAN_COUNTRIES = [
  * if/when the product expands to serve non-African founders too. */
 export function isAfricanCountry(country: string | null | undefined): boolean {
   if (!country || country.trim().length === 0) return true;
-  const normalized = country.trim().toLowerCase();
+  // Accents dropped so "São Tomé and Príncipe" matches; "Papua New Guinea"
+  // contains "guinea" but is in Oceania.
+  const normalized = country.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (normalized.includes("papua")) return false;
   return AFRICAN_COUNTRIES.some((name) => normalized === name || normalized.includes(name));
 }
 

@@ -32,16 +32,20 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
 .btn-pop:active { transform: translateY(1px); box-shadow: none; }
 .card-pop { box-shadow: var(--shadow-card); transition: transform 200ms ease-out, box-shadow 200ms ease-out; }
 .card-pop:hover { transform: translateY(-3px); box-shadow: var(--shadow-card-hover); }
-/* Signature motion, used sparingly: outcome cards flip, the hero score card
-   tilts, the hero blocks rise. Nothing moves on its own. */
+/* Signature motion, used sparingly: outcome cards flip slowly and the hero
+   score card pulses gently on hover. Nothing moves on its own. */
 .flip { perspective: 1200px; }
-.flip-inner { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 600ms cubic-bezier(.2,.7,.2,1); }
+.flip-inner { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 1100ms cubic-bezier(.25,.6,.25,1); }
 .flip-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .flip-back { transform: rotateY(180deg); }
 @media (hover: hover) { .flip:hover .flip-inner { transform: rotateY(180deg); } }
 .flip-inner[aria-pressed="true"] { transform: rotateY(180deg); }
 .tilt { transition: transform 400ms cubic-bezier(.2,.7,.2,1), box-shadow 400ms; }
 @media (hover: hover) { .tilt:hover { transform: perspective(1000px) rotateX(4deg) rotateY(-7deg) translateY(-6px); } }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .card-pulse:hover { animation: cardPulse 1.8s ease-in-out infinite; }
+}
+@keyframes cardPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
 .blk { transition: transform 350ms cubic-bezier(.2,.7,.2,1); }
 @media (hover: hover) {
   .blocks:hover .blk:nth-child(1) { transform: translateY(-12px); }

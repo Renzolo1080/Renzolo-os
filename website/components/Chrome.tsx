@@ -45,7 +45,7 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
       <ScrollShadow />
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4 md:px-8">
         <a href="/" className="font-display text-xl font-extrabold tracking-[-0.01em] text-ink">
-          RENZOLO<sup className="ml-0.5 text-[0.55em] font-semibold">™</sup>
+          RENZOLO<sup className="ml-0.5 text-[0.55em] font-extrabold text-black">™</sup>
         </a>
         <nav aria-label="Main" className="hidden items-center gap-7 text-[15px] font-medium lg:flex">
           {NAV.map(([label, href]) => (

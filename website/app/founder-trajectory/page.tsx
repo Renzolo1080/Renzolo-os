@@ -91,7 +91,7 @@ export default function FounderTrajectoryPage() {
               <p className="mt-2 text-muted">Lorenzo · AI coaches you any time from Lorenzo&apos;s 20-year playbook, with local to global insight and dated actions. Included with Growth and Elevate.</p>
             </div>
             <div className="rounded-card border border-line bg-surface-tint p-7">
-              <p className="font-display text-xl font-bold">Live sessions with Lorenzo</p>
+              <p className="font-display text-xl font-bold">Live sessions with a Founder Coach</p>
               <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Two sessions a quarter on Growth, two a month on Elevate, or from $59 a session for members.</p>
             </div>
           </div>

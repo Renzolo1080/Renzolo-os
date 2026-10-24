@@ -4,7 +4,7 @@ import { generateDiagnosticReport } from "@/lib/anthropic";
 import { extractNextSteps } from "@/lib/recommendations";
 import { entitlements } from "@/lib/membership";
 import { loadMembership } from "@/lib/membership-server";
-import { TIME_HORIZONS } from "@/lib/quickcheck";
+import { normalizeHorizon } from "@/lib/quickcheck";
 import { loadPlan } from "@/lib/plan-server";
 import { planAsText } from "@/lib/plan";
 import { parsePlanReview, reviewAsText } from "@/lib/plan-review";
@@ -239,8 +239,5 @@ function marketText(insights: any): string | null {
 /** The plan length the founder chose (assessments.extra.planLength), or
  * their goal timeframe from the Snapshot, or 12 months. */
 function planLengthFor(assessment: any): string {
-  const chosen = assessment?.extra?.planLength;
-  if (typeof chosen === "string" && (TIME_HORIZONS as readonly string[]).includes(chosen)) return chosen;
-  if (typeof assessment?.time_horizon === "string" && (TIME_HORIZONS as readonly string[]).includes(assessment.time_horizon)) return assessment.time_horizon;
-  return "12 months";
+  return normalizeHorizon(assessment?.extra?.planLength) ?? normalizeHorizon(assessment?.time_horizon) ?? "12 months";
 }
