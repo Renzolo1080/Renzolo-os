@@ -7,7 +7,7 @@ import { createShareToken, ensureProfileExtras, readAttribution, publicAppUrl } 
  * is read on the server (never taken from the browser), and the link
  * carries their referral code. */
 export async function POST(req: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (!score) return NextResponse.json({ error: "Take the Readiness Snapshot first." }, { status: 404 });
   const admin = createAdminClient();
-  const code = await ensureProfileExtras(admin, user.id, readAttribution());
+  const code = await ensureProfileExtras(admin, user.id, await readAttribution());
   const planScore = (score as any).assessments?.extra?.planScore;
   const readiness = readinessFromRows(score, { completeness: null, review: null }, typeof planScore === "number" ? planScore : null);
   const token = await createShareToken(admin, {

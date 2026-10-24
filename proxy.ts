@@ -14,7 +14,7 @@ import { createServerClient } from "@supabase/ssr";
  * 2. Send anyone who is not logged in to /login before a protected page
  *    starts loading. Each page and API route still does its own check;
  *    this is the first line, not the only one. */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       preview_tier: overview.band,
       plan_score: overview.planScore,
       answers: { profile, plan, answers: quick.answers, evidence: quick.evidence },
-      attribution: readAttribution(),
+      attribution: await readAttribution(),
       marketing_consent: marketingConsent,
     })
     .select("id")

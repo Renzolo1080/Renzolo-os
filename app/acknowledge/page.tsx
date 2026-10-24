@@ -9,7 +9,7 @@ export const metadata = { title: "Before you continue · Founder Trajectory™" 
  * acknowledged the current Matching Statement sees it here before their
  * dashboard. Everyone else goes straight to the dashboard. */
 export default async function AcknowledgePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

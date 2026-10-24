@@ -4,9 +4,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { ATTRIBUTION_COOKIE, decodeAttribution, newReferralCode, type Attribution } from "./attribution";
 
 /** Where this visitor came from, from the first-party cookie (lib/attribution.ts). */
-export function readAttribution(): Attribution | null {
+export async function readAttribution(): Promise<Attribution | null> {
   try {
-    return decodeAttribution(cookies().get(ATTRIBUTION_COOKIE)?.value);
+    return decodeAttribution((await cookies()).get(ATTRIBUTION_COOKIE)?.value);
   } catch {
     return null;
   }

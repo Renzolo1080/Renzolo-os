@@ -11,7 +11,7 @@ const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { weekday: "s
 /** The coach's workspace: sessions to schedule and run, founders who need
  * attention, and how coaching is going. Coaches and admins only. */
 export default async function CoachPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

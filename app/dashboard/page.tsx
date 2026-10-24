@@ -27,8 +27,9 @@ import { ensureMatchingAcknowledgment } from "@/lib/acknowledgment-server";
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-export default async function DashboardPage({ searchParams }: { searchParams?: SearchParams }) {
-  const supabase = createClient();
+export default async function DashboardPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<SearchParams> }) {
+  const searchParams = await searchParamsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -89,7 +90,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: S
 
   // Once per founder: referral code, where they came from, who invited them.
   const referralCode = process.env.SUPABASE_SERVICE_ROLE_KEY
-    ? await ensureProfileExtras(createAdminClient(), user.id, readAttribution(), user.user_metadata?.marketing_consent === true).catch(() => null)
+    ? await ensureProfileExtras(createAdminClient(), user.id, await readAttribution(), user.user_metadata?.marketing_consent === true).catch(() => null)
     : null;
   const { data: rewards } = await supabase.from("referral_rewards").select("id");
   const subscription = m.subscription;

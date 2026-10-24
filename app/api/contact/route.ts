@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     company: v.company || null,
     topic: v.topic,
     message: v.message,
-    attribution: readAttribution(),
+    attribution: await readAttribution(),
   });
   if (error) return NextResponse.json({ error: "We couldn't send your message. Please try again." }, { status: 500, headers });
   return NextResponse.json({ ok: true }, { headers });

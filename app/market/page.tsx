@@ -17,7 +17,7 @@ const VERDICT: Record<string, string> = { realistic: "bg-teal text-on-brand", st
 /** Market Intelligence: a researched brief on the founder's industry in
  * their country, written to strengthen their strategic plan. */
 export default async function MarketPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

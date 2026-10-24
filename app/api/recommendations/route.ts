@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
  * Both land in the same `recommendations` table so a founder sees one
  * combined list on /tools. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

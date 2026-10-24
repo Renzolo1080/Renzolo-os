@@ -7,7 +7,7 @@ import { MAX_EXTRAS, MIN_EXTRAS, setFor, validExtras } from "@/lib/dashboard";
  * dashboard, in their chosen order. RLS ("profiles: self update") scopes
  * this to the caller's own row; the column grant limits what can change. */
 export async function PATCH(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

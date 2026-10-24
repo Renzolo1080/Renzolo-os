@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/server";
  * Marks a Diagnostic Report as advisor-reviewed. Restricted to
  * advisor/admin roles — this is the human-in-the-loop gate the Phase 1
  * spec requires before an AI-drafted report reaches a paid-tier founder. */
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function PATCH(req: NextRequest, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

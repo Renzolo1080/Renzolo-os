@@ -12,8 +12,9 @@ export const dynamic = "force-dynamic";
 
 /** One coaching session: the founder's prep and context, the AI prep
  * brief, GROW notes, summary and commitments. Coaches and admins only. */
-export default async function CoachSessionPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+export default async function CoachSessionPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

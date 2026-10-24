@@ -25,7 +25,7 @@ const text = (v: unknown, max = 2000) => (typeof v === "string" ? v.trim().slice
  * answers) and are stored as 0-100 scores; older clients sent `measures`
  * (0-100) directly, which is still accepted. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

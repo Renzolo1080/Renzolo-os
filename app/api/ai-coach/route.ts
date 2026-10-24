@@ -13,7 +13,7 @@ export const maxDuration = 90;
  * coach and returns its reply. Growth and Elevate members. Limited per
  * day (lib/ai-coach.ts DAILY_LIMITS); a failed reply isn't counted. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

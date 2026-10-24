@@ -11,7 +11,7 @@ import { publicAppUrl } from "@/lib/growth-server";
  * booking link so the founder can pick a time straight away, and lets
  * the coach know by email when email is set up. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

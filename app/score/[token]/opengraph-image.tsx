@@ -6,7 +6,8 @@ export const alt = "A founder's Total Readiness Score";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
-export default async function Image({ params }: { params: { token: string } }) {
+export default async function Image({ params: paramsPromise }: { params: Promise<{ token: string }> }) {
+  const params = await paramsPromise;
   const s = await getSharedScore(params.token);
   return brandImage({
     eyebrow: "Readiness Snapshot",

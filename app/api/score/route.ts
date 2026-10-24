@@ -7,7 +7,7 @@ import { parseSnapshotBody, saveSnapshotForFounder } from "@/lib/snapshot-save";
  * Every answer is checked against the fixed lists in lib/quickcheck.ts
  * before anything is saved. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

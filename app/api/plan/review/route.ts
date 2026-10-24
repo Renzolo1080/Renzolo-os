@@ -17,7 +17,7 @@ export const maxDuration = 120;
  * once the plan has the minimum worth reviewing. A failed or unreadable
  * answer isn't saved, so it doesn't count against the limit. */
 export async function POST() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

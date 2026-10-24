@@ -10,7 +10,7 @@ import { periodOf } from "@/lib/progress";
  * where they need help. One per month; saving again updates it. The
  * period defaults to this month and can be one of the last 12. */
 export async function PUT(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

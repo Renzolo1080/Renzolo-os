@@ -8,7 +8,7 @@ import { recordMatchingAcknowledgment } from "@/lib/acknowledgment-server";
  * version must be the current one, so a page left open through a statement
  * change can't acknowledge the old text. */
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

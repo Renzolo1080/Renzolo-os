@@ -4,7 +4,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 /** POST /api/membership/waitlist — joins the Elevate waitlist (seats are
  * limited by coaching hours; see ELEVATE_SEAT_LIMIT). */
 export async function POST() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

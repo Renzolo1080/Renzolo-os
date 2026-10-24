@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 /** PATCH /api/milestones/[id] { completed?, title?, targetDate? }
  * DELETE /api/milestones/[id]
  * Both scoped to the founder's own milestones via RLS. */
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function PATCH(req: NextRequest, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -24,8 +25,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json({ milestone: data });
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function DELETE(_req: NextRequest, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -4,7 +4,8 @@ import { getSharedScore } from "@/lib/shared-score";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { token: string } }): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ token: string }> }): Promise<Metadata>  {
+  const params = await paramsPromise;
   const s = await getSharedScore(params.token);
   if (!s) return { title: "Founder Trajectory™" };
   const title = `A founder scored ${Number(s.venture_score)}/100. What's your Total Readiness Score?`;
@@ -17,7 +18,8 @@ export async function generateMetadata({ params }: { params: { token: string } }
 
 /** A shared score: "A founder scored 62 — what's yours?" Shows no name,
  * email or answers. Brings the sharer's referral code along, if any. */
-export default async function SharedScorePage({ params }: { params: { token: string } }) {
+export default async function SharedScorePage({ params: paramsPromise }: { params: Promise<{ token: string }> }) {
+  const params = await paramsPromise;
   const s = await getSharedScore(params.token);
   if (!s) notFound();
   const ref = s.referral_code ? `&ref=${encodeURIComponent(s.referral_code)}` : "";

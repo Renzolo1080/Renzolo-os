@@ -18,7 +18,7 @@ function formatDate(iso: string): string {
  * upgrading, renewing or moving down), the one-time assessment, and
  * coaching. */
 export default async function MembershipPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

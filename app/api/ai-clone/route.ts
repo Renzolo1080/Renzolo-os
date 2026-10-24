@@ -10,7 +10,7 @@ import { buildCloneContext, cloneConfig, CONSENT_VERSION, greeting, SESSION_SECO
  * coaching, after consent and within the monthly limit. Returns the
  * conversation link to embed. The Tavus key never leaves the server. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

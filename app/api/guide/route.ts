@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const admin = createAdminClient();
   // One row per email: asking again just refreshes the date.
   const { error } = await admin.from("guide_leads").upsert(
-    { email: v.email, full_name: v.fullName, country: v.country || null, source: v.source, guide_version: GUIDE_VERSION, consented_at: new Date().toISOString(), attribution: readAttribution() },
+    { email: v.email, full_name: v.fullName, country: v.country || null, source: v.source, guide_version: GUIDE_VERSION, consented_at: new Date().toISOString(), attribution: await readAttribution() },
     { onConflict: "email" }
   );
   if (error) return NextResponse.json({ error: "We couldn't send the guide just now. Please try again." }, { status: 500, headers });

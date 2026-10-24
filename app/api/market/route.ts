@@ -16,7 +16,7 @@ export const maxDuration = 180;
  * Elevate and the one-time Readiness Assessment; refreshed monthly (or
  * sooner if their industry or country changes). */
 export async function POST() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

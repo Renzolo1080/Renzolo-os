@@ -11,8 +11,9 @@ import { cloneConfig, SESSION_SECONDS, sessionLimit, sessionsLeft } from "@/lib/
 export const dynamic = "force-dynamic";
 
 /** The AI coach: conversations and weekly check-ins. */
-export default async function AiCoachPage({ searchParams }: { searchParams?: { t?: string } }) {
-  const supabase = createClient();
+export default async function AiCoachPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<{ t?: string }> }) {
+  const searchParams = await searchParamsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 /** The guided Plan Builder and AI plan review. */
 export default async function PlanPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

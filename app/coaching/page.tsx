@@ -21,7 +21,7 @@ const STEPS = [
 
 /** The founder's coaching page: agreement, booking, sessions and commitments. */
 export default async function CoachingPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   if (recent) return NextResponse.json({ ok: true }, { headers });
   let founderId: string | null = null;
   try {
-    const { data } = await createClient().auth.getUser();
+    const { data } = await (await createClient()).auth.getUser();
     founderId = data.user?.id ?? null;
   } catch {}
   const { error } = await admin.from("cohort_applications").insert({
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     venture_stage: v.ventureStage || null,
     cohort: v.cohort,
     message: v.message || null,
-    attribution: readAttribution(),
+    attribution: await readAttribution(),
   });
   if (error) return NextResponse.json({ error: "We couldn't save your application. Please try again." }, { status: 500, headers });
   return NextResponse.json({ ok: true }, { headers });

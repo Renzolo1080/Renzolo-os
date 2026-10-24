@@ -2,7 +2,8 @@ export const metadata = { title: "Unsubscribe · Founder Trajectory™" };
 
 /** Asks for one click to confirm, so link-scanning email filters can't
  * unsubscribe someone by accident. */
-export default function UnsubscribePage({ searchParams }: { searchParams: { e?: string; t?: string; done?: string } }) {
+export default async function UnsubscribePage({ searchParams: searchParamsPromise }: { searchParams: Promise<{ e?: string; t?: string; done?: string }> }) {
+  const searchParams = await searchParamsPromise;
   const done = searchParams.done === "1";
   return (
     <main className="flex min-h-[60vh] items-center justify-center px-4 py-12">

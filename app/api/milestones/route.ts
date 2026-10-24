@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
  * the caller actually owns, so a mismatched assessmentId simply fails
  * to insert rather than needing a manual ownership check here. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

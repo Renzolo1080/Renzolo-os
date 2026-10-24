@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  * answers sharpen the score and shape the Readiness Report and plan.
  * Members, and founders who bought the one-time Readiness Assessment. */
 export default async function DetailsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

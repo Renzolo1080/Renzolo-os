@@ -10,8 +10,9 @@ export const dynamic = "force-dynamic";
  * who can read the report (its owner while a member, or for good when
  * bought with the one-time assessment). Summary reports aren't offered
  * for download. */
-export default async function ReportPrintPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+export default async function ReportPrintPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

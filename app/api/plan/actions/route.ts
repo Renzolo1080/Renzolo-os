@@ -11,7 +11,7 @@ import { BLOCK_KEYS, type BlockKey } from "@/lib/scoring";
  *                                   Intelligence recommendation)
  *  PATCH { area, id, status }      updates an action's status (dashboard) */
 async function guard() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

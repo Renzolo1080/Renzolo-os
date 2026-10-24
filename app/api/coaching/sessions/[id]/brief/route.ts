@@ -15,8 +15,9 @@ export const maxDuration = 90;
 /** POST /api/coaching/sessions/[id]/brief — coach only. Drafts a one-page
  * prep brief from the founder's assessment, plan, review, goal progress,
  * monthly update and earlier sessions, and saves it on the session. */
-export async function POST(_req: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function POST(_req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

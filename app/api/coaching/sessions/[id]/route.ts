@@ -16,8 +16,9 @@ import type { BlockKey } from "@/lib/scoring";
  *   { scheduledAt?, kind?, notes?, summary?, commitments?, complete? }
  *   Completing a session adds its commitments that belong to a business
  *   area to the founder's plan as actions (once). */
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createClient();
+export async function PATCH(req: NextRequest, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

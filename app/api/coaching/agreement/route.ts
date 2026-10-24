@@ -4,7 +4,7 @@ import { AGREEMENT_VERSION } from "@/lib/coaching";
 
 /** POST /api/coaching/agreement — the founder accepts the current coaching agreement. */
 export async function POST() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

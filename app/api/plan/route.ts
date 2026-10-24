@@ -11,7 +11,7 @@ import { loadLatestAssessment } from "@/lib/plan-server";
  * against the founder's latest assessment. Any member, and founders who
  * bought the one-time Readiness Assessment. */
 export async function PUT(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

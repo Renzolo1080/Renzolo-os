@@ -9,7 +9,7 @@ import { parseAmount } from "@/lib/plan";
  * Records the actual value of one of the founder's plan goals, so the
  * dashboard can show target vs actual. */
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
