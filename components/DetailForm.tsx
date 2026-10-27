@@ -4,6 +4,16 @@ import { useRouter } from "next/navigation";
 import type { BlockPrompt } from "@/lib/blocks";
 import { BlockStep, answerComplete, type BlockAnswer } from "@/components/BlockStep";
 
+/** Business type, years, team size and registration: asked here rather
+ * than in the Snapshot, because the Readiness Report uses them. */
+export interface BusinessDetails {
+  businessType: string;
+  yearsInBusiness: string;
+  teamSize: string;
+  registration: string;
+}
+export type BusinessDetailFields = [keyof BusinessDetails, string, string[]][];
+
 export interface DetailArea {
   prompt: BlockPrompt;
   initial: BlockAnswer;
@@ -24,6 +34,8 @@ export function DetailForm({
   planLengths = [],
   initialPlanLength = "12 months",
   planHref,
+  detailFields = [],
+  initialDetails = { businessType: "", yearsInBusiness: "", teamSize: "", registration: "" },
 }: {
   assessmentId: string;
   areas: DetailArea[];
@@ -32,6 +44,8 @@ export function DetailForm({
   initialPlanLength?: string;
   /** Where the Plan Builder is, or null if the founder can't use it. */
   planHref: string | null;
+  detailFields?: BusinessDetailFields;
+  initialDetails?: BusinessDetails;
 }) {
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, BlockAnswer>>(() => Object.fromEntries(areas.map((a) => [a.prompt.key, a.initial])));
@@ -39,6 +53,8 @@ export function DetailForm({
   const firstOpen = Math.max(0, areas.findIndex((a) => !answerComplete(a.initial)));
   const [step, setStep] = useState<number>(areas.every((a) => answerComplete(a.initial)) ? areas.length : firstOpen);
   const [planLength, setPlanLength] = useState(initialPlanLength);
+  const [details, setDetails] = useState<BusinessDetails>(initialDetails);
+  const detailsDone = detailFields.every(([k]) => details[k] !== "");
   const [busy, setBusy] = useState<null | "save" | "finish">(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -78,7 +94,7 @@ export function DetailForm({
     setBusy("finish");
     setError(null);
     try {
-      await post({ blocks: {}, planLength, finish: true });
+      await post({ blocks: {}, planLength, details, finish: true });
       router.push("/dashboard?details=done");
       router.refresh();
     } catch (e: any) {
@@ -173,10 +189,31 @@ export function DetailForm({
                   ? `You've completed ${doneCount} of ${areas.length} areas. Update your score now; your Readiness Report will be built from everything you've answered.`
                   : `Complete at least ${required} areas (you've done ${doneCount}) to update your score and create your Readiness Report.`}
               </p>
+              {detailFields.length > 0 && (
+                <fieldset className="mt-5">
+                  <legend className="font-semibold text-navy">A few details about your business</legend>
+                  <span className="mt-1 block text-sm text-ink-soft">Your Readiness Report uses these to compare you with businesses like yours.</span>
+                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                    {detailFields.map(([key, label, options]) => (
+                      <label key={key} className="block">
+                        <span className="mb-1 block text-sm font-medium">{label}</span>
+                        <select className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5" value={details[key]} onChange={(e) => setDetails({ ...details, [key]: e.target.value })}>
+                          <option value="">Choose…</option>
+                          {options.map((o) => (
+                            <option key={o} value={o}>
+                              {o}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
               {planLengths.length > 0 && (
                 <label className="mt-5 block">
                   <span className="block font-semibold text-navy">How far ahead should your growth and readiness plan go?</span>
-                  <span className="mt-1 block text-sm text-ink-soft">The first 90 days are planned in detail; the rest is set out in phases you'll refine each time you re-assess.</span>
+                  <span className="mt-1 block text-sm text-ink-soft">The first 3 months are planned in detail; the rest is set out in phases you'll refine each time you re-assess.</span>
                   <select className="mt-3 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 sm:w-64" value={planLength} onChange={(e) => setPlanLength(e.target.value)}>
                     {planLengths.map((p) => (
                       <option key={p} value={p}>
@@ -191,7 +228,7 @@ export function DetailForm({
                   {error}
                 </p>
               )}
-              <button type="button" className="mt-5 rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand disabled:opacity-50" disabled={doneCount < required || busy !== null} onClick={finish}>
+              <button type="button" className="mt-5 rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand disabled:opacity-50" disabled={doneCount < required || !detailsDone || busy !== null} onClick={finish}>
                 {busy === "finish" ? "Updating your score…" : "Update my score"}
               </button>
             </div>

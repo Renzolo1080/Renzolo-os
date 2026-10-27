@@ -3,7 +3,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { runDiagnostic, BLOCK_KEYS, MEASURE_KEYS, type AllBlockScores, type BlockKey, type BlockMeasureScores } from "@/lib/scoring";
 import { computeValuation } from "@/lib/valuation";
 import { loadMembership } from "@/lib/membership-server";
-import { normalizeHorizon, DETAIL_AREAS_REQUIRED } from "@/lib/quickcheck";
+import { normalizeHorizon, DETAIL_AREAS_REQUIRED, BUSINESS_TYPES, YEARS_IN_BUSINESS, TEAM_SIZES, REGISTRATION_STATUSES } from "@/lib/quickcheck";
 import { MEASURE_LEVELS } from "@/lib/blocks";
 
 const clampScore = (v: unknown) => {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "The detailed questions are part of membership and the one-time Readiness Assessment." }, { status: 402 });
   }
 
-  const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; blocks?: Record<string, any>; planLength?: unknown; finish?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { assessmentId?: unknown; blocks?: Record<string, any>; planLength?: unknown; details?: any; finish?: unknown } | null;
   const assessmentId = typeof body?.assessmentId === "string" ? body.assessmentId : null;
   if (!assessmentId || !body?.blocks || typeof body.blocks !== "object") return NextResponse.json({ error: "Missing answers" }, { status: 400 });
 
@@ -50,6 +50,22 @@ export async function POST(req: NextRequest) {
   if (planLength) {
     const extra = { ...((assessment as any).extra ?? {}), planLength };
     await supabase.from("assessments").update({ extra }).eq("id", assessment.id);
+  }
+
+  // Business type, years, team size and registration (asked here, not in
+  // the Snapshot). Each saved only when it is one of the listed choices.
+  const d = body.details && typeof body.details === "object" ? body.details : null;
+  if (d) {
+    const one = (list: readonly string[], v: unknown) => (typeof v === "string" && list.includes(v) ? v : undefined);
+    const cols: Record<string, string> = {};
+    const bt = one(BUSINESS_TYPES, d.businessType); if (bt) cols.business_type = bt;
+    const yb = one(YEARS_IN_BUSINESS, d.yearsInBusiness); if (yb) cols.years_in_business = yb;
+    const ts = one(TEAM_SIZES, d.teamSize); if (ts) cols.employee_count = ts;
+    const reg = one(REGISTRATION_STATUSES, d.registration);
+    const { data: fresh } = await supabase.from("assessments").select("extra").eq("id", assessment.id).maybeSingle();
+    const update: Record<string, unknown> = { ...cols };
+    if (reg) update.extra = { ...(((fresh as any)?.extra) ?? {}), registration: reg };
+    if (Object.keys(update).length) await supabase.from("assessments").update(update).eq("id", assessment.id);
   }
 
   const finish = body.finish === true;

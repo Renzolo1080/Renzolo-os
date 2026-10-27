@@ -3,7 +3,7 @@ import { membershipCurrenciesFor } from "@/lib/pricing";
 
 export const metadata = {
   title: "Founder Trajectory™ South Africa · free Readiness Snapshot",
-  description: "For South African founders and SMMEs: see where your business stands in 5-7 minutes, then build a plan to grow, win contracts or get funded.",
+  description: "For South African founders and SMMEs: see where your business stands in 5 minutes or less, then build a plan to grow, win contracts or get funded.",
 };
 
 export default function SouthAfricaPage() {

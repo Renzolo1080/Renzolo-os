@@ -8,6 +8,6 @@ export default function Image() {
   return brandImage({
     eyebrow: "Venture Readiness Assessment and Development Support",
     title: "Know exactly where your business stands, and what to do next.",
-    subtitle: "Take the free 5-7 minute Readiness Snapshot.",
+    subtitle: "Take the free 5-minute Readiness Snapshot.",
   });
 }

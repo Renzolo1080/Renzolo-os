@@ -88,7 +88,7 @@ export default async function CoachingPage() {
             <a href="/assessment" className="font-semibold text-teal underline">
               Readiness Snapshot
             </a>{" "}
-            first (5 to 7 minutes). Your coach uses it to prepare, so your first session goes straight to what matters.
+            first (5 minutes or less). Your coach uses it to prepare, so your first session goes straight to what matters.
           </p>
         )}
         {!agreement ? (

@@ -11,8 +11,8 @@ export async function generateMetadata({ params: paramsPromise }: { params: Prom
   const title = `A founder scored ${Number(s.venture_score)}/100. What's your Total Readiness Score?`;
   return {
     title,
-    description: "Take the free 5-7 minute Readiness Snapshot and see where your business stands.",
-    openGraph: { title, description: "Take the free 5-7 minute Readiness Snapshot and see where your business stands." },
+    description: "Take the free 5-minute Readiness Snapshot and see where your business stands.",
+    openGraph: { title, description: "Take the free 5-minute Readiness Snapshot and see where your business stands." },
   };
 }
 
@@ -42,7 +42,7 @@ export default async function SharedScorePage({ params: paramsPromise }: { param
               <p className="mt-1 text-sm text-cream/70">out of 100</p>
             </div>
           </div>
-          <p className="mx-auto mt-8 max-w-xl text-lg text-cream/85">What's your Total Readiness Score? Take the free Readiness Snapshot: 5 to 7 minutes, no account needed.</p>
+          <p className="mx-auto mt-8 max-w-xl text-lg text-cream/85">What's your Total Readiness Score? Take the free Readiness Snapshot: 5 minutes or less, no account needed.</p>
           <a href={href} className="mt-6 inline-block rounded-lg bg-brand px-7 py-4 text-lg font-semibold text-on-brand">
             Get my Total Readiness Score
           </a>

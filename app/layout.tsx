@@ -8,10 +8,10 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL && /^https?:\/\//.test(process.
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: "Founder Trajectory™ · Powered by RENZOLO OS™",
-  description: "Venture Readiness Assessment and Development Support. Take the free 5-7 minute Readiness Snapshot and see where your business stands.",
+  description: "Venture Readiness Assessment and Development Support. Take the free 5-minute Readiness Snapshot and see where your business stands.",
   openGraph: {
     title: "Know exactly where your business stands",
-    description: "Free 5-7 minute Readiness Snapshot: your Total Readiness Score, Strategic Plan Readiness and the three areas holding you back.",
+    description: "Free 5-minute Readiness Snapshot: your Total Readiness Score, Strategic Plan Readiness and the three areas holding you back.",
     siteName: "Founder Trajectory™",
     type: "website",
   },

@@ -58,7 +58,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col gap-3 pt-8 sm:flex-row sm:items-center">
                 <Button href="/snapshot" className="sm:whitespace-nowrap">Start your free Readiness Snapshot</Button>
-                <span className="text-sm text-ink-muted sm:ml-2">5 to 7 minutes · no account needed</span>
+                <span className="text-sm text-ink-muted sm:ml-2">5 minutes or less · no account needed</span>
               </div>
               <p className="pt-6 text-sm text-ink-muted">
                 Already a member?{" "}
