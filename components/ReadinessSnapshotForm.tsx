@@ -10,14 +10,10 @@ import {
   STAGES,
   INDUSTRIES,
   COUNTRIES,
-  BUSINESS_TYPES,
-  YEARS_IN_BUSINESS,
-  TEAM_SIZES,
   REVENUE_BANDS,
   PRIMARY_GOALS,
   TIME_HORIZONS,
   FUNDING_NEEDS,
-  REGISTRATION_STATUSES,
   CHALLENGES,
   MAX_CHALLENGES,
   HEARD_FROM,
@@ -26,7 +22,9 @@ import {
 } from "@/lib/quickcheck";
 import { SnapshotResult } from "./SnapshotResult";
 
-/** The Readiness Snapshot, 5-7 minutes, almost all dropdowns and taps.
+/** The Readiness Snapshot, 5 minutes or less, almost all dropdowns and taps.
+ * Business type, years in business, team size and registration are asked
+ * in the full Readiness Assessment instead, where the report uses them.
  *
  * "public" (no account): starts with name, company and email, and shows
  * the short overview on the page when done.
@@ -69,9 +67,6 @@ const BUSINESS_FIELDS: Field[] = [
   ["ventureStage", "Stage of your business", STAGES],
   ["industry", "Industry", INDUSTRIES],
   ["country", "Country you operate in", COUNTRIES],
-  ["businessType", "Business type", BUSINESS_TYPES],
-  ["yearsInBusiness", "Years in business", YEARS_IN_BUSINESS],
-  ["teamSize", "Team size", TEAM_SIZES],
   ["annualRevenue", "Annual revenue (US dollars)", REVENUE_BANDS],
 ];
 
@@ -79,7 +74,6 @@ const GOAL_FIELDS: Field[] = [
   ["primaryGoal", "Your main goal", PRIMARY_GOALS],
   ["timeHorizon", "When do you want to reach it?", TIME_HORIZONS],
   ["fundingNeed", "Are you looking for funding in the next 12 months?", FUNDING_NEEDS],
-  ["registration", "Is your business registered with the government and tax authority?", REGISTRATION_STATUSES],
 ];
 
 type Section = { id: string; title: string };
@@ -88,8 +82,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
   const router = useRouter();
   const sections: Section[] = [
     ...(mode === "public" ? [{ id: "you", title: "About you" }] : []),
-    { id: "business", title: "Your business" },
-    { id: "goals", title: "Your goals" },
+    { id: "business", title: "Your business and goals" },
     { id: "plan", title: "Your strategic plan" },
     ...QUICK_QUESTIONS.map((q) => ({ id: `area:${q.key}`, title: "Your business model" })),
     { id: "finish", title: "Almost done" },
@@ -126,8 +119,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
 
   let canContinue = false;
   if (current.id === "you") canContinue = fullName.trim() !== "" && emailOk;
-  else if (current.id === "business") canContinue = fieldsDone(BUSINESS_FIELDS);
-  else if (current.id === "goals") canContinue = fieldsDone(GOAL_FIELDS);
+  else if (current.id === "business") canContinue = fieldsDone(BUSINESS_FIELDS) && fieldsDone(GOAL_FIELDS);
   else if (current.id === "plan") canContinue = PLAN_QUESTIONS.every((q) => planAnswers[q.key] !== undefined);
   else if (current.id === "finish") canContinue = challenges.length > 0;
   else canContinue = answers[current.id.slice(5) as BlockKey] !== undefined;
@@ -206,7 +198,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <p className="text-xs font-semibold uppercase tracking-wide text-teal">Free Readiness Snapshot · 5 to 7 minutes</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-teal">Free Readiness Snapshot · 5 minutes or less</p>
       <div className="mt-3 mb-8">
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-soft mb-2">
           {sectionNames.map((name, i) => (
@@ -249,14 +241,8 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
 
         {current.id === "business" && (
           <section className="space-y-4">
-            <h1 className="text-2xl font-bold text-navy">Your business</h1>
+            <h1 className="text-2xl font-bold text-navy">Your business and goals</h1>
             {renderSelects(BUSINESS_FIELDS)}
-          </section>
-        )}
-
-        {current.id === "goals" && (
-          <section className="space-y-4">
-            <h1 className="text-2xl font-bold text-navy">Your goals</h1>
             {renderSelects(GOAL_FIELDS)}
           </section>
         )}

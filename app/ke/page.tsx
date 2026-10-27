@@ -3,7 +3,7 @@ import { membershipCurrenciesFor } from "@/lib/pricing";
 
 export const metadata = {
   title: "Founder Trajectory™ Kenya · free Readiness Snapshot",
-  description: "For Kenyan founders and MSMEs: see where your business stands in 5-7 minutes, then build a plan to grow, win contracts or get funded.",
+  description: "For Kenyan founders and MSMEs: see where your business stands in 5 minutes or less, then build a plan to grow, win contracts or get funded.",
 };
 
 export default function KenyaPage() {

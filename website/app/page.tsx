@@ -46,7 +46,7 @@ const TIERS: Tier[] = [
 
 /** "Find your path": where the founder is today, and the first step. */
 const PATHS: PathStage[] = [
-  { key: "idea", label: "I have an idea or I'm just starting", who: "No steady customers yet", first: { name: "Free Snapshot", note: "See where you stand in about seven minutes." }, then: { name: "Launch or Essentials", note: "The 8-week Launch cohort, or Essentials from $15 a month." }, start: "Take the free Snapshot, then choose Launch or Essentials.", cta: { label: "Start the free Snapshot", href: appLink("/snapshot", "path_idea") } },
+  { key: "idea", label: "I have an idea or I'm just starting", who: "No steady customers yet", first: { name: "Free Snapshot", note: "See where you stand in 5 minutes or less." }, then: { name: "Launch or Essentials", note: "The 8-week Launch cohort, or Essentials from $15 a month." }, start: "Take the free Snapshot, then choose Launch or Essentials.", cta: { label: "Start the free Snapshot", href: appLink("/snapshot", "path_idea") } },
   { key: "first", label: "I have my first customers", who: "Selling, but not yet steady", first: { name: "Readiness Assessment", note: "The full report, a valuation range and AI market insight, for $79." }, then: { name: "Essentials or Growth", note: "Work the plan, with coaching on Growth." }, start: HOW_TO_START.assessment, cta: { label: "Get the assessment", href: appLink("/pricing", "path_first") } },
   { key: "growing", label: "I'm growing, with steady customers", who: "Ready to work the plan with a coach", first: { name: "Growth membership", note: "Your plan, dashboard and your coaching team." }, then: { name: "Build cohort", note: "12 weeks: traction first, then readiness for loans, grants and contracts." }, start: HOW_TO_START.growth, cta: { label: "See Growth", href: "#pricing" } },
   { key: "raise", label: "I'm ready to raise or win big contracts", who: "Capital, investors or large buyers next", first: { name: "Elevate membership", note: "Two coaching sessions a month and a pitch and investor readiness review." }, then: { name: "Scale cohort", note: "6 months, selective, with curated introductions." }, start: HOW_TO_START.elevate, cta: { label: "See Elevate", href: "#pricing" } },
@@ -61,7 +61,7 @@ const ACADEMY = [
 
 const FAQ = [
   ["How do I pay?", "Prices are in US dollars. You pay by card or mobile money, including M-Pesa, through Flutterwave."],
-  ["What does the free Snapshot give me?", "Your Total Readiness Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back and a recommended next move, in about seven minutes, with no account needed."],
+  ["What does the free Snapshot give me?", "Your Total Readiness Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back and a recommended next move, in 5 minutes or less, with no account needed."],
   ["What is the difference between the $79 assessment and membership?", "The assessment gives you the full report once, with a valuation range and AI market insight. Membership adds the plan, the dashboard and, on Growth and Elevate, your coaching team: Lorenzo · AI any time and live sessions with a Founder Coach."],
   ["How does coaching work?", "You prepare a short brief, book a time on your coach's calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan."],
   ["Can I get a refund?", "Our refund policy sets out exactly when and how refunds apply."],
@@ -173,7 +173,7 @@ export default function Home() {
             <div>
               <Eyebrow className="reveal">Free Readiness Snapshot</Eyebrow>
               <h2 className={`reveal mt-2 ${H2}`}>Start with three questions.</h2>
-              <p className="reveal mt-4 text-lg text-ink-muted">Answer three now, then finish the free Snapshot in the app: about seven minutes in all, no account needed.</p>
+              <p className="reveal mt-4 text-lg text-ink-muted">Answer three now, then finish the free Snapshot in the app: 5 minutes or less in all, no account needed.</p>
             </div>
             <div className="reveal">
               <SnapshotTaster appUrl={APP_URL} />
@@ -348,7 +348,7 @@ export default function Home() {
         {/* 13. Final call to action */}
         <section className={`${WRAP} py-16 md:py-24`}>
           <div className="reveal flex flex-col gap-6 rounded-panel bg-brand p-8 text-on-brand md:flex-row md:items-center md:justify-between md:p-12">
-            <p className={`max-w-2xl ${H2}`}>Know where you stand in seven minutes.</p>
+            <p className={`max-w-2xl ${H2}`}>Know where you stand in 5 minutes.</p>
             <div className="flex shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center">
               <a href={appLink("/snapshot", "home_final_cta")} className="inline-flex justify-center rounded-pill bg-ink px-6 py-3 font-semibold text-surface transition-colors hover:bg-ink/85">
                 Start your assessment

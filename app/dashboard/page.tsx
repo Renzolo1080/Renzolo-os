@@ -246,7 +246,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
       {!latestScore ? (
         <div>
           <p className="mb-1 font-semibold text-navy">Start with your free Readiness Snapshot</p>
-          <p className="mb-4 text-ink-soft">5 to 7 minutes, mostly dropdowns and taps. You'll get your Total Readiness Score, your Strategic Plan Readiness and the three areas holding you back.</p>
+          <p className="mb-4 text-ink-soft">5 minutes or less, mostly dropdowns and taps. You'll get your Total Readiness Score, your Strategic Plan Readiness and the three areas holding you back.</p>
           <a href="/assessment" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
             Start the Snapshot
           </a>

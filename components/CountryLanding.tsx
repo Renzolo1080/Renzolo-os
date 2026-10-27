@@ -30,7 +30,7 @@ export function CountryLanding({
             <a href={href} className="rounded-lg bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
               Start your free Readiness Snapshot
             </a>
-            <span className="text-sm text-cream/70">5 to 7 minutes · no account needed</span>
+            <span className="text-sm text-cream/70">5 minutes or less · no account needed</span>
           </div>
         </div>
       </section>

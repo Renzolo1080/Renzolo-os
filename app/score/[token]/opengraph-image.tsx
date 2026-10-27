@@ -14,6 +14,6 @@ export default async function Image({ params: paramsPromise }: { params: Promise
     big: s ? String(Number(s.venture_score)) : "?",
     bigLabel: s ? s.venture_tier : undefined,
     title: "What's your Total Readiness Score?",
-    subtitle: "Free · 5 to 7 minutes · no account needed",
+    subtitle: "Free · 5 minutes or less · no account needed",
   });
 }

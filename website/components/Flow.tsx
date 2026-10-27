@@ -39,7 +39,7 @@ export function ProofBand() {
 }
 
 /** 4. The closing call to action at the end of every page. */
-export function PageEndCta({ campaign, title = "Know where you stand in seven minutes." }: { campaign: string; title?: string }) {
+export function PageEndCta({ campaign, title = "Know where you stand in 5 minutes." }: { campaign: string; title?: string }) {
   return (
     <section className={`${WRAP} pb-16 pt-4 md:pb-24`}>
       <div className="reveal flex flex-col gap-6 rounded-panel bg-brand p-8 text-on-brand md:flex-row md:items-center md:justify-between md:p-12">
