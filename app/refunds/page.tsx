@@ -5,7 +5,7 @@ export const metadata = { title: "Refund and cancellation policy · Founder Traj
 export default function RefundsPage() {
   const email = contactEmail();
   return (
-    <LegalPage title="Refund and cancellation policy" updated="13 October 2026">
+    <LegalPage title="Refund and cancellation policy" updated="31 October 2026">
       <H>Memberships</H>
       <UL
         items={[
@@ -22,7 +22,7 @@ export default function RefundsPage() {
       <H>Coaching sessions</H>
       <UL
         items={[
-          "Sessions you bought and haven't used can be refunded within 14 days of purchase.",
+          "Coaching sessions are not refundable, including unused sessions. If you can't make a session, we'll work with you to reschedule it within 60 days of purchase.",
           "Please give at least 24 hours' notice to reschedule. A session missed without notice counts as used.",
           "Coaching included in Growth and Elevate isn't refundable separately from the membership.",
         ]}
