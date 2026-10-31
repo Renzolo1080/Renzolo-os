@@ -22,6 +22,7 @@ import { InviteCard } from "@/components/InviteCard";
 import { PurchaseTracker } from "@/components/PurchaseTracker";
 import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwave";
 import { readinessFromRows } from "@/lib/readiness";
+import { ScoreExplainer } from "@/components/ScoreExplainer";
 import { ensureMatchingAcknowledgment } from "@/lib/acknowledgment-server";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -336,6 +337,14 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
           <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
             {ent.tools ? "Open Founder Tools (calculators, recommendations & milestones)" : "Open Founder Tools (free calculators)"}
           </a>
+        </div>
+      )}
+      {latestScore && (
+        <div className="mt-6 space-y-2">
+          <ScoreExplainer />
+          <p className="text-center text-xs text-ink-soft">
+            <a href="/account/data" className="underline">Your data</a>: download it, ask for a review, or delete your account.
+          </p>
         </div>
       )}
     </main>

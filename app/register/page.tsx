@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PasswordInput } from "@/components/PasswordInput";
 import { track } from "@/lib/track";
+import { PRIVACY_VERSION } from "@/lib/privacy";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function RegisterPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   // Coming from the free Snapshot: fill in the name and email they gave,
   // so their Snapshot is matched to the new account.
@@ -24,6 +26,10 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!agreed) {
+      setError("Please confirm you are 18 or older and agree to the terms and privacy policy.");
+      return;
+    }
     setStatus("loading");
     setError(null);
     try {
@@ -31,7 +37,16 @@ export default function RegisterPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName, marketing_consent: marketingConsent } },
+        options: {
+          data: {
+            full_name: fullName,
+            marketing_consent: marketingConsent,
+            age_18_plus: true,
+            terms_accepted_at: new Date().toISOString(),
+            privacy_version: PRIVACY_VERSION,
+            us_transfer_ack: true,
+          },
+        },
       });
       if (error) {
         setError(error.message);
@@ -103,10 +118,13 @@ export default function RegisterPage() {
           <input type="checkbox" className="mt-1" checked={marketingConsent} onChange={(e) => setMarketingConsent(e.target.checked)} />
           <span>Email me practical tips for growing my venture. You can unsubscribe at any time.</span>
         </label>
-        <p className="text-xs text-ink-soft">
-          By creating an account you agree to our <a href="/terms" className="underline">terms</a> and{" "}
-          <a href="/privacy" className="underline">privacy policy</a>.
-        </p>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" className="mt-1" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} required />
+          <span>
+            I am 18 or older and agree to the <a href="/terms" className="underline">terms</a> and{" "}
+            <a href="/privacy" className="underline">privacy policy</a>, including that my information is stored in the United States.
+          </span>
+        </label>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <p className="text-sm text-ink-soft">
           Already have an account?{" "}

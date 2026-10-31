@@ -13,7 +13,7 @@
     "test:quiz": "tsx test/quiz.test.ts",
     "test:payments": "tsx test/payments.test.ts",
     "test:flutterwave": "tsx test/flutterwave.test.ts",
-    "test": "npm run test:scoring && npm run test:valuation && npm run test:recommendations && npm run test:geo && npm run test:quiz && npm run test:payments && npm run test:flutterwave && npm run test:membership && npm run test:report && npm run test:growth && npm run test:quickcheck && npm run test:plan && npm run test:coaching && npm run test:ai-coach && npm run test:readiness && npm run test:ai-clone && npm run test:acknowledgment && npm run test:db",
+    "test": "npm run test:scoring && npm run test:valuation && npm run test:recommendations && npm run test:geo && npm run test:quiz && npm run test:payments && npm run test:flutterwave && npm run test:membership && npm run test:report && npm run test:growth && npm run test:quickcheck && npm run test:plan && npm run test:coaching && npm run test:ai-coach && npm run test:readiness && npm run test:ai-clone && npm run test:acknowledgment && npm run test:db && npm run test:privacy",
     "test:db": "tsx test/db.test.ts",
     "test:quickcheck": "tsx test/quickcheck.test.ts",
     "test:membership": "tsx test/membership.test.ts",
@@ -24,7 +24,8 @@
     "test:ai-coach": "tsx test/ai-coach.test.ts",
     "test:acknowledgment": "tsx test/acknowledgment.test.ts",
     "test:readiness": "tsx test/readiness.test.ts",
-    "test:ai-clone": "tsx test/ai-clone.test.ts"
+    "test:ai-clone": "tsx test/ai-clone.test.ts",
+    "test:privacy": "tsx test/privacy.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.27.3",

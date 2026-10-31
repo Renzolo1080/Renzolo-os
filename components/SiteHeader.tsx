@@ -70,6 +70,7 @@ export function SiteFooter() {
     ["Academy", "/programs"],
     ["Contact", "/contact"],
     ["Privacy", "/privacy"],
+    ["Your data", "/account/data"],
     ["Terms", "/terms"],
     ["Refunds", "/refunds"],
   ];
