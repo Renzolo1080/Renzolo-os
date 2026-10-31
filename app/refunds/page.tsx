@@ -23,6 +23,8 @@ export default function RefundsPage() {
       <UL
         items={[
           "Coaching sessions are not refundable, including unused sessions. If you can't make a session, we'll work with you to reschedule it within 60 days of purchase.",
+          "Sessions not used within 60 days of purchase expire. In exceptional circumstances we may extend them.",
+          "If we cancel a session and can't offer you another time, we'll refund that session.",
           "Please give at least 24 hours' notice to reschedule. A session missed without notice counts as used.",
           "Coaching included in Growth and Elevate isn't refundable separately from the membership.",
         ]}
