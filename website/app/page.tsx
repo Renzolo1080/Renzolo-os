@@ -33,7 +33,7 @@ const OS_MODULES = [
 const REASONS = [
   ["Experience", "Built by someone who has done this across Africa for 20 years.", "Lorenzo's 20+ years developing suppliers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean, and six years leading the EY Africa Enterprise Impact Program."],
   ["Capability", "A platform and a coach, working together.", "RENZOLO OS™ (assessment, plan, dashboard, reports) plus your coaching team: Lorenzo · AI any time and live sessions with a Founder Coach."],
-  ["Value", "Know exactly where you stand for $79.", "The standalone assessment with AI market insight; membership from $15 a month, every tier priced in plain numbers below."],
+  ["Value", "Know exactly where you stand for $60.", "The standalone assessment with AI market insight; membership from $15 a month, every tier priced in plain numbers below."],
   ["Solution", "One path from where you are to customer, capital and investor ready.", "Evaluate. Evolve. Execute. Elevate., a plan length you choose (90 days to 36 months) and a dashboard that tracks it."],
   ["Differentiator", "Readiness that leads somewhere.", "One Readiness Score per outcome, and introductions to buyers, lenders and investors curated by the RENZOLO team."],
 ];
@@ -47,7 +47,7 @@ const TIERS: Tier[] = [
 /** "Find your path": where the founder is today, and the first step. */
 const PATHS: PathStage[] = [
   { key: "idea", label: "I have an idea or I'm just starting", who: "No steady customers yet", first: { name: "Free Snapshot", note: "See where you stand in about seven minutes." }, then: { name: "Launch or Essentials", note: "The 8-week Launch cohort, or Essentials from $15 a month." }, start: "Take the free Snapshot, then choose Launch or Essentials.", cta: { label: "Start the free Snapshot", href: appLink("/snapshot", "path_idea") } },
-  { key: "first", label: "I have my first customers", who: "Selling, but not yet steady", first: { name: "Readiness Assessment", note: "The full report, a valuation range and AI market insight, for $79." }, then: { name: "Essentials or Growth", note: "Work the plan, with coaching on Growth." }, start: HOW_TO_START.assessment, cta: { label: "Get the assessment", href: appLink("/pricing", "path_first") } },
+  { key: "first", label: "I have my first customers", who: "Selling, but not yet steady", first: { name: "Readiness Assessment", note: "The full report, a valuation range and AI market insight, for $60." }, then: { name: "Essentials or Growth", note: "Work the plan, with coaching on Growth." }, start: HOW_TO_START.assessment, cta: { label: "Get the assessment", href: appLink("/pricing", "path_first") } },
   { key: "growing", label: "I'm growing, with steady customers", who: "Ready to work the plan with a coach", first: { name: "Growth membership", note: "Your plan, dashboard and your coaching team." }, then: { name: "Build cohort", note: "12 weeks: traction first, then readiness for loans, grants and contracts." }, start: HOW_TO_START.growth, cta: { label: "See Growth", href: "#pricing" } },
   { key: "raise", label: "I'm ready to raise or win big contracts", who: "Capital, investors or large buyers next", first: { name: "Elevate membership", note: "Two coaching sessions a month and a pitch and investor readiness review." }, then: { name: "Scale cohort", note: "6 months, selective, with curated introductions." }, start: HOW_TO_START.elevate, cta: { label: "See Elevate", href: "#pricing" } },
 ];
@@ -62,7 +62,7 @@ const ACADEMY = [
 const FAQ = [
   ["How do I pay?", "Prices are in US dollars. You pay by card or mobile money, including M-Pesa, through Flutterwave."],
   ["What does the free Snapshot give me?", "Your Total Readiness Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back and a recommended next move, in about seven minutes, with no account needed."],
-  ["What is the difference between the $79 assessment and membership?", "The assessment gives you the full report once, with a valuation range and AI market insight. Membership adds the plan, the dashboard and, on Growth and Elevate, your coaching team: Lorenzo · AI any time and live sessions with a Founder Coach."],
+  ["What is the difference between the $60 assessment and membership?", "The assessment gives you the full report once, with a valuation range and AI market insight. Membership adds the plan, the dashboard and, on Growth and Elevate, your coaching team: Lorenzo · AI any time and live sessions with a Founder Coach."],
   ["How does coaching work?", "You prepare a short brief, book a time on your coach's calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan."],
   ["Can I get a refund?", "Our refund policy sets out exactly when and how refunds apply."],
 ];
@@ -284,7 +284,7 @@ export default function Home() {
                 <HowToStart text={HOW_TO_START.assessment} className="mt-3" />
               </div>
               <div className="flex items-center gap-6">
-                <p className="font-display text-5xl font-bold">$79</p>
+                <p className="font-display text-5xl font-bold">$60</p>
                 <Button href={appLink("/pricing", "home_pricing_assessment")} variant="secondary">Get the assessment</Button>
               </div>
             </div>

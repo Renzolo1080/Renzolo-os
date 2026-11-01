@@ -61,8 +61,8 @@ export function PageEndCta({ campaign, title = "Know where you stand in seven mi
 export const HOW_TO_START = {
   assessment: "Buy it and start today. It carries into a membership if you join within 30 days.",
   essentials: "Take the free Snapshot, then choose Essentials.",
-  growth: "Take the free Snapshot or the $79 assessment, then choose Growth.",
-  elevate: "Take the $79 assessment first. Places are limited.",
+  growth: "Take the free Snapshot or the $60 assessment, then choose Growth.",
+  elevate: "Take the $60 assessment first. Places are limited.",
   launch: "Register your interest. We email you when applications open.",
   build: "For businesses with customers. Register your interest to hear first.",
   scale: "Apply after your assessment. Selective, once a year.",
