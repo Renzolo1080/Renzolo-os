@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 /** The emails RENZOLO sends after a free Readiness Snapshot:
  *   results   — straight away: their scores and recommendation (asked for).
  *   day2      — what their weakest area means, with practical tips.
- *   day5      — turning the Snapshot into a plan (membership / $79 assessment).
+ *   day5      — turning the Snapshot into a plan (membership / $60 assessment).
  *   day10     — cohorts and the Readiness Clinic.
  * The three follow-ups go only to founders who ticked "email me tips",
  * stop once they create an account, and always carry an unsubscribe link.
@@ -123,11 +123,11 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
       `${hi}your score is a starting point`,
       p(`A Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you actually carry out.`) +
         p(`With a Founder Trajectory&trade; membership you get your full Readiness Assessment and report, a growth and readiness plan of 90 days to 36 months, a dashboard with goals and reminders, and coaching to keep you on track. Memberships start at $15 a month.`) +
-        p(`Prefer a one-time answer? The <strong>Readiness Assessment</strong> ($79) gives you the full report, a valuation range, an AI market insight for your industry and country, and a recommendation of the membership that fits you.`),
+        p(`Prefer a one-time answer? The <strong>Readiness Assessment</strong> ($60) gives you the full report, a valuation range, an AI market insight for your industry and country, and a recommendation of the membership that fits you.`),
       ctx,
       { label: "See membership options", href: pricing }
     );
-    const text = `${hi}a Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you carry out.\n\nMemberships start at $15 a month and include your full Readiness Assessment, a growth and readiness plan (90 days to 36 months), a dashboard and coaching. Or get the one-time Readiness Assessment for $79.\n\nSee the options: ${pricing}${textFooter(ctx)}`;
+    const text = `${hi}a Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you carry out.\n\nMemberships start at $15 a month and include your full Readiness Assessment, a growth and readiness plan (90 days to 36 months), a dashboard and coaching. Or get the one-time Readiness Assessment for $60.\n\nSee the options: ${pricing}${textFooter(ctx)}`;
     return { subject, html, text };
   }
   const programs = link(ctx, "/programs", "day10");

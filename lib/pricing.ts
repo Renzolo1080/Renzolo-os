@@ -13,7 +13,7 @@
  *
  * ONE-TIME PURCHASES
  *   Readiness Assessment (full report, valuation, market insight, tier
- *   recommendation)                         $79
+ *   recommendation)                         $60 (was $79; changed Nov 1 2026)
  *   Coaching has three price levels:
  *     members (any tier)                     $59 one session · $149 for three
  *     clients (bought the assessment or a
@@ -74,7 +74,7 @@ const DEFAULT_MEMBERSHIP: Record<Tier, Partial<Record<BillingInterval, number>>>
 };
 
 const DEFAULT_ONE_OFF: Record<OneOffItem, { standard: number; member: number; starter: number }> = {
-  assessment: { standard: 79, member: 79, starter: 79 },
+  assessment: { standard: 60, member: 60, starter: 60 },
   coaching_single: { standard: 79, member: 59, starter: 99 },
   coaching_pack3: { standard: 199, member: 149, starter: 249 },
 };

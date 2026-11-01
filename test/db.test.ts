@@ -422,7 +422,7 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   const ap = (await SRV(`insert into payments (tx_ref,founder_id,product,amount,currency) values ('renzolo-assessment-e-1','${E}','assessment',79,'USD') returning id`)).rows[0].id;
   r = await pay(ap, "t9010", "2027-02-02T00:00:00Z");
   const purchase = await one(`select * from assessment_purchases where payment_id='${ap}'`);
-  assert(r.ok && purchase?.founder_id === E, "a $79 assessment payment records the purchase", purchase);
+  assert(r.ok && purchase?.founder_id === E, "a $60 assessment payment records the purchase", purchase);
   r = await pay(ap, "t9010", "2027-02-02T00:00:00Z");
   assert((await one(`select count(*)::int as c from assessment_purchases where founder_id='${E}'`)).c === 1, "…exactly once");
 
@@ -459,9 +459,9 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   assert(r.ok, "server saves a report", r);
   const bp = (await SRV(`insert into assessment_purchases (founder_id,purchased_at) values ('${B}',now()) returning id`)).rows[0].id;
   r = await SRV(`insert into reports (assessment_id, score_id, diagnostic_markdown, assessment_purchase_id, level) values ('${ba}','${bs}','bought report','${bp}','full')`);
-  assert(r.ok, "server saves a report bought with the $79 assessment", r);
+  assert(r.ok, "server saves a report bought with the $60 assessment", r);
   r = await U(B, `select diagnostic_markdown from reports where assessment_id='${ba}'`);
-  assert(r.ok && r.rows.length === 1 && r.rows[0].diagnostic_markdown === "bought report", "without a membership, only the report bought with the $79 assessment is readable", r);
+  assert(r.ok && r.rows.length === 1 && r.rows[0].diagnostic_markdown === "bought report", "without a membership, only the report bought with the $60 assessment is readable", r);
   r = await U(A, `select diagnostic_markdown from reports where assessment_id='${ba}'`);
   assert(r.ok && r.rows.length === 0, "…and never by another founder", r);
 

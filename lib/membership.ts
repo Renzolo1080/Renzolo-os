@@ -70,7 +70,7 @@ export interface Entitlements {
   includedCoaching: string | null;
 }
 
-/** What a founder can use. `purchasedAssessment` is the one-time $79
+/** What a founder can use. `purchasedAssessment` is the one-time $60
  * Readiness Assessment: it unlocks the full report, valuation, scores and
  * market insight for the assessment it was bought for, but not the
  * membership tools. */
@@ -197,6 +197,6 @@ export function elevateSeatLimit(env: Record<string, string | undefined> = proce
   return Number.isInteger(n) && n > 0 ? n : 50;
 }
 
-/** How long after buying the $79 assessment it carries straight into a
+/** How long after buying the $60 assessment it carries straight into a
  * membership without starting a fresh assessment. */
 export const ASSESSMENT_CARRY_DAYS = 30;

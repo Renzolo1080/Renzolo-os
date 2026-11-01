@@ -5,7 +5,7 @@ export const metadata = { title: "Refund and cancellation policy · Founder Traj
 export default function RefundsPage() {
   const email = contactEmail();
   return (
-    <LegalPage title="Refund and cancellation policy" updated="31 October 2026">
+    <LegalPage title="Refund and cancellation policy" updated="1 November 2026">
       <H>Memberships</H>
       <UL
         items={[
@@ -16,7 +16,7 @@ export default function RefundsPage() {
         ]}
       />
 
-      <H>One-time Readiness Assessment ($79)</H>
+      <H>One-time Readiness Assessment ($60)</H>
       <p>Refundable in full if you ask before your Readiness Report has been created. Once the report has been created, it is not refundable.</p>
 
       <H>Coaching sessions</H>

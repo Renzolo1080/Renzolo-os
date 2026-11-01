@@ -32,7 +32,7 @@ assert(P("growth", "quarterly")?.amount === 117 && P("growth", "annual")?.amount
 assert(P("elevate", "quarterly")?.amount === 447 && P("elevate", "annual")?.amount === 1490, "Elevate: $447 quarterly ($149/month), $1,490 annual");
 assert(P("growth", "monthly") === null && P("elevate", "monthly") === null, "Growth and Elevate can't be bought monthly (closes the one-month gap)");
 assert(perMonth(usd(117), "quarterly") === "$39" && perMonth(usd(447), "quarterly") === "$149", "quarterly prices shown per month: $39 and $149");
-assert(getOneOffPrice("assessment", false, undefined, {})?.amount === 79 && getOneOffPrice("assessment", true, undefined, {})?.amount === 79, "Readiness Assessment is $79 for everyone");
+assert(getOneOffPrice("assessment", false, undefined, {})?.amount === 60 && getOneOffPrice("assessment", true, undefined, {})?.amount === 60, "Readiness Assessment is $60 for everyone");
 assert(getOneOffPrice("coaching_single", false, undefined, {})?.amount === 79 && getOneOffPrice("coaching_single", true, undefined, {})?.amount === 59, "one coaching session: $79, or $59 for members");
 assert(getOneOffPrice("coaching_pack3", false, undefined, {})?.amount === 199 && getOneOffPrice("coaching_pack3", true, undefined, {})?.amount === 149, "three sessions: $199, or $149 for members");
 
@@ -72,7 +72,7 @@ const e = entitlements("essentials"), g = entitlements("growth"), x = entitlemen
 assert(e.summaryReport && !e.fullReport && !e.valuation && !e.marketInsight && !e.aiCoaching && e.tools && e.includedCoaching === null, "Essentials: summary report, tools, no valuation/market insight/coaching");
 assert(g.fullReport && g.valuation && g.marketInsight && g.readinessScores && g.aiCoaching && g.includedCoaching === "2 one-on-one sessions per quarter", "Growth: full report, valuation, market insight, AI coaching, 2 sessions a quarter");
 assert(x.fullReport && x.includedCoaching === "2 one-on-one sessions per month", "Elevate: everything, 2 sessions a month");
-assert(buy.fullReport && buy.valuation && buy.marketInsight && !buy.tools && !buy.member, "$79 assessment: full report, valuation, market insight; no membership tools");
+assert(buy.fullReport && buy.valuation && buy.marketInsight && !buy.tools && !buy.member, "$60 assessment: full report, valuation, market insight; no membership tools");
 assert(!none.fullReport && !none.summaryReport && !none.tools, "nothing paid: nothing unlocked");
 
 // --- changing plan ----------------------------------------------------------------
@@ -117,7 +117,7 @@ console.log("\nAll membership and pricing tests completed.");
   const { coachingBuyerLevel } = require("../lib/pricing");
   assert(getOneOffPrice("coaching_single", "starter", undefined, {})?.amount === 99 && getOneOffPrice("coaching_pack3", "starter", undefined, {})?.amount === 249, "starting with coaching: $99 one session, $249 for three");
   assert(getOneOffPrice("coaching_single", "starter", undefined, { PRICE_COACHING_SINGLE_STARTER: "120" })?.amount === 120, "starter price can be changed in settings");
-  assert(getOneOffPrice("assessment", "starter", undefined, {})?.amount === 79, "the assessment price doesn't change by level");
+  assert(getOneOffPrice("assessment", "starter", undefined, {})?.amount === 60, "the assessment price doesn't change by level");
   assert(coachingBuyerLevel({ member: true, boughtAssessment: false, hadCoaching: false }) === "member", "members pay the member price");
   assert(coachingBuyerLevel({ member: false, boughtAssessment: true, hadCoaching: false }) === "client", "assessment buyers pay the standard price");
   assert(coachingBuyerLevel({ member: false, boughtAssessment: false, boughtCohort: true, hadCoaching: false }) === "client", "cohort buyers pay the standard price");
