@@ -8,6 +8,6 @@ export default function Image() {
   return brandImage({
     eyebrow: "Founder Trajectory™ membership",
     title: "Choose the support that fits where you want to be.",
-    subtitle: "Essentials from $15/month · Growth $39/month · Elevate $149/month",
+    subtitle: "Essentials $60/quarter · Growth $147/quarter · Elevate $699/quarter",
   });
 }

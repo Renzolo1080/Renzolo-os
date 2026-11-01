@@ -91,7 +91,14 @@ export function entitlements(tier: Tier | null, purchasedAssessment = false): En
     aiCoaching: growthUp,
     advisorReview: growthUp,
     tools: rank > 0,
-    includedCoaching: tier === "growth" ? "2 one-on-one sessions per quarter" : tier === "elevate" ? "2 one-on-one sessions per month" : null,
+    includedCoaching:
+      tier === "essentials"
+        ? "1 basic 30-minute coaching session per quarter"
+        : tier === "growth"
+          ? "2 one-on-one 30-minute sessions per quarter"
+          : tier === "elevate"
+            ? "1 one-on-one 60-minute session per month"
+            : null,
   };
 }
 

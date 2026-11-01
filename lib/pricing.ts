@@ -1,43 +1,40 @@
 /** All prices live here. Every price can be changed with an environment
  * setting in Vercel (plus a redeploy), never a code change.
  *
- * FOUNDER TRAJECTORY(TM) MEMBERSHIP — three tiers (approved Oct 2026):
+ * FOUNDER TRAJECTORY(TM) MEMBERSHIP — three tiers (Nov 1 2026). Every
+ * membership includes the Readiness Assessment (valued at $60 inside a
+ * membership). Billed quarterly or annually, never monthly:
  *
- *   Essentials  $15 monthly · $45 quarterly · $150 annual
- *   Growth      $117 quarterly ($39/month) · $390 annual
- *   Elevate     $447 quarterly ($149/month) · $1,490 annual
- *
- * Growth and Elevate are billed quarterly or annually, never monthly, so
- * one month of Growth can't be bought to get everything in the one-time
- * Readiness Assessment for less than its price.
+ *   Essentials  $60 quarterly · $200 annual   1 x 30-min basic session a quarter
+ *   Growth      $147 quarterly · $490 annual  2 x 30-min sessions a quarter
+ *   Elevate     $699 quarterly · $2,490 annual 1 x 60-min session a month
  *
  * ONE-TIME PURCHASES
  *   Readiness Assessment (full report, valuation, market insight, tier
- *   recommendation)                         $60 (was $79; changed Nov 1 2026)
- *   Coaching has three price levels:
- *     members (any tier)                     $59 one session · $149 for three
- *     clients (bought the assessment or a
- *     cohort, or have had coaching before)   $79 · $199
- *     starting with coaching (first coaching
- *     purchase, nothing else bought; covers
- *     intake and session planning)           $99 · $249
+ *   recommendation)                         $60
+ *   Extra coaching (60 min), priced by membership level:
+ *     not a member (first session includes intake) $150 · $399 for three
+ *     Essentials                             $75 · $199
+ *     Growth                                 $105 · $279
+ *     Elevate                                $120 · $319
  *
  * Settings (all optional; a missing or unusable value falls back to the
  * default above, never to free):
  *   PRICE_CURRENCY=USD
- *   PRICE_ESSENTIALS_MONTHLY, PRICE_ESSENTIALS_QUARTERLY, PRICE_ESSENTIALS_ANNUAL
+ *   PRICE_ESSENTIALS_QUARTERLY, PRICE_ESSENTIALS_ANNUAL
  *   PRICE_GROWTH_QUARTERLY, PRICE_GROWTH_ANNUAL
  *   PRICE_ELEVATE_QUARTERLY, PRICE_ELEVATE_ANNUAL
  *   PRICE_ASSESSMENT
- *   PRICE_COACHING_SINGLE, PRICE_COACHING_SINGLE_MEMBER
- *   PRICE_COACHING_PACK3, PRICE_COACHING_PACK3_MEMBER
- *   PRICE_COACHING_SINGLE_STARTER, PRICE_COACHING_PACK3_STARTER
+ *   PRICE_COACHING_SINGLE, PRICE_COACHING_PACK3            (not a member)
+ *   PRICE_COACHING_SINGLE_ESSENTIALS, PRICE_COACHING_PACK3_ESSENTIALS
+ *   PRICE_COACHING_SINGLE_GROWTH, PRICE_COACHING_PACK3_GROWTH
+ *   PRICE_COACHING_SINGLE_ELEVATE, PRICE_COACHING_PACK3_ELEVATE
  *
  * LOCAL-CURRENCY PRICES. Flutterwave decides which payment methods to show
  * from the currency of the charge: M-Pesa only appears for a Kenyan
  * shilling (KES) charge. To take mobile money, set a price in that
  * currency by adding the currency code to the setting name, e.g.
- *   PRICE_ESSENTIALS_MONTHLY_KES=1950
+ *   PRICE_ESSENTIALS_QUARTERLY_KES=7800
  * A local currency is only offered for something when its price is set;
  * nothing is ever converted automatically, because an exchange rate is a
  * pricing decision. */
@@ -59,7 +56,7 @@ export const TIER_RANK: Record<Tier, number> = { essentials: 1, growth: 2, eleva
 
 /** Which billing periods each tier can be bought for. */
 export const TIER_INTERVALS: Record<Tier, BillingInterval[]> = {
-  essentials: ["monthly", "quarterly", "annual"],
+  essentials: ["quarterly", "annual"],
   growth: ["quarterly", "annual"],
   elevate: ["quarterly", "annual"],
 };
@@ -68,26 +65,27 @@ export const INTERVAL_MONTHS: Record<BillingInterval, number> = { monthly: 1, qu
 export const INTERVAL_NAMES: Record<BillingInterval, string> = { monthly: "Monthly", quarterly: "Quarterly", annual: "Annual" };
 
 const DEFAULT_MEMBERSHIP: Record<Tier, Partial<Record<BillingInterval, number>>> = {
-  essentials: { monthly: 15, quarterly: 45, annual: 150 },
-  growth: { quarterly: 117, annual: 390 },
-  elevate: { quarterly: 447, annual: 1490 },
+  essentials: { quarterly: 60, annual: 200 },
+  growth: { quarterly: 147, annual: 490 },
+  elevate: { quarterly: 699, annual: 2490 },
 };
 
-const DEFAULT_ONE_OFF: Record<OneOffItem, { standard: number; member: number; starter: number }> = {
-  assessment: { standard: 60, member: 60, starter: 60 },
-  coaching_single: { standard: 79, member: 59, starter: 99 },
-  coaching_pack3: { standard: 199, member: 149, starter: 249 },
+/** Who is buying, for coaching prices: their membership tier, or "none"
+ * for someone who isn't a member. */
+export type BuyerLevel = "none" | Tier;
+export const BUYER_LEVELS: BuyerLevel[] = ["none", "essentials", "growth", "elevate"];
+
+const DEFAULT_ONE_OFF: Record<OneOffItem, Record<BuyerLevel, number>> = {
+  assessment: { none: 60, essentials: 60, growth: 60, elevate: 60 },
+  coaching_single: { none: 150, essentials: 75, growth: 105, elevate: 120 },
+  coaching_pack3: { none: 399, essentials: 199, growth: 279, elevate: 319 },
 };
 
-/** Who is buying, for coaching prices: a member, a client (has bought the
- * assessment or a cohort, or coaching before), or someone starting with
- * coaching. `true`/`false` are kept for member/client. */
-export type BuyerLevel = "member" | "client" | "starter";
-const levelOf = (v: boolean | BuyerLevel): BuyerLevel => (v === true ? "member" : v === false ? "client" : v);
+/** `false` (or null) means not a member. */
+const levelOf = (v: boolean | BuyerLevel | null | undefined): BuyerLevel => (typeof v === "string" ? v : "none");
 
-export function coachingBuyerLevel(input: { member: boolean; boughtAssessment: boolean; boughtCohort?: boolean; hadCoaching: boolean }): BuyerLevel {
-  if (input.member) return "member";
-  return input.boughtAssessment || input.boughtCohort || input.hadCoaching ? "client" : "starter";
+export function coachingBuyerLevel(input: { tier: Tier | null | undefined }): BuyerLevel {
+  return input.tier ?? "none";
 }
 
 /** Coaching sessions bought in each one-off coaching item. */
@@ -163,23 +161,19 @@ export function getMembershipPrice(tier: Tier, interval: BillingInterval, curren
   return amount === null ? null : { amount, currency: wanted };
 }
 
-/** The price of a one-time purchase. Coaching depends on who is buying
- * (BuyerLevel); the assessment is the same for everyone. */
-export function getOneOffPrice(item: OneOffItem, who: boolean | BuyerLevel, currency?: unknown, env: Env = process.env): Price | null {
+/** The price of a one-time purchase. Coaching depends on the buyer's
+ * membership level; the assessment is the same for everyone. */
+export function getOneOffPrice(item: OneOffItem, who: boolean | BuyerLevel | null, currency?: unknown, env: Env = process.env): Price | null {
   const main = mainCurrency(env);
   const wanted = currency === undefined ? main : cleanCurrency(currency);
   if (!wanted) return null;
-  const level = item === "assessment" ? "client" : levelOf(who);
-  const base = `PRICE_${item.toUpperCase()}`;
-  const keys = level === "member" ? [`${base}_MEMBER`, base] : level === "starter" ? [`${base}_STARTER`, base] : [base];
-  for (const key of keys) {
-    const amount = readAmount(env[wanted === main ? key : `${key}_${wanted}`]);
-    if (amount !== null) return { amount, currency: wanted };
-    // A member or starter price that isn't set in settings falls through
-    // to its default, not to the standard setting.
-    if (wanted === main) return { amount: DEFAULT_ONE_OFF[item][level === "client" ? "standard" : level], currency: main };
-  }
-  return null;
+  const level = item === "assessment" ? "none" : levelOf(who);
+  const key = `PRICE_${item.toUpperCase()}${level === "none" ? "" : `_${level.toUpperCase()}`}`;
+  const amount = readAmount(env[wanted === main ? key : `${key}_${wanted}`]);
+  if (amount !== null) return { amount, currency: wanted };
+  // A level price that isn't set falls back to its default (main currency
+  // only), never to another level's setting.
+  return wanted === main ? { amount: DEFAULT_ONE_OFF[item][level], currency: main } : null;
 }
 
 /** Currencies a founder in this country can pay in for membership: their
@@ -198,7 +192,7 @@ export function membershipCurrenciesFor(country: string | null | undefined, env:
 }
 
 /** Currencies a founder can pay in for a one-time purchase. */
-export function oneOffCurrenciesFor(item: OneOffItem, member: boolean | BuyerLevel, country: string | null | undefined, env: Env = process.env): string[] {
+export function oneOffCurrenciesFor(item: OneOffItem, member: boolean | BuyerLevel | null, country: string | null | undefined, env: Env = process.env): string[] {
   const main = mainCurrency(env);
   const local = currencyForCountry(country);
   const offered: string[] = [];

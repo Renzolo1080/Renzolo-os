@@ -613,17 +613,19 @@ create or replace function grant_included_coaching(
   language plpgsql security definer set search_path = public as $$
 declare
   chunk integer;
+  qty integer;
   n integer;
   i integer;
 begin
-  if p_tier::text = 'growth' then chunk := 3;
-  elsif p_tier::text = 'elevate' then chunk := 1;
+  if p_tier::text = 'essentials' then chunk := 3; qty := 1;
+  elsif p_tier::text = 'growth' then chunk := 3; qty := 2;
+  elsif p_tier::text = 'elevate' then chunk := 1; qty := 1;
   else return;
   end if;
   n := greatest(1, p_months / chunk);
   for i in 0 .. n - 1 loop
     insert into public.coaching_credits (founder_id, source, tier, quantity, available_from, expires_at, payment_id)
-    values (p_founder, 'membership', p_tier, 2,
+    values (p_founder, 'membership', p_tier, qty,
             ((p_start at time zone 'UTC') + make_interval(months => i * chunk)) at time zone 'UTC',
             ((p_start at time zone 'UTC') + make_interval(months => (i + 1) * chunk)) at time zone 'UTC',
             p_payment);

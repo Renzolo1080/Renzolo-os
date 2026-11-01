@@ -38,8 +38,7 @@ export default async function MembershipPage() {
 
   const blocks = buildCurrencyBlocks(profile?.country, m.current, m.tier);
   const member = !!m.tier;
-  const { data: pastCoaching } = await supabase.from("payments").select("id").eq("product", "coaching").eq("status", "successful").limit(1);
-  const level = coachingBuyerLevel({ member, boughtAssessment: m.purchases.length > 0, hadCoaching: (pastCoaching ?? []).length > 0 });
+  const level = coachingBuyerLevel({ tier: m.tier });
   const oneOffCurrencies = Array.from(
     new Set([...oneOffCurrenciesFor("assessment", false, profile?.country), ...oneOffCurrenciesFor("coaching_single", level, profile?.country)])
   );
