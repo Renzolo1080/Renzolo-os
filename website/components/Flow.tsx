@@ -12,8 +12,9 @@ const WRAP = "mx-auto max-w-[1200px] px-4 md:px-8";
 const SHORT: Record<string, string> = {
   "20+": "years developing founders and suppliers",
   "800+": "entrepreneurs trained",
-  "4,000+": "founders benefited across 19 African countries",
-  "$2M+": "raised for founder development and access to capital",
+  "4,000+": "founders benefited across 30+ countries",
+  "$10M": "raised for founder development and investment",
+  "$4.2B": "in customer contracts matched to founders",
 };
 
 /** 1. One proof band, straight after the hero. */
@@ -22,7 +23,7 @@ export function ProofBand() {
     <section aria-label="Lorenzo's track record" className="border-y border-line bg-surface">
       <div className={`${WRAP} grid items-center gap-6 py-6 md:grid-cols-[auto_1fr_auto] md:gap-10`}>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-text md:max-w-[11rem]">Lorenzo&apos;s track record, before RENZOLO</p>
-        <ul className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4">
+        <ul className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-5">
           {PROOF_STATS.map((p) => (
             <li key={p.figure}>
               <span className="block font-display text-3xl font-bold tracking-tight text-ink">{p.figure}</span>

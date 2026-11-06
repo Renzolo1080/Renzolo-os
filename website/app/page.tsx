@@ -29,8 +29,9 @@ const BENEFITS: [string, string, string][] = [
 const PROOF: [string, string][] = [
   ["20+", "years developing founders and suppliers"],
   ["800+", "entrepreneurs trained"],
-  ["4,000+", "founders benefited across 19 African countries"],
-  ["$2M+", "raised for founder development and access to capital"],
+  ["4,000+", "founders benefited across 30+ countries"],
+  ["$10M", "raised for founder development and investment"],
+  ["$4.2B", "in customer contracts matched to founders"],
 ];
 
 const STEPS: [string, string, string, string][] = [
@@ -132,7 +133,7 @@ export default function Home() {
                 <p className="mt-0.5 text-base text-[#C5CDD7] md:whitespace-nowrap">Founder and CEO. U.S. Navy veteran.</p>
               </div>
             </div>
-            <div className="grid min-w-0 flex-[2_1_560px] gap-6 [grid-template-columns:repeat(auto-fit,minmax(140px,1fr))]">
+            <div className="grid min-w-0 flex-[2_1_560px] grid-cols-2 gap-6 sm:grid-cols-3">
               {PROOF.map(([figure, label]) => (
                 <div key={figure}>
                   <p className="font-display text-[44px] font-bold leading-none">{figure}</p>

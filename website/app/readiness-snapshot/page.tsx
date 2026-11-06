@@ -44,8 +44,9 @@ const INSIDE = [
 const PROOF = [
   ["20+", "years developing suppliers and founders for large buyers"],
   ["800+", "entrepreneurs trained to become customer and investor ready"],
-  ["4,000+", "founders reached across 19 African countries"],
-  ["$2M+", "raised for founder development and access to capital in Wisconsin"],
+  ["4,000+", "founders benefited across 30+ countries"],
+  ["$10M", "raised for founder development and investment"],
+  ["$4.2B", "in customer contracts matched to founders"],
 ];
 
 const METHOD: [string, string, string][] = [
@@ -142,7 +143,7 @@ export default function ReadinessSnapshotLanding() {
           <div className="rounded-panel bg-night px-6 py-12 text-white md:px-14 md:py-16">
             <p className="text-sm font-bold uppercase tracking-[0.12em] text-gold">Track record, before RENZOLO</p>
             <h2 className={`${H2} mt-3`}>Built on 20+ years of getting businesses ready</h2>
-            <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
+            <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-5">
               {PROOF.map(([figure, label]) => (
                 <li key={figure}>
                   <span className="block font-display text-[44px] font-bold leading-none">{figure}</span>

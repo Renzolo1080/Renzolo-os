@@ -67,7 +67,7 @@ export default function AboutPage() {
           <div data-theme="dark" className="relative overflow-hidden rounded-panel bg-night text-ink">
           <div className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The proof behind the method</h2>
-            <div className="mt-10 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-5 sm:[&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1">
               {PROOF_STATS.map((p) => (
                 <div key={p.label} className="bg-navy/80 p-6">
                   <p className="font-display text-ink text-5xl font-bold">{p.figure}</p>
