@@ -1,6 +1,6 @@
 import { Header, Footer } from "@/components/Chrome";
 import { OutcomeChips, Portrait } from "@/components/Visuals";
-import { AFFILIATION_NOTE, CREDENTIALS, FOUNDER, PROOF_STATS, TRACK_RECORD } from "@/lib/story";
+import { AFFILIATION_NOTE, CREDENTIALS, FOUNDER, PROOF_STATS, CAREER_STORY } from "@/lib/story";
 import { appLink } from "@/lib/site";
 import { PageEndCta } from "@/components/Flow";
 
@@ -75,17 +75,11 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
-            <ol className="mt-12 space-y-0 border-l-2 border-white/15">
-              {TRACK_RECORD.map((t) => (
-                <li key={t.org + t.years} className="relative pb-9 pl-8 last:pb-0">
-                  <span aria-hidden="true" className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-gold ring-4 ring-night" />
-                  <p className="text-sm font-semibold uppercase tracking-wider text-gold-soft">{t.years}</p>
-                  <p className="mt-1 font-display text-xl font-bold">{t.role}</p>
-                  <p className="font-semibold text-mist">{t.org}</p>
-                  <p className="mt-2 max-w-3xl text-mist">{t.text}</p>
-                </li>
+            <div className="mt-12 max-w-3xl space-y-5 text-lg leading-relaxed text-mist">
+              {CAREER_STORY.map((p) => (
+                <p key={p.slice(0, 24)}>{p}</p>
               ))}
-            </ol>
+            </div>
             <p className="mt-10 max-w-3xl text-xs text-mist/70">{AFFILIATION_NOTE}</p>
           </div>
         </div>

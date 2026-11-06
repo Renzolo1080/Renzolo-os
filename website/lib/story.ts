@@ -44,7 +44,15 @@ export const PROOF_STATS: { figure: string; label: string }[] = [
 export const AFFILIATION_NOTE =
   "Roles and programme results are from Lorenzo's past and current positions. RENZOLO™ is independent and is not affiliated with or endorsed by EY or the other organisations named.";
 
-/** Track record, newest first. */
+/** Lorenzo's experience as one story, no timeline (About page, Nov 2026). */
+export const CAREER_STORY: string[] = [
+  "Lorenzo's career has been about one thing: getting good businesses ready for the opportunities in front of them. For more than 20 years he has worked from the buyer's side of the table, assessing suppliers for global companies, developing them until they met the standard, and connecting them to customers, lenders and investors across Africa, the UK, Europe, the US, India, Latin America and the Caribbean.",
+  "He has built and led accelerators and supplier development programmes for global companies, including the EY Africa Enterprise Impact Program, which he founded and where he trained and coached the founders himself. As a board leader in supplier development and mentor-protégé programmes, he has raised money for founder development and held programmes to their results.",
+  "Across that work, 4,000+ founders in 30+ countries have benefited, $10M has been raised for founder development and investment, and founders have been matched with $4.2B in customer contracts.",
+  "He still coaches founders one to one, including through the Green Bay Packers Mentor-Protégé Program, and advises the Girls STEAM Institute. A U.S. Navy veteran, he built RENZOLO so every founder can use the same playbook, not just the few who win a place in a cohort.",
+];
+
+/** Track record, newest first. No longer shown on the About page. */
 export const TRACK_RECORD: { years: string; role: string; org: string; text: string }[] = [
   {
     years: "2021–2026",
