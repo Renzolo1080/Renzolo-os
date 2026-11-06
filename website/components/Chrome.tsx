@@ -44,8 +44,11 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
     <header id="site-header" className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur transition-shadow">
       <ScrollShadow />
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4 md:px-8">
-        <a href="/" className="font-sans text-2xl font-bold tracking-[0.08em] text-ink">
-          RENZOLO<sup className="ml-0.5 text-[0.5em] font-bold text-black">™</sup>
+        <a href="/" className="inline-flex shrink-0 items-center gap-2 font-sans text-xl font-bold tracking-[0.06em] text-ink md:gap-3 md:text-2xl md:tracking-[0.08em]">
+          <img src="/img/rz-logo.png" alt="" aria-hidden="true" width={43} height={36} className="h-8 w-auto md:h-9" />
+          <span>
+            RENZOLO<sup className="ml-0.5 text-[0.5em] font-bold text-black">™</sup>
+          </span>
         </a>
         <nav aria-label="Main" className="hidden items-center gap-7 text-[15px] font-medium lg:flex">
           {NAV.map(([label, href]) => (
@@ -58,8 +61,9 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
             Log in
           </a>
         </nav>
-        <a href={appLink("/snapshot", campaign)} className="rounded-pill bg-brand px-5 py-2.5 text-[15px] font-bold text-on-brand transition-colors hover:bg-brand/90">
-          Start the free Snapshot
+        <a href={appLink("/snapshot", campaign)} className="shrink-0 rounded-pill bg-brand px-4 py-2.5 text-sm font-bold text-on-brand transition-colors hover:bg-brand/90 md:px-5 md:text-[15px]">
+          <span className="sm:hidden">Free Snapshot</span>
+          <span className="hidden sm:inline">Start the free Snapshot</span>
         </a>
       </div>
       <nav aria-label="Main (mobile)" className="flex gap-5 overflow-x-auto px-4 pb-3 text-sm font-medium lg:hidden">
@@ -85,7 +89,10 @@ export function Footer() {
       <footer data-theme="dark" className="bg-night text-ink-muted">
         <div className="mx-auto grid max-w-[1200px] gap-8 px-4 py-16 text-sm md:grid-cols-[2fr_1fr_1fr_1fr] md:px-8">
           <div>
-            <p className="font-display text-lg font-bold text-ink">RENZOLO™</p>
+            <p className="inline-flex items-center gap-2.5 font-sans text-lg font-bold tracking-[0.08em] text-ink">
+              <img src="/img/rz-logo.png" alt="" aria-hidden="true" width={34} height={29} className="h-7 w-auto" />
+              RENZOLO™
+            </p>
             <p className="mt-2 max-w-sm">
               Get ready to win contracts, access capital and attract investment. For early- and growth-stage businesses in Africa, the Caribbean and the US. Home of Founder Trajectory™, powered by RENZOLO OS™.
             </p>
