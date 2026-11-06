@@ -27,9 +27,9 @@ const LOOKS_LIKE = [
 ];
 
 const OUTCOMES = [
-  ["Win more customers", "Are you ready for larger buyers, corporate contracts and supplier programmes?"],
-  ["Get credit or capital", "Are you ready to apply for a loan, grant or working-capital facility and be approved?"],
-  ["Take investment", "Are you ready to bring in investors, partners or new owners on good terms?"],
+  ["Win more contracts", "Are you ready for larger buyers, corporate and government contracts and supplier programmes?"],
+  ["Access capital", "Are you ready to apply for a loan, grant or working-capital facility and be approved?"],
+  ["Attract investment", "Are you ready to bring in investors, partners or new owners on good terms?"],
 ];
 
 const INSIDE = [
