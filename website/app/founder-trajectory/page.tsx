@@ -75,7 +75,7 @@ export default function FounderTrajectoryPage() {
             </div>
             <p className="mt-8 max-w-3xl text-muted">
               Prefer a one-time answer? The Readiness Assessment ($60) gives you the full report, a valuation range, an AI market insight and a
-              recommendation of the plan that fits you, with no membership. Coaching sessions are from $59 for members.
+              recommendation of the plan that fits you, with no membership. Extra coaching sessions start at $75 for members.
             </p>
             <a href={appLink("/pricing", "ft_tiers")} className="mt-6 inline-block rounded-full border-2 border-navy px-6 py-3 font-semibold text-navy hover:bg-navy hover:text-white">
               See full pricing
@@ -92,7 +92,7 @@ export default function FounderTrajectoryPage() {
             </div>
             <div className="rounded-card border border-line bg-surface-tint p-7">
               <p className="font-display text-xl font-bold">Live sessions with a Founder Coach</p>
-              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Two sessions a quarter on Growth, two a month on Elevate, or from $59 a session for members.</p>
+              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month; extra sessions start at $75 for members.</p>
             </div>
           </div>
         </section>

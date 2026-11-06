@@ -43,7 +43,7 @@ export function PathChooser({ stages, fallbackHref }: { stages: PathStage[]; fal
               onClick={() => choose(x.key)}
               className={`flex items-center gap-4 rounded-card border-2 p-4 text-left transition-colors duration-200 ${sel ? "border-ink bg-ink text-surface" : "border-line bg-surface-raised text-ink hover:border-ink/40"}`}
             >
-              <span className={`inline-grid h-9 w-9 shrink-0 place-items-center rounded-pill font-display text-sm font-extrabold ${sel ? "bg-brand text-on-brand" : "bg-surface-tint text-ink"}`}>{i + 1}</span>
+              <span className={`inline-grid h-9 w-9 shrink-0 place-items-center rounded-pill font-display text-sm font-bold ${sel ? "bg-brand text-on-brand" : "bg-surface-tint text-ink"}`}>{i + 1}</span>
               <span>
                 <span className="block font-semibold">{x.label}</span>
                 <span className={`block text-sm ${sel ? "text-surface/75" : "text-ink-muted"}`}>{x.who}</span>

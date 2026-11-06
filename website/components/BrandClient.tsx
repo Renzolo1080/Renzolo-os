@@ -343,13 +343,13 @@ export function RevealOnScroll() {
 /* ---------- Outcome cards that flip (hover on desktop, tap on phones) ---------- */
 const OUTCOME_FLIP = [
   {
-    key: "customers", num: "01", label: "Customers", title: "Win more customers", text: "Get ready for buyers, tenders and supplier programmes.",
+    key: "customers", num: "01", label: "Customers", title: "Win more contracts", text: "Get ready for buyers, tenders and supplier programmes.",
     tile: "bg-brand text-on-brand", back: "bg-brand text-on-brand", backTitle: "Your path to buyer-ready",
     gets: ["Your Customer readiness score", "A plan for the gaps buyers check", "Coaching for your next big contract"],
     icon: <path d="M3 9h18l-1.5 11h-15zM8 9V6a4 4 0 0 1 8 0v3" />,
   },
   {
-    key: "capital", num: "02", label: "Capital", title: "Access credit and grants", text: "Get your plan, numbers and records lender-ready.",
+    key: "capital", num: "02", label: "Capital", title: "Access capital", text: "Get your plan, numbers and records lender-ready.",
     tile: "bg-gold text-on-gold", back: "bg-gold text-on-gold", backTitle: "Lender-ready numbers",
     gets: ["Your Venture and plan readiness scores", "Cash flow, records and plan gaps named", "Market Intelligence for your country"],
     icon: <path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18" />,

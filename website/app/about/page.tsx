@@ -1,16 +1,16 @@
 import { Header, Footer } from "@/components/Chrome";
-import { Glow, OutcomeChips, Portrait, SignalBand } from "@/components/Visuals";
-import { AFFILIATION_NOTE, CREDENTIALS, FOUNDER, PROOF_STATS, TRACK_RECORD } from "@/lib/story";
+import { OutcomeChips, Portrait } from "@/components/Visuals";
+import { AFFILIATION_NOTE, CREDENTIALS, FOUNDER, PROOF_STATS, CAREER_STORY } from "@/lib/story";
 import { appLink } from "@/lib/site";
 import { PageEndCta } from "@/components/Flow";
 
 export const metadata = { title: "About", description: "Customer, capital and investor readiness for founders and suppliers, built by someone who has assessed and developed suppliers for large buyers. Founder Trajectory™, powered by RENZOLO OS™." };
 
 const STEPS = [
-  ["Evaluate", "See exactly where your business stands with the Readiness Snapshot and your full Readiness Assessment."],
-  ["Evolve", "Turn the results into a growth and readiness plan, and update your strategy around the gaps that matter most."],
-  ["Execute", "Work the plan with your dashboard, goals, Lorenzo · AI, tools and live coaching with a Founder Coach."],
-  ["Elevate", "Re-assess, measure your progress and move your business to its next stage."],
+  ["Evaluate", "Know your readiness score, free in minutes, then go deeper with your full Readiness Assessment."],
+  ["Evolve", "Develop your strategic growth plan, built to support your market growth."],
+  ["Execute", "Work the plan with a Founder Coach, your dashboard and progress tracking."],
+  ["Elevate", "Re-assess and move to your next stage."],
 ];
 
 const ACCENTS = ["#E8603C", "#F4B740", "#22B8B0", "#C18B2C", "#087F77", "#E8603C"];
@@ -20,12 +20,13 @@ export default function AboutPage() {
     <>
       <Header campaign="about_header" />
       <main>
-        <section data-theme="dark" className="relative overflow-hidden bg-night text-ink">
-          <Glow />
-          <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-10 md:pt-16">
+        <section className="mx-auto max-w-[1240px] px-4 pt-8 md:px-8 md:pt-10">
+          <div data-theme="dark" className="relative overflow-hidden rounded-panel bg-night px-6 py-14 text-ink md:px-14 md:py-20">
+          <img src="/img/burst-bright.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute -right-48 top-1/2 hidden h-[600px] w-[600px] -translate-y-1/2 object-cover opacity-90 [mask-image:radial-gradient(circle,#000_35%,transparent_70%)] md:block" />
+          <div className="relative max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold-soft">About RENZOLO™</p>
-            <h1 className="mt-4 max-w-4xl font-display text-4xl font-extrabold leading-[1.05] tracking-tight md:text-6xl" style={{ fontWeight: 800 }}>
-              Customer, capital and investor readiness, <span className="text-gold">from the buyer&apos;s side of the table.</span>
+            <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
+              Ready for contracts, capital and investment, <span className="text-gold">from the buyer&apos;s side of the table.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-mist">
               RENZOLO™ is a venture development firm. We give founders and suppliers a clear view of where their business stands, help them build a
@@ -33,14 +34,14 @@ export default function AboutPage() {
             </p>
             <OutcomeChips className="mt-6" />
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <a href={appLink("/snapshot", "about_hero")} className="btn-pop rounded-pill border-2 border-ink bg-brand px-7 py-4 font-semibold text-on-brand">
-                Start your assessment
+              <a href={appLink("/snapshot", "about_hero")} className="rounded-pill bg-brand px-7 py-4 text-lg font-bold text-on-brand transition-colors hover:bg-brand/90">
+                Start the free Snapshot
               </a>
               <a href="#proof" className="font-semibold text-gold-soft underline-offset-4 hover:underline">See the track record</a>
             </div>
           </div>
+          </div>
         </section>
-        <SignalBand />
 
         <section className="mx-auto grid max-w-6xl gap-12 px-5 py-16 md:grid-cols-[0.8fr_1.2fr] md:py-24">
           <div>
@@ -62,31 +63,26 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section id="proof" data-theme="dark" className="relative scroll-mt-24 overflow-hidden bg-night text-ink">
-          <Glow />
+        <section id="proof" className="mx-auto max-w-[1240px] scroll-mt-24 px-4 md:px-8">
+          <div data-theme="dark" className="relative overflow-hidden rounded-panel bg-night text-ink">
           <div className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The proof behind the method</h2>
-            <div className="mt-10 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid gap-px overflow-hidden rounded-3xl bg-white/10 sm:grid-cols-2 lg:grid-cols-5 sm:[&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1">
               {PROOF_STATS.map((p) => (
                 <div key={p.label} className="bg-navy/80 p-6">
-                  <p className="font-display text-ink text-5xl font-extrabold" style={{ fontWeight: 800 }}>{p.figure}</p>
+                  <p className="font-display text-ink text-5xl font-bold">{p.figure}</p>
                   <p className="mt-2 text-sm text-mist">{p.label}</p>
                 </div>
               ))}
             </div>
-            <ol className="mt-12 space-y-0 border-l-2 border-white/15">
-              {TRACK_RECORD.map((t) => (
-                <li key={t.org + t.years} className="relative pb-9 pl-8 last:pb-0">
-                  <span aria-hidden="true" className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full bg-gold ring-4 ring-night" />
-                  <p className="text-sm font-semibold uppercase tracking-wider text-gold-soft">{t.years}</p>
-                  <p className="mt-1 font-display text-xl font-bold">{t.role}</p>
-                  <p className="font-semibold text-mist">{t.org}</p>
-                  <p className="mt-2 max-w-3xl text-mist">{t.text}</p>
-                </li>
+            <div className="mt-12 max-w-3xl space-y-5 text-lg leading-relaxed text-mist">
+              {CAREER_STORY.map((p) => (
+                <p key={p.slice(0, 24)}>{p}</p>
               ))}
-            </ol>
+            </div>
             <p className="mt-10 max-w-3xl text-xs text-mist/70">{AFFILIATION_NOTE}</p>
           </div>
+        </div>
         </section>
 
         <section id="expertise" className="scroll-mt-24 bg-white">
@@ -97,7 +93,7 @@ export default function AboutPage() {
               {CREDENTIALS.map((c, i) => (
                 <li key={c.title} className="rounded-3xl border border-mist p-6">
                   <span aria-hidden="true" className="block h-1.5 w-10 rounded-full" style={{ background: ACCENTS[i % ACCENTS.length] }} />
-                  {c.figure && <p className="mt-4 font-display text-4xl font-extrabold text-navy" style={{ fontWeight: 800 }}>{c.figure}</p>}
+                  {c.figure && <p className="mt-4 font-display text-4xl font-bold text-navy">{c.figure}</p>}
                   <p className="mt-4 font-display text-lg font-bold">{c.title}</p>
                   <p className="mt-2 text-muted">{c.text}</p>
                 </li>
@@ -112,7 +108,7 @@ export default function AboutPage() {
           <ol className="mt-10 divide-y divide-mist border-y border-mist">
             {STEPS.map(([name, text], i) => (
               <li key={name} className="grid gap-2 py-7 md:grid-cols-[4rem_14rem_1fr] md:items-baseline md:gap-8">
-                <span className="font-display text-3xl font-extrabold" style={{ fontWeight: 800, color: ACCENTS[i] }}>
+                <span className="font-display text-3xl font-bold" style={{ fontWeight: 800, color: ACCENTS[i] }}>
                   {i + 1}
                 </span>
                 <p className="font-display text-2xl font-bold">{name}</p>
