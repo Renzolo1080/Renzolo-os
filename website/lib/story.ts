@@ -19,10 +19,10 @@ export const FOUNDER = {
   pullQuote:
     "Talented founders lose opportunities not because their business is weak, but because nobody showed them what ready looks like to a buyer, a lender or an investor.",
   short:
-    "For more than 20 years Lorenzo has developed suppliers and founders for large buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. In six years founding and leading EY Africa's Enterprise Impact Program, he trained 800+ entrepreneurs in 19 African countries to become customer and investor ready, and 4,000+ founders across 30+ countries have benefited from his work. RENZOLO puts that playbook in every founder's hands.",
+    "For more than 20 years Lorenzo has developed suppliers and founders for large buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. He has trained 7,000+ suppliers and entrepreneurs in 30+ countries to become customer and investor ready, including six years founding and leading EY Africa's Enterprise Impact Program, and 4,000+ founders have benefited from his work. RENZOLO puts that playbook in every founder's hands.",
   story: [
     "For more than 20 years I sat on the buyer's side of the table. I assessed suppliers for global companies, developed them until they were ready, and connected them to contracts worth winning, across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. I saw the same thing again and again: talented founders lost opportunities not because their business was weak, but because nobody had shown them what “ready” looks like to a buyer, a lender or an investor.",
-    "At EY I led inclusive and sustainable procurement strategy, and founded and led the EY Africa Enterprise Impact Program: a six-month accelerator. Over six years we trained 800+ entrepreneurs across 19 African countries to become customer and investor ready, 60% of them women, and 4,000+ founders across 30+ countries have benefited from my work. I trained and coached those founders myself, and I've coached founders through EY's Ignite advisor programme and the Green Bay Packers Mentor-Protégé Program.",
+    "At EY I led inclusive and sustainable procurement strategy, and founded and led the EY Africa Enterprise Impact Program: a six-month accelerator. Over six years we trained entrepreneurs across Africa to become customer and investor ready, 60% of them women. Across my career I've trained 7,000+ suppliers and entrepreneurs in 30+ countries, and 4,000+ founders have benefited from my work. I trained and coached those founders myself, and I've coached founders through EY's Ignite advisor programme and the Green Bay Packers Mentor-Protégé Program.",
     "I built RENZOLO so every founder can get that support, not just the few who win a place in a cohort. Founder Trajectory™ turns what procurement teams, credit committees and investors check into an assessment, a plan and coaching any founder can use, at a price early-stage founders in Africa can afford.",
     "I learned discipline and mission in the U.S. Navy. Today I also advise the Girls STEAM Institute on building the next generation of supplier-ready entrepreneurs. The lesson is the same everywhere: no single generation builds the future alone.",
   ],
@@ -34,7 +34,7 @@ export const FOUNDER = {
 /** Headline proof figures. */
 export const PROOF_STATS: { figure: string; label: string }[] = [
   { figure: "20+", label: "years developing founders and suppliers" },
-  { figure: "800+", label: "entrepreneurs trained in six years leading EY Africa's Enterprise Impact Program" },
+  { figure: "7,000+", label: "suppliers and entrepreneurs trained to become customer and investor ready in 30+ countries" },
   { figure: "4,000+", label: "founders benefited across 30+ countries" },
   { figure: "$10M", label: "raised for founder development and investment" },
   { figure: "$4.2B", label: "in customer contracts matched to founders" },
@@ -58,7 +58,7 @@ export const TRACK_RECORD: { years: string; role: string; org: string; text: str
     years: "2021–2026",
     role: "Founder, lead, trainer and coach",
     org: "EY Africa Enterprise Impact Program",
-    text: "Six years leading a six-month virtual accelerator that closes the capability gap for black-owned businesses in Africa and opens customer and investor opportunities. Results: 800+ entrepreneurs trained across 19 countries, 60% women, 4,000+ founders benefited, 280 hours of training and coaching.",
+    text: "Six years leading a six-month virtual accelerator that closes the capability gap for black-owned businesses in Africa and opens customer and investor opportunities. 60% of founders trained were women; 280 hours of training and coaching.",
   },
   {
     years: "2024–2026",
@@ -99,9 +99,9 @@ export const CREDENTIALS: { figure?: string; title: string; text: string }[] = [
     text: "Connecting ready suppliers to contract opportunities with large buyers and their supply chains, across seven regions of the world.",
   },
   {
-    figure: "800+",
+    figure: "7,000+",
     title: "Customer and investor readiness",
-    text: "Entrepreneurs trained to become customer and investor ready in six years leading the EY Africa Enterprise Impact Program, across 19 countries, with 4,000+ founders benefiting.",
+    text: "Suppliers and entrepreneurs trained to become customer and investor ready across 30+ countries, including six years leading the EY Africa Enterprise Impact Program.",
   },
   {
     title: "Coaching founders",
@@ -119,7 +119,7 @@ export const CREDENTIALS: { figure?: string; title: string; text: string }[] = [
 
 /** Each "why" claim, tied to the proof behind it (home page). */
 export const WHY_PROOF = {
-  outcome: "Proof: the customer and investor readiness approach Lorenzo used to train 800+ founders in 19 African countries over six years.",
+  outcome: "Proof: the customer and investor readiness approach Lorenzo used to train 7,000+ suppliers and entrepreneurs in 30+ countries.",
   buyer: "Proof: 20+ years developing suppliers for global buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean.",
   price: "Proof: the kind of support EIP values at $25,000 per founder, now from $60 a quarter.",
 };
@@ -131,7 +131,7 @@ export const RESULTS = {
   label: "Lorenzo's track record, before RENZOLO",
   stats: [
     { figure: "20+", label: "years developing suppliers and founders" },
-    { figure: "800+", label: "entrepreneurs trained to be customer and investor ready" },
+    { figure: "7,000+", label: "suppliers and entrepreneurs trained to become customer and investor ready" },
     { figure: "4,000+", label: "founders benefited across 30+ countries" },
     { figure: "$10M", label: "raised for founder development and investment" },
     { figure: "$4.2B", label: "in customer contracts matched to founders" },

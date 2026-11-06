@@ -43,7 +43,7 @@ const INSIDE = [
 
 const PROOF = [
   ["20+", "years developing suppliers and founders for large buyers"],
-  ["800+", "entrepreneurs trained to become customer and investor ready"],
+  ["7,000+", "suppliers and entrepreneurs trained to become customer and investor ready"],
   ["4,000+", "founders benefited across 30+ countries"],
   ["$10M", "raised for founder development and investment"],
   ["$4.2B", "in customer contracts matched to founders"],

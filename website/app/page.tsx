@@ -28,7 +28,7 @@ const BENEFITS: [string, string, string][] = [
 
 const PROOF: [string, string][] = [
   ["20+", "years developing founders and suppliers"],
-  ["800+", "entrepreneurs trained"],
+  ["7,000+", "suppliers and entrepreneurs trained"],
   ["4,000+", "founders benefited across 30+ countries"],
   ["$10M", "raised for founder development and investment"],
   ["$4.2B", "in customer contracts matched to founders"],

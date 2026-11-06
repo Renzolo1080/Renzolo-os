@@ -8,7 +8,7 @@ import { OutcomeFlipCards, ReadinessTicker } from "@/components/brand/BrandClien
 const WHY = [
   {
     title: "Built around the outcome you need",
-    text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it. The approach behind 800+ founders trained in 19 African countries.",
+    text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it. The approach behind 7,000+ suppliers and entrepreneurs trained in 30+ countries.",
   },
   {
     title: "Built from the buyer's side of the table",
