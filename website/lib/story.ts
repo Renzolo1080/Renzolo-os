@@ -19,10 +19,10 @@ export const FOUNDER = {
   pullQuote:
     "Talented founders lose opportunities not because their business is weak, but because nobody showed them what ready looks like to a buyer, a lender or an investor.",
   short:
-    "For more than 20 years Lorenzo has developed suppliers and founders for large buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. In six years founding and leading EY Africa's Enterprise Impact Program, he trained 800+ entrepreneurs in 19 African countries to become customer and investor ready, with $880k invested in their businesses. RENZOLO puts that playbook in every founder's hands.",
+    "For more than 20 years Lorenzo has developed suppliers and founders for large buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. In six years founding and leading EY Africa's Enterprise Impact Program, he trained 800+ entrepreneurs in 19 African countries to become customer and investor ready, and 4,000+ founders across 19 African countries benefited. RENZOLO puts that playbook in every founder's hands.",
   story: [
     "For more than 20 years I sat on the buyer's side of the table. I assessed suppliers for global companies, developed them until they were ready, and connected them to contracts worth winning, across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. I saw the same thing again and again: talented founders lost opportunities not because their business was weak, but because nobody had shown them what “ready” looks like to a buyer, a lender or an investor.",
-    "At EY I led inclusive and sustainable procurement strategy, and founded and led the EY Africa Enterprise Impact Program: a six-month accelerator. Over six years we trained 800+ entrepreneurs across 19 African countries to become customer and investor ready, 60% of them women, with $880k invested in their businesses. I trained and coached those founders myself, and I've coached founders through EY's Ignite advisor programme and the Green Bay Packers Mentor-Protégé Program.",
+    "At EY I led inclusive and sustainable procurement strategy, and founded and led the EY Africa Enterprise Impact Program: a six-month accelerator. Over six years we trained 800+ entrepreneurs across 19 African countries to become customer and investor ready, 60% of them women, and 4,000+ founders across 19 African countries benefited. I trained and coached those founders myself, and I've coached founders through EY's Ignite advisor programme and the Green Bay Packers Mentor-Protégé Program.",
     "I built RENZOLO so every founder can get that support, not just the few who win a place in a cohort. Founder Trajectory™ turns what procurement teams, credit committees and investors check into an assessment, a plan and coaching any founder can use, at a price early-stage founders in Africa can afford.",
     "I learned discipline and mission in the U.S. Navy. Today I also advise the Girls STEAM Institute on building the next generation of supplier-ready entrepreneurs. The lesson is the same everywhere: no single generation builds the future alone.",
   ],
@@ -33,10 +33,10 @@ export const FOUNDER = {
 
 /** Headline proof figures. */
 export const PROOF_STATS: { figure: string; label: string }[] = [
-  { figure: "20+", label: "years developing suppliers and founders" },
+  { figure: "20+", label: "years developing founders and suppliers" },
   { figure: "800+", label: "entrepreneurs trained in six years leading EY Africa's Enterprise Impact Program" },
-  { figure: "19", label: "African countries reached" },
-  { figure: "$880k", label: "invested in programme founders' businesses" },
+  { figure: "4,000+", label: "founders benefited across 19 African countries" },
+  { figure: "$2M+", label: "raised for founder development and access to capital" },
 ];
 
 /** Shown wherever EY or another organisation is named. */
@@ -49,7 +49,7 @@ export const TRACK_RECORD: { years: string; role: string; org: string; text: str
     years: "2021–2026",
     role: "Founder, lead, trainer and coach",
     org: "EY Africa Enterprise Impact Program",
-    text: "Six years leading a six-month virtual accelerator that closes the capability gap for black-owned businesses in Africa and opens customer and investor opportunities. Results: 800+ entrepreneurs trained across 19 countries, 60% women, $880k invested, 280 hours of training and coaching.",
+    text: "Six years leading a six-month virtual accelerator that closes the capability gap for black-owned businesses in Africa and opens customer and investor opportunities. Results: 800+ entrepreneurs trained across 19 countries, 60% women, 4,000+ founders benefited, 280 hours of training and coaching.",
   },
   {
     years: "2024–2026",
@@ -92,7 +92,7 @@ export const CREDENTIALS: { figure?: string; title: string; text: string }[] = [
   {
     figure: "800+",
     title: "Customer and investor readiness",
-    text: "Entrepreneurs trained to become customer and investor ready in six years leading the EY Africa Enterprise Impact Program, across 19 countries, with $880k invested.",
+    text: "Entrepreneurs trained to become customer and investor ready in six years leading the EY Africa Enterprise Impact Program, across 19 countries, with 4,000+ founders benefiting.",
   },
   {
     title: "Coaching founders",
@@ -123,8 +123,8 @@ export const RESULTS = {
   stats: [
     { figure: "20+", label: "years developing suppliers and founders" },
     { figure: "800+", label: "entrepreneurs trained to be customer and investor ready" },
-    { figure: "19", label: "African countries" },
-    { figure: "$880K", label: "invested in programme founders" },
+    { figure: "4,000+", label: "founders benefited across 19 African countries" },
+    { figure: "$2M+", label: "raised for founder development and access to capital" },
   ],
   base: "Programme figures cover six years leading the EY Africa Enterprise Impact Program (2021–2026), as reported in January 2026.",
 };

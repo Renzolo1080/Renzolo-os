@@ -11,7 +11,7 @@ const NAV = [
 
 /** "Track record" menu: the proof, gathered in one place. */
 const TRACK = [
-  ["Lorenzo's experience", "/about/#proof", "20+ years, 800+ founders, 19 countries"],
+  ["Lorenzo's experience", "/about/#proof", "20+ years, 800+ trained, 4,000+ founders, $2M+ raised"],
   ["Expertise", "/about/#expertise", "What every assessment draws on"],
   ["Founder story", "/about/", "Why Lorenzo built RENZOLO"],
 ];

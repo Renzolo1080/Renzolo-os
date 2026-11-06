@@ -10,10 +10,10 @@ const WRAP = "mx-auto max-w-[1200px] px-4 md:px-8";
 
 /** Short labels for the band; the full labels stay on the About page. */
 const SHORT: Record<string, string> = {
-  "20+": "years developing suppliers and founders",
+  "20+": "years developing founders and suppliers",
   "800+": "entrepreneurs trained",
-  "19": "African countries reached",
-  "$880k": "invested in founders' businesses",
+  "4,000+": "founders benefited across 19 African countries",
+  "$2M+": "raised for founder development and access to capital",
 };
 
 /** 1. One proof band, straight after the hero. */
