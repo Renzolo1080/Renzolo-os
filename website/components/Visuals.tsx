@@ -4,8 +4,8 @@
 
 /** The three outcomes, in the fixed order and accents the brand book sets. */
 export const OUTCOMES = [
-  { key: "customers", num: "01", label: "Customers", title: "Win more customers", text: "Prove your offer and get ready for buyers, tenders and supplier programmes.", fill: "bg-brand text-on-brand" },
-  { key: "capital", num: "02", label: "Capital", title: "Access credit and grants", text: "Get your plan, numbers and records lender-ready.", fill: "bg-gold text-on-gold" },
+  { key: "customers", num: "01", label: "Customers", title: "Win more contracts", text: "Prove your offer and get ready for buyers, tenders and supplier programmes.", fill: "bg-brand text-on-brand" },
+  { key: "capital", num: "02", label: "Capital", title: "Access capital", text: "Get your plan, numbers and records lender-ready.", fill: "bg-gold text-on-gold" },
   { key: "investors", num: "03", label: "Investors", title: "Attract investment", text: "Show investors and partners a business that is ready to grow.", fill: "bg-teal text-on-teal" },
 ] as const;
 
@@ -84,7 +84,7 @@ export function OutcomeCards({ hrefFor }: { hrefFor: (key: string) => string }) 
     <div className="grid gap-6 md:grid-cols-3">
       {OUTCOMES.map((o) => (
         <a key={o.key} href={hrefFor(o.key)} className="card-pop group block rounded-card border border-line bg-surface-raised p-6 md:p-8">
-          <span className={`flex h-12 w-12 items-center justify-center rounded-card font-display text-xl font-extrabold ${o.fill}`}>{o.num}</span>
+          <span className={`flex h-12 w-12 items-center justify-center rounded-card font-display text-xl font-bold ${o.fill}`}>{o.num}</span>
           <Eyebrow className="mt-4">{o.label}</Eyebrow>
           <h3 className="mt-1 font-display text-[22px] font-bold leading-7">{o.title}</h3>
           <p className="mt-2 text-ink-muted">{o.text}</p>
@@ -133,7 +133,7 @@ export function Portrait({ name, photo, className = "" }: { name: string; photo?
         <span className="block h-28 w-1/3 rounded-t-card bg-gold" />
         <span className="block h-40 w-1/3 rounded-t-card bg-teal" />
       </div>
-      <span className="relative m-6 font-display text-6xl font-extrabold text-ink">{initials}</span>
+      <span className="relative m-6 font-display text-6xl font-bold text-ink">{initials}</span>
     </div>
   );
 }

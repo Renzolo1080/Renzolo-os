@@ -3,16 +3,16 @@ import { APP_URL, appLink, WHATSAPP_URL } from "@/lib/site";
 
 /** Header links, per the brand book's page flow. */
 const NAV = [
+  ["How it works", "/#how"],
   ["Founder Trajectory™", "/founder-trajectory/"],
   ["Academy", "/academy/"],
-  ["Pricing", "/#pricing"],
+  ["Pricing", `${APP_URL}/pricing`],
 ];
 
 /** "Track record" menu: the proof, gathered in one place. */
 const TRACK = [
   ["Lorenzo's experience", "/about/#proof", "20+ years, 800+ founders, 19 countries"],
   ["Expertise", "/about/#expertise", "What every assessment draws on"],
-  ["Why RENZOLO", "/#why", "Five reasons, each with its proof"],
   ["Founder story", "/about/", "Why Lorenzo built RENZOLO"],
 ];
 
@@ -44,8 +44,8 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
     <header id="site-header" className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur transition-shadow">
       <ScrollShadow />
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4 md:px-8">
-        <a href="/" className="font-display text-xl font-extrabold tracking-[-0.01em] text-ink">
-          RENZOLO<sup className="ml-0.5 text-[0.55em] font-extrabold text-black">™</sup>
+        <a href="/" className="font-sans text-2xl font-bold tracking-[0.08em] text-ink">
+          RENZOLO<sup className="ml-0.5 text-[0.5em] font-bold text-black">™</sup>
         </a>
         <nav aria-label="Main" className="hidden items-center gap-7 text-[15px] font-medium lg:flex">
           {NAV.map(([label, href]) => (
@@ -58,8 +58,8 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
             Log in
           </a>
         </nav>
-        <a href={appLink("/snapshot", campaign)} className="rounded-pill bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-colors hover:bg-ink/85">
-          Start your assessment
+        <a href={appLink("/snapshot", campaign)} className="rounded-pill bg-brand px-5 py-2.5 text-[15px] font-bold text-on-brand transition-colors hover:bg-brand/90">
+          Start the free Snapshot
         </a>
       </div>
       <nav aria-label="Main (mobile)" className="flex gap-5 overflow-x-auto px-4 pb-3 text-sm font-medium lg:hidden">
@@ -85,16 +85,17 @@ export function Footer() {
       <footer data-theme="dark" className="bg-night text-ink-muted">
         <div className="mx-auto grid max-w-[1200px] gap-8 px-4 py-16 text-sm md:grid-cols-[2fr_1fr_1fr_1fr] md:px-8">
           <div>
-            <p className="font-display text-lg font-extrabold text-ink">RENZOLO™</p>
+            <p className="font-display text-lg font-bold text-ink">RENZOLO™</p>
             <p className="mt-2 max-w-sm">
-              Customer, capital and investor readiness for founders across Africa, starting in South Africa and Kenya. Home of Founder Trajectory™, powered by RENZOLO OS™.
+              Get ready to win contracts, access capital and attract investment. For early- and growth-stage businesses in Africa, the Caribbean and the US. Home of Founder Trajectory™, powered by RENZOLO OS™.
             </p>
           </div>
           <div className="flex flex-col gap-2">
             <a href="/founder-trajectory/" className="hover:text-ink">Founder Trajectory™</a>
             <a href="/#os" className="hover:text-ink">RENZOLO OS™</a>
+            <a href="/readiness-snapshot/" className="hover:text-ink">Free Readiness Snapshot</a>
             <a href="/academy/" className="hover:text-ink">Academy</a>
-            <a href="/#pricing" className="hover:text-ink">Pricing</a>
+            <a href={`${APP_URL}/pricing`} className="hover:text-ink">Pricing</a>
             <a href="/about/" className="hover:text-ink">About</a>
           </div>
           <div className="flex flex-col gap-2">

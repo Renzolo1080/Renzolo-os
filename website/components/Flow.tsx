@@ -25,7 +25,7 @@ export function ProofBand() {
         <ul className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-4">
           {PROOF_STATS.map((p) => (
             <li key={p.figure}>
-              <span className="block font-display text-3xl font-extrabold tracking-tight text-ink">{p.figure}</span>
+              <span className="block font-display text-3xl font-bold tracking-tight text-ink">{p.figure}</span>
               <span className="mt-0.5 block text-sm leading-5 text-ink-muted">{SHORT[p.figure] ?? p.label}</span>
             </li>
           ))}
@@ -39,16 +39,17 @@ export function ProofBand() {
 }
 
 /** 4. The closing call to action at the end of every page. */
-export function PageEndCta({ campaign, title = "Know where you stand in seven minutes." }: { campaign: string; title?: string }) {
+export function PageEndCta({ campaign, title = "Know where you stand in minutes." }: { campaign: string; title?: string }) {
   return (
     <section className={`${WRAP} pb-16 pt-4 md:pb-24`}>
-      <div className="reveal flex flex-col gap-6 rounded-panel bg-brand p-8 text-on-brand md:flex-row md:items-center md:justify-between md:p-12">
-        <p className="max-w-2xl font-display text-[34px] font-bold leading-[40px] tracking-[-0.015em] md:text-5xl md:leading-[54px]">{title}</p>
-        <div className="flex shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-          <a href={appLink("/snapshot", campaign)} className="inline-flex justify-center rounded-pill bg-ink px-6 py-3 font-semibold text-surface transition-colors hover:bg-ink/85">
-            Start your assessment
+      <div className="reveal relative flex flex-col gap-6 overflow-hidden rounded-panel bg-night p-8 text-white md:flex-row md:items-center md:justify-between md:p-14">
+        <img src="/img/burst-bright.jpg" alt="" aria-hidden="true" className="pointer-events-none absolute -right-40 top-1/2 h-[520px] w-[520px] -translate-y-1/2 object-cover opacity-85 [mask-image:radial-gradient(circle,#000_35%,transparent_70%)]" />
+        <p className="relative max-w-2xl font-display text-[34px] font-bold leading-[1.1] md:text-[46px]">{title}</p>
+        <div className="relative flex shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+          <a href={appLink("/snapshot", campaign)} className="inline-flex justify-center rounded-pill bg-brand px-7 py-4 text-lg font-bold text-on-brand transition-colors hover:bg-brand/90">
+            Start the free Snapshot
           </a>
-          <a href="/contact/" className="inline-flex justify-center rounded-pill border-2 border-ink/70 px-6 py-3 font-semibold text-on-brand transition-colors hover:border-ink">
+          <a href="/contact/" className="inline-flex justify-center rounded-pill border-2 border-white/60 px-6 py-3.5 font-semibold text-white transition-colors hover:border-white">
             Talk to Lorenzo
           </a>
         </div>
