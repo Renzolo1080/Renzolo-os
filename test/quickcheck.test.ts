@@ -163,3 +163,17 @@ assert(rec.includes("get your first paying customers") && !/\bmy\b/.test(rec), "
   assert(keys.indexOf("costStructure") === 7 && keys.indexOf("keyPartnerships") === 8, "question 8 is costs, 9 is partners");
   assert(site.join("|") === QC.COUNTRIES.join("|"), "the website's country list matches the app's");
 }
+
+// Snapshot next step (routing from answers already asked)
+import { snapshotNextStep } from "../lib/snapshot";
+{
+  const base = { annualRevenue: "$250k-$1M", timeHorizon: "12 months", fundingNeed: "No", primaryGoal: "Grow revenue" };
+  const check = (ok: boolean, msg: string) => { if (!ok) { console.error("  ✗", msg); process.exitCode = 1; } else console.log("  ✓", msg); };
+  check(snapshotNextStep({ ...base, timeHorizon: "3 months" }) === "elevate", "established + wants results within 6 months → Elevate");
+  check(snapshotNextStep({ ...base, fundingNeed: "Yes" }) === "elevate", "established + needs funding → Elevate");
+  check(snapshotNextStep({ ...base, primaryGoal: "Win corporate or government contracts" }) === "elevate", "established + contracts goal → Elevate");
+  check(snapshotNextStep(base) === "assessment", "established, no urgency → assessment");
+  check(snapshotNextStep({ ...base, annualRevenue: "Pre-revenue", fundingNeed: "Yes" }) === "essentials", "pre-revenue → Essentials even when seeking funding");
+  check(snapshotNextStep({ ...base, annualRevenue: "$50k-$250k", primaryGoal: "Get my first paying customers" }) === "essentials", "first-customers goal → Essentials");
+  check(snapshotNextStep({ ...base, annualRevenue: "$50k-$250k", timeHorizon: "3 months" }) === "assessment", "smaller business with urgency → assessment, not Elevate");
+}

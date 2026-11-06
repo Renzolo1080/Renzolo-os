@@ -110,6 +110,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
   const [error, setError] = useState<string | null>(null);
   const [overview, setOverview] = useState<SnapshotOverview | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [offer, setOffer] = useState<{ price: string | null; bookingUrl: string | null } | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false);
 
   // Country pages (/ke, /za) link here with ?country=Kenya etc.
@@ -169,6 +170,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
       track("snapshot_complete");
       if (mode === "public") {
         setShareUrl(data.shareUrl ?? null);
+        setOffer(data.nextStepOffer ?? null);
         setOverview(data.overview);
         window.scrollTo({ top: 0 });
       } else {
@@ -180,7 +182,7 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
     }
   }
 
-  if (overview) return <SnapshotResult overview={overview} fullName={fullName} companyName={companyName} email={email} shareUrl={shareUrl} />;
+  if (overview) return <SnapshotResult overview={overview} fullName={fullName} companyName={companyName} email={email} shareUrl={shareUrl} offer={offer} />;
 
   const selectClass = "w-full rounded-lg border border-gray-300 px-3 py-2.5 bg-white focus:border-navy focus:outline-none";
   const inputClass = selectClass;
