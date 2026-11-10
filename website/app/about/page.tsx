@@ -32,7 +32,8 @@ export default function AboutPage() {
 
         <section className={`${WRAP} pt-20 md:pt-24`}>
           <p className={EYEBROW}>Our purpose</p>
-          <h2 className="mt-3 max-w-[860px] font-display text-[32px] font-bold leading-[1.12] md:text-[46px]">Talented founders shouldn&apos;t lose opportunities because nobody showed them what ready looks like.</h2>
+          <h2 className="mt-3 max-w-[860px] font-display text-[32px] font-bold leading-[1.12] md:text-[46px]">Helping founders and CEOs get ready to grow and scale their businesses.</h2>
+          <p className="mt-5 max-w-[760px] text-lg leading-relaxed text-ink-muted md:text-[21px]">Talented founders shouldn&apos;t lose opportunities because nobody showed them what ready looks like.</p>
           <div className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))]">
             <Card label="Our mission" text="To get founders and CEOs ready to win contracts, capital and investment, and connect them to the people who can say yes." />
             <Card label="Our vision" text="A world where every capable founder, wherever they start, is ready when opportunity arrives." />
