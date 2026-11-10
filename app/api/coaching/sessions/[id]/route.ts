@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { isCoach } from "@/lib/coaching-server";
 import { SESSION_KINDS, sanitizeCommitments, sanitizeNotes, COMMITMENT_STATUSES, type Commitment } from "@/lib/coaching";
 import { loadLatestAssessment, loadPlan } from "@/lib/plan-server";
+import { sharesWith } from "@/lib/coach-access";
 import { MAX_ACTIONS, planCompleteness, sanitizePlan } from "@/lib/plan";
 import type { BlockKey } from "@/lib/scoring";
 
@@ -95,7 +96,8 @@ export async function PATCH(req: NextRequest, { params: paramsPromise }: { param
   }
 
   let addedToPlan = 0;
-  if (body.complete === true) {
+  // Commitments go into the founder's plan only while they share it with this coach.
+  if (body.complete === true && (await sharesWith(admin, user.id, session.founder_id))) {
     addedToPlan = await addCommitmentsToPlan(admin, session.founder_id, commitments ?? sanitizeCommitments(session.commitments));
   }
   return NextResponse.json({ ok: true, addedToPlan });

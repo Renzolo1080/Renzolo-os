@@ -4,6 +4,7 @@ import { isCoach } from "@/lib/coaching-server";
 import { askClaude } from "@/lib/anthropic";
 import { buildPrepBriefPrompt, sanitizeCommitments, sanitizePrep, type SessionKind } from "@/lib/coaching";
 import { loadLatestAssessment, loadPlan } from "@/lib/plan-server";
+import { sharesWith } from "@/lib/coach-access";
 import { planAsText } from "@/lib/plan";
 import { parsePlanReview, reviewAsText } from "@/lib/plan-review";
 import { goalProgress, GOAL_STATUS_LABELS, formatAmount } from "@/lib/progress";
@@ -28,6 +29,9 @@ export async function POST(_req: Request, { params: paramsPromise }: { params: P
   const { data: session } = await admin.from("advisor_sessions").select("id, founder_id, kind, founder_prep, created_at").eq("id", params.id).maybeSingle();
   if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
   const fid = session.founder_id;
+  if (!(await sharesWith(admin, user.id, fid))) {
+    return NextResponse.json({ error: "This founder hasn't shared their plan and dashboard with you. Ask them to turn on sharing on their Coaching page." }, { status: 403 });
+  }
 
   const [latest, planRow, { data: profile }, { data: review }, { data: checkins }, { data: update }, { data: previous }, membership] = await Promise.all([
     loadLatestAssessment(admin, fid),

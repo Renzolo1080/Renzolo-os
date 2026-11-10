@@ -731,6 +731,31 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   assert(r.ok && r.rows.length === 0, "other founders cannot see who joined", r);
   r = await U(A, `delete from cohort_members where founder_id='${A}'`);
   assert(r.ok, "founder can stop sharing at any time", r);
+  // Coach access: founders choose to share with one coach and can stop.
+  // ------------------------------------------------------------------
+  r = await U(A, `insert into coach_access (founder_id, coach_id, consent_version) values ('${A}','${B}','1.0')`);
+  assert(!r.ok, "founders can only share with a coach, not another founder", r);
+  r = await U(A, `insert into coach_access (founder_id, coach_id, consent_version) values ('${B}','${S}','1.0')`);
+  assert(!r.ok, "nobody can share someone else's plan", r);
+  r = await U(A, `insert into coach_access (id, founder_id, coach_id, consent_version) values ('77777777-7777-7777-7777-777777777777','${A}','${S}','1.0')`);
+  assert(r.ok, "founder shares with a coach", r);
+  r = await U(A, `insert into coach_access (founder_id, coach_id, consent_version) values ('${A}','${M}','1.0')`);
+  assert(!r.ok, "one coach at a time: stop sharing first", r);
+  r = await U(S, `select founder_id from coach_access where revoked_at is null`);
+  assert(r.ok && r.rows.length === 1, "the coach sees the founders who share with them", r);
+  r = await U(B, `select id from coach_access`);
+  assert(r.ok && r.rows.length === 0, "other founders can't see who shares with whom", r);
+  r = await U(S, `update coach_access set revoked_at = now() where id = '77777777-7777-7777-7777-777777777777'`);
+  assert(r.ok && (await SRV(`select revoked_at from coach_access where id = '77777777-7777-7777-7777-777777777777'`)).rows[0]?.revoked_at === null, "a coach can't change the founder's choice", r);
+  r = await U(A, `update coach_access set coach_id = '${M}' where id = '77777777-7777-7777-7777-777777777777'`);
+  assert(!r.ok, "founders can only stop sharing, not move a grant", r);
+  r = await U(A, `update coach_access set revoked_at = now() where id = '77777777-7777-7777-7777-777777777777'`);
+  assert(r.ok, "founder stops sharing at any time", r);
+  r = await U(A, `delete from coach_access`);
+  assert(!r.ok || (await SRV(`select count(*)::int as n from coach_access`)).rows[0]?.n === 1, "records are kept (no deleting)", r);
+  r = await U(A, `insert into coach_access (founder_id, coach_id, consent_version) values ('${A}','${M}','1.0')`);
+  assert(r.ok, "after stopping, the founder can share with another coach", r);
+
   // Statement acknowledgments
   // ------------------------------------------------------------------
   r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','1.0','login') returning id`);
@@ -805,6 +830,8 @@ async function main() {
     "supabase/migrations/2026-11-01_included_coaching.sql",
     "supabase/migrations/2026-11-10_documents_and_partners.sql",
     "supabase/migrations/2026-11-10_documents_and_partners.sql",
+    "supabase/migrations/2026-11-10_coach_access.sql",
+    "supabase/migrations/2026-11-10_coach_access.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

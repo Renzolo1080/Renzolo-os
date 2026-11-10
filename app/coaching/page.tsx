@@ -6,6 +6,9 @@ import { AGREEMENT_VERSION, bookingLink, sanitizeCommitments, sanitizePrep, SESS
 import { FOUNDER_SESSION_COLUMNS } from "@/lib/coaching-server";
 import { loadLatestAssessment, loadPlan } from "@/lib/plan-server";
 import { BLOCK_KEYS, BLOCK_LABELS } from "@/lib/scoring";
+import { CoachSharing } from "@/components/coaching/CoachSharing";
+import { activeGrant, availableCoaches, NOT_SHARED_WITH_COACH, SHARED_WITH_COACH } from "@/lib/coach-access";
+import { createAdminClient } from "@/lib/supabase/server";
 import { AgreementCard, CommitmentRow, RateSession, RequestSession, type FocusOption } from "@/components/coaching/FounderCoaching";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +16,7 @@ export const dynamic = "force-dynamic";
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
 const STEPS = [
   ["Agree", "Accept the coaching agreement once."],
-  ["Prepare", "Say what you want from the session; your coach reads your report, plan and progress."],
+  ["Prepare", "Say what you want from the session; with your permission, your coach reads your plan and progress."],
   ["Meet", "30-60 minutes on one goal: where you are, the options, and what you'll do."],
   ["Act", "1-3 commitments go into your plan and dashboard."],
   ["Review", "Every quarter: re-assess, refresh the plan, set new priorities."],
@@ -45,6 +48,7 @@ export default async function CoachingPage() {
     { value: "other:investors", label: "Attracting investors or partners", group: "Outcomes" },
     { value: "other:other", label: "Something else", group: "Outcomes" },
   ];
+  const [grant, coaches] = await Promise.all([activeGrant(supabase, user.id), process.env.SUPABASE_SERVICE_ROLE_KEY ? availableCoaches(createAdminClient()) : Promise.resolve([])]);
   const list = (sessions ?? []) as any[];
   const upcoming = list.filter((s) => s.status === "requested" || s.status === "scheduled");
   const past = list.filter((s) => s.status === "completed");
@@ -82,6 +86,7 @@ export default async function CoachingPage() {
       </ol>
 
       <div className="mt-8 space-y-6">
+        <CoachSharing coaches={coaches} currentCoachId={grant?.coach_id ?? null} since={grant?.granted_at ?? null} shared={SHARED_WITH_COACH} notShared={NOT_SHARED_WITH_COACH} />
         {!latest && (
           <p className="rounded-lg border border-gold/60 bg-cream p-4 text-sm">
             Starting with coaching? Take the free{" "}

@@ -4,6 +4,7 @@ import { isCoach } from "@/lib/coaching-server";
 import { coachingStats, openCommitments, riskFlags, RISK_LABELS, sanitizePrep, SESSION_KINDS, type SessionLike } from "@/lib/coaching";
 import { goalProgress } from "@/lib/progress";
 import { sanitizePlan } from "@/lib/plan";
+import { foundersSharingWith } from "@/lib/coach-access";
 
 export const dynamic = "force-dynamic";
 const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -27,12 +28,15 @@ export default async function CoachPage() {
     .limit(500);
   const sessions = (sessionRows ?? []) as any[];
   const founderIds = [...new Set(sessions.map((s) => s.founder_id))];
+  // Plans, goals and updates only for founders who share them with this coach.
+  const sharing = await foundersSharingWith(admin, user.id);
+  const sharedIds = founderIds.filter((id) => sharing.has(id));
 
-  const [{ data: plans }, { data: checkins }, { data: updates }] = founderIds.length
+  const [{ data: plans }, { data: checkins }, { data: updates }] = sharedIds.length
     ? await Promise.all([
-        admin.from("strategic_plans").select("founder_id, data").in("founder_id", founderIds),
-        admin.from("goal_checkins").select("founder_id, goal_id, value, checked_on").in("founder_id", founderIds),
-        admin.from("founder_updates").select("founder_id, period").in("founder_id", founderIds).order("period", { ascending: false }),
+        admin.from("strategic_plans").select("founder_id, data").in("founder_id", sharedIds),
+        admin.from("goal_checkins").select("founder_id, goal_id, value, checked_on").in("founder_id", sharedIds),
+        admin.from("founder_updates").select("founder_id, period").in("founder_id", sharedIds).order("period", { ascending: false }),
       ])
     : [{ data: [] }, { data: [] }, { data: [] }];
 
@@ -50,6 +54,7 @@ export default async function CoachPage() {
       flags: riskFlags({ sessions: own, lastUpdate, goalsBehind: behind }, today),
       open: openCommitments(own).length,
       sessions: own.length,
+      shared: sharing.has(fid),
     };
   });
   founders.sort((a, b) => b.flags.length - a.flags.length);
@@ -121,11 +126,16 @@ export default async function CoachPage() {
                 <tbody>
                   {founders.map((f) => (
                     <tr key={f.id} className="border-b last:border-0">
-                      <td className="py-2 font-medium">{f.name}</td>
+                      <td className="py-2 font-medium">
+                        {f.name}
+                        {!f.shared && <span className="ml-2 rounded bg-surface px-1.5 py-0.5 text-xs font-normal text-ink-soft">Plan not shared</span>}
+                      </td>
                       <td className="py-2">{f.sessions}</td>
                       <td className="py-2">{f.open}</td>
                       <td className="py-2">
-                        {f.flags.length === 0 ? (
+                        {!f.shared ? (
+                          <span className="text-ink-soft">Ask the founder to share their plan</span>
+                        ) : f.flags.length === 0 ? (
                           <span className="text-teal">On track</span>
                         ) : (
                           <span className="flex flex-wrap gap-1">

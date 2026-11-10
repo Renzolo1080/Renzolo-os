@@ -1,6 +1,9 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { isCoach } from "@/lib/coaching-server";
+import { sharesWith } from "@/lib/coach-access";
+import { loadDigest } from "@/lib/accountability-server";
+import { statusLine } from "@/lib/live-score";
 import { sanitizeCommitments, sanitizeNotes, sanitizePrep } from "@/lib/coaching";
 import { loadLatestAssessment, loadPlan } from "@/lib/plan-server";
 import { goalProgress, GOAL_STATUS_LABELS, formatAmount } from "@/lib/progress";
@@ -25,13 +28,17 @@ export default async function CoachSessionPage({ params: paramsPromise }: { para
   const { data: s } = await admin.from("advisor_sessions").select("*, profiles!advisor_sessions_founder_id_fkey(full_name)").eq("id", params.id).maybeSingle();
   if (!s || !s.paid_at) notFound();
   const fid = s.founder_id;
+  // The founder's plan, goals, updates and trajectory only with their permission.
+  const shared = await sharesWith(admin, user.id, fid);
+  const none = Promise.resolve({ data: null as any });
   const [latest, planRow, { data: checkins }, { data: update }, { data: history }] = await Promise.all([
-    loadLatestAssessment(admin, fid),
-    loadPlan(admin, fid),
-    admin.from("goal_checkins").select("goal_id, value, checked_on").eq("founder_id", fid),
-    admin.from("founder_updates").select("*").eq("founder_id", fid).order("period", { ascending: false }).limit(1).maybeSingle(),
+    shared ? loadLatestAssessment(admin, fid) : Promise.resolve(null),
+    shared ? loadPlan(admin, fid) : Promise.resolve(null),
+    shared ? admin.from("goal_checkins").select("goal_id, value, checked_on").eq("founder_id", fid) : none,
+    shared ? admin.from("founder_updates").select("*").eq("founder_id", fid).order("period", { ascending: false }).limit(1).maybeSingle() : none,
     admin.from("advisor_sessions").select("id, completed_at, summary, commitments").eq("founder_id", fid).eq("status", "completed").neq("id", s.id).order("completed_at", { ascending: false }).limit(5),
   ]);
+  const progress = shared ? (await loadDigest(admin, fid, new Date().toISOString().slice(0, 10))).trajectory : null;
   const prep = sanitizePrep(s.founder_prep);
   const today = new Date().toISOString().slice(0, 10);
   const goals = (planRow?.data.goals ?? []).filter((g) => g.title).map((g) => goalProgress(g, (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })), today));
@@ -68,6 +75,27 @@ export default async function CoachSessionPage({ params: paramsPromise }: { para
             {prep.wins && <p className="mt-2 text-xs text-cream/80">Wins: {prep.wins}</p>}
             {prep.challenge && <p className="mt-1 text-xs text-cream/80">Challenge: {prep.challenge}</p>}
           </div>
+          {!shared && (
+            <div className="rounded-2xl border border-gold bg-white p-4">
+              <p className="font-semibold text-navy">Plan and dashboard not shared</p>
+              <p className="mt-1 text-ink-soft">This founder hasn't shared their plan, goals and dashboard with you. They can turn sharing on from their Coaching page; until then you'll see only what they wrote when booking.</p>
+            </div>
+          )}
+          {progress && progress.live !== null && progress.latest && (
+            <div className="rounded-2xl bg-white p-4 shadow-sm">
+              <p className="font-semibold text-navy">Trajectory</p>
+              <p className="mt-1">
+                Live {Math.round(progress.live)} · confirmed {Math.round(progress.latest.total)}
+                {progress.target ? ` · target ${progress.target.score} by ${progress.target.date}` : ""}
+              </p>
+              <p className="text-ink-soft">{statusLine(progress)}{progress.nextReassessment ? ` · next re-assessment ${progress.nextReassessment}` : ""}</p>
+              {[...progress.moves.slice(0, 3), ...progress.flags].map((mv, i) => (
+                <p key={i} className="mt-1 text-xs text-ink-soft">
+                  {mv.source === "flag" ? "⚑" : `+${mv.points}`} {mv.label}
+                </p>
+              ))}
+            </div>
+          )}
           {sc && (
             <div className="rounded-2xl bg-white p-4 shadow-sm">
               <p className="font-semibold text-navy">Scores</p>
