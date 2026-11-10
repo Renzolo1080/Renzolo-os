@@ -30,10 +30,14 @@ grant execute on function is_coach_user(uuid) to authenticated, service_role;
 
 alter table coach_access enable row level security;
 grant select, insert, update on coach_access to service_role;
-grant select, insert on coach_access to authenticated;
+-- Supabase gives signed-in users every right on new tables by default, so
+-- take them all back and grant only what founders need: read their rows,
+-- create a grant (three columns) and stop sharing (revoked_at only).
+revoke insert, update, delete, truncate, references, trigger on coach_access from authenticated;
+grant select on coach_access to authenticated;
+grant insert (founder_id, coach_id, consent_version) on coach_access to authenticated;
 grant update (revoked_at) on coach_access to authenticated;
 revoke all on coach_access from anon;
-revoke delete on coach_access from authenticated;
 
 do $$ begin
   create policy "coach_access: founder, their coach or staff read" on coach_access for select
