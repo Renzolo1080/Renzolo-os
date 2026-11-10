@@ -14,7 +14,7 @@ export function SiteHeader() {
         <a href={member ? "/dashboard" : "/"} className="inline-flex items-center gap-3 text-white">
           <img src="/img/rz-logo.png" alt="" aria-hidden="true" width={44} height={36} className="h-9 w-auto" />
           <span className="text-lg font-bold tracking-[0.08em]">
-            RENZOLO OS<span className="text-gold">™</span>
+            RENZOLO OS™
           </span>
         </a>
         {member ? (
