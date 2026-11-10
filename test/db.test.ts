@@ -698,6 +698,38 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   assert(!r.ok || r.rows.length === 0, "signed-out visitors cannot read the guide list", r);
   r = await U(M, `select email from guide_leads`);
   assert(r.ok && r.rows.length === 1, "admin reads the guide list", r);
+  // Document intake: founders keep their own results private
+  // ------------------------------------------------------------------
+  r = await U(A, `insert into document_extractions (founder_id, doc_type, file_name, result) values ('${A}','bank_statement','s.pdf','{}') returning id`);
+  assert(r.ok, "founder saves own document results", r);
+  r = await U(A, `insert into document_extractions (founder_id, doc_type, file_name, result) values ('${B}','bank_statement','s.pdf','{}')`);
+  assert(!r.ok, "founders cannot save results as someone else", r);
+  r = await U(B, `select id from document_extractions`);
+  assert(r.ok && r.rows.length === 0, "another founder cannot see them", r);
+  r = await U(A, `update document_extractions set file_name='x.pdf'`);
+  assert(!r.ok, "results cannot be edited after the fact", r);
+  r = await U(A, `delete from document_extractions where founder_id='${A}'`);
+  assert(r.ok, "founder deletes own results", r);
+  // Partner portal: founders join by consent; partners see only their own
+  // ------------------------------------------------------------------
+  r = await SRV(`insert into partners (id, name, kind) values ('99999999-9999-9999-9999-999999999999','Agency','government')`);
+  assert(r.ok, "server creates a partner", r);
+  r = await SRV(`insert into partner_cohorts (id, partner_id, name, join_code) values ('88888888-8888-8888-8888-888888888888','99999999-9999-9999-9999-999999999999','Q1 cohort','AGENCY27')`);
+  r = await SRV(`insert into partner_users (partner_id, user_id) values ('99999999-9999-9999-9999-999999999999','${S}')`);
+  r = await U(A, `select id from partner_cohorts`);
+  assert(r.ok && r.rows.length === 0, "founders cannot browse partners' cohorts", r);
+  r = await U(S, `select join_code from partner_cohorts`);
+  assert(r.ok && r.rows.length === 1, "a partner's own user sees its cohorts", r);
+  r = await U(A, `insert into partners (name, kind) values ('Fake','other')`);
+  assert(!r.ok, "founders cannot create partners", r);
+  r = await U(A, `insert into cohort_members (cohort_id, founder_id, consent_version) values ('88888888-8888-8888-8888-888888888888','${A}','1.0')`);
+  assert(r.ok, "founder joins a cohort with consent", r);
+  r = await U(A, `insert into cohort_members (cohort_id, founder_id, consent_version) values ('88888888-8888-8888-8888-888888888888','${B}','1.0')`);
+  assert(!r.ok, "nobody can sign someone else up", r);
+  r = await U(B, `select founder_id from cohort_members`);
+  assert(r.ok && r.rows.length === 0, "other founders cannot see who joined", r);
+  r = await U(A, `delete from cohort_members where founder_id='${A}'`);
+  assert(r.ok, "founder can stop sharing at any time", r);
   // Statement acknowledgments
   // ------------------------------------------------------------------
   r = await U(A, `insert into acknowledgments (founder_id,statement,version,source) values ('${A}','matching','1.0','login') returning id`);
@@ -768,6 +800,8 @@ async function main() {
     OCT30, // guide_leads is created after Supabase's change
     "supabase/migrations/2026-10-20_guide_leads.sql",
     "supabase/migrations/2026-10-20_guide_leads.sql",
+    "supabase/migrations/2026-11-10_documents_and_partners.sql",
+    "supabase/migrations/2026-11-10_documents_and_partners.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }
