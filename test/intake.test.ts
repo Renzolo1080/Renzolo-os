@@ -44,3 +44,19 @@ assert(lenderChecks(wrong, today).some((c) => c.text.includes("looks like a busi
 // --- checklist -------------------------------------------------------------------------------
 const list = documentChecklist([{ doc_type: "bank_statement", created_at: "2026-11-19T00:00:00Z", result: e }, { doc_type: "tax_clearance", created_at: "2026-11-19T00:00:00Z", result: tax }], today);
 assert(list.length === 4 && list[0].status === "fix" && list[1].status === "missing" && list[3].status === "fix", "checklist: statement needs work, financials missing, tax expired", list.map((l) => l.status));
+
+// --- partner portal ---------------------------------------------------------------------
+import("../lib/partner").then(({ impactSummary, memberRow, normalizeCode, validCode, SHARED_WITH_PARTNER, NOT_SHARED }) => {
+  assert(normalizeCode(" agency-27 ") === "AGENCY27" && validCode("AGENCY27") && !validCode("AB1") && normalizeCode(42) === "", "join codes are cleaned and checked");
+  const base = { name: "Ama", company: "Ama Foods", joinedAt: "2026-11-20", areasTotal: 9 };
+  const a = memberRow({ ...base, baseline: 42, score: 55.5, band: "Getting ready", areasAnswered: 9, planCompleteness: 70 });
+  const b = memberRow({ ...base, name: "Kofi", baseline: 60, score: 58, band: "Nearly ready", areasAnswered: 4, planCompleteness: 0 });
+  const c = memberRow({ ...base, name: "Zola", baseline: null, score: null, band: null, areasAnswered: 0, planCompleteness: null });
+  assert(a.change === 13.5 && a.assessmentPct === 100 && a.planPct === 70, "per-founder change and progress", a);
+  assert(b.change === -2 && b.assessmentPct === 44 && c.change === null && c.planPct === 0, "decline and not-yet-assessed handled", { b, c });
+  const s = impactSummary([a, b, c]);
+  assert(s.members === 3 && s.scored === 2 && s.avgScore === 56.8 && s.avgBaseline === 51 && s.avgChange === 5.8 && s.improved === 1, "cohort averages only count founders with data", s);
+  assert(s.assessmentsComplete === 1 && s.plansStarted === 1 && s.plansReady === 1 && s.byBand["Getting ready"] === 1, "completion counts and bands", s);
+  assert(impactSummary([]).avgScore === null && impactSummary([]).members === 0, "an empty cohort shows dashes, not errors");
+  assert(!SHARED_WITH_PARTNER.join(" ").toLowerCase().includes("answers") && NOT_SHARED.join(" ").includes("assessment answers"), "consent wording: answers stay private");
+});
