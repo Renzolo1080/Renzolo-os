@@ -7,7 +7,26 @@
 @import "@fontsource/dm-sans/700.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/libre-caslon-text/700.css";
+@import "@fontsource/source-sans-3/400.css";
+@import "@fontsource/source-sans-3/600.css";
+@import "@fontsource/source-sans-3/700.css";
 @import "./brand-tokens.css";
+
+/* RENZOLO OS™ in the website look (approved Nov 9, 2026), so the app and
+   renzoloenterprises.com feel like one firm: serif headlines, Source Sans
+   body, white pages, cool grey lines and tints, 32px rounded panels. */
+:root {
+  --font-display: "Libre Caslon Text", Georgia, serif;
+  --font-sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --surface: #ffffff;
+  --surface-rgb: 255 255 255;
+  --surface-tint: #f3f5f8;
+  --surface-tint-rgb: 243 245 248;
+  --line: #e3e7ed;
+  --line-rgb: 227 231 237;
+  --radius-lg: 32px;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
