@@ -32,6 +32,7 @@ export interface AreaContext {
 }
 
 const input = "mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2";
+import { PLAN_TEMPLATES, applyTemplate, type TemplateKey } from "@/lib/plan-templates";
 const newId = (p: string) => `${p}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`;
 
 /** The guided Plan Builder. Founders build their plan here rather than
@@ -282,8 +283,31 @@ function Vision({ plan, update, horizons }: SectionProps & { horizons: string[] 
 
 function Goals({ plan, update }: SectionProps) {
   const setGoal = (i: number, patch: Partial<PlanGoal>) => update((p) => ((p.goals[i] = { ...p.goals[i], ...patch }), p));
+  const [templateNote, setTemplateNote] = useState<string | null>(null);
+  const applyStarter = (key: TemplateKey) => {
+    const r = applyTemplate(plan, key, new Date().toISOString().slice(0, 10), () => newId("t"));
+    update(() => r.plan);
+    setTemplateNote(
+      r.added.goals + r.added.actions + r.added.risks === 0
+        ? "Your plan already has room filled; nothing was added."
+        : `Added ${r.added.goals} goal${r.added.goals === 1 ? "" : "s"}, ${r.added.actions} action${r.added.actions === 1 ? "" : "s"} and ${r.added.risks} risk${r.added.risks === 1 ? "" : "s"}. Nothing you'd written was changed. Set your own starting numbers and targets below, then review the actions under Business areas.`
+    );
+  };
   return (
     <Section title="Goals" intro={`Up to ${MAX_GOALS} goals that tell you whether the plan is working. Each needs a number: where it stands now, the target and the date. You'll log progress against them on your dashboard.`}>
+      <Card>
+        <p className="font-semibold text-navy">Start from a template (optional)</p>
+        <p className="text-sm text-ink-soft">Pick the outcome you're getting ready for. We'll add suggested goals, actions and a risk to fill in; you can edit or remove anything.</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {PLAN_TEMPLATES.map((t) => (
+            <button key={t.key} type="button" onClick={() => applyStarter(t.key)} className="rounded-xl border border-gray-200 p-3 text-left hover:border-navy">
+              <span className="block font-semibold text-navy">{t.label}</span>
+              <span className="mt-1 block text-xs text-ink-soft">{t.description}</span>
+            </button>
+          ))}
+        </div>
+        {templateNote && <p className="rounded-lg bg-cream p-3 text-sm text-navy" role="status">{templateNote}</p>}
+      </Card>
       {plan.goals.map((g, i) => (
         <Card key={g.id}>
           <div className="flex items-center justify-between">
