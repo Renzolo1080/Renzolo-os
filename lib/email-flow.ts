@@ -54,3 +54,30 @@ export async function sendReminderOnce(admin: SupabaseClient, kind: string, to: 
   }
   return true;
 }
+
+/** Sends an email built on the spot (e.g. the weekly accountability email)
+ * at most once per kind, with the same claim-then-send and unsubscribe
+ * rules as the reminders. */
+export async function sendBuiltOnce(
+  admin: SupabaseClient,
+  kind: string,
+  to: string,
+  appUrl: string,
+  build: (links: { unsubscribeUrl: string; postalAddress: string | null }) => { subject: string; html: string; text: string }
+): Promise<boolean> {
+  if (!emailConfigured()) return false;
+  const email = to.trim().toLowerCase();
+  const unsub = unsubscribeUrl(appUrl, email);
+  if (!unsub) return false;
+  const { data: blocked } = await admin.from("email_unsubscribes").select("email").eq("email", email).maybeSingle();
+  if (blocked) return false;
+  const { error: claimError } = await admin.from("email_log").insert({ email, kind, lead_id: null });
+  if (claimError) return false;
+  const msg = build({ unsubscribeUrl: unsub, postalAddress: process.env.EMAIL_POSTAL_ADDRESS || null });
+  const res = await sendEmail({ to: email, ...msg, unsubscribeUrl: unsub });
+  if (!res.sent) {
+    await admin.from("email_log").delete().eq("email", email).eq("kind", kind);
+    return false;
+  }
+  return true;
+}

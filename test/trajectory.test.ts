@@ -68,3 +68,21 @@ const empty = trajectory({ ...base, plan: null, confirmed: [], checkins: [], doc
 assert(empty.live === null && empty.moves.length === 0 && empty.drivers.length === 0 && empty.status === "no_target", "no assessment yet: nothing breaks");
 const maxed = trajectory({ ...base, confirmed: [{ date: "2027-02-10", total: 99 }] });
 assert(maxed.cap === 0.5 && (maxed.live ?? 0) <= 99.5, "near the top there's little room to move", maxed.cap);
+
+// --- weekly accountability email -----------------------------------------------------------
+import("../lib/accountability").then(({ weeklyDigest, weekOf, digestDay, digestKind, buildDigestEmail }) => {
+  assert(weekOf("2027-03-03") === "2027-03-01" && weekOf("2027-03-07") === "2027-03-01" && weekOf("2027-03-01") === "2027-03-01", "the week starts on Monday");
+  assert(digestDay("2027-03-01") && digestDay("2027-03-03") && !digestDay("2027-03-04"), "sent Monday, or by a late run up to Wednesday");
+  assert(digestKind("2027-03-02") === "account:week:2027-03-01", "once a week (email_log kind)");
+  const plan = planWith();
+  plan.areas.revenueStreams!.actions[0].due = "2027-02-20"; // overdue
+  plan.areas.channels!.actions.push({ id: "c4", text: "Call 3 buyers", owner: "", due: "2027-03-05", status: "in_progress", doneOn: "", evidence: "" });
+  const d = weeklyDigest({ plan, checkins: [{ goal_id: "g1", value: 2, checked_on: "2027-02-01" }], updates: [], nextReassessment: "2027-03-06", today: "2027-03-01" })!;
+  assert(d.counts.overdue === 1 && d.counts.due === 1 && d.counts.checkin === 1, "overdue, due this week and goals needing a check-in", d);
+  assert(d.items.some((x) => x.kind === "update") && d.items.some((x) => x.kind === "reassess"), "missing monthly update and the coming re-assessment are included", d.items);
+  const quiet = weeklyDigest({ plan: { ...planWith(), goals: [] }, checkins: [], updates: [{ period: "2027-02-01", revenue: 1, customers: 1, cash: 1 }], nextReassessment: "2027-05-01", today: "2027-03-01" });
+  assert(quiet === null, "nothing to act on: no email");
+  const msg = buildDigestEmail(d, { appUrl: "https://app.x", firstName: "<Ama>", unsubscribeUrl: "https://app.x/unsub", postalAddress: "Milwaukee, WI", live: 62.9, confirmed: 58 });
+  assert(msg.subject === "Your plan this week: 1 overdue, 1 due this week" && msg.html.includes("live Total Readiness Score is <strong>63</strong>") && msg.html.includes("Unsubscribe") && !msg.html.includes("<Ama>"), "email: subject, live score, unsubscribe, escaped name", msg.subject);
+  assert(msg.html.includes("/dashboard?utm_source=email&amp;utm_medium=email&amp;utm_campaign=weekly_plan#coming-up") || msg.html.includes("weekly_plan#coming-up"), "links go straight to the right place");
+});

@@ -53,9 +53,9 @@ const STATUS_STYLE: Record<GoalStatus, string> = {
 const fmtDate = (d: string) => new Date(`${d.slice(0, 10)}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const monthName = (p: string) => new Date(`${p}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" });
 
-function Panel({ title, action, children, className = "" }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
+function Panel({ title, action, children, className = "", id }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string; id?: string }) {
   return (
-    <section className={`rounded-2xl bg-white p-5 shadow-sm ${className}`}>
+    <section id={id} className={`scroll-mt-24 rounded-2xl bg-white p-5 shadow-sm ${className}`}>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold text-navy">{title}</h2>
         {action}
@@ -203,7 +203,7 @@ export function FounderDashboard(d: DashboardData) {
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         {/* 2. Goals: target vs actual */}
-        <Panel title="Goals: target vs actual" action={<a href="/plan" className="text-sm text-teal">Edit goals</a>}>
+        <Panel id="goals" title="Goals" action={<a href="/plan" className="text-sm text-teal">Edit goals</a>}>
           {goals.length === 0 ? (
             <p className="text-sm text-ink-soft">
               No goals yet. <a href="/plan" className="font-semibold text-teal underline">Set up to 3 goals</a> with a starting point, target and date, then log
@@ -260,7 +260,7 @@ export function FounderDashboard(d: DashboardData) {
 
         <div className="space-y-6">
           {/* 3. Coming up */}
-          <Panel title="Coming up">
+          <Panel id="coming-up" title="Coming up">
             {due.length === 0 ? (
               <p className="text-sm text-ink-soft">Nothing dated yet. Give your plan's actions an owner and a due date.</p>
             ) : (
@@ -284,7 +284,7 @@ export function FounderDashboard(d: DashboardData) {
           </Panel>
 
           {/* 4. Monthly update */}
-          <Panel title={`Monthly update${latestUpdate ? ` · ${monthName(latestUpdate.period)}` : ""}`}>
+          <Panel id="update" title={`Monthly update${latestUpdate ? ` · ${monthName(latestUpdate.period)}` : ""}`}>
             {latestUpdate && (latestUpdate.wins || latestUpdate.challenges || latestUpdate.asks) ? (
               <dl className="mb-3 space-y-2 text-sm">
                 {latestUpdate.wins && (

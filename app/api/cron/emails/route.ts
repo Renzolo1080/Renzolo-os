@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import { dueFollowUp } from "@/lib/emails";
-import { sendOnce, sendReminderOnce } from "@/lib/email-flow";
+import { sendBuiltOnce, sendOnce, sendReminderOnce } from "@/lib/email-flow";
+import { activeMembers, loadDigest } from "@/lib/accountability-server";
+import { buildDigestEmail, digestDay, digestKind } from "@/lib/accountability";
 import { loadStepState, recentPayingFounders } from "@/lib/reminders-server";
 import { dueReminder, reminderStep } from "@/lib/reminders";
 import { emailConfigured } from "@/lib/email-send";
@@ -18,7 +20,8 @@ export const maxDuration = 60;
  * Sends the Snapshot follow-up emails that are due: only to founders who
  * ticked "email me tips", who haven't created an account, and who haven't
  * unsubscribed. Then sends member reminders for unfinished steps
- * (lib/reminders.ts), also respecting unsubscribes. Vercel calls it with "Authorization: Bearer <CRON_SECRET>". */
+ * (lib/reminders.ts) and the weekly accountability email
+ * (lib/accountability.ts), also respecting unsubscribes. Vercel calls it with "Authorization: Bearer <CRON_SECRET>". */
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   const auth = req.headers.get("authorization") ?? "";
@@ -98,5 +101,29 @@ export async function GET(req: NextRequest) {
       console.error("Member reminder failed:", e);
     }
   }
-  return NextResponse.json({ sent, reminders });
+  // Weekly accountability email (lib/accountability.ts): active members,
+  // Monday (or a late run up to Wednesday), only when something needs doing.
+  let weekly = 0;
+  const today = new Date().toISOString().slice(0, 10);
+  if (digestDay(today)) {
+    const kind = digestKind(today);
+    for (const founderId of await activeMembers(admin)) {
+      try {
+        const { data: userData } = await admin.auth.admin.getUserById(founderId);
+        const email = userData?.user?.email?.toLowerCase();
+        if (!email) continue;
+        const { data: already } = await admin.from("email_log").select("kind").eq("email", email).eq("kind", kind).maybeSingle();
+        if (already) continue;
+        const { digest, trajectory } = await loadDigest(admin, founderId, today);
+        if (!digest) continue;
+        const { data: profile } = await admin.from("profiles").select("full_name").eq("id", founderId).maybeSingle();
+        const firstName = String(profile?.full_name ?? "").split(/\s+/)[0] ?? "";
+        const did = await sendBuiltOnce(admin, kind, email, appUrl, (links) => buildDigestEmail(digest, { appUrl, firstName, ...links, live: trajectory.live, confirmed: trajectory.latest?.total ?? null }));
+        if (did) weekly++;
+      } catch (e) {
+        console.error("Weekly accountability email failed:", e);
+      }
+    }
+  }
+  return NextResponse.json({ sent, reminders, weekly });
 }
