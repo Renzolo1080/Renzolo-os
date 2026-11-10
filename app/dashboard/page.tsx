@@ -24,6 +24,8 @@ import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwa
 import { readinessFromRows } from "@/lib/readiness";
 import { ScoreExplainer } from "@/components/ScoreExplainer";
 import { ensureMatchingAcknowledgment } from "@/lib/acknowledgment-server";
+import { loadStepState } from "@/lib/reminders-server";
+import { nextReminderDate, reminderStep } from "@/lib/reminders";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -200,6 +202,22 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
       else if (reviewRow && new Date(reviewRow.created_at) > new Date(existingReport.created_at)) reportOutdated = "Your plan has been reviewed since this report was written.";
     }
 
+    // When the next reminder email for an unfinished step goes out, for
+    // the "We'll remind you on…" note (lib/reminders.ts).
+    let nextReminder: string | null = null;
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY && user.email) {
+      try {
+        const admin = createAdminClient();
+        const current = reminderStep(await loadStepState(admin, user.id));
+        if (current) {
+          const { data: log } = await admin.from("email_log").select("kind").eq("email", user.email.toLowerCase()).like("kind", "remind:%");
+          nextReminder = nextReminderDate(current.step, current.since, (log ?? []).map((l: any) => l.kind));
+        }
+      } catch {
+        nextReminder = null;
+      }
+    }
+
     dashboard = {
       access,
       extras,
@@ -221,6 +239,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
       commitments: openCommitments((coachRows ?? []) as any[]).map((c) => ({ id: c.id, sessionId: c.sessionId, text: c.text, due: c.due })),
       invite: referralCode ? <InviteCard inviteUrl={`${publicAppUrl()}/?ref=${referralCode}&utm_source=referral&utm_medium=member`} rewardsEarned={(rewards ?? []).length} /> : null,
       today: new Date().toISOString().slice(0, 10),
+      nextReminder,
     };
   }
 

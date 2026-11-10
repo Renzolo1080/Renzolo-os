@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildEmail, unsubscribeToken, type EmailKind, type EmailContext } from "./emails";
 import { sendEmail, emailConfigured } from "./email-send";
+import { buildReminderEmail, type ReminderContext } from "./reminders";
 
 /** Unsubscribe links need EMAIL_LINK_SECRET; without it, follow-up
  * (marketing) emails are not sent at all. */
@@ -27,6 +28,26 @@ export async function sendOnce(admin: SupabaseClient, kind: EmailKind, to: strin
   if (claimError) return false;
   const msg = buildEmail(kind, { ...ctx, unsubscribeUrl: unsub, postalAddress: process.env.EMAIL_POSTAL_ADDRESS || null });
   const res = await sendEmail({ to: email, ...msg, unsubscribeUrl: unsub ?? undefined });
+  if (!res.sent) {
+    await admin.from("email_log").delete().eq("email", email).eq("kind", kind);
+    return false;
+  }
+  return true;
+}
+
+/** Sends one member reminder (lib/reminders.ts) at most once, with the same
+ * claim-then-send and unsubscribe rules as the Snapshot follow-ups. */
+export async function sendReminderOnce(admin: SupabaseClient, kind: string, to: string, ctx: Omit<ReminderContext, "unsubscribeUrl" | "postalAddress">): Promise<boolean> {
+  if (!emailConfigured()) return false;
+  const email = to.trim().toLowerCase();
+  const unsub = unsubscribeUrl(ctx.appUrl, email);
+  if (!unsub) return false;
+  const { data: blocked } = await admin.from("email_unsubscribes").select("email").eq("email", email).maybeSingle();
+  if (blocked) return false;
+  const { error: claimError } = await admin.from("email_log").insert({ email, kind, lead_id: null });
+  if (claimError) return false;
+  const msg = buildReminderEmail(kind, { ...ctx, unsubscribeUrl: unsub, postalAddress: process.env.EMAIL_POSTAL_ADDRESS || null });
+  const res = await sendEmail({ to: email, ...msg, unsubscribeUrl: unsub });
   if (!res.sent) {
     await admin.from("email_log").delete().eq("email", email).eq("kind", kind);
     return false;

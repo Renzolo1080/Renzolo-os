@@ -8,6 +8,7 @@ import { Bars, GoalChart, LineChart, Sparkline } from "./Charts";
 import { CheckinForm, CommitmentDone, DashboardCustomizer, MarkDone, MonthlyUpdateForm } from "./Interactive";
 import { ScoreRing } from "@/components/brand/Visuals";
 import { COMPONENTS, COMPONENT_HELP, COMPONENT_LABELS, type ReadinessResult } from "@/lib/readiness";
+import { founderSteps, reminderNote, stepProgress } from "@/lib/next-steps";
 
 export interface DashboardData {
   access: { member: boolean; growth: boolean };
@@ -32,6 +33,8 @@ export interface DashboardData {
   commitments: { id: string; sessionId: string; text: string; due: string }[];
   invite: React.ReactNode;
   today: string;
+  /** Next reminder email date (YYYY-MM-DD), if a reminder series is running. */
+  nextReminder?: string | null;
 }
 
 const STATUS_STYLE: Record<GoalStatus, string> = {
@@ -77,14 +80,19 @@ export function FounderDashboard(d: DashboardData) {
   }
   due.sort((a, b) => a.date.localeCompare(b.date));
 
-  const steps = [
-    { label: "Full assessment", value: `${d.areasAnswered} of ${d.areasTotal} areas`, done: d.areasAnswered >= d.areasTotal, ok: d.areasAnswered >= 3, href: "/assessment/details", locked: false },
-    { label: "Strategic plan", value: d.planCompleteness === null ? "Not started" : `${d.planCompleteness}% complete`, done: (d.planCompleteness ?? 0) >= 100, ok: (d.planCompleteness ?? 0) >= 60, href: "/plan", locked: !d.access.member },
-    { label: "Plan review", value: d.review ? `${d.review.review.overall}/100` : "Not yet", done: !!d.review && d.review.review.overall >= 75, ok: !!d.review, href: "/plan", locked: !d.access.growth },
-    { label: "Market Intelligence", value: d.market ? fmtDate(d.market.createdAt) : "Not yet", done: !!d.market, ok: !!d.market, href: "/market", locked: !d.access.growth },
-    { label: "Readiness Report", value: d.report.exists ? (d.report.current ? "Up to date" : "Update available") : "Not yet", done: d.report.exists && d.report.current, ok: d.report.exists, href: "#report", locked: false },
-  ];
-  const next = steps.find((s) => !s.ok && !s.locked) ?? steps.find((s) => !s.done && !s.locked);
+  const steps = founderSteps({
+    areasAnswered: d.areasAnswered,
+    areasTotal: d.areasTotal,
+    planCompleteness: d.planCompleteness,
+    review: d.review ? { overall: d.review.review.overall } : null,
+    marketDate: d.market ? fmtDate(d.market.createdAt) : null,
+    report: d.report,
+    access: d.access,
+  });
+  const prog = stepProgress(steps);
+  const next = prog.next;
+  const note = next ? reminderNote(d.nextReminder ?? null, d.today) : null;
+  const doneSteps = steps.filter((s) => !s.locked && s.done && s !== next);
 
   return (
     <div className="space-y-6">
@@ -143,27 +151,46 @@ export function FounderDashboard(d: DashboardData) {
 
       {/* Next steps */}
       <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-semibold text-navy">Your next steps</h2>
-          {next && (
-            <a href={next.href} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
-              Next: {next.label}
-            </a>
-          )}
+          <p className="text-sm text-ink-soft">{next ? `Step ${prog.position} of ${prog.total}` : `All ${prog.total} steps done`}</p>
         </div>
-        <ol className="mt-4 grid gap-2 sm:grid-cols-5">
-          {steps.map((s, i) => (
-            <li key={s.label}>
-              <a href={s.locked ? "/dashboard/subscribe" : s.href} className={`block h-full rounded-xl border p-3 text-sm ${s === next ? "border-gold bg-cream" : "border-gray-200"} hover:border-navy`}>
-                <span className="flex items-center gap-2">
-                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${s.done ? "bg-teal text-white" : s.ok ? "bg-teal/20 text-teal" : "border border-gray-300 text-ink-soft"}`}>{s.done ? "✓" : i + 1}</span>
-                  <span className="font-semibold text-navy">{s.label}</span>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={prog.percent} aria-label="Steps completed">
+          <div className="h-full rounded-full bg-gradient-to-r from-[#FF5A1F] via-[#B8177F] to-[#3B1694] transition-[width] duration-500" style={{ width: `${prog.percent}%` }} />
+        </div>
+        {next ? (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gold bg-cream p-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-text">Now</p>
+              <p className="font-semibold text-navy">{next.label}</p>
+              <p className="text-sm text-ink-soft">{next.value}</p>
+              {note && <p className="mt-1 text-xs text-ink-soft">{note}</p>}
+            </div>
+            <a href={next.href} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
+              {next.done || next.ok ? "Continue" : "Start"}: {next.label}
+            </a>
+          </div>
+        ) : (
+          <p className="mt-4 rounded-xl bg-cream p-4 text-sm text-navy">Every open step is done. Keep your weekly rhythm: log a check-in and review your goals.</p>
+        )}
+        <ol className="mt-3 space-y-1 text-sm">
+          {steps.filter((s) => s !== next && !(s.done && !s.locked)).map((s) => (
+            <li key={s.key} className="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
+              <span className="flex items-center gap-2">
+                <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${s.ok ? "bg-teal/20 text-teal" : "border border-gray-300 text-ink-soft"}`} aria-hidden="true">
+                  {s.locked ? "🔒" : ""}
                 </span>
-                <span className="mt-1 block text-xs text-ink-soft">{s.locked ? "With Growth" : s.value}</span>
-              </a>
+                {s.locked ? <span className="text-ink-soft">{s.label}</span> : <a href={s.href} className="text-navy hover:underline">{s.label}</a>}
+              </span>
+              <span className="text-xs text-ink-soft">{s.locked ? <a href="/dashboard/subscribe" className="underline">{s.unlock ?? "Upgrade"}</a> : s.value}</span>
             </li>
           ))}
         </ol>
+        {doneSteps.length > 0 && (
+          <p className="mt-2 px-2 text-xs text-ink-soft">
+            <span className="font-semibold text-teal">✓ Done:</span> {doneSteps.map((s) => s.label).join(" · ")}
+          </p>
+        )}
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">

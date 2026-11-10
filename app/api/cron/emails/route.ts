@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/server";
 import { dueFollowUp } from "@/lib/emails";
-import { sendOnce } from "@/lib/email-flow";
+import { sendOnce, sendReminderOnce } from "@/lib/email-flow";
+import { loadStepState, recentPayingFounders } from "@/lib/reminders-server";
+import { dueReminder, reminderStep } from "@/lib/reminders";
 import { emailConfigured } from "@/lib/email-send";
 import { parseSnapshotBody } from "@/lib/snapshot-save";
 import { scoreSnapshot, snapshotOverview } from "@/lib/snapshot";
@@ -15,7 +17,8 @@ export const maxDuration = 60;
 /** GET /api/cron/emails — run once a day by Vercel Cron (vercel.json).
  * Sends the Snapshot follow-up emails that are due: only to founders who
  * ticked "email me tips", who haven't created an account, and who haven't
- * unsubscribed. Vercel calls it with "Authorization: Bearer <CRON_SECRET>". */
+ * unsubscribed. Then sends member reminders for unfinished steps
+ * (lib/reminders.ts), also respecting unsubscribes. Vercel calls it with "Authorization: Bearer <CRON_SECRET>". */
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   const auth = req.headers.get("authorization") ?? "";
@@ -67,5 +70,33 @@ export async function GET(req: NextRequest) {
     ).catch(() => false);
     if (did) sent++;
   }
-  return NextResponse.json({ sent });
+
+  // Member reminders (lib/reminders.ts): founders who paid in the last 60
+  // days and still have an unfinished step get up to three nudges per step.
+  let reminders = 0;
+  for (const founderId of await recentPayingFounders(admin)) {
+    try {
+      const state = await loadStepState(admin, founderId);
+      const current = reminderStep(state);
+      if (!current) continue;
+      const { data: userData } = await admin.auth.admin.getUserById(founderId);
+      const email = userData?.user?.email?.toLowerCase();
+      if (!email) continue;
+      const { data: log } = await admin.from("email_log").select("kind").eq("email", email).like("kind", "remind:%");
+      const kind = dueReminder(current.step, current.since, (log ?? []).map((l: any) => l.kind));
+      if (!kind) continue;
+      const { data: profile } = await admin.from("profiles").select("full_name").eq("id", founderId).maybeSingle();
+      const did = await sendReminderOnce(admin, kind, email, {
+        appUrl,
+        firstName: String(profile?.full_name ?? "").split(/\s+/)[0] ?? "",
+        areasAnswered: state.areasAnswered,
+        areasTotal: state.areasTotal,
+        coachingAvailable: state.coachingAvailable,
+      });
+      if (did) reminders++;
+    } catch (e) {
+      console.error("Member reminder failed:", e);
+    }
+  }
+  return NextResponse.json({ sent, reminders });
 }

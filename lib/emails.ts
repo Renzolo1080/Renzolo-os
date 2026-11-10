@@ -57,9 +57,9 @@ export interface EmailContext {
   postalAddress?: string | null;
 }
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+export const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-function layout(title: string, bodyHtml: string, ctx: EmailContext, cta?: { label: string; href: string }): string {
+export function layout(title: string, bodyHtml: string, ctx: EmailContext, cta?: { label: string; href: string }): string {
   return `<!doctype html><html><body style="margin:0;background:#F7F4EE;font-family:Arial,Helvetica,sans-serif;color:#111111">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F4EE;padding:24px 0"><tr><td align="center">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden">
@@ -73,11 +73,11 @@ ${cta ? `<p style="margin:28px 0 8px"><a href="${esc(cta.href)}" style="backgrou
 </table></td></tr></table></body></html>`;
 }
 
-function textFooter(ctx: EmailContext) {
+export function textFooter(ctx: EmailContext) {
   return `\n\n--\nFounder Trajectory(TM), powered by RENZOLO OS(TM)\nRenzolo Enterprises LLC${ctx.postalAddress ? `, ${ctx.postalAddress}` : ""}\nPrivacy: ${ctx.appUrl}/privacy${ctx.unsubscribeUrl ? `\nUnsubscribe: ${ctx.unsubscribeUrl}` : ""}`;
 }
 
-const p = (t: string) => `<p style="margin:0 0 14px;line-height:1.55;font-size:15px">${t}</p>`;
+export const p = (t: string) => `<p style="margin:0 0 14px;line-height:1.55;font-size:15px">${t}</p>`;
 const link = (ctx: EmailContext, path: string, campaign: string) => `${ctx.appUrl}${path}${path.includes("?") ? "&" : "?"}utm_source=email&utm_medium=email&utm_campaign=${campaign}`;
 
 export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: string; html: string; text: string } {
