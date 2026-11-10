@@ -68,9 +68,9 @@ export default function AboutPage() {
 
         <section className={`${WRAP} pb-20`}>
           <p className={EYEBROW}>Leadership</p>
-          <div className="mt-6 flex max-w-[760px] items-center gap-6 rounded-[24px] border border-line bg-white p-7">
+          <div className="mt-6 flex max-w-[760px] flex-col items-start gap-6 rounded-[24px] sm:flex-row sm:items-center border border-line bg-white p-7">
             {FOUNDER.photo ? (
-              <img src={FOUNDER.photo} alt={FOUNDER.name} className="h-[88px] w-[88px] shrink-0 rounded-full object-cover" />
+              <img src={FOUNDER.photo} alt={FOUNDER.name} className="h-[112px] w-[112px] shrink-0 rounded-full object-cover" />
             ) : (
               <span aria-hidden="true" className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-full bg-ink font-display text-2xl font-bold text-white">
                 LB
@@ -79,7 +79,7 @@ export default function AboutPage() {
             <div className="min-w-0">
               <p className="text-[22px] font-bold">Lorenzo Bell Jr.</p>
               <p className="mt-0.5 text-base font-bold text-brand-text">Founder &amp; CEO</p>
-              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">25+ years developing suppliers and founders for global buyers, lenders and investors. U.S. Navy veteran.</p>
+              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">25+ years developing, coaching and connecting suppliers and founders to global supply chains, while supporting their access to capital and investors. U.S. Navy veteran.</p>
             </div>
           </div>
         </section>
