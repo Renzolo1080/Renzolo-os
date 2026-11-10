@@ -18,12 +18,39 @@ export default function PricingPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Founder Trajectory™ membership</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-bold leading-tight">Choose the support that fits where you want to be.</h1>
           <p className="mt-4 max-w-2xl text-cream/85">
-            Every membership starts with your full Readiness Assessment and a growth and readiness plan. Not sure which fits? Start with the free
-            Readiness Snapshot.
+            Start with the $60 Readiness Assessment on its own, or choose a membership: every membership includes it, plus a growth and readiness plan.
+            Not sure yet? Take the free Readiness Snapshot.
           </p>
-          <a href="/snapshot" className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand">
-            Take the free Snapshot first
-          </a>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href="#assessment" className="inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand">
+              Buy the assessment · {f(getOneOffPrice("assessment", false))}
+            </a>
+            <a href="/snapshot" className="inline-block rounded-pill border-2 border-white/70 px-6 py-3 font-semibold text-white hover:bg-white/10">
+              Take the free Snapshot first
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="assessment" className="mx-auto max-w-6xl scroll-mt-24 px-4 pt-12 sm:px-6">
+        <div className="flex flex-col gap-6 rounded-2xl border-2 border-brand bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between md:p-8">
+          <div className="min-w-0 max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-teal">One-time · no membership needed</p>
+            <p className="mt-1 text-2xl font-bold text-navy">Readiness Assessment</p>
+            <p className="mt-2 text-ink-soft">
+              The full assessment and detailed, downloadable AI Readiness Report, with your valuation range, readiness scores, an AI market insight
+              for your industry and country, and a recommendation of the membership tier that fits you. Join within 30 days and it carries straight
+              into your membership.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
+            <p className="text-5xl font-bold text-navy">
+              {f(getOneOffPrice("assessment", false))} <span className="text-base font-normal text-ink-soft">one time</span>
+            </p>
+            <a href="/register" className="inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand hover:bg-brand/90">
+              Buy the assessment · {f(getOneOffPrice("assessment", false))}
+            </a>
+          </div>
         </div>
       </section>
 
@@ -40,20 +67,7 @@ export default function PricingPage() {
         />
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-5 px-4 pb-12 sm:px-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-gold/50 bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-teal">One-time · no membership</p>
-          <p className="mt-1 text-xl font-bold text-navy">Readiness Assessment</p>
-          <p className="mt-2 text-4xl font-bold text-navy">{f(getOneOffPrice("assessment", false))}</p>
-          <p className="mt-3 text-sm text-ink-soft">
-            The full assessment and detailed, downloadable AI Readiness Report, with your valuation range, readiness scores, an AI market insight
-            for your industry and country, and a recommendation of the membership tier that fits you. Join within 30 days and it carries straight
-            into your membership.
-          </p>
-          <a href="/register" className="mt-5 inline-block rounded-lg bg-navy px-5 py-3 font-semibold text-white">
-            Create an account to buy
-          </a>
-        </div>
+      <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-6">
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-teal">No minimum</p>
           <p className="mt-1 text-xl font-bold text-navy">One-on-one coaching</p>

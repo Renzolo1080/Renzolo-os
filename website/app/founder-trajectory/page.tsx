@@ -1,6 +1,7 @@
 import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
+import { AssessmentOffer } from "@/components/AssessmentOffer";
 import { Faq } from "@/components/Faq";
 import { HOW_TO_START, HowToStart, PageEndCta } from "@/components/Flow";
 import { OfferTabs } from "@/components/OfferTabs";
@@ -54,7 +55,8 @@ export default function FounderTrajectoryPage() {
 
         <section id="membership" className="scroll-mt-36 bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Three levels of support</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The assessment and three levels of support</h2>
+            <AssessmentOffer campaign="ft_assessment" className="mt-8" />
             <div className="mt-10 grid gap-6 lg:grid-cols-3">
               {TIERS.map((t, i) => (
                 <div key={t.name} className={`rounded-3xl p-7 ${i === 1 ? "bg-navy text-white" : "bg-paper"}`}>
@@ -74,8 +76,7 @@ export default function FounderTrajectoryPage() {
               ))}
             </div>
             <p className="mt-8 max-w-3xl text-muted">
-              Prefer a one-time answer? The Readiness Assessment ($60) gives you the full report, a valuation range, an AI market insight and a
-              recommendation of the plan that fits you, with no membership. Extra coaching sessions start at $75 for members.
+              Every membership includes the Readiness Assessment. Extra coaching sessions start at $75 for members.
             </p>
             <a href={appLink("/pricing", "ft_tiers")} className="mt-6 inline-block rounded-full border-2 border-navy px-6 py-3 font-semibold text-navy hover:bg-navy hover:text-white">
               See full pricing

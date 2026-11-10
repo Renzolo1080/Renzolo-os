@@ -2,6 +2,7 @@ import { Header, Footer } from "@/components/Chrome";
 import { HeroZoom } from "@/components/HeroZoom";
 import { ProofPanel } from "@/components/Proof";
 import { APP_URL, appLink } from "@/lib/site";
+import { AssessmentOffer } from "@/components/AssessmentOffer";
 
 /* Home page, v6 "global firm" (approved Nov 9, 2026): zooming hero, the
    Founder Trajectory™ method, who we are, services, track record,
@@ -123,7 +124,8 @@ export default function Home() {
         <section id="memberships" className={`${WRAP} scroll-mt-24 pb-20 md:pb-24`}>
           <p className={EYEBROW}>Memberships</p>
           <h2 className={`${H2} mt-3`}>Choose how far you want to go.</h2>
-          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Every membership starts with your full Readiness Assessment, a $60 value. One price in every region; your local-currency estimate shows at checkout.</p>
+          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Start with the $60 Readiness Assessment on its own, or choose a membership: every membership includes it. One price in every region; your local-currency estimate shows at checkout.</p>
+          <AssessmentOffer campaign="home_assessment" className="mt-9" />
           <ol className="mt-9 flex flex-wrap gap-6 rounded-[20px] bg-[#F3F5F8] p-7">
             {JOURNEY.map(([title, text, color], i) => (
               <li key={title} className="flex min-w-0 flex-[1_1_260px] items-start gap-3.5">
