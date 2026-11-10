@@ -1,150 +1,97 @@
 import { Header, Footer } from "@/components/Chrome";
-import { OsStory, OutcomeFlipCards, PricingTable, ReadinessTicker, RevealOnScroll, SnapshotTaster, StickyMobileCta, type Tier } from "@/components/BrandClient";
-import { Button, DotGrid, Eyebrow, Glow, Portrait } from "@/components/Visuals";
-import { HOW_TO_START, HowToStart, ProofBand } from "@/components/Flow";
-import { PathChooser, type PathStage } from "@/components/PathChooser";
-import { GuideForm } from "@/components/Forms";
-import { AFFILIATION_NOTE, FOUNDER, RESULTS, TESTIMONIALS } from "@/lib/story";
+import { HeroZoom } from "@/components/HeroZoom";
+import { ProofPanel } from "@/components/Proof";
 import { APP_URL, appLink } from "@/lib/site";
 
-/* The home page follows the brand book's story arc and 14-section flow:
-   the founder is the hero, RENZOLO is the guide. Read top to bottom, the
-   headlines alone tell the story. */
+/* Home page, v6 "global firm" (approved Nov 9, 2026): zooming hero, the
+   Founder Trajectory™ method, who we are, services, track record,
+   memberships, inside RENZOLO OS™, FAQs and a closing call to action. */
 
-const WRAP = "mx-auto max-w-[1200px] px-4 md:px-8";
-const SECTION = `${WRAP} py-16 md:py-24`;
-const H2 = "font-display text-[34px] font-bold leading-[40px] tracking-[-0.015em] md:text-5xl md:leading-[54px]";
+const WRAP = "mx-auto max-w-[1240px] px-4 md:px-8";
+const EYEBROW = "text-[15px] font-bold uppercase tracking-[0.16em] text-brand-text";
+const H2 = "font-display text-[34px] font-bold leading-[1.12] md:text-[46px]";
+const CTA = "inline-flex min-h-[48px] items-center justify-center rounded-pill bg-brand px-7 py-4 text-lg font-bold text-on-brand transition-colors hover:bg-brand/90";
 
-const STAGES = [
-  ["Evaluate", "Take the free Snapshot, then your full Readiness Assessment, and see exactly where you stand and why."],
-  ["Evolve", "Turn the results into a growth and readiness plan of 90 days to 36 months, built around the gaps that matter."],
-  ["Execute", "Work the plan from your dashboard with goals, reminders, Lorenzo · AI and live sessions with a Founder Coach."],
-  ["Elevate", "Re-assess, measure your progress and move to your next stage."],
+const METHOD: [string, string, string][] = [
+  ["Evaluate", "Know your readiness score, free in minutes.", "#FF5A1F"],
+  ["Evolve", "Develop your strategic growth plan.", "#B8177F"],
+  ["Execute", "Founder Coach, dashboard, progress tracking.", "#6A2BCB"],
+  ["Elevate", "Re-assess and move to your next stage.", "#3B1694"],
 ];
 
-const OS_MODULES = [
-  { title: "Your dashboard", text: "Revenue, customers, cash and your score in one view, with goals tracked target against actual.", src: "/img/screen-dashboard.jpg", alt: "RENZOLO OS dashboard showing revenue, customers, cash, Total Readiness Score and goals" },
-  { title: "Your strategic plan", text: "A guided plan built from your assessment: where you are, where you're going, and dated actions for every gap.", src: "/img/screen-plan.jpg", alt: "The Plan Builder checking a strategic plan for goals, measures and dated actions" },
-  { title: "Market Intelligence", text: "Your industry and country researched each month, tied to your plan and targets, with sources.", src: "/img/screen-market.jpg", alt: "A Market Intelligence brief with recommendations for the founder's plan" },
-  { title: "Your coaching team", text: "Lorenzo · AI coaches you any time from Lorenzo's 20-year playbook, with local to global insight and dated actions. Book a Founder Coach live when the decision is big.", src: "/img/screen-aicoach.jpg", alt: "The AI coach answering a pricing question with suggested actions" },
+const SERVICES: [string, string][] = [
+  ["Readiness Assessment", "A full view of your business against what buyers, lenders and investors check, with your Total Readiness Score and valuation range."],
+  ["Growth planning", "A strategic plan built to support your market growth, from 90 days to 36 months, with dated actions for every gap."],
+  ["Founder coaching", "Live sessions with a Founder Coach and an AI coach any time, keeping you on plan until you're ready."],
+  ["Buyer and investor matching", "Full introductions to buyers, lenders and investors once you meet the readiness requirements."],
 ];
 
-/** The five reasons, each with its proof (brand book: Why RENZOLO). */
-const REASONS = [
-  ["Experience", "Built by someone who has done this across Africa for 20 years.", "Lorenzo's 20+ years developing suppliers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean, and six years leading the EY Africa Enterprise Impact Program."],
-  ["Capability", "A platform and a coach, working together.", "RENZOLO OS™ (assessment, plan, dashboard, reports) plus your coaching team: Lorenzo · AI any time and live sessions with a Founder Coach."],
-  ["Value", "Know exactly where you stand for $60.", "The standalone assessment with AI market insight; membership from $60 a quarter, every tier priced in plain numbers below."],
-  ["Solution", "One path from where you are to customer, capital and investor ready.", "Evaluate. Evolve. Execute. Elevate., a plan length you choose (90 days to 36 months) and a dashboard that tracks it."],
-  ["Differentiator", "Readiness that leads somewhere.", "One Readiness Score per outcome, and introductions to buyers, lenders and investors curated by the RENZOLO team."],
+const JOURNEY: [string, string, string][] = [
+  ["Start free", "Readiness Snapshot: your score and three biggest gaps.", "#FF5A1F"],
+  ["Get the full picture", "Readiness Assessment, $60 on its own, included in every membership.", "#E6197F"],
+  ["Work the plan, coached", "Choose the membership that fits where you're going.", "#3B1694"],
 ];
 
-const TIERS: Tier[] = [
-  { name: "Essentials", for: "Know where you stand and work your plan.", prices: { quarterly: 60, annual: 200 }, gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools", "One basic 30-minute coaching session a quarter"], start: HOW_TO_START.essentials },
-  { name: "Growth", for: "Go deeper, with coaching to carry out your plan.", prices: { quarterly: 147, annual: 490 }, gets: ["Everything in Essentials", "Full report with valuation range and market insight", "Lorenzo · AI any time, plus plan review", "Two 30-minute one-on-one sessions a quarter"], popular: true, start: HOW_TO_START.growth },
-  { name: "Elevate", for: "Hands-on support to raise, scale or win big contracts.", prices: { quarterly: 699, annual: 2490 }, gets: ["Everything in Growth", "One 60-minute one-on-one session a month", "Pitch and investor readiness review", "Priority support. Limited places"], start: HOW_TO_START.elevate },
+type Plan = { name: string; who: string; price: string; per: string; items: string[]; color: string; featured?: boolean };
+const PLANS: Plan[] = [
+  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: "$60", per: "a quarter · or $200 a year", color: "#FF5A1F", items: ["Full Readiness Assessment included", "Strategic growth plan and dashboard", "AI coach any time", "One 30-minute coaching session a quarter"] },
+  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: "$147", per: "a quarter · or $490 a year", color: "#E6197F", featured: true, items: ["Everything in Essentials", "Two 30-minute coaching sessions a quarter", "Extra 60-minute coaching at the member rate, $105"] },
+  { name: "Elevate", who: "For businesses ready to get in front of buyers and funders.", price: "$699", per: "a quarter · or $2,490 a year", color: "#3B1694", items: ["Everything in Growth", "One 60-minute coaching session a month", "Advanced coaching process", "Buyer and investor matching (readiness requirements apply)"] },
 ];
 
-/** "Find your path": where the founder is today, and the first step. */
-const PATHS: PathStage[] = [
-  { key: "idea", label: "I have an idea or I'm just starting", who: "No steady customers yet", first: { name: "Free Snapshot", note: "See where you stand in about seven minutes." }, then: { name: "Launch or Essentials", note: "The 8-week Launch cohort, or Essentials from $60 a quarter." }, start: "Take the free Snapshot, then choose Launch or Essentials.", cta: { label: "Start the free Snapshot", href: appLink("/snapshot", "path_idea") } },
-  { key: "first", label: "I have my first customers", who: "Selling, but not yet steady", first: { name: "Readiness Assessment", note: "The full report, a valuation range and AI market insight, for $60." }, then: { name: "Essentials or Growth", note: "Work the plan, with coaching on Growth." }, start: HOW_TO_START.assessment, cta: { label: "Get the assessment", href: appLink("/pricing", "path_first") } },
-  { key: "growing", label: "I'm growing, with steady customers", who: "Ready to work the plan with a coach", first: { name: "Growth membership", note: "Your plan, dashboard and your coaching team." }, then: { name: "Build cohort", note: "12 weeks: traction first, then readiness for loans, grants and contracts." }, start: HOW_TO_START.growth, cta: { label: "See Growth", href: "#pricing" } },
-  { key: "raise", label: "I'm ready to raise or win big contracts", who: "Capital, investors or large buyers next", first: { name: "Elevate membership", note: "Two coaching sessions a month and a pitch and investor readiness review." }, then: { name: "Scale cohort", note: "6 months, selective, with curated introductions." }, start: HOW_TO_START.elevate, cta: { label: "See Elevate", href: "#pricing" } },
+const INSIDE: [string, string, string, string][] = [
+  ["Your dashboard", "Score, goals and the numbers that matter.", "/img/screen-dashboard.jpg", "The dashboard with revenue, customers, cash, Total Readiness Score and goals"],
+  ["Your strategic plan", "Dated actions for every gap.", "/img/screen-plan.jpg", "The Plan Builder checking a strategic plan for goals, measures and dated actions"],
+  ["Market Intelligence", "Your industry and country, with sources.", "/img/screen-market.jpg", "A Market Intelligence brief with recommendations for the founder's plan"],
+  ["Your coaching team", "An AI coach any time, and a Founder Coach.", "/img/screen-aicoach.jpg", "The AI coach answering a pricing question with suggested actions"],
 ];
 
-const ACADEMY_START: Record<string, string> = { Launch: HOW_TO_START.launch, Build: HOW_TO_START.build, Scale: HOW_TO_START.scale };
-const ACADEMY = [
-  ["Launch", "8 weeks", "Self-paced for early-stage founders: all nine parts of your business model, Lorenzo · AI coaching and one 30-minute live session, ending with a written plan."],
-  ["Build", "12 weeks", "For businesses with customers: traction first, then readiness for loans, grants, contracts and investors. Live group sessions and coaching."],
-  ["Scale", "6 months", "Selective and hands-on: raise capital, scale or win large contracts, with curated introductions to investors, lenders and buyers."],
-];
-
-const FAQ = [
-  ["How do I pay?", "Prices are in US dollars. You pay by card or mobile money, including M-Pesa, through Flutterwave."],
-  ["What does the free Snapshot give me?", "Your Total Readiness Score, your Strategic Plan Readiness, your strongest area, the three areas holding you back and a recommended next move, in about seven minutes, with no account needed."],
-  ["What is the difference between the $60 assessment and membership?", "The assessment gives you the full report once, with a valuation range and AI market insight. Membership adds the plan, the dashboard and, on Growth and Elevate, your coaching team: Lorenzo · AI any time and live sessions with a Founder Coach."],
-  ["How does coaching work?", "You prepare a short brief, book a time on your coach's calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan."],
-  ["Can I get a refund?", "Our refund policy sets out exactly when and how refunds apply."],
+const FAQ: [string, string][] = [
+  ["What does the free Snapshot give me?", "Your Total Readiness Score, your three biggest gaps and your best next move, in about five minutes."],
+  ["What's the difference between the $60 assessment and a membership?", "The assessment is a one-time full report. A membership keeps you moving with your plan, dashboard, tools and one-on-one coaching."],
+  ["How does coaching work?", "Your AI coach answers any time from your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter, and Elevate one 60-minute session a month."],
+  ["Who is it for, and where?", "Early- and growth-stage founders and CEOs, wherever they are. We're starting in Africa, the United States and the United Kingdom. Prices are in US dollars; pay by card, or mobile money where available."],
+  ["Is my business information safe?", "We never sell it. You can download or delete your data any time, and we share your profile only with your permission."],
 ];
 
 export default function Home() {
   return (
     <>
       <Header campaign="home_header" />
-      <RevealOnScroll />
       <main>
-        {/* 2. Hero: the ambition */}
-        <section id="hero" className="relative overflow-hidden">
-          <Glow />
-          <div className={`relative grid items-center gap-12 ${WRAP} pb-16 pt-12 md:pt-20 lg:grid-cols-[1.1fr_1fr]`}>
-            <div className="hero-in">
-              <Eyebrow>Founder Trajectory™, powered by RENZOLO OS™</Eyebrow>
-              <h1 className="mt-4 font-display text-[44px] font-extrabold leading-[48px] tracking-[-0.02em] md:text-[72px] md:leading-[76px]">
-                Ready for customers, capital and investors.
-              </h1>
-              <p className="max-w-xl pt-6 text-lg leading-7 text-ink-muted">
-                Know exactly where your business stands, build the plan to close the gaps, and get coached to the standard buyers, lenders and investors look for.
-              </p>
-              <div className="flex flex-wrap items-center gap-4 pt-8">
-                <Button href={appLink("/snapshot", "home_hero")}>Start your assessment</Button>
-                <Button href="#method" variant="secondary">See how it works</Button>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="float-in relative mx-auto max-w-[420px]">
-                <ReadinessTicker className="card-pulse" />
-              </div>
+        <HeroZoom eyebrow="Venture development & capital infrastructure" title="Get ready to win." intro="We help founders and CEOs get ready to win contracts, access capital and attract investment.">
+          <div className="mt-9 flex flex-wrap justify-center gap-4">
+            <a href={appLink("/snapshot", "home_hero")} className={CTA}>
+              Start the free Snapshot
+            </a>
+            <a href="/contact/" className="inline-flex min-h-[48px] items-center rounded-pill border-2 border-white px-7 py-3.5 text-lg font-bold text-white hover:bg-white/10">
+              Talk to our team
+            </a>
+          </div>
+          <p className="mt-5 text-[15px] [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">Free · about 5 minutes · no card needed</p>
+        </HeroZoom>
+
+        {/* Who we are + the method */}
+        <section className={`${WRAP} flex flex-wrap items-center gap-12 py-20 md:py-24`}>
+          <div className="min-w-0 flex-[1_1_440px]">
+            <p className={EYEBROW}>Who we are</p>
+            <h2 className={`${H2} mt-3`}>We see your business the way buyers, lenders and investors do.</h2>
+            <div className="mt-6 space-y-5 text-lg leading-relaxed text-ink-muted md:text-[19px]">
+              <p>RENZOLO is a global venture development and capital infrastructure firm. Our approach comes from more than 25 years on the buyer&apos;s side of the table: assessing suppliers for global companies, developing them until they meet the standard, and connecting them to contracts, lenders and investors.</p>
+              <p>Founder Trajectory™, powered by RENZOLO OS™, puts that same standard in every founder&apos;s hands: a clear score, a growth plan, coaching, and a path to the people who can say yes.</p>
             </div>
           </div>
-        </section>
-
-        {/* 2b. Proof, straight after the ambition */}
-        <ProofBand />
-
-        {/* 3. Three outcomes */}
-        <section className="bg-surface-tint">
-          <div className={SECTION}>
-            <Eyebrow className="reveal">Three outcomes</Eyebrow>
-            <h2 className={`reveal mt-2 max-w-3xl ${H2}`}>Pick the yes you need next.</h2>
-            <div className="reveal mt-12">
-              <OutcomeFlipCards hrefs={Object.fromEntries(["customers", "capital", "investors"].map((k) => [k, appLink(`/snapshot?goal=${k}`, `home_outcome_${k}`)]))} />
-            </div>
-          </div>
-        </section>
-
-        {/* 4. The gap */}
-        <section>
-          <div className={`${SECTION} grid gap-10 md:grid-cols-2`}>
-            <div>
-              <Eyebrow className="reveal">The gap</Eyebrow>
-              <h2 className={`reveal mt-2 ${H2}`}>Lenders and buyers keep saying &ldquo;not yet&rdquo;.</h2>
-            </div>
-            <div className="reveal space-y-4 text-lg leading-7 text-ink-muted">
-              <p>Your plan is scattered across notebooks and spreadsheets. You are not sure what a buyer, a bank or an investor will check. Every programme gives you more advice, and the answer is still &ldquo;come back when you&apos;re ready&rdquo;.</p>
-              <p className="font-display text-2xl font-bold leading-8 text-ink">You don&apos;t need more advice. You need to know exactly where you stand.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. The method */}
-        <section id="method" className="bg-surface-tint">
-          <div className={SECTION}>
-            <Eyebrow className="reveal">The Founder Trajectory™ Method</Eyebrow>
-            <h2 className={`reveal mt-2 ${H2}`}>Evaluate. Evolve. Execute. Elevate.</h2>
-            <p className="reveal mt-4 max-w-2xl text-lg text-ink-muted">Four steps, repeated as you grow. Tap a stage to see what happens in it.</p>
-            <div className="reveal relative mt-12">
-              <span aria-hidden="true" className="absolute left-6 right-6 top-[24px] hidden h-1 rounded-pill bg-line md:block" />
-              <span aria-hidden="true" className="method-line absolute left-6 right-6 top-[24px] hidden h-1 origin-left rounded-pill bg-brand md:block" />
-              <ol className="relative grid gap-4 md:grid-cols-4">
-                {STAGES.map(([name, text], i) => (
-                  <li key={name}>
-                    <details className="group" open={i === 0}>
-                      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-pill border-2 border-ink bg-surface-raised py-2 pl-2 pr-4 font-semibold group-open:bg-brand group-open:text-on-brand [&::-webkit-details-marker]:hidden">
-                        <span className="inline-grid h-8 w-8 place-items-center rounded-pill bg-surface-tint font-display text-sm font-extrabold text-ink group-open:bg-ink group-open:text-surface">{i + 1}</span>
-                        {name}
-                      </summary>
-                      <p className="mt-3 px-2 text-ink-muted">{text}</p>
-                    </details>
+          <div className="min-w-0 flex-[1_1_460px]">
+            <div className="relative overflow-hidden rounded-panel bg-black px-6 py-9 md:px-8 md:py-10">
+              <img src="/img/burst-bright.jpg" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
+              <p className="relative mb-4 text-sm font-bold uppercase tracking-[0.16em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.5)]">The Founder Trajectory™ method</p>
+              <ol className="relative flex max-w-[440px] flex-col gap-2.5">
+                {METHOD.map(([name, text, color], i) => (
+                  <li key={name} className="rounded-pill bg-white px-5 py-2.5 text-black shadow-[0_8px_24px_rgba(0,0,0,0.18)]" style={{ border: `6px solid ${color}` }}>
+                    <p className="text-[19px] font-bold uppercase tracking-[0.08em]">
+                      {i + 1}. {name}
+                    </p>
+                    <p className="mt-0.5 text-[15px] text-[#333]">{text}</p>
                   </li>
                 ))}
               </ol>
@@ -152,216 +99,134 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5b. Free method guide (lead capture for founders not ready to assess) */}
-        <section id="guide">
-          <div className={`${SECTION} grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]`}>
-            <div className="reveal">
-              <img src="/img/guide-cover.png" alt="The Founder Trajectory Method guide: three outcomes, four steps, the five parts of the Total Readiness Score and where to start" width={510} height={660} className="mx-auto w-full max-w-[360px] -rotate-2 rounded-card border border-line shadow-card" loading="lazy" />
-            </div>
-            <div>
-              <Eyebrow className="reveal">Free guide</Eyebrow>
-              <h2 className={`reveal mt-2 ${H2}`}>The Founder Trajectory™ Method on one page.</h2>
-              <p className="reveal mt-4 max-w-xl text-lg text-ink-muted">The three outcomes, the four steps, how the Total Readiness Score is measured and where to start. Print it, share it with your team, keep it on your desk.</p>
-              <div className="reveal mt-8"><GuideForm source="home_guide" /></div>
-            </div>
-          </div>
+        {/* Services */}
+        <section id="services" className={`${WRAP} scroll-mt-24 pb-20 md:pb-24`}>
+          <p className={EYEBROW}>What we do</p>
+          <h2 className={`${H2} mt-3`}>Our services</h2>
+          <ol className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+            {SERVICES.map(([title, text], i) => (
+              <li key={title} className="rounded-[24px] border border-line bg-white p-8">
+                <p className="font-display text-xl font-bold text-brand-text">0{i + 1}</p>
+                <h3 className="mb-2 mt-3.5 font-sans text-[23px] font-bold">{title}</h3>
+                <p className="text-[17px] leading-relaxed text-ink-muted">{text}</p>
+              </li>
+            ))}
+          </ol>
         </section>
 
-        {/* 6. Readiness Snapshot taster */}
-        <section>
-          <div className={`${SECTION} grid items-center gap-10 lg:grid-cols-[1fr_1.2fr]`}>
-            <div>
-              <Eyebrow className="reveal">Free Readiness Snapshot</Eyebrow>
-              <h2 className={`reveal mt-2 ${H2}`}>Start with three questions.</h2>
-              <p className="reveal mt-4 text-lg text-ink-muted">Answer three now, then finish the free Snapshot in the app: about seven minutes in all, no account needed.</p>
-            </div>
-            <div className="reveal">
-              <SnapshotTaster appUrl={APP_URL} />
-            </div>
-          </div>
+        {/* Track record */}
+        <section id="proof" className={`${WRAP} pb-20 md:pb-24`}>
+          <ProofPanel title="25+ years of getting businesses ready, across 30+ countries." regions />
         </section>
 
-        {/* 7. RENZOLO OS showcase: the tool (night band, premium) */}
-        <section id="os" data-theme="dark" className="premium relative bg-night text-ink">
-          <DotGrid />
-          <Glow />
-          <div className={`relative ${SECTION}`}>
-            <Eyebrow className="reveal">RENZOLO OS™</Eyebrow>
-            <h2 className={`reveal mt-2 max-w-3xl ${H2}`}>One place to plan, track and get coached.</h2>
-            <p className="reveal mt-4 max-w-xl text-lg text-ink-muted">Real screens from a sample business.</p>
-            <div className="mt-12">
-              <OsStory modules={OS_MODULES} />
-            </div>
-          </div>
-        </section>
-
-        {/* 8. Why RENZOLO: the guide (premium) */}
-        <section id="why" className="premium">
-          <div className={SECTION}>
-            <Eyebrow className="reveal">Why RENZOLO</Eyebrow>
-            <h2 className={`reveal mt-2 max-w-4xl ${H2}`}>
-              Other tools help you run your business. RENZOLO gets you ready for customers, capital and investors, and connects you to them.
-            </h2>
-            <div className="mt-12 grid gap-12 md:grid-cols-[0.8fr_1.2fr]">
-              <div className="reveal">
-                <Portrait name={FOUNDER.name} photo={FOUNDER.photo} className="aspect-[4/5] w-full max-w-sm" />
-                <p className="mt-4 font-display text-xl font-bold">{FOUNDER.name}</p>
-                <p className="text-ink-muted">{FOUNDER.title}</p>
+        {/* Memberships */}
+        <section id="memberships" className={`${WRAP} scroll-mt-24 pb-20 md:pb-24`}>
+          <p className={EYEBROW}>Memberships</p>
+          <h2 className={`${H2} mt-3`}>Choose how far you want to go.</h2>
+          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Every membership starts with your full Readiness Assessment, a $60 value. One price in every region; your local-currency estimate shows at checkout.</p>
+          <ol className="mt-9 flex flex-wrap gap-6 rounded-[20px] bg-[#F3F5F8] p-7">
+            {JOURNEY.map(([title, text, color], i) => (
+              <li key={title} className="flex min-w-0 flex-[1_1_260px] items-start gap-3.5">
+                <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full font-bold text-white" style={{ background: color }}>
+                  {i + 1}
+                </span>
+                <span>
+                  <b className="block text-lg">{title}</b>
+                  <span className="text-base leading-snug text-ink-muted">{text}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-12 grid items-stretch gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))]">
+            {PLANS.map((p) => (
+              <div key={p.name} className={`relative flex flex-col rounded-[24px] bg-white px-8 py-9 ${p.featured ? "border-2 border-ink" : "border border-line"}`}>
+                {p.featured && <span className="absolute right-6 top-6 rounded-pill bg-ink px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-white">Recommended</span>}
+                <div aria-hidden="true" className="h-1 w-12 rounded" style={{ background: p.color }} />
+                <h3 className="mb-1.5 mt-5 font-sans text-[26px] font-bold">{p.name}</h3>
+                <p className="text-base text-ink-muted">{p.who}</p>
+                <p className="mt-5 font-display text-[44px] font-bold leading-none">{p.price}</p>
+                <p className="mb-5 mt-1.5 text-[15px] text-ink-muted">{p.per}</p>
+                <ul className="mb-7 flex-1 space-y-2.5">
+                  {p.items.map((it) => (
+                    <li key={it} className="flex gap-2.5 text-base leading-snug text-ink-muted">
+                      <span aria-hidden="true" className="font-bold" style={{ color: p.color }}>
+                        ✓
+                      </span>
+                      <span>{it}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={appLink("/pricing", `home_plan_${p.name.toLowerCase()}`)}
+                  className={`rounded-pill px-6 py-3.5 text-center text-[17px] font-bold ${p.featured ? "bg-ink text-white hover:bg-ink/90" : "border-2 border-ink text-ink hover:bg-ink/5"}`}
+                >
+                  Choose {p.name}
+                </a>
               </div>
-              <div className="reveal">
-                <blockquote className="font-display text-2xl font-bold leading-8 md:text-[28px] md:leading-9">&ldquo;{FOUNDER.pullQuote}&rdquo;</blockquote>
-                <p className="mt-6 max-w-[60ch] text-lg leading-7 text-ink-muted">{FOUNDER.short}</p>
-                <a href="/about/" className="mt-4 inline-block font-semibold text-teal-text underline underline-offset-4">Read Lorenzo&apos;s story</a>
-              </div>
-            </div>
+            ))}
+          </div>
+          <p className="mt-7 text-[17px]">
+            <a href={`${APP_URL}/pricing`} className="font-bold text-ink underline underline-offset-4">
+              Compare all features and extra coaching on the pricing page →
+            </a>
+          </p>
+        </section>
 
-            <dl className="reveal mt-16 divide-y divide-line border-y border-line">
-              {REASONS.map(([reason, say, proof]) => (
-                <div key={reason} className="grid gap-2 py-6 md:grid-cols-[10rem_1fr_1.3fr] md:gap-8">
-                  <dt className="text-[13px] font-bold uppercase tracking-[0.08em] text-brand-text">{reason}</dt>
-                  <dd className="font-display text-xl font-bold leading-7">{say}</dd>
-                  <dd className="text-ink-muted">{proof}</dd>
+        {/* Inside RENZOLO OS */}
+        <section id="os" className={`${WRAP} pb-20 md:pb-24`}>
+          <p className={EYEBROW}>Inside RENZOLO OS™</p>
+          <h2 className={`${H2} mt-3 max-w-[900px]`}>Instead of a consultant, a spreadsheet and a lender&apos;s checklist: one place.</h2>
+          <p className="mt-4 max-w-[620px] text-lg leading-relaxed text-ink-muted md:text-[19px]">See where you stand, plan, track progress and get coached, all working together.</p>
+          <div className="mt-12 grid gap-7 [grid-template-columns:repeat(auto-fit,minmax(250px,1fr))]">
+            {INSIDE.map(([title, text, src, alt]) => (
+              <div key={title} className="flex flex-col gap-3.5">
+                <img src={src} alt={alt} loading="lazy" className="aspect-[16/10] w-full rounded-2xl border border-line object-cover object-left-top shadow-[0_12px_32px_rgba(7,23,39,0.10)]" />
+                <div>
+                  <h3 className="mb-1.5 font-sans text-[21px] font-bold">{title}</h3>
+                  <p className="text-base leading-relaxed text-ink-muted">{text}</p>
                 </div>
-              ))}
-            </dl>
-
-            {/* Results strip: Lorenzo's track record until RENZOLO has its own results */}
-            <div className="reveal mt-16">
-              <p className="text-[13px] font-bold uppercase tracking-[0.08em] text-ink-muted">{RESULTS.label}</p>
-              <div className="mt-4 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                {RESULTS.stats.map((s) => (
-                  <div key={s.label}>
-                    <p className="font-display text-5xl font-bold leading-[54px]">{s.figure}</p>
-                    <p className="mt-1 text-[13px] font-medium text-ink-muted">{s.label}</p>
-                  </div>
-                ))}
               </div>
-              <p className="mt-6 max-w-3xl text-[13px] text-ink-muted">{RESULTS.base} {AFFILIATION_NOTE}</p>
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* 9. Testimonials: shown once there are at least four real ones */}
-        {TESTIMONIALS.length >= 4 && (
-          <section className="bg-surface-tint">
-            <div className={SECTION}>
-              <Eyebrow>Founders on RENZOLO</Eyebrow>
-              <ul className="mt-8 flex snap-x gap-6 overflow-x-auto pb-4">
-                {TESTIMONIALS.map((t) => (
-                  <li key={t.name} className="w-[300px] shrink-0 snap-start rounded-card border border-line bg-surface-raised p-6">
-                    <span className="rounded-pill bg-gold px-3 py-1 text-[13px] font-bold text-on-gold">{t.result}</span>
-                    <p className="mt-4 text-[17px] font-medium leading-[26px]">&ldquo;{t.quote}&rdquo;</p>
-                    <p className="mt-4 font-bold">{t.name}</p>
-                    <p className="text-[13px] text-ink-muted">{t.business} · {t.place}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        )}
-
-        {/* 10. Pricing: the choice (premium) */}
-        {/* 9b. Find your path */}
-        <section id="path">
-          <div className={SECTION}>
-            <Eyebrow className="reveal">Find your path</Eyebrow>
-            <h2 className={`reveal mt-2 max-w-3xl ${H2}`}>Where is your business today?</h2>
-            <p className="reveal mt-4 max-w-2xl text-lg text-ink-muted">Pick the one that fits. We&apos;ll show you the path founders like you take, and the first step.</p>
-            <div className="reveal mt-10">
-              <PathChooser stages={PATHS} fallbackHref={appLink("/snapshot", "path_fallback")} />
-            </div>
-          </div>
+        {/* FAQ */}
+        <section className="mx-auto max-w-[900px] px-4 pb-20 md:px-8 md:pb-24">
+          <p className={EYEBROW}>Questions</p>
+          <h2 className={`${H2} mb-8 mt-3`}>Good to know.</h2>
+          {FAQ.map(([q, a], i) => (
+            <details key={q} className={`border-t border-line py-5 ${i === FAQ.length - 1 ? "border-b" : ""}`}>
+              <summary className="cursor-pointer text-xl font-bold">{q}</summary>
+              <p className="mt-3 text-[17px] leading-relaxed text-ink-muted">{a}</p>
+            </details>
+          ))}
         </section>
 
-        <section id="pricing" className="premium bg-surface-tint">
-          <div className={SECTION}>
-            <Eyebrow className="reveal">Pricing</Eyebrow>
-            <h2 className={`reveal mt-2 ${H2}`}>Start small. Go as deep as you need.</h2>
-            <div className="reveal mt-12 flex flex-col gap-6 rounded-panel border border-line bg-surface-raised p-8 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="font-display text-[32px] font-bold leading-[38px]">Readiness Assessment</p>
-                <p className="mt-1 max-w-xl text-ink-muted">The full report once, with a valuation range, AI market insight for your industry and country, and the plan that fits you. No membership needed.</p>
-                <HowToStart text={HOW_TO_START.assessment} className="mt-3" />
-              </div>
-              <div className="flex items-center gap-6">
-                <p className="font-display text-5xl font-bold">$60</p>
-                <Button href={appLink("/pricing", "home_pricing_assessment")} variant="secondary">Get the assessment</Button>
-              </div>
+        {/* Closing call to action */}
+        <section className={`${WRAP} pb-20 md:pb-24`}>
+          <div className="relative flex flex-wrap items-center justify-between gap-10 overflow-hidden rounded-panel bg-night px-8 py-14 text-white md:px-16 md:py-[72px]">
+            <img
+              src="/img/burst-bright.jpg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-40 top-1/2 h-[560px] w-[560px] -translate-y-1/2 object-cover opacity-85 [mask-image:radial-gradient(circle,#000_35%,transparent_70%)]"
+            />
+            <div className="relative min-w-0 flex-[1_1_380px]">
+              <h2 className="font-display text-[34px] font-bold leading-[1.1] md:text-[46px]">Know where you stand in minutes.</h2>
+              <p className="mt-4 text-[19px] text-[#C5CDD7]">Free. Mostly dropdowns and taps. No card needed.</p>
+              <p className="mt-5 text-[17px]">
+                <a href="/contact/" className="font-bold text-gold underline-offset-4 hover:underline">
+                  Or talk to our team →
+                </a>
+              </p>
             </div>
-            <div className="reveal mt-12">
-              <PricingTable tiers={TIERS} appUrl={APP_URL} />
-            </div>
-            <p className="mt-6 text-[13px] text-ink-muted">Prices in US dollars. One-on-one coaching sessions from $59 for members.</p>
-          </div>
-        </section>
-
-        {/* 11. Academy (premium) */}
-        <section className="premium">
-          <div className={SECTION}>
-            <Eyebrow className="reveal">Founder Trajectory™ Academy</Eyebrow>
-            <h2 className={`reveal mt-2 ${H2}`}>Grow alongside founders building too.</h2>
-            <div className="reveal mt-12 grid gap-6 md:grid-cols-3">
-              {ACADEMY.map(([name, length, text]) => (
-                <div key={name} className="rounded-card border border-line bg-surface-raised p-8">
-                  <p className="font-mono text-sm font-medium text-ink-muted">{length}</p>
-                  <h3 className="mt-2 font-display text-[32px] font-bold leading-[38px]">{name}</h3>
-                  <p className="mt-3 text-ink-muted">{text}</p>
-                  <HowToStart text={ACADEMY_START[name]} className="mt-5 border-t border-line pt-4" />
-                </div>
-              ))}
-            </div>
-            <div className="reveal mt-8">
-              <Button href="/academy/" variant="link">Explore the Academy</Button>
-            </div>
-          </div>
-        </section>
-
-        {/* 12. FAQ */}
-        <section className="bg-surface-tint">
-          <div className={`${SECTION} grid gap-10 md:grid-cols-[1fr_1.6fr]`}>
-            <div>
-              <Eyebrow className="reveal">Questions</Eyebrow>
-              <h2 className={`reveal mt-2 ${H2}`}>Good to know.</h2>
-            </div>
-            <div className="reveal divide-y divide-line border-y border-line">
-              {FAQ.map(([q, a]) => (
-                <details key={q} className="group py-5">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-xl font-bold [&::-webkit-details-marker]:hidden">
-                    {q}
-                    <span aria-hidden="true" className="text-2xl text-brand-text transition group-open:rotate-45">+</span>
-                  </summary>
-                  <p className="mt-3 text-ink-muted">
-                    {a}
-                    {q.startsWith("Can I get a refund") && (
-                      <>
-                        {" "}
-                        <a href={`${APP_URL}/refunds`} className="font-semibold text-teal-text underline underline-offset-4">Read the refund policy</a>
-                      </>
-                    )}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 13. Final call to action */}
-        <section className={`${WRAP} py-16 md:py-24`}>
-          <div className="reveal flex flex-col gap-6 rounded-panel bg-brand p-8 text-on-brand md:flex-row md:items-center md:justify-between md:p-12">
-            <p className={`max-w-2xl ${H2}`}>Know where you stand in seven minutes.</p>
-            <div className="flex shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-              <a href={appLink("/snapshot", "home_final_cta")} className="inline-flex justify-center rounded-pill bg-ink px-6 py-3 font-semibold text-surface transition-colors hover:bg-ink/85">
-                Start your assessment
-              </a>
-              <a href="/contact/" className="inline-flex justify-center rounded-pill border-2 border-ink/70 px-6 py-3 font-semibold text-on-brand transition-colors hover:border-ink">
-                Talk to Lorenzo
-              </a>
-            </div>
+            <a href={appLink("/snapshot", "home_end")} className={`${CTA} relative`}>
+              Start the free Snapshot
+            </a>
           </div>
         </section>
       </main>
       <Footer />
-      <StickyMobileCta href={appLink("/snapshot", "home_sticky")} label="Start your assessment" />
     </>
   );
 }
