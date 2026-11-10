@@ -28,7 +28,7 @@ export default function AboutPage() {
     <>
       <Header campaign="about_header" />
       <main>
-        <HeroZoom eyebrow="About us" title="We get businesses ready for the yes." intro="A global venture development and capital infrastructure firm, built for founders and CEOs ready to grow." minHeight="min-h-[440px] md:min-h-[520px]" />
+        <HeroZoom eyebrow="About us" title={<>We get founders ready to <span className="text-[#FF5A1F]">win</span></>} subtitle={<span className="text-[#FF5A1F]">Contracts, capital, and investment.</span>} intro="A global venture development and capital infrastructure firm, built for founders and CEOs ready to grow." minHeight="min-h-[440px] md:min-h-[520px]" />
 
         <section className={`${WRAP} pt-20 md:pt-24`}>
           <p className={EYEBROW}>Our purpose</p>
