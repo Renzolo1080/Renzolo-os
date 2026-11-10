@@ -87,7 +87,7 @@ export function LoanReadinessCheck({ snapshotHref }: { snapshotHref: string }) {
             )}
             <div className="mt-6 rounded-xl bg-white/10 p-4">
               <p className="text-sm">A loan is only one way to fund growth. See your full picture across customers, capital and investment.</p>
-              <a href={snapshotHref} className="mt-3 inline-block rounded-lg bg-brand px-5 py-2.5 font-semibold text-on-brand">
+              <a href={snapshotHref} className="mt-3 inline-block rounded-pill bg-brand px-5 py-2.5 font-semibold text-on-brand">
                 Start the free Snapshot
               </a>
             </div>

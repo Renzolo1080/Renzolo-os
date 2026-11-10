@@ -1,3 +1,4 @@
+import { Burst } from "@/components/brand/Visuals";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
@@ -294,7 +295,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
                   ? `Join a membership within ${carryDaysLeft} day${carryDaysLeft === 1 ? "" : "s"} and this assessment carries straight into it.`
                   : "Join a membership to keep building on this assessment with a plan, tools and coaching."}
               </p>
-              <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
+              <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-pill bg-brand px-4 py-2 font-semibold text-on-brand">
                 See membership options
               </a>
             </div>
@@ -344,7 +345,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
                 <span className="font-semibold text-navy">Lorenzo · AI: </span>
                 coaching from Lorenzo&apos;s playbook any time, built on your plan, plus your weekly check-in.
               </p>
-              <a href="/ai-coach" className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
+              <a href="/ai-coach" className="rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
                 Talk to Lorenzo · AI
               </a>
             </div>
@@ -412,7 +413,9 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
         </div>
       )}
 
-      <div className="rounded border p-6 bg-navy text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-navy p-6 text-white sm:p-8">
+        <Burst className="hidden sm:block" />
+        <div className="relative">
         <p className="text-lg font-semibold">
           {lapsed ? "Your membership has ended" : "Continue your Founder Trajectory™"}
         </p>
@@ -420,7 +423,7 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
           <SubscriptionFeatures dark />
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href="/dashboard/subscribe" className="inline-block rounded bg-brand px-6 py-3 text-center font-semibold text-on-brand">
+          <a href="/dashboard/subscribe" className="inline-block rounded-pill bg-brand px-6 py-3 text-center font-bold text-on-brand">
             {lapsed ? "Renew my membership" : "Become a member"}
           </a>
           {!lapsed && (
@@ -429,9 +432,10 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
             </a>
           )}
         </div>
+        </div>
       </div>
 
-      <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
+      <a href="/tools" className="block rounded-pill border-2 border-navy px-5 py-3 text-center font-semibold text-navy">
         Open Founder Tools (free calculators)
       </a>
     </div>

@@ -183,7 +183,7 @@ export function PlanBuilder({
               {saving ? "Saving…" : "Save"}
             </button>
             {idx < PLAN_STEPS.length - 1 && (
-              <button type="button" className="rounded-lg bg-navy px-6 py-2.5 font-semibold text-white disabled:opacity-40" disabled={saving} onClick={() => go(PLAN_STEPS[idx + 1].key)}>
+              <button type="button" className="rounded-pill bg-brand px-6 py-2.5 font-bold text-on-brand disabled:opacity-40" disabled={saving} onClick={() => go(PLAN_STEPS[idx + 1].key)}>
                 Save and continue
               </button>
             )}

@@ -75,7 +75,7 @@ export function YourDataPanel({ email, requests }: { email: string; requests: Re
           onChange={(e) => setDetails(e.target.value)}
           placeholder={kind === "score_review" ? "Which score looks wrong, and why?" : ""}
         />
-        <button disabled={busy} onClick={() => send(kind, details)} className="mt-3 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand disabled:opacity-50">
+        <button disabled={busy} onClick={() => send(kind, details)} className="mt-3 rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand disabled:opacity-50">
           Send request
         </button>
       </section>

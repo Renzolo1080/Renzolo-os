@@ -109,7 +109,7 @@ export function DocumentIntake({ initial, today }: { initial: DocRow[]; today: s
           </span>
         </label>
         {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
-        <button type="submit" disabled={busy || !consent || !file} className="rounded-lg bg-brand px-5 py-2.5 font-semibold text-on-brand disabled:opacity-50">
+        <button type="submit" disabled={busy || !consent || !file} className="rounded-pill bg-brand px-5 py-2.5 font-semibold text-on-brand disabled:opacity-50">
           {busy ? "Reading your document…" : "Check this document"}
         </button>
       </form>

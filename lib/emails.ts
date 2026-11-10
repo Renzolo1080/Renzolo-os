@@ -60,21 +60,21 @@ export interface EmailContext {
 export const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function layout(title: string, bodyHtml: string, ctx: EmailContext, cta?: { label: string; href: string }): string {
-  return `<!doctype html><html><body style="margin:0;background:#F7F4EE;font-family:Arial,Helvetica,sans-serif;color:#111111">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F4EE;padding:24px 0"><tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden">
-<tr><td style="background:#071727;padding:20px 28px;color:#ffffff;font-size:18px;font-weight:bold">Founder Trajectory&trade;<div style="font-size:11px;font-weight:normal;color:#cfd6dc">Powered by RENZOLO OS&trade;</div></td></tr>
+  return `<!doctype html><html><body style="margin:0;background:#F3F5F8;font-family:'Source Sans 3',Arial,Helvetica,sans-serif;color:#071727">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3F5F8;padding:24px 0"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #E3E7ED">
+<tr><td style="padding:18px 28px;border-bottom:1px solid #E3E7ED"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="padding-right:12px"><img src="${esc(ctx.appUrl)}/img/rz-logo.png" width="48" height="40" alt="RZ" style="display:block;border:0"></td><td style="font-size:19px;font-weight:bold;letter-spacing:2px;color:#071727">RENZOLO&trade;</td></tr></table></td></tr>
 <tr><td style="padding:28px">
-<h1 style="margin:0 0 16px;font-size:22px;color:#071727">${esc(title)}</h1>
+<h1 style="margin:0 0 16px;font-family:'Libre Caslon Text',Georgia,serif;font-size:24px;line-height:1.25;color:#071727">${esc(title)}</h1>
 ${bodyHtml}
-${cta ? `<p style="margin:28px 0 8px"><a href="${esc(cta.href)}" style="background:#C18B2C;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:bold;display:inline-block">${esc(cta.label)}</a></p>` : ""}
+${cta ? `<p style="margin:28px 0 8px"><a href="${esc(cta.href)}" style="background:#FF5A1F;color:#071727;text-decoration:none;padding:13px 24px;border-radius:999px;font-weight:bold;display:inline-block">${esc(cta.label)}</a></p>` : ""}
 </td></tr>
-<tr><td style="padding:16px 28px;font-size:11px;color:#68737D;border-top:1px solid #eeeeee">Renzolo Enterprises LLC${ctx.postalAddress ? `, ${esc(ctx.postalAddress)}` : ""} &middot; <a href="${esc(ctx.appUrl)}/privacy" style="color:#68737D">Privacy</a>${ctx.unsubscribeUrl ? ` &middot; <a href="${esc(ctx.unsubscribeUrl)}" style="color:#68737D">Unsubscribe</a>` : ""}</td></tr>
+<tr><td style="padding:16px 28px;font-size:11px;color:#68737D;border-top:1px solid #eeeeee">RENZOLO&trade; &middot; Founder Trajectory&trade; &middot; RENZOLO OS&trade;<br>Renzolo Enterprises LLC${ctx.postalAddress ? `, ${esc(ctx.postalAddress)}` : ""} &middot; <a href="${esc(ctx.appUrl)}/privacy" style="color:#68737D">Privacy</a>${ctx.unsubscribeUrl ? ` &middot; <a href="${esc(ctx.unsubscribeUrl)}" style="color:#68737D">Unsubscribe</a>` : ""}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 export function textFooter(ctx: EmailContext) {
-  return `\n\n--\nFounder Trajectory(TM), powered by RENZOLO OS(TM)\nRenzolo Enterprises LLC${ctx.postalAddress ? `, ${ctx.postalAddress}` : ""}\nPrivacy: ${ctx.appUrl}/privacy${ctx.unsubscribeUrl ? `\nUnsubscribe: ${ctx.unsubscribeUrl}` : ""}`;
+  return `\n\n--\nRENZOLO(TM) · Founder Trajectory(TM) · RENZOLO OS(TM)\nRenzolo Enterprises LLC${ctx.postalAddress ? `, ${ctx.postalAddress}` : ""}\nPrivacy: ${ctx.appUrl}/privacy${ctx.unsubscribeUrl ? `\nUnsubscribe: ${ctx.unsubscribeUrl}` : ""}`;
 }
 
 export const p = (t: string) => `<p style="margin:0 0 14px;line-height:1.55;font-size:15px">${t}</p>`;
@@ -92,7 +92,7 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
         (ctx.weakest.length ? p(`<strong>The areas holding you back most:</strong><br>${ctx.weakest.map((w, i) => `${i + 1}. ${esc(w)}`).join("<br>")}`) : "") +
         p(`<strong>Our recommendation:</strong> ${esc(ctx.recommendation)}`) +
         p(`Create your account with this email address and your Snapshot will be waiting for you.`) +
-        (ctx.shareUrl ? p(`Know another founder who should check their readiness? <a href="${esc(ctx.shareUrl)}" style="color:#087F77">Share your score</a>.`) : ""),
+        (ctx.shareUrl ? p(`Know another founder who should check their readiness? <a href="${esc(ctx.shareUrl)}" style="color:#C4400F">Share your score</a>.`) : ""),
       ctx,
       { label: "Continue your Founder Trajectory", href: signup }
     );

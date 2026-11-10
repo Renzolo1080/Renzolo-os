@@ -32,7 +32,7 @@ export default async function DocumentsPage() {
         ) : (
           <div className="rounded-2xl bg-white p-6 shadow-sm">
             <p className="text-navy">Document checks come with every membership and the one-time Readiness Assessment.</p>
-            <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-brand px-5 py-2.5 font-semibold text-on-brand">
+            <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-pill bg-brand px-5 py-2.5 font-semibold text-on-brand">
               See membership options
             </a>
           </div>

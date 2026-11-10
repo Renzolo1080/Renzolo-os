@@ -6,7 +6,7 @@ import type { MarketInsights } from "@/lib/market";
 import { BLOCK_LABELS, type BlockKey } from "@/lib/scoring";
 import { Bars, GoalChart, LineChart, Sparkline } from "./Charts";
 import { CheckinForm, CommitmentDone, DashboardCustomizer, MarkDone, MonthlyUpdateForm } from "./Interactive";
-import { ScoreRing } from "@/components/brand/Visuals";
+import { Burst, ScoreRing } from "@/components/brand/Visuals";
 import { COMPONENTS, COMPONENT_HELP, COMPONENT_LABELS, type ReadinessResult } from "@/lib/readiness";
 import { founderSteps, reminderNote, stepProgress } from "@/lib/next-steps";
 
@@ -112,8 +112,10 @@ export function FounderDashboard(d: DashboardData) {
           </div>
         ))}
         <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-navy p-4 text-white shadow-sm">
-          <div aria-hidden="true" className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-teal/30 blur-2xl" />
-          <ScoreRing value={Math.round(d.readiness.total)} size={56} label={`Total Readiness Score ${Math.round(d.readiness.total)} out of 100`} />
+          <Burst className="-right-40 h-[300px] w-[300px] opacity-70" />
+          <div className="relative">
+            <ScoreRing value={Math.round(d.readiness.total)} size={56} label={`Total Readiness Score ${Math.round(d.readiness.total)} out of 100`} />
+          </div>
           <div className="relative">
             <p className="text-xs text-cream/80">Total Readiness Score</p>
             <p className="text-xs font-semibold text-gold">{d.readiness.band}</p>
@@ -166,7 +168,7 @@ export function FounderDashboard(d: DashboardData) {
               <p className="text-sm text-ink-soft">{next.value}</p>
               {note && <p className="mt-1 text-xs text-ink-soft">{note}</p>}
             </div>
-            <a href={next.href} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
+            <a href={next.href} className="rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
               {next.started ? "Continue" : "Start"}: {next.label}
             </a>
           </div>
@@ -337,7 +339,7 @@ function Extra({ k, d, goals, kpiList, runway }: { k: ExtraKey; d: DashboardData
     return (
       <Panel title={def.label}>
         <p className="text-sm text-ink-soft">{def.description}</p>
-        <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
+        <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
           Included with Growth
         </a>
       </Panel>

@@ -36,7 +36,7 @@ export default async function AiCoachPage({ searchParams: searchParamsPromise }:
             <li>A weekly check-in on your goals, overdue actions and the one thing that matters most</li>
             <li>Suggested actions you can add to your plan in one tap</li>
           </ul>
-          <a href="/dashboard/subscribe" className="mt-5 inline-block rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand">
+          <a href="/dashboard/subscribe" className="mt-5 inline-block rounded-pill bg-brand px-5 py-3 font-semibold text-on-brand">
             See Growth
           </a>
           <p className="mt-3 text-xs text-cream/70">Included with Growth, Elevate and the Launch programme.</p>

@@ -20,7 +20,7 @@ export function PartnerJoin({ code, partnerName, cohortName }: { code: string; p
       <div className="rounded-2xl bg-cream p-5" role="status">
         <p className="font-semibold text-navy">You've joined {cohortName}.</p>
         <p className="mt-1 text-sm text-ink-soft">{partnerName} will see your readiness progress from today. You can stop sharing at any time on this page.</p>
-        <a href="/dashboard" className="mt-3 inline-block rounded-lg bg-brand px-5 py-2.5 font-semibold text-on-brand">
+        <a href="/dashboard" className="mt-3 inline-block rounded-pill bg-brand px-5 py-2.5 font-semibold text-on-brand">
           Go to my dashboard
         </a>
       </div>
@@ -32,7 +32,7 @@ export function PartnerJoin({ code, partnerName, cohortName }: { code: string; p
         <span>I agree to share the information above with {partnerName} for this programme. I can stop sharing at any time.</span>
       </label>
       {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
-      <button type="button" disabled={!consent || state === "busy"} onClick={join} className="rounded-lg bg-brand px-5 py-2.5 font-semibold text-on-brand disabled:opacity-50">
+      <button type="button" disabled={!consent || state === "busy"} onClick={join} className="rounded-pill bg-brand px-5 py-2.5 font-semibold text-on-brand disabled:opacity-50">
         {state === "busy" ? "Joining…" : "Join and share my progress"}
       </button>
     </div>

@@ -47,7 +47,7 @@ export function AcknowledgeForm() {
         <button
           type="submit"
           disabled={!checked || saving}
-          className="w-full rounded-lg bg-navy px-6 py-3 font-semibold text-white disabled:opacity-50"
+          className="w-full rounded-pill bg-brand px-6 py-3 font-bold text-on-brand disabled:opacity-50"
         >
           {saving ? "Saving…" : "Continue to dashboard"}
         </button>
