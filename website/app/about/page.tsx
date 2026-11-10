@@ -79,7 +79,7 @@ export default function AboutPage() {
             <div className="min-w-0">
               <p className="text-[22px] font-bold">Lorenzo Bell Jr.</p>
               <p className="mt-0.5 text-base font-bold text-brand-text">Founder &amp; CEO</p>
-              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">Lorenzo Bell Jr. brings more than 25 years of experience leading supplier development and growth programs for Fortune 500 organizations. He specializes in coaching suppliers and founders, helping them build the capabilities to compete in global supply chains, enter new markets, and connect with investors and other sources of capital.</p>
+              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">Lorenzo is a former corporate executive and strategist with 25+ years of experience leading global supplier development and growth programs for Fortune 500 organizations. His work has trained 7,000+ suppliers and increased access to contract opportunities and investors for 4,000+ founders across 30+ countries. A U.S. Navy veteran, he helps founders build the confidence, discipline and systems to win customers, new markets and capital.</p>
             </div>
           </div>
         </section>
