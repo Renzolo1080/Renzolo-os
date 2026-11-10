@@ -103,3 +103,19 @@ h1, h2, h3 { font-family: var(--font-display); }
   .reveal.in .method-line { transform: scaleX(1); }
 }
 [data-theme="dark"] .eyebrow { color: var(--heritage); }
+
+/* Zooming hero (approved Nov 2026): three images fade one into the next
+   every 6 seconds, each slowly zooming in. One still image when motion is off. */
+.zoom-slide { position: absolute; inset: 0; opacity: 0; }
+.zoom-slide:first-child { opacity: 1; }
+.zoom-slide img { width: 100%; height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: no-preference) {
+  .zoom-slide { animation: zoomFade 18s infinite; }
+  .zoom-slide img { animation: kenBurns 18s linear infinite; }
+  /* Start the first image already faded in, so the page never opens on black. */
+  .zoom-slide:first-child, .zoom-slide:first-child img { animation-delay: -1.1s; }
+  .zoom-slide:nth-child(2), .zoom-slide:nth-child(2) img { animation-delay: 4.9s; }
+  .zoom-slide:nth-child(3), .zoom-slide:nth-child(3) img { animation-delay: 10.9s; }
+  @keyframes zoomFade { 0% { opacity: 0; } 6% { opacity: 1; } 33% { opacity: 1; } 39% { opacity: 0; } 100% { opacity: 0; } }
+  @keyframes kenBurns { from { transform: scale(1); } to { transform: scale(1.18); } }
+}

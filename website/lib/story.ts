@@ -33,12 +33,19 @@ export const FOUNDER = {
 
 /** Headline proof figures. */
 export const PROOF_STATS: { figure: string; label: string }[] = [
-  { figure: "20+", label: "years developing founders and suppliers" },
-  { figure: "7,000+", label: "suppliers and entrepreneurs trained to become customer and investor ready in 30+ countries" },
+  { figure: "25+", label: "years developing founders and suppliers" },
+  { figure: "7,000+", label: "suppliers and entrepreneurs trained" },
   { figure: "4,000+", label: "founders benefited across 30+ countries" },
   { figure: "$10M", label: "raised for founder development and investment" },
   { figure: "$4.2B", label: "in customer contracts matched to founders" },
 ];
+
+/** The approved proof statement (Nov 2026). Firm voice, no footnote. */
+export const PROOF_STATEMENT =
+  "Our founder, coaches and team bring more than 25 years of experience developing, coaching and connecting a diverse ecosystem of founders, CEOs and suppliers, helping them get ready to win contracts with global clients across multiple industries.";
+
+/** Always the full descriptor. */
+export const FIRM = "a global venture development and capital infrastructure firm";
 
 /** Shown wherever EY or another organisation is named. */
 export const AFFILIATION_NOTE =

@@ -1,15 +1,16 @@
 import { Header, Footer } from "@/components/Chrome";
+import { HeroZoom } from "@/components/HeroZoom";
+import { ProofPanel } from "@/components/Proof";
 import { APP_URL, appLink } from "@/lib/site";
 
-/* Home page, Option B v5 (approved Nov 5, 2026): one call to action, the
-   Founder Trajectory™ method on the bright colour burst, benefits, track
-   record on a navy panel, three steps with prices, three outcomes, what's
-   inside RENZOLO OS™, FAQs and a closing call to action. */
+/* Home page, v6 "global firm" (approved Nov 9, 2026): zooming hero, the
+   Founder Trajectory™ method, who we are, services, track record,
+   memberships, inside RENZOLO OS™, FAQs and a closing call to action. */
 
 const WRAP = "mx-auto max-w-[1240px] px-4 md:px-8";
 const EYEBROW = "text-[15px] font-bold uppercase tracking-[0.16em] text-brand-text";
 const H2 = "font-display text-[34px] font-bold leading-[1.12] md:text-[46px]";
-const CTA = "inline-flex items-center justify-center rounded-pill bg-brand px-7 py-4 text-lg font-bold text-on-brand transition-colors hover:bg-brand/90";
+const CTA = "inline-flex min-h-[48px] items-center justify-center rounded-pill bg-brand px-7 py-4 text-lg font-bold text-on-brand transition-colors hover:bg-brand/90";
 
 const METHOD: [string, string, string][] = [
   ["Evaluate", "Know your readiness score, free in minutes.", "#FF5A1F"],
@@ -18,46 +19,38 @@ const METHOD: [string, string, string][] = [
   ["Elevate", "Re-assess and move to your next stage.", "#3B1694"],
 ];
 
-const BENEFITS: [string, string, string][] = [
-  ["Know where you stand.", "Your Total Readiness Score and the gaps holding you back.", "#FF5A1F"],
-  ["A plan built to support your market growth.", "90 days to 36 months, with dated actions.", "#E6197F"],
-  ["Track your progress.", "Revenue, customers, cash and goals on one dashboard.", "#6A2BCB"],
-  ["Coaching when you need it.", "Lorenzo · AI any time, plus live sessions with a Founder Coach.", "#3B1694"],
-  ["Get in front of the yes.", "Matching to buyers and funders once you meet the readiness requirements.", "#071727"],
+const SERVICES: [string, string][] = [
+  ["Readiness Assessment", "A full view of your business against what buyers, lenders and investors check, with your Total Readiness Score and valuation range."],
+  ["Growth planning", "A strategic plan built to support your market growth, from 90 days to 36 months, with dated actions for every gap."],
+  ["Founder coaching", "Live sessions with a Founder Coach and an AI coach any time, keeping you on plan until you're ready."],
+  ["Buyer and investor matching", "Full introductions to buyers, lenders and investors once you meet the readiness requirements."],
 ];
 
-const PROOF: [string, string][] = [
-  ["20+", "years developing founders and suppliers"],
-  ["7,000+", "suppliers and entrepreneurs trained"],
-  ["4,000+", "founders benefited across 30+ countries"],
-  ["$10M", "raised for founder development and investment"],
-  ["$4.2B", "in customer contracts matched to founders"],
+const JOURNEY: [string, string, string][] = [
+  ["Start free", "Readiness Snapshot: your score and three biggest gaps.", "#FF5A1F"],
+  ["Get the full picture", "Readiness Assessment, $60 on its own, included in every membership.", "#E6197F"],
+  ["Work the plan, coached", "Choose the membership that fits where you're going.", "#3B1694"],
 ];
 
-const STEPS: [string, string, string, string][] = [
-  ["See where you stand", "The free Readiness Snapshot: your Total Readiness Score, biggest gaps and best next move.", "Free", "#FF5A1F"],
-  ["Get the full picture", "The Readiness Assessment: a full report with a valuation range and AI market insight.", "$60 one time", "#E6197F"],
-  ["Work the plan, coached", "A membership: your plan, dashboard, tools and coaching. Includes your assessment.", "From $60 a quarter", "#3B1694"],
-];
-
-const OUTCOMES: [string, string, string][] = [
-  ["Win more contracts", "Ready for buyers and contracts.", "#FF5A1F"],
-  ["Access capital", "Ready for loans, credit and grants.", "#E6197F"],
-  ["Attract investment", "Ready for investors and partners.", "#1E6BFF"],
+type Plan = { name: string; who: string; price: string; per: string; items: string[]; color: string; featured?: boolean };
+const PLANS: Plan[] = [
+  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: "$60", per: "a quarter · or $200 a year", color: "#FF5A1F", items: ["Full Readiness Assessment included", "Strategic growth plan and dashboard", "AI coach any time", "One 30-minute coaching session a quarter"] },
+  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: "$147", per: "a quarter · or $490 a year", color: "#E6197F", featured: true, items: ["Everything in Essentials", "Two 30-minute coaching sessions a quarter", "Extra 60-minute coaching at the member rate, $105"] },
+  { name: "Elevate", who: "For businesses ready to get in front of buyers and funders.", price: "$699", per: "a quarter · or $2,490 a year", color: "#3B1694", items: ["Everything in Growth", "One 60-minute coaching session a month", "Advanced coaching process", "Buyer and investor matching (readiness requirements apply)"] },
 ];
 
 const INSIDE: [string, string, string, string][] = [
   ["Your dashboard", "Score, goals and the numbers that matter.", "/img/screen-dashboard.jpg", "The dashboard with revenue, customers, cash, Total Readiness Score and goals"],
   ["Your strategic plan", "Dated actions for every gap.", "/img/screen-plan.jpg", "The Plan Builder checking a strategic plan for goals, measures and dated actions"],
   ["Market Intelligence", "Your industry and country, with sources.", "/img/screen-market.jpg", "A Market Intelligence brief with recommendations for the founder's plan"],
-  ["Your coaching team", "Lorenzo · AI any time, and a Founder Coach.", "/img/screen-aicoach.jpg", "The AI coach answering a pricing question with suggested actions"],
+  ["Your coaching team", "An AI coach any time, and a Founder Coach.", "/img/screen-aicoach.jpg", "The AI coach answering a pricing question with suggested actions"],
 ];
 
 const FAQ: [string, string][] = [
-  ["What does the free Snapshot give me?", "Your Total Readiness Score, your biggest gaps and your best next move, in about five minutes."],
-  ["What's the difference between the $60 assessment and a membership?", "The assessment is a one-time full report. A membership includes the assessment and keeps you moving with your plan, dashboard, tools and coaching."],
-  ["How does coaching work?", "Lorenzo · AI answers any time from your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter, and Elevate one 60-minute session a month."],
-  ["Who is it for, and where?", "Early- and growth-stage businesses in Africa, the Caribbean and the United States. Prices are in US dollars, with the amount in your currency shown at checkout."],
+  ["What does the free Snapshot give me?", "Your Total Readiness Score, your three biggest gaps and your best next move, in about five minutes."],
+  ["What's the difference between the $60 assessment and a membership?", "The assessment is a one-time full report. A membership keeps you moving with your plan, dashboard, tools and one-on-one coaching."],
+  ["How does coaching work?", "Your AI coach answers any time from your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter, and Elevate one 60-minute session a month."],
+  ["Who is it for, and where?", "Early- and growth-stage founders and CEOs, wherever they are. We're starting in Africa, the United States and the United Kingdom. Prices are in US dollars; pay by card, or mobile money where available."],
   ["Is my business information safe?", "We never sell it. You can download or delete your data any time, and we share your profile only with your permission."],
 ];
 
@@ -66,23 +59,27 @@ export default function Home() {
     <>
       <Header campaign="home_header" />
       <main>
-        {/* Hero */}
-        <section className={`${WRAP} flex flex-wrap items-center gap-12 pb-20 pt-12 md:pb-24 md:pt-16`}>
+        <HeroZoom eyebrow="Venture development & capital infrastructure" title="Get ready to win." intro="We help founders and CEOs get ready to win contracts, access capital and attract investment.">
+          <div className="mt-9 flex flex-wrap justify-center gap-4">
+            <a href={appLink("/snapshot", "home_hero")} className={CTA}>
+              Start the free Snapshot
+            </a>
+            <a href="/contact/" className="inline-flex min-h-[48px] items-center rounded-pill border-2 border-white px-7 py-3.5 text-lg font-bold text-white hover:bg-white/10">
+              Talk to our team
+            </a>
+          </div>
+          <p className="mt-5 text-[15px] [text-shadow:0_1px_12px_rgba(0,0,0,0.6)]">Free · about 5 minutes · no card needed</p>
+        </HeroZoom>
+
+        {/* Who we are + the method */}
+        <section className={`${WRAP} flex flex-wrap items-center gap-12 py-20 md:py-24`}>
           <div className="min-w-0 flex-[1_1_440px]">
-            <p className={EYEBROW}>Founder Trajectory™</p>
-            <h1 className="mt-4 font-display text-[40px] font-bold leading-[1.08] md:text-[52px]">Get ready for the yes: contracts, capital, investment.</h1>
-            <p className="mt-6 max-w-[500px] text-xl leading-relaxed text-ink-muted">
-              See where your business stands, build the plan, and get coached to the standard buyers, lenders and investors look for.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-6">
-              <a href={appLink("/snapshot", "home_hero")} className={CTA}>
-                Start the free Snapshot
-              </a>
-              <a href="#how" className="text-[17px] font-bold text-ink underline-offset-4 hover:underline">
-                See how it works →
-              </a>
+            <p className={EYEBROW}>Who we are</p>
+            <h2 className={`${H2} mt-3`}>We see your business the way buyers, lenders and investors do.</h2>
+            <div className="mt-6 space-y-5 text-lg leading-relaxed text-ink-muted md:text-[19px]">
+              <p>RENZOLO is a global venture development and capital infrastructure firm. Our approach comes from more than 25 years on the buyer&apos;s side of the table: assessing suppliers for global companies, developing them until they meet the standard, and connecting them to contracts, lenders and investors.</p>
+              <p>Founder Trajectory™, powered by RENZOLO OS™, puts that same standard in every founder&apos;s hands: a clear score, a growth plan, coaching, and a path to the people who can say yes.</p>
             </div>
-            <p className="mt-5 text-[15px] text-ink-muted">Free · about 5 minutes · no card needed</p>
           </div>
           <div className="min-w-0 flex-[1_1_460px]">
             <div className="relative overflow-hidden rounded-panel bg-black px-6 py-9 md:px-8 md:py-10">
@@ -102,96 +99,84 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Benefits */}
-        <section className={`${WRAP} pb-20`}>
-          <p className={EYEBROW}>Founder Trajectory™, powered by RENZOLO OS™</p>
-          <h2 className={`${H2} mt-3`}>Everything you need to get ready, in one place.</h2>
-          <ul className="mt-8 grid gap-x-10 gap-y-6 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
-            {BENEFITS.map(([title, text, color]) => (
-              <li key={title} className="flex items-start gap-3.5">
-                <span aria-hidden="true" className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full text-[15px] font-bold text-white" style={{ background: color }}>
-                  ✓
-                </span>
-                <span className="text-lg leading-snug">
-                  <b>{title}</b> {text}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Track record */}
-        <section id="proof" className={WRAP}>
-          <div className="flex flex-wrap items-center gap-10 rounded-panel bg-night px-6 py-10 text-white md:px-14 md:py-12">
-            <div className="flex min-w-0 items-center gap-5">
-              <div role="img" aria-label="Placeholder for Lorenzo's photo" className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-full border-2 border-dashed border-white/50 bg-white/10 text-center text-xs font-bold text-[#C5CDD7]">
-                [Photo]
-              </div>
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.12em] text-gold md:whitespace-nowrap">Track record, before RENZOLO</p>
-                <p className="mt-1.5 text-xl font-bold">Built by Lorenzo Bell Jr.</p>
-                <p className="mt-0.5 text-base text-[#C5CDD7] md:whitespace-nowrap">Founder and CEO. U.S. Navy veteran.</p>
-              </div>
-            </div>
-            <div className="grid min-w-0 flex-[2_1_560px] grid-cols-2 gap-6 sm:grid-cols-3">
-              {PROOF.map(([figure, label]) => (
-                <div key={figure}>
-                  <p className="font-display text-[44px] font-bold leading-none">{figure}</p>
-                  <p className="mt-1.5 text-base text-[#C5CDD7]">{label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* How it works */}
-        <section id="how" className={`${WRAP} py-20 md:py-24`}>
-          <p className={EYEBROW}>How it works</p>
-          <h2 className={`${H2} mt-3`}>Three steps. Start free.</h2>
-          <ol className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
-            {STEPS.map(([title, text, price, color], i) => (
-              <li key={title} className="flex flex-col gap-2.5 rounded-[24px] border border-line p-8">
-                <p className="flex h-11 w-11 items-center justify-center rounded-full text-xl font-bold" style={{ background: color, color: i === 0 ? "#071727" : "#FFFFFF" }}>
-                  {i + 1}
-                </p>
-                <h3 className="mt-2.5 font-sans text-2xl font-bold">{title}</h3>
+        {/* Services */}
+        <section id="services" className={`${WRAP} scroll-mt-24 pb-20 md:pb-24`}>
+          <p className={EYEBROW}>What we do</p>
+          <h2 className={`${H2} mt-3`}>Our services</h2>
+          <ol className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+            {SERVICES.map(([title, text], i) => (
+              <li key={title} className="rounded-[24px] border border-line bg-white p-8">
+                <p className="font-display text-xl font-bold text-brand-text">0{i + 1}</p>
+                <h3 className="mb-2 mt-3.5 font-sans text-[23px] font-bold">{title}</h3>
                 <p className="text-[17px] leading-relaxed text-ink-muted">{text}</p>
-                <p className="mt-2 font-display text-[28px] font-bold">{price}</p>
               </li>
             ))}
           </ol>
-          <div className="mt-8 flex flex-wrap items-center gap-6">
-            <a href={appLink("/snapshot", "home_steps")} className={CTA}>
-              Start the free Snapshot
-            </a>
-            <a href={`${APP_URL}/pricing`} className="text-[17px] font-bold text-ink underline-offset-4 hover:underline">
-              Compare memberships →
-            </a>
-          </div>
         </section>
 
-        {/* Three outcomes */}
-        <section className={WRAP}>
-          <div className="rounded-panel bg-night px-6 py-16 text-white md:px-14 md:py-[88px]">
-            <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-gold">Three outcomes</p>
-            <h2 className={`${H2} mt-3`}>Pick the yes you need next.</h2>
-            <div className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
-              {OUTCOMES.map(([title, text, color]) => (
-                <div key={title} className="rounded-[20px] border border-white/15 bg-white/5 p-8">
-                  <div aria-hidden="true" className="h-[3px] w-12 rounded" style={{ background: color }} />
-                  <h3 className="mb-2 mt-6 font-sans text-2xl font-bold">{title}</h3>
-                  <p className="text-lg leading-relaxed text-[#C5CDD7]">{text}</p>
-                </div>
-              ))}
-            </div>
+        {/* Track record */}
+        <section id="proof" className={`${WRAP} pb-20 md:pb-24`}>
+          <ProofPanel title="25+ years of getting businesses ready, across 30+ countries." regions />
+        </section>
+
+        {/* Memberships */}
+        <section id="memberships" className={`${WRAP} scroll-mt-24 pb-20 md:pb-24`}>
+          <p className={EYEBROW}>Memberships</p>
+          <h2 className={`${H2} mt-3`}>Choose how far you want to go.</h2>
+          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Every membership starts with your full Readiness Assessment, a $60 value. One price in every region; your local-currency estimate shows at checkout.</p>
+          <ol className="mt-9 flex flex-wrap gap-6 rounded-[20px] bg-[#F3F5F8] p-7">
+            {JOURNEY.map(([title, text, color], i) => (
+              <li key={title} className="flex min-w-0 flex-[1_1_260px] items-start gap-3.5">
+                <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full font-bold text-white" style={{ background: color }}>
+                  {i + 1}
+                </span>
+                <span>
+                  <b className="block text-lg">{title}</b>
+                  <span className="text-base leading-snug text-ink-muted">{text}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-12 grid items-stretch gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))]">
+            {PLANS.map((p) => (
+              <div key={p.name} className={`relative flex flex-col rounded-[24px] bg-white px-8 py-9 ${p.featured ? "border-2 border-ink" : "border border-line"}`}>
+                {p.featured && <span className="absolute right-6 top-6 rounded-pill bg-ink px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-white">Recommended</span>}
+                <div aria-hidden="true" className="h-1 w-12 rounded" style={{ background: p.color }} />
+                <h3 className="mb-1.5 mt-5 font-sans text-[26px] font-bold">{p.name}</h3>
+                <p className="text-base text-ink-muted">{p.who}</p>
+                <p className="mt-5 font-display text-[44px] font-bold leading-none">{p.price}</p>
+                <p className="mb-5 mt-1.5 text-[15px] text-ink-muted">{p.per}</p>
+                <ul className="mb-7 flex-1 space-y-2.5">
+                  {p.items.map((it) => (
+                    <li key={it} className="flex gap-2.5 text-base leading-snug text-ink-muted">
+                      <span aria-hidden="true" className="font-bold" style={{ color: p.color }}>
+                        ✓
+                      </span>
+                      <span>{it}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={appLink("/pricing", `home_plan_${p.name.toLowerCase()}`)}
+                  className={`rounded-pill px-6 py-3.5 text-center text-[17px] font-bold ${p.featured ? "bg-ink text-white hover:bg-ink/90" : "border-2 border-ink text-ink hover:bg-ink/5"}`}
+                >
+                  Choose {p.name}
+                </a>
+              </div>
+            ))}
           </div>
+          <p className="mt-7 text-[17px]">
+            <a href={`${APP_URL}/pricing`} className="font-bold text-ink underline underline-offset-4">
+              Compare all features and extra coaching on the pricing page →
+            </a>
+          </p>
         </section>
 
         {/* Inside RENZOLO OS */}
-        <section id="os" className={`${WRAP} py-20 md:py-24`}>
+        <section id="os" className={`${WRAP} pb-20 md:pb-24`}>
           <p className={EYEBROW}>Inside RENZOLO OS™</p>
           <h2 className={`${H2} mt-3 max-w-[900px]`}>Instead of a consultant, a spreadsheet and a lender&apos;s checklist: one place.</h2>
-          <p className="mt-4 max-w-[620px] text-[19px] leading-relaxed text-ink-muted">See where you stand, plan, track progress and get coached, all working together.</p>
+          <p className="mt-4 max-w-[620px] text-lg leading-relaxed text-ink-muted md:text-[19px]">See where you stand, plan, track progress and get coached, all working together.</p>
           <div className="mt-12 grid gap-7 [grid-template-columns:repeat(auto-fit,minmax(250px,1fr))]">
             {INSIDE.map(([title, text, src, alt]) => (
               <div key={title} className="flex flex-col gap-3.5">
@@ -229,6 +214,11 @@ export default function Home() {
             <div className="relative min-w-0 flex-[1_1_380px]">
               <h2 className="font-display text-[34px] font-bold leading-[1.1] md:text-[46px]">Know where you stand in minutes.</h2>
               <p className="mt-4 text-[19px] text-[#C5CDD7]">Free. Mostly dropdowns and taps. No card needed.</p>
+              <p className="mt-5 text-[17px]">
+                <a href="/contact/" className="font-bold text-gold underline-offset-4 hover:underline">
+                  Or talk to our team →
+                </a>
+              </p>
             </div>
             <a href={appLink("/snapshot", "home_end")} className={`${CTA} relative`}>
               Start the free Snapshot

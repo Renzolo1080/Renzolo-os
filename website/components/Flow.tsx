@@ -10,7 +10,7 @@ const WRAP = "mx-auto max-w-[1200px] px-4 md:px-8";
 
 /** Short labels for the band; the full labels stay on the About page. */
 const SHORT: Record<string, string> = {
-  "20+": "years developing founders and suppliers",
+  "25+": "years developing founders and suppliers",
   "7,000+": "suppliers and entrepreneurs trained",
   "4,000+": "founders benefited across 30+ countries",
   "$10M": "raised for founder development and investment",
@@ -20,9 +20,9 @@ const SHORT: Record<string, string> = {
 /** 1. One proof band, straight after the hero. */
 export function ProofBand() {
   return (
-    <section aria-label="Lorenzo's track record" className="border-y border-line bg-surface">
+    <section aria-label="Our track record" className="border-y border-line bg-surface">
       <div className={`${WRAP} grid items-center gap-6 py-6 md:grid-cols-[auto_1fr_auto] md:gap-10`}>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-text md:max-w-[11rem]">Lorenzo&apos;s track record, before RENZOLO</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-text md:max-w-[11rem]">Our track record</p>
         <ul className="grid grid-cols-2 gap-x-6 gap-y-4 lg:grid-cols-5">
           {PROOF_STATS.map((p) => (
             <li key={p.figure}>
@@ -51,7 +51,7 @@ export function PageEndCta({ campaign, title = "Know where you stand in minutes.
             Start the free Snapshot
           </a>
           <a href="/contact/" className="inline-flex justify-center rounded-pill border-2 border-white/60 px-6 py-3.5 font-semibold text-white transition-colors hover:border-white">
-            Talk to Lorenzo
+            Talk to our team
           </a>
         </div>
       </div>

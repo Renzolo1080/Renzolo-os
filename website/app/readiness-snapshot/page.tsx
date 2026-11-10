@@ -1,4 +1,5 @@
 import { Header, Footer } from "@/components/Chrome";
+import { ProofPanel } from "@/components/Proof";
 
 import { appLink } from "@/lib/site";
 
@@ -41,13 +42,7 @@ const INSIDE = [
   ["Your results by email", "And waiting in your account if you sign up with the same email."],
 ];
 
-const PROOF = [
-  ["20+", "years developing suppliers and founders for large buyers"],
-  ["7,000+", "suppliers and entrepreneurs trained to become customer and investor ready"],
-  ["4,000+", "founders benefited across 30+ countries"],
-  ["$10M", "raised for founder development and investment"],
-  ["$4.2B", "in customer contracts matched to founders"],
-];
+
 
 const METHOD: [string, string, string][] = [
   ["Evaluate", "Know your readiness score, free in minutes.", "#FF5A1F"],
@@ -64,7 +59,7 @@ export default function ReadinessSnapshotLanding() {
         {/* Hero: audience line, reframe headline, one call to action, the bright burst */}
         <section className={`${WRAP} flex flex-wrap items-center gap-12 pb-20 pt-12 md:pt-16`}>
           <div className="min-w-0 flex-[1_1_480px]">
-            <p className={EYEBROW}>For early- and growth-stage businesses in Africa, the Caribbean and the US</p>
+            <p className={EYEBROW}>For early- and growth-stage founders and CEOs, wherever you are</p>
             <h1 className="mt-4 font-display text-[38px] font-bold leading-[1.08] md:text-[56px]">
               Customers and funders keep saying &ldquo;not yet&rdquo;? It&apos;s usually readiness, not your pitch.
             </h1>
@@ -140,22 +135,7 @@ export default function ReadinessSnapshotLanding() {
 
         {/* Proof */}
         <section className={WRAP}>
-          <div className="rounded-panel bg-night px-6 py-12 text-white md:px-14 md:py-16">
-            <p className="text-sm font-bold uppercase tracking-[0.12em] text-gold">Track record, before RENZOLO</p>
-            <h2 className={`${H2} mt-3`}>Built on 20+ years of getting businesses ready</h2>
-            <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-5">
-              {PROOF.map(([figure, label]) => (
-                <li key={figure}>
-                  <span className="block font-display text-[44px] font-bold leading-none">{figure}</span>
-                  <span className="mt-2 block text-base text-[#C5CDD7]">{label}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-10 max-w-3xl text-lg text-[#C5CDD7]">
-              Lorenzo Bell Jr. has spent his career on the buyer&apos;s side of the table: assessing suppliers, developing them until they were ready,
-              and connecting them to contracts, lenders and investors. He is a U.S. Navy veteran and the founder of RENZOLO.
-            </p>
-          </div>
+          <ProofPanel title="Built on 25+ years of getting businesses ready." />
         </section>
 
         {/* Method, on the bright burst */}
