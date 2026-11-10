@@ -95,7 +95,7 @@ export function applyTemplate(plan: StrategicPlan, key: TemplateKey, today: stri
   for (const a of t.actions) {
     const area = out.areas[a.area] ?? { current: "", desired: "", actions: [] };
     if (area.actions.length >= MAX_ACTIONS || area.actions.some((x) => norm(x.text) === norm(a.text))) continue;
-    const action: PlanAction = { id: newId(), text: a.text, owner: "", due: addDays(today, a.days), status: "not_started" };
+    const action: PlanAction = { id: newId(), text: a.text, owner: "", due: addDays(today, a.days), status: "not_started", doneOn: "", evidence: "" };
     area.actions.push(action);
     out.areas[a.area] = area;
     added.actions++;

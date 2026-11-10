@@ -112,7 +112,7 @@ async function addCommitmentsToPlan(admin: any, founderId: string, list: Commitm
   for (const c of withArea) {
     const area = plan.areas[c.area as BlockKey] ?? { current: "", desired: "", actions: [] };
     if (area.actions.length >= MAX_ACTIONS || area.actions.some((a) => a.text.toLowerCase() === c.text.toLowerCase())) continue;
-    area.actions.push({ id: `k${c.id}${Date.now().toString(36)}`.slice(0, 40), text: c.text, owner: "", due: c.due, status: "not_started" });
+    area.actions.push({ id: `k${c.id}${Date.now().toString(36)}`.slice(0, 40), text: c.text, owner: "", due: c.due, status: "not_started", doneOn: "", evidence: "" });
     plan.areas[c.area as BlockKey] = area;
     added++;
   }

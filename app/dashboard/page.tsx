@@ -27,6 +27,8 @@ import { ScoreExplainer } from "@/components/ScoreExplainer";
 import { ensureMatchingAcknowledgment } from "@/lib/acknowledgment-server";
 import { loadStepState } from "@/lib/reminders-server";
 import { nextReminderDate, reminderStep } from "@/lib/reminders";
+import { trajectory } from "@/lib/live-score";
+import { lenderChecks } from "@/lib/doc-intake";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -184,18 +186,39 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
         .map((r: any) => ({ id: r.id, source: r.source, title: r.title }));
       milestones = (msRows ?? []).slice().sort((a: any, b: any) => (a.target_date ?? "9999").localeCompare(b.target_date ?? "9999")).slice(0, 3);
     }
-    let scoreHistory: { date: string; score: number }[] = [];
-    if (extras.includes("history")) {
-      const { data: historyRows } = await supabase
-        .from("scores")
-        .select("*, assessments!inner(founder_id, extra)")
-        .eq("assessments.founder_id", user.id)
-        .order("created_at", { ascending: true });
-      scoreHistory = (historyRows ?? []).map((r: any) => ({
-        date: r.created_at,
-        score: readinessFromRows(r, { completeness: null, review: null }, typeof r.assessments?.extra?.planScore === "number" ? r.assessments.extra.planScore : null).total,
-      }));
-    }
+    // Every scored assessment: the first is the starting point, the rest
+    // are re-assessments that confirm the score (lib/live-score.ts).
+    const { data: historyRows } = await supabase
+      .from("scores")
+      .select("*, assessments!inner(founder_id, extra)")
+      .eq("assessments.founder_id", user.id)
+      .order("created_at", { ascending: true });
+    const headline = readinessFromRows(latestScore, { completeness: planRow?.completeness ?? null, review: review?.overall ?? null }, planScore);
+    const confirmed = (historyRows ?? []).map((r: any) => ({
+      date: r.created_at as string,
+      total: r.id === latestScore.id ? headline.total : readinessFromRows(r, { completeness: null, review: null }, typeof r.assessments?.extra?.planScore === "number" ? r.assessments.extra.planScore : null).total,
+    }));
+    const scoreHistory: { date: string; score: number }[] = extras.includes("history") ? confirmed.map((c) => ({ date: c.date, score: c.total })) : [];
+    // Document checks (PR 28); the table may not exist yet, which is fine.
+    const { data: docRows } = await supabase.from("document_extractions").select("doc_type, created_at, result").order("created_at", { ascending: true }).limit(50);
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const progress = trajectory({
+      plan: planRow?.data ?? null,
+      confirmed,
+      checkins: (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })),
+      documents: (docRows ?? []).map((d: any) => {
+        let ok = false;
+        try {
+          ok = !!d.result && !lenderChecks(d.result, todayIso).some((c) => c.level === "fix");
+        } catch {
+          ok = false;
+        }
+        return { doc_type: d.doc_type, created_at: d.created_at, ok };
+      }),
+      updates: (updates ?? []).map((u: any) => ({ ...u, revenue: u.revenue === null ? null : Number(u.revenue), cash: u.cash === null ? null : Number(u.cash) })),
+      startBlocks: ((historyRows ?? [])[0] as any)?.block_scores ?? null,
+      today: todayIso,
+    });
 
     if (existingReport) {
       if (existingReport.score_id !== latestScore.id) reportOutdated = "Your score has changed since this report was written.";
@@ -224,7 +247,8 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
       access,
       extras,
       score: latestScore,
-      readiness: readinessFromRows(latestScore, { completeness: planRow?.completeness ?? null, review: review?.overall ?? null }, planScore),
+      readiness: headline,
+      trajectory: progress,
       plan: planRow?.data ?? null,
       planCompleteness: planRow?.completeness ?? null,
       checkins: (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })),
