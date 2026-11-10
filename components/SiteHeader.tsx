@@ -11,11 +11,11 @@ export function SiteHeader() {
   return (
     <header className="bg-navy">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <a href={member ? "/dashboard" : "/"} className="leading-tight text-white">
-          <span className="block text-lg font-bold tracking-wide">
-            Founder Trajectory<span className="text-gold">™</span>
+        <a href={member ? "/dashboard" : "/"} className="inline-flex items-center gap-3 text-white">
+          <img src="/img/rz-logo.png" alt="" aria-hidden="true" width={44} height={36} className="h-9 w-auto" />
+          <span className="text-lg font-bold tracking-[0.08em]">
+            RENZOLO OS<span className="text-gold">™</span>
           </span>
-          <span className="block text-[11px] text-cream/70">Powered by RENZOLO OS™</span>
         </a>
         {member ? (
           <nav className="flex items-center gap-4 text-sm">
