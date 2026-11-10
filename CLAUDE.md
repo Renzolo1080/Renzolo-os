@@ -2,7 +2,7 @@
 
 Read this at the start of every session. When anything here conflicts with chat history or older code comments, this file and Lorenzo's latest master documents win.
 
-**Checkpoint (Nov 5, 2026):** launch moved to **November 16, 2026**. Live on master: $60 assessment, Nov 1 membership and coaching prices, local prices for Kenya, Nigeria, South Africa and Ghana in Vercel, local-currency estimate at checkout, privacy launch (consent, Your data page, PAIA manual), refund policy, Google Workspace email and email settings in Vercel. Open blockers: Flutterwave account and keys, Resend (`RESEND_API_KEY`), `EMAIL_POSTAL_ADDRESS`, `COACHING_BOOKING_URL`, `CRON_SECRET`, `EMAIL_LINK_SECRET`, end-to-end test purchases. In review: Readiness Snapshot landing page, Snapshot qualifier questions.
+**Checkpoint (Nov 9, 2026):** launch on **November 16, 2026**. In review (PR "Hubflo enhancements"): member reminders, next-steps progress, free loan readiness check, plan templates, AI document intake, partner portal and impact report (migration `2026-11-10_documents_and_partners.sql` not applied yet). The Founder Trajectory™ book starts in January 2027, after launch. Live on master: $60 assessment, Nov 1 membership and coaching prices, local prices for Kenya, Nigeria, South Africa and Ghana in Vercel, local-currency estimate at checkout, privacy launch (consent, Your data page, PAIA manual), refund policy, Google Workspace email and email settings in Vercel. Open blockers: Flutterwave account and keys, Resend (`RESEND_API_KEY`), `EMAIL_POSTAL_ADDRESS`, `COACHING_BOOKING_URL`, `CRON_SECRET`, `EMAIL_LINK_SECRET`, end-to-end test purchases. In review: Readiness Snapshot landing page, Snapshot qualifier questions.
 
 ## How to use this file
 
@@ -15,7 +15,7 @@ Read this at the start of every session. When anything here conflicts with chat 
 RENZOLO™ is a venture development and capital infrastructure platform, not a consulting or training business. It helps early- and growth-stage businesses become customer, capital and investor ready, then connects them to the buyers and funders who can say yes.
 
 - **Owner:** Renzolo Enterprises LLC (Wisconsin). Founder and CEO: Lorenzo Bell Jr.
-- **Launch markets (Nov 16, 2026):** Africa (South Africa and Kenya first), the Caribbean and the United States. UK and EU start in 2027.
+- **Positioning:** a global venture development and capital infrastructure firm. **Launch markets (Nov 16, 2026):** Africa (South Africa and Kenya first), the United States and the United Kingdom. The Caribbean and EU follow later.
 - **Africa strategy:** value and volume. Drive free Snapshots, assessments and memberships that funnel into cohorts and coaching.
 - **Revenue:** from founders and program funders, not U.S. corporate supplier-diversity budgets.
 - **Positioning:** the step after the accelerator. Accelerators teach; RENZOLO gets businesses ready and in front of customers and investors.
@@ -105,8 +105,16 @@ Launch-critical work comes first; everything marked "after launch" waits until N
 - [ ] After launch: founder profile and challenge brief export — a short business overview with key metrics plus one key challenge, generated from assessment data, for founders applying to clinics, accelerators, buyers and funders (own format; do not copy any outside template or name its source)
 - [ ] After launch: financial indicators and report builder on the dashboard; Funder Impact Report; one-page Founder Trajectory™ visual
 - [ ] Paused until procurement rules settle: South Africa procurement and B-BBEE evidence checklist
+- [ ] In review (Hubflo benchmark, Nov 9): reminder emails on day 0, 3 and 5 for unfinished steps; "Step X of Y" next-steps card; public `/free-tools` loan readiness check; plan templates by goal; AI document intake at `/assessment/documents` (keeps figures only, never files); partner portal (`/partner`, `/partner/join`, `/partner/report/[id]`)
+- [ ] After launch: outcome tracking (contracts won, capital raised, jobs) for founders and the partner impact report; staff screen to set up partners and cohorts (SQL for now)
 
-**2. Founder Trajectory™ Academy (after launch, before the Q1 2027 pilot)**
+**2. Founder Trajectory™ book (January 2027, after launch)**
+
+- [ ] Writing starts after the November 16 launch; plan and timeline in the Founder Trajectory™ Book Plan and the Ad, Landing Page and Spin-off Plan
+- [ ] Book page at `/book` (not `/founder-trajectory`); book and social posts in Lorenzo's own voice, website and app in the firm's voice
+- [ ] Book checkout on the RENZOLO site and email-gated chapter worksheets, before the book launch
+
+**3. Founder Trajectory™ Academy (after launch, before the Q1 2027 pilot)**
 
 - [ ] Community and cohorts inside RENZOLO OS™ per the Feature Spec (no outside platform)
 - [ ] Strategy Toolkit worksheets in the Plan Builder, linked to readiness scores
@@ -114,7 +122,7 @@ Launch-critical work comes first; everything marked "after launch" waits until N
 - [ ] Train Lorenzo · AI on the lesson cards
 - [ ] Cohorts: Launch (8 weeks), Build (12 weeks), Scale (6 months); recruit in December for Q1 2027
 
-**3. Website (launch-critical)**
+**4. Website (launch-critical)**
 
 - [ ] Option B v3 visual refresh: one call to action ("Start the free Snapshot"), clean layouts, approved palette, motion used sparingly. Functionality unchanged
 - [ ] In review: Readiness Snapshot landing page
@@ -126,7 +134,7 @@ Launch-critical work comes first; everything marked "after launch" waits until N
 2. Never commit keys or secrets; they live only in Vercel and Supabase settings. Never ask Lorenzo to paste them into chat.
 3. Ask before changing prices, product names, live payments, live database migrations, or deleting anything.
 4. Keep RENZOLO OS™ the hero product in all copy and comparisons.
-5. Write plain, business-owner-friendly copy for early- and growth-stage businesses in Africa, the Caribbean and the US.
+5. Write plain, business-owner-friendly copy for founders and CEOs of early- and growth-stage businesses, in the firm's voice.
 6. Test each change (tests, build, and a look at the page) before saying it's done.
 7. End every session by updating the Checkpoint line and listing next steps.
 
