@@ -382,14 +382,15 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   assert(se.tier === "elevate" && iso(se.current_period_end) === "2027-02-20T00:00:00.000Z", "upgrade to Elevate: starts now, 3 months plus the 5 extra days worked out at checkout", se);
   cr = await credits();
   const elevateCr = cr.filter((c: any) => c.tier === "elevate");
-  assert(elevateCr.length === 3 && elevateCr.every((c: any) => c.quantity === 2) && iso(elevateCr[2].expires_at) === "2027-02-15T00:00:00.000Z", "…3 monthly batches of 2 Elevate sessions", elevateCr);
+  assert(elevateCr.length === 3 && elevateCr.every((c: any) => c.quantity === 1) && iso(elevateCr[2].expires_at) === "2027-02-15T00:00:00.000Z", "…3 monthly batches of 1 Elevate session (Nov 1 rules)", elevateCr);
   assert(cr.filter((c: any) => c.tier === "growth").length === 1, "…and Growth sessions already given are kept until they expire");
 
   const d1 = await tierPay("renzolo-subscription-e-3", { tier: "essentials", interval: "monthly", amount: 15, kind: "downgrade" });
   await pay(d1, "t9003", "2026-12-01T00:00:00Z");
   se = await sub(E);
   assert(se.tier === "elevate" && se.scheduled_tier === "essentials" && iso(se.scheduled_from) === "2027-02-20T00:00:00.000Z" && iso(se.current_period_end) === "2027-03-20T00:00:00.000Z", "downgrade: Elevate kept until the paid period ends, then Essentials for the month paid", se);
-  assert((await credits()).length === 4, "…no coaching sessions added for Essentials");
+  const essCr = (await credits()).filter((c: any) => c.tier === "essentials");
+  assert(essCr.length === 1 && essCr[0].quantity === 1 && iso(essCr[0].available_from) === "2027-02-20T00:00:00.000Z", "…Essentials' one included session a quarter starts when Essentials takes effect (Nov 1 rules)", essCr);
 
   const r2 = await tierPay("renzolo-subscription-e-4", { tier: "essentials", interval: "monthly", amount: 15, kind: "renewal" });
   await pay(r2, "t9004", "2027-03-01T00:00:00Z");
@@ -438,8 +439,8 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   assert(!r.ok, "…or give themselves credits");
   r = await U(E, `select quantity from coaching_credits`);
   assert(r.ok && r.rows.length === 1, "founder sees their own coaching credits", r);
-  r = await U(B, `select quantity from coaching_credits`);
-  assert(r.ok && r.rows.length === 0, "…and not anyone else's", r);
+  r = await U(B, `select founder_id from coaching_credits`);
+  assert(r.ok && r.rows.every((x: any) => x.founder_id === B), "…and not anyone else's", r);
   for (let i = 0; i < 3; i++) {
     r = await SRV(`select use_coaching_credit('${E}','2027-03-01T00:00:00Z') as s`);
     assert(r.ok && !!r.rows[0].s, `booking session ${i + 1} of 3 uses a credit and creates a paid session request`, r);
@@ -800,6 +801,8 @@ async function main() {
     OCT30, // guide_leads is created after Supabase's change
     "supabase/migrations/2026-10-20_guide_leads.sql",
     "supabase/migrations/2026-10-20_guide_leads.sql",
+    "supabase/migrations/2026-11-01_included_coaching.sql",
+    "supabase/migrations/2026-11-01_included_coaching.sql",
     "supabase/migrations/2026-11-10_documents_and_partners.sql",
     "supabase/migrations/2026-11-10_documents_and_partners.sql",
   ]);
