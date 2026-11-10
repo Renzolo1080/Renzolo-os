@@ -18,7 +18,7 @@ const STEPS = [
   ["Agree", "Accept the coaching agreement once."],
   ["Prepare", "Say what you want from the session; with your permission, your coach reads your plan and progress."],
   ["Meet", "30-60 minutes on one goal: where you are, the options, and what you'll do."],
-  ["Act", "1-3 commitments go into your plan and dashboard."],
+  ["Act", "1-3 commitments show on your dashboard; add them to your plan when you're ready."],
   ["Review", "Every quarter: re-assess, refresh the plan, set new priorities."],
 ];
 

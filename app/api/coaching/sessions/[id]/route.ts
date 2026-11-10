@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { isCoach } from "@/lib/coaching-server";
 import { SESSION_KINDS, sanitizeCommitments, sanitizeNotes, COMMITMENT_STATUSES, type Commitment } from "@/lib/coaching";
-import { loadLatestAssessment, loadPlan } from "@/lib/plan-server";
-import { sharesWith } from "@/lib/coach-access";
-import { MAX_ACTIONS, planCompleteness, sanitizePlan } from "@/lib/plan";
-import type { BlockKey } from "@/lib/scoring";
 
 /** PATCH /api/coaching/sessions/[id]
  *
@@ -95,35 +91,8 @@ export async function PATCH(req: NextRequest, { params: paramsPromise }: { param
     if (credit && credit.used > 0) await admin.from("coaching_credits").update({ used: credit.used - 1 }).eq("id", session.coaching_credit_id).eq("used", credit.used);
   }
 
-  let addedToPlan = 0;
-  // Commitments go into the founder's plan only while they share it with this coach.
-  if (body.complete === true && (await sharesWith(admin, user.id, session.founder_id))) {
-    addedToPlan = await addCommitmentsToPlan(admin, session.founder_id, commitments ?? sanitizeCommitments(session.commitments));
-  }
-  return NextResponse.json({ ok: true, addedToPlan });
-}
-
-/** Commitments tied to a business area become actions in the founder's plan. */
-async function addCommitmentsToPlan(admin: any, founderId: string, list: Commitment[]): Promise<number> {
-  const withArea = list.filter((c) => c.area && c.status === "open");
-  if (!withArea.length) return 0;
-  const row = await loadPlan(admin, founderId);
-  if (!row) return 0;
-  const plan = row.data;
-  let added = 0;
-  for (const c of withArea) {
-    const area = plan.areas[c.area as BlockKey] ?? { current: "", desired: "", actions: [] };
-    if (area.actions.length >= MAX_ACTIONS || area.actions.some((a) => a.text.toLowerCase() === c.text.toLowerCase())) continue;
-    area.actions.push({ id: `k${c.id}${Date.now().toString(36)}`.slice(0, 40), text: c.text, owner: "", due: c.due, status: "not_started", doneOn: "", evidence: "" });
-    plan.areas[c.area as BlockKey] = area;
-    added++;
-  }
-  if (!added) return 0;
-  const clean = sanitizePlan(plan);
-  const latest = await loadLatestAssessment(admin, founderId);
-  await admin
-    .from("strategic_plans")
-    .update({ data: clean, completeness: planCompleteness(clean, latest?.gapKeys ?? []), updated_at: new Date().toISOString() })
-    .eq("founder_id", founderId);
-  return added;
+  // Coach access is view-only (approved Nov 10, 2026): coaches never change
+  // the founder's plan. Session commitments show on the founder's dashboard,
+  // and the founder adds them to their plan themselves.
+  return NextResponse.json({ ok: true });
 }

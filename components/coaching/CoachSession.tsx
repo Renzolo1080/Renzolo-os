@@ -172,7 +172,7 @@ export function CoachSession({
               run("complete", async () => {
                 await save();
                 const d = await send(`/api/coaching/sessions/${id}`, "PATCH", { complete: true });
-                return `Session completed.${d.addedToPlan ? ` ${d.addedToPlan} commitment${d.addedToPlan > 1 ? "s" : ""} added to their plan.` : ""}`;
+                return "Session completed. The commitments now show on the founder's dashboard.";
               })
             }
             className="rounded-pill bg-brand px-5 py-2.5 font-semibold text-on-brand disabled:opacity-50"
