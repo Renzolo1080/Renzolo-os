@@ -177,7 +177,7 @@ export default function HomePage() {
               <SubscriptionFeatures dark />
             </div>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a href="/snapshot" className="rounded-lg bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
+              <a href="/snapshot" className="rounded-pill bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
                 Start with the free Snapshot
               </a>
               <a href="/pricing" className="rounded-lg border border-cream/40 px-7 py-4 text-center text-lg font-semibold text-white">
