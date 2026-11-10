@@ -50,3 +50,16 @@ const allDone = stepProgress(founderSteps({ areasAnswered: 9, areasTotal: 9, pla
 assert(allDone.next === null && allDone.percent === 100 && allDone.position === 5, "all done", allDone);
 assert(reminderNote("2026-11-19", "2026-11-17") === "We'll remind you on Thursday.", "reminder note uses the weekday", reminderNote("2026-11-19", "2026-11-17"));
 assert(reminderNote("2026-11-18", "2026-11-17") === "We'll remind you tomorrow." && reminderNote(null, "2026-11-17") === null, "tomorrow, or nothing");
+
+// --- free loan readiness check -------------------------------------------------
+import("../lib/free-tools").then(({ loanCheck, monthlyRepayment }) => {
+  const pay = monthlyRepayment(10000, 12, 12);
+  assert(Math.abs(pay - 888.49) < 0.01, "amortised repayment (10,000 over 12 months at 12%)", pay);
+  assert(monthlyRepayment(1200, 12, 0) === 100, "0% interest repays evenly");
+  const strong = loanCheck({ monthlyRevenue: 50000, monthlyCosts: 30000, loanAmount: 100000, termMonths: 24, annualRatePct: 18, monthsTrading: 36, bankStatements6m: true, registered: true, taxUpToDate: true });
+  assert(strong.band === "Ready to apply" && strong.score === 100 && strong.fixes.length === 0, "a strong business is ready to apply", strong);
+  const weak = loanCheck({ monthlyRevenue: 5000, monthlyCosts: 4800, loanAmount: 50000, termMonths: 12, annualRatePct: 20, monthsTrading: 4, bankStatements6m: false, registered: false, taxUpToDate: true });
+  assert(weak.band === "Not ready yet" && weak.fixes.length === 3 && weak.fixes[0].startsWith("Your cash after costs doesn't cover"), "a weak case gets the three biggest fixes, repayment first", weak.fixes);
+  const junk = loanCheck({ monthlyRevenue: NaN, monthlyCosts: -5, loanAmount: 0, termMonths: 0, annualRatePct: -1, monthsTrading: NaN, bankStatements6m: false, registered: false, taxUpToDate: false });
+  assert(junk.coverage === null && junk.monthlyRepayment === 0 && junk.score === 0, "bad input doesn't break it", junk);
+});

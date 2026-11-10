@@ -48,6 +48,9 @@ export function SiteHeader() {
             <a href="/programs" className="hidden text-cream hover:text-white sm:inline">
               Academy
             </a>
+            <a href="/free-tools" className="hidden text-cream hover:text-white md:inline">
+              Free tools
+            </a>
             <a href="/pricing" className="text-cream hover:text-white">
               Pricing
             </a>
