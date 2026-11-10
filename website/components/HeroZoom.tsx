@@ -6,7 +6,7 @@ const SLIDES: [string, string][] = [
   ["/img/burst-bright.jpg", "60% 30%"],
 ];
 
-export function HeroZoom({ eyebrow, title, subtitle, intro, minHeight = "min-h-[560px] md:min-h-[680px]", children }: { eyebrow: string; title: React.ReactNode; subtitle?: string; intro: string; minHeight?: string; children?: React.ReactNode }) {
+export function HeroZoom({ eyebrow, title, subtitle, intro, minHeight = "min-h-[560px] md:min-h-[680px]", children }: { eyebrow: string; title: React.ReactNode; subtitle?: React.ReactNode; intro: string; minHeight?: string; children?: React.ReactNode }) {
   return (
     <section className={`relative flex overflow-hidden bg-black ${minHeight}`}>
       <div aria-hidden="true" className="absolute inset-0">
