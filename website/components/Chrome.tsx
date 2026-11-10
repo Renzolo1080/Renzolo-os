@@ -47,7 +47,7 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
         <a href="/" className="inline-flex shrink-0 items-center gap-2 font-sans text-xl font-bold tracking-[0.06em] text-ink md:gap-3 md:text-2xl md:tracking-[0.08em]">
           <img src="/img/rz-logo.png" alt="" aria-hidden="true" width={43} height={36} className="h-8 w-auto md:h-9" />
           <span>
-            RENZOLO<sup className="ml-0.5 text-[0.5em] font-bold text-black">™</sup>
+            RENZOLO<sup className="ml-0.5 text-[0.5em] font-bold">™</sup>
           </span>
         </a>
         <nav aria-label="Main" className="hidden items-center gap-7 text-[15px] font-medium lg:flex">
