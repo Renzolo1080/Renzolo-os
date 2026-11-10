@@ -191,3 +191,26 @@ const rpNoPlan = buildReportPrompt({ ...reportInput, planText: null, planReviewT
 assert(rpNoPlan.includes("have not built a plan in the Plan Builder") && !rpNoPlan.includes("THE FOUNDER'S STRATEGIC PLAN"), "report without a plan recommends building one");
 
 console.log(fails ? `\n${fails} FAILED` : "\nAll plan, review, market, dashboard and progress tests passed.");
+
+// --- plan templates ------------------------------------------------------------
+import("../lib/plan-templates").then(({ applyTemplate, PLAN_TEMPLATES }) => {
+  const ok = (c: boolean, m: string, d?: unknown) => { if (!c) { console.error("FAIL:", m, d === undefined ? "" : JSON.stringify(d)); process.exitCode = 1; } else console.log("PASS:", m); };
+  let i = 0;
+  const id = () => `t${i++}`;
+  import("../lib/plan").then(({ emptyPlan, sanitizePlan, MAX_GOALS }) => {
+    const r = applyTemplate(emptyPlan(), "capital", "2026-11-20", id);
+    ok(r.added.goals === 3 && r.plan.goals[0].baseline === null && r.plan.goals[0].date === "2027-03-20", "capital template adds 3 goals with no numbers, dated from today", r.plan.goals[0]);
+    ok(r.added.actions === 5 && r.plan.areas.costStructure!.actions.length === 2 && r.plan.areas.costStructure!.actions[0].due === "2026-12-20", "actions land in the right areas with due dates");
+    const clean = sanitizePlan(r.plan);
+    ok(JSON.stringify(clean.goals) === JSON.stringify(r.plan.goals) && Object.values(clean.areas).flatMap((a) => a!.actions).length === 5 && clean.risks.length === 1, "template output passes plan validation with nothing dropped");
+    const mine = emptyPlan();
+    mine.goals.push({ id: "g1", title: "My own goal", measure: "x", unit: "$", baseline: 5, target: 10, start: "2026-11-01", date: "2027-01-01" });
+    mine.areas.revenueStreams = { current: "Cash sales", desired: "Invoiced", actions: [] };
+    const r2 = applyTemplate(mine, "customers", "2026-11-20", id);
+    ok(r2.plan.goals.length === MAX_GOALS && r2.plan.goals[0].title === "My own goal" && r2.plan.goals[0].baseline === 5, "never changes what the founder wrote; fills only free goal slots");
+    ok(r2.plan.areas.revenueStreams!.current === "Cash sales", "area text kept");
+    const r3 = applyTemplate(r2.plan, "customers", "2026-11-20", id);
+    ok(r3.added.goals === 0 && r3.added.actions === 0 && r3.added.risks === 0, "applying twice adds nothing");
+    ok(PLAN_TEMPLATES.length === 3, "three templates: customers, capital, investment");
+  });
+});

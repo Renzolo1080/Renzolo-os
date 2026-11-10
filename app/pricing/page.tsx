@@ -21,7 +21,7 @@ export default function PricingPage() {
             Every membership starts with your full Readiness Assessment and a growth and readiness plan. Not sure which fits? Start with the free
             Readiness Snapshot.
           </p>
-          <a href="/snapshot" className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand">
+          <a href="/snapshot" className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand">
             Take the free Snapshot first
           </a>
         </div>

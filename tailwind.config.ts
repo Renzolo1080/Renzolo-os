@@ -41,7 +41,10 @@ const config: Config = {
         mono: ["var(--font-mono)"],
       },
       borderRadius: { pill: "var(--radius-pill)", card: "var(--radius-md)", panel: "var(--radius-lg)" },
-      boxShadow: { pop: "var(--shadow-pop)", card: "var(--shadow-card)", "card-hover": "var(--shadow-card-hover)", soft: "var(--shadow-soft)", glow: "var(--glow-brand)" },
+      boxShadow: {
+        // White pages (Nov 2026): small shadows also draw a hairline edge, so white cards stay visible.
+        sm: "0 0 0 1px rgb(var(--line-rgb)), 0 1px 2px 0 rgb(7 23 39 / 0.05)",
+        pop: "var(--shadow-pop)", card: "var(--shadow-card)", "card-hover": "var(--shadow-card-hover)", soft: "var(--shadow-soft)", glow: "var(--glow-brand)" },
     },
   },
   plugins: [],

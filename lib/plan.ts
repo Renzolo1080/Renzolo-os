@@ -66,6 +66,10 @@ export interface PlanAction {
   owner: string;
   due: string; // YYYY-MM-DD or ""
   status: ActionStatus;
+  /** When it was marked done (YYYY-MM-DD), stamped by the server; "" otherwise. */
+  doneOn: string;
+  /** Proof it's done: a short note or a link. Earns full live-score credit. */
+  evidence: string;
 }
 
 export interface PlanGoal {
@@ -109,6 +113,21 @@ export interface PlanRisk {
   mitigation: string;
 }
 
+/** Re-assessment choices: every N days after the last assessment, or on a
+ * date the founder confirms. */
+export const REASSESS_EVERY = [30, 60, 90, 180] as const;
+export const DEFAULT_REASSESS_EVERY = 90;
+
+export interface PlanTracking {
+  /** The Total Readiness Score the founder is aiming for, and by when. */
+  targetScore: number | null;
+  targetDate: string;
+  /** Days between re-assessments (one of REASSESS_EVERY). */
+  reassessEvery: number;
+  /** A confirmed re-assessment date; when set it wins over the interval. */
+  reassessOn: string;
+}
+
 export interface StrategicPlan {
   starting: { existingPlan: string; lastUpdated: string; whatChanged: string };
   vision: { current: string; desired: string; horizon: string };
@@ -116,6 +135,7 @@ export interface StrategicPlan {
   areas: Partial<Record<BlockKey, PlanArea>>;
   resources: { revenueNow: string; revenueTarget: string; fundingNeed: string; fundingSources: string[]; fundingUse: string; people: string };
   risks: PlanRisk[];
+  tracking: PlanTracking;
 }
 
 export const MAX_GOALS = 3;
@@ -130,6 +150,7 @@ export function emptyPlan(): StrategicPlan {
     areas: {},
     resources: { revenueNow: "", revenueTarget: "", fundingNeed: "", fundingSources: [], fundingUse: "", people: "" },
     risks: [],
+    tracking: { targetScore: null, targetDate: "", reassessEvery: DEFAULT_REASSESS_EVERY, reassessOn: "" },
   };
 }
 
@@ -180,6 +201,8 @@ export function sanitizePlan(raw: unknown): StrategicPlan {
           owner: str(x?.owner, 80),
           due: date(x?.due),
           status: (oneOf(x?.status, ACTION_STATUSES.map((s) => s.value)) || "not_started") as ActionStatus,
+          doneOn: date(x?.doneOn),
+          evidence: str(x?.evidence, 300),
         }))
         .filter((x) => x.text),
     };
@@ -202,7 +225,33 @@ export function sanitizePlan(raw: unknown): StrategicPlan {
       mitigation: str(x?.mitigation, 500),
     }))
     .filter((x) => x.risk);
+  const t = r.tracking ?? {};
+  const target = parseAmount(t.targetScore);
+  plan.tracking = {
+    targetScore: target === null ? null : Math.max(1, Math.min(100, Math.round(target))),
+    targetDate: date(t.targetDate),
+    reassessEvery: (REASSESS_EVERY as readonly number[]).includes(Number(t.reassessEvery)) ? Number(t.reassessEvery) : DEFAULT_REASSESS_EVERY,
+    reassessOn: date(t.reassessOn),
+  };
   return plan;
+}
+
+/** Stamps when actions were finished: an action that is done now and wasn't
+ * before (or has no date) gets today's date; one that's no longer done
+ * loses it. The server calls this on every save, so founders can't
+ * back-date work. `prev` is the plan as it was saved before. */
+export function stampDoneDates(prev: StrategicPlan | null, next: StrategicPlan, today: string = new Date().toISOString().slice(0, 10)): StrategicPlan {
+  const before = new Map<string, PlanAction>();
+  for (const [area, a] of Object.entries(prev?.areas ?? {})) for (const x of a?.actions ?? []) before.set(`${area}:${x.id}`, x);
+  for (const [area, a] of Object.entries(next.areas)) {
+    for (const x of a?.actions ?? []) {
+      const old = before.get(`${area}:${x.id}`);
+      if (x.status !== "done") x.doneOn = "";
+      else if (old?.status === "done" && old.doneOn) x.doneOn = old.doneOn;
+      else x.doneOn = today;
+    }
+  }
+  return next;
 }
 
 /** A new plan pre-filled from the founder's assessment, so they start from
@@ -225,7 +274,7 @@ export function planFromAssessment(input: {
     plan.areas[key] = {
       current: (b?.current_state ?? "").trim(),
       desired: (b?.future_state ?? "").trim(),
-      actions: (b?.goal_target ?? "").trim() ? [{ id: `a${key}`, text: b!.goal_target!.trim().slice(0, 300), owner: "", due: b?.target_date ?? "", status: "not_started" }] : [],
+      actions: (b?.goal_target ?? "").trim() ? [{ id: `a${key}`, text: b!.goal_target!.trim().slice(0, 300), owner: "", due: b?.target_date ?? "", status: "not_started", doneOn: "", evidence: "" }] : [],
     };
   }
   if (input.primaryGoal) plan.goals.push({ id: "g1", title: input.primaryGoal.slice(0, 200), measure: "", unit: "other", baseline: null, target: null, start: "", date: "" });
