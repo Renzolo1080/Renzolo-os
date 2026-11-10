@@ -33,8 +33,8 @@ export interface DashboardData {
   commitments: { id: string; sessionId: string; text: string; due: string }[];
   invite: React.ReactNode;
   today: string;
-  /** Next reminder email date (YYYY-MM-DD), if a reminder series is running. */
-  nextReminder?: string | null;
+  /** Next reminder email, if a reminder series is running (lib/reminders.ts). */
+  nextReminder?: { date: string; step: "assessment" | "coaching" } | null;
 }
 
 const STATUS_STYLE: Record<GoalStatus, string> = {
@@ -91,7 +91,7 @@ export function FounderDashboard(d: DashboardData) {
   });
   const prog = stepProgress(steps);
   const next = prog.next;
-  const note = next ? reminderNote(d.nextReminder ?? null, d.today) : null;
+  const note = next && d.nextReminder && d.nextReminder.step === next.key ? reminderNote(d.nextReminder.date, d.today) : null;
   const doneSteps = steps.filter((s) => !s.locked && s.done && s !== next);
 
   return (
@@ -167,7 +167,7 @@ export function FounderDashboard(d: DashboardData) {
               {note && <p className="mt-1 text-xs text-ink-soft">{note}</p>}
             </div>
             <a href={next.href} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
-              {next.done || next.ok ? "Continue" : "Start"}: {next.label}
+              {next.started ? "Continue" : "Start"}: {next.label}
             </a>
           </div>
         ) : (

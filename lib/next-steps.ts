@@ -11,6 +11,8 @@ export interface Step {
   done: boolean;
   /** Good enough to move on, even if not fully done. */
   ok: boolean;
+  /** Some progress made (button says Continue rather than Start). */
+  started: boolean;
   href: string;
   locked: boolean;
   /** What unlocks a locked step. */
@@ -29,11 +31,11 @@ export interface StepInput {
 
 export function founderSteps(d: StepInput): Step[] {
   return [
-    { key: "assessment", label: "Full assessment", value: `${d.areasAnswered} of ${d.areasTotal} areas`, done: d.areasAnswered >= d.areasTotal, ok: d.areasAnswered >= 3, href: "/assessment/details", locked: false },
-    { key: "plan", label: "Strategic plan", value: d.planCompleteness === null ? "Not started" : `${d.planCompleteness}% complete`, done: (d.planCompleteness ?? 0) >= 100, ok: (d.planCompleteness ?? 0) >= 60, href: "/plan", locked: !d.access.member, unlock: "With a membership" },
-    { key: "review", label: "Plan review", value: d.review ? `${d.review.overall}/100` : "Not yet", done: !!d.review && d.review.overall >= 75, ok: !!d.review, href: "/plan", locked: !d.access.growth, unlock: "With Growth" },
-    { key: "market", label: "Market Intelligence", value: d.marketDate ?? "Not yet", done: !!d.marketDate, ok: !!d.marketDate, href: "/market", locked: !d.access.growth, unlock: "With Growth" },
-    { key: "report", label: "Readiness Report", value: d.report.exists ? (d.report.current ? "Up to date" : "Update available") : "Not yet", done: d.report.exists && d.report.current, ok: d.report.exists, href: "#report", locked: false },
+    { key: "assessment", label: "Full assessment", value: `${d.areasAnswered} of ${d.areasTotal} areas`, done: d.areasAnswered >= d.areasTotal, ok: d.areasAnswered >= 3, started: d.areasAnswered > 0, href: "/assessment/details", locked: false },
+    { key: "plan", label: "Strategic plan", value: d.planCompleteness === null ? "Not started" : `${d.planCompleteness}% complete`, done: (d.planCompleteness ?? 0) >= 100, ok: (d.planCompleteness ?? 0) >= 60, started: (d.planCompleteness ?? 0) > 0, href: "/plan", locked: !d.access.member, unlock: "With a membership" },
+    { key: "review", label: "Plan review", value: d.review ? `${d.review.overall}/100` : "Not yet", done: !!d.review && d.review.overall >= 75, ok: !!d.review, started: !!d.review, href: "/plan", locked: !d.access.growth, unlock: "With Growth" },
+    { key: "market", label: "Market Intelligence", value: d.marketDate ?? "Not yet", done: !!d.marketDate, ok: !!d.marketDate, started: !!d.marketDate, href: "/market", locked: !d.access.growth, unlock: "With Growth" },
+    { key: "report", label: "Readiness Report", value: d.report.exists ? (d.report.current ? "Up to date" : "Update available") : "Not yet", done: d.report.exists && d.report.current, ok: d.report.exists, started: d.report.exists, href: "#report", locked: false },
   ];
 }
 

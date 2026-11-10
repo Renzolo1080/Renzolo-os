@@ -14,7 +14,7 @@ const at = (days: number) => new Date(new Date(paid).getTime() + days * 864e5);
 // --- which step is reminded --------------------------------------------------
 const base = { areasAnswered: 2, areasTotal: 9, coachingAvailable: 1, paidAt: paid, coachingSince: "2026-11-20T00:00:00Z" };
 assert(reminderStep(base)?.step === "assessment", "an unfinished assessment comes first");
-assert(reminderStep({ ...base, areasAnswered: 9 })?.step === "coaching" && reminderStep({ ...base, areasAnswered: 9 })?.since === "2026-11-20T00:00:00Z", "then coaching, from when the sessions arrived");
+assert(reminderStep({ ...base, areasAnswered: 3 })?.step === "coaching" && reminderStep({ ...base, areasAnswered: 3 })?.since === "2026-11-20T00:00:00Z", "then coaching once the report is unlocked (3 areas, as on the dashboard card)");
 assert(reminderStep({ ...base, areasAnswered: 9, coachingAvailable: 0 }) === null, "nothing to remind when all is done");
 assert(reminderStep({ ...base, paidAt: null }) === null, "never remind someone who hasn't paid");
 
@@ -33,9 +33,9 @@ assert(nextReminderDate("assessment", paid, sent0, at(1)) === "2026-11-19", "nex
 assert(nextReminderDate("assessment", paid, [...sent0, reminderKind("assessment", paid, 3), reminderKind("assessment", paid, 5)], at(6)) === null, "no note once all three are sent");
 
 // --- the emails -----------------------------------------------------------------
-const ctx = { appUrl: "https://app.renzoloenterprises.com", firstName: "Ama", areasAnswered: 4, areasTotal: 9, coachingAvailable: 2, unsubscribeUrl: "https://x/unsub", postalAddress: "Milwaukee, WI" };
+const ctx = { appUrl: "https://app.renzoloenterprises.com", firstName: "Ama", areasAnswered: 1, areasTotal: 9, coachingAvailable: 2, unsubscribeUrl: "https://x/unsub", postalAddress: "Milwaukee, WI" };
 const a3 = buildReminderEmail(reminderKind("assessment", paid, 3), ctx);
-assert(a3.subject === "5 areas left in your assessment" && a3.html.includes("/assessment/details?utm_source=email") && a3.text.includes("4 of 9"), "assessment reminder shows progress and links to the assessment", a3.subject);
+assert(a3.subject === "2 areas to unlock your Readiness Report" && a3.html.includes("/assessment/details?utm_source=email") && a3.text.includes("answered 1 area; 2 more unlock"), "assessment reminder shows progress and links to the assessment", a3.text);
 assert(a3.html.includes("Unsubscribe") && a3.text.includes("Milwaukee, WI"), "reminders carry unsubscribe and the postal address");
 const c0 = buildReminderEmail(reminderKind("coaching", "2026-11-20T00:00:00Z", 0), ctx);
 assert(c0.subject === "You have 2 coaching sessions ready to book" && c0.html.includes("/coaching?"), "coaching reminder", c0.subject);

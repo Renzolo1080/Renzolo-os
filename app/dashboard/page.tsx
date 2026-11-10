@@ -204,14 +204,15 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
 
     // When the next reminder email for an unfinished step goes out, for
     // the "We'll remind you on…" note (lib/reminders.ts).
-    let nextReminder: string | null = null;
+    let nextReminder: { date: string; step: "assessment" | "coaching" } | null = null;
     if (process.env.SUPABASE_SERVICE_ROLE_KEY && user.email) {
       try {
         const admin = createAdminClient();
         const current = reminderStep(await loadStepState(admin, user.id));
         if (current) {
           const { data: log } = await admin.from("email_log").select("kind").eq("email", user.email.toLowerCase()).like("kind", "remind:%");
-          nextReminder = nextReminderDate(current.step, current.since, (log ?? []).map((l: any) => l.kind));
+          const date = nextReminderDate(current.step, current.since, (log ?? []).map((l: any) => l.kind));
+          nextReminder = date ? { date, step: current.step } : null;
         }
       } catch {
         nextReminder = null;

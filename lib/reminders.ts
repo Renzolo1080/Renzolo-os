@@ -1,10 +1,13 @@
 import { esc, layout, p, textFooter, type EmailContext } from "./emails";
+import { DETAIL_AREAS_REQUIRED } from "./quickcheck";
 
 /** Reminders for paying founders who have an unfinished step.
  *
  * Two steps are nudged, one at a time, in this order:
  *   assessment — they paid (membership or the $60 assessment) but haven't
- *                answered every area of the full assessment yet;
+ *                answered enough areas of the full assessment to unlock
+ *                their Readiness Report (DETAIL_AREAS_REQUIRED, as on the
+ *                dashboard's next-steps card);
  *   coaching   — the assessment is done and they have coaching sessions
  *                ready to book.
  * Each step gets at most three reminders, on day 0, 3 and 5 after the step
@@ -30,8 +33,9 @@ export interface StepState {
 
 /** Which step (if any) to remind about, and since when. */
 export function reminderStep(s: StepState): { step: ReminderStep; since: string } | null {
-  if (s.paidAt && s.areasAnswered < s.areasTotal) return { step: "assessment", since: s.paidAt };
-  if (s.areasAnswered >= s.areasTotal && s.coachingAvailable > 0 && s.coachingSince) return { step: "coaching", since: s.coachingSince };
+  const enough = s.areasAnswered >= Math.min(DETAIL_AREAS_REQUIRED, s.areasTotal);
+  if (s.paidAt && !enough) return { step: "assessment", since: s.paidAt };
+  if (enough && s.coachingAvailable > 0 && s.coachingSince) return { step: "coaching", since: s.coachingSince };
   return null;
 }
 
@@ -89,9 +93,9 @@ export function buildReminderEmail(kind: string, c: ReminderContext): { subject:
     return { subject, html: layout(day === 0 ? "Your next step: book your coaching session" : "Book your coaching session", body, ec, { label: "Book a session", href }), text };
   }
   const href = linkTo(c, "/assessment/details", `remind_assessment_d${day}`);
-  const left = Math.max(0, c.areasTotal - c.areasAnswered);
-  const progress = c.areasAnswered > 0 ? `You've answered ${c.areasAnswered} of ${c.areasTotal} areas; ${left} to go.` : `It takes about 30 minutes, and you can stop and come back at any time.`;
-  const subject = day === 0 ? "Your next step: finish your full assessment" : day === 3 ? `${left} area${left === 1 ? "" : "s"} left in your assessment` : "Your Readiness Report is waiting on one thing";
+  const left = Math.max(0, Math.min(DETAIL_AREAS_REQUIRED, c.areasTotal) - c.areasAnswered);
+  const progress = c.areasAnswered > 0 ? `You've answered ${c.areasAnswered} area${c.areasAnswered === 1 ? "" : "s"}; ${left} more unlock${left === 1 ? "s" : ""} your Readiness Report.` : `Answer your three priority areas to unlock your Readiness Report. You can stop and come back at any time.`;
+  const subject = day === 0 ? "Your next step: finish your full assessment" : day === 3 ? `${left} area${left === 1 ? "" : "s"} to unlock your Readiness Report` : "Your Readiness Report is waiting on one thing";
   const body =
     p(`${esc(hi)}thank you for joining. Your full Readiness Assessment is what unlocks your Readiness Report, your growth plan and the most useful coaching.`) +
     p(esc(progress));
