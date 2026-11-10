@@ -70,7 +70,7 @@ export default function AboutPage() {
           <p className={EYEBROW}>Leadership</p>
           <div className="mt-6 flex max-w-[760px] flex-col items-start gap-6 rounded-[24px] sm:flex-row sm:items-center border border-line bg-white p-7">
             {FOUNDER.photo ? (
-              <img src={FOUNDER.photo} alt={FOUNDER.name} className="h-[150px] w-[150px] shrink-0 rounded-full object-cover md:h-[180px] md:w-[180px]" />
+              <img src={FOUNDER.photo} alt={FOUNDER.name} className="h-[170px] w-[170px] shrink-0 rounded-full bg-black object-cover md:h-[210px] md:w-[210px]" />
             ) : (
               <span aria-hidden="true" className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-full bg-ink font-display text-2xl font-bold text-white">
                 LB
@@ -79,7 +79,7 @@ export default function AboutPage() {
             <div className="min-w-0">
               <p className="text-[22px] font-bold">Lorenzo Bell Jr.</p>
               <p className="mt-0.5 text-base font-bold text-brand-text">Founder &amp; CEO</p>
-              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">25+ years developing, coaching and connecting suppliers and founders to global supply chains, while supporting their access to capital and investors. U.S. Navy veteran.</p>
+              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">Lorenzo Bell Jr. brings more than 25 years of experience leading supplier development and growth programs for Fortune 500 organizations. He specializes in coaching suppliers and founders, helping them build the capabilities to compete in global supply chains, enter new markets, and connect with investors and other sources of capital.</p>
             </div>
           </div>
         </section>
