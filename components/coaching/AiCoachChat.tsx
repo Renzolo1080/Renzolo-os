@@ -33,7 +33,9 @@ export function AiCoachChat({
   remaining: initialRemaining,
   hasPlan,
   checkinDue,
+  initialDraft = "",
 }: {
+  initialDraft?: string;
   threadId: string | null;
   initialMessages: ChatMessage[];
   starters: string[];
@@ -44,7 +46,7 @@ export function AiCoachChat({
   const router = useRouter();
   const [threadId, setThreadId] = useState(initialThread);
   const [messages, setMessages] = useState(initialMessages);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(initialDraft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState(initialRemaining);

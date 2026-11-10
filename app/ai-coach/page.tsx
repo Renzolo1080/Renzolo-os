@@ -11,7 +11,7 @@ import { cloneConfig, SESSION_SECONDS, sessionLimit, sessionsLeft } from "@/lib/
 export const dynamic = "force-dynamic";
 
 /** The AI coach: conversations and weekly check-ins. */
-export default async function AiCoachPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<{ t?: string }> }) {
+export default async function AiCoachPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<{ t?: string; q?: string }> }) {
   const searchParams = await searchParamsPromise;
   const supabase = await createClient();
   const {
@@ -102,6 +102,7 @@ export default async function AiCoachPage({ searchParams: searchParamsPromise }:
           remaining={remaining}
           hasPlan={hasPlan}
           checkinDue={checkinDue}
+          initialDraft={!current && typeof searchParams?.q === "string" ? searchParams.q.slice(0, 500) : ""}
         />
       </div>
     </main>

@@ -1,4 +1,5 @@
-import { statusLine, type Trajectory } from "@/lib/live-score";
+import { statusLine, type NextMove, type Trajectory } from "@/lib/live-score";
+import { Burst } from "@/components/brand/Visuals";
 
 /** "Target vs actual" on the founder dashboard (approved Nov 10, 2026):
  * the trajectory (score and goals over time, from the full assessment) and
@@ -277,7 +278,7 @@ function Key({ items }: { items: { label: string; style: React.CSSProperties; sq
   );
 }
 
-export function TrajectorySection({ t, today, canReassess }: { t: Trajectory; today: string; canReassess: boolean }) {
+export function TrajectorySection({ t, today, canReassess, summary, moves, aiCoach }: { t: Trajectory; today: string; canReassess: boolean; summary: string; moves: NextMove[]; aiCoach: boolean }) {
   if (!t.start || t.live === null || !t.latest) return null;
   const month = t.moves.filter((m) => dn(m.date) >= dn(today) - 30);
   const shown = [...month.slice(0, 6), ...t.flags];
@@ -287,6 +288,43 @@ export function TrajectorySection({ t, today, canReassess }: { t: Trajectory; to
       <h2 id="trajectory-title" className="font-display text-2xl font-bold text-navy">
         Target vs actual
       </h2>
+
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
+        <div className="relative overflow-hidden rounded-2xl bg-navy p-5 text-white sm:p-6">
+          <Burst className="hidden -right-48 sm:block" />
+          <div className="relative max-w-xl">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-gold">In short</p>
+            <p className="mt-2 text-lg leading-relaxed">{summary}</p>
+            <p className="mt-3 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{statusLine(t)}</p>
+          </div>
+        </div>
+        <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
+          <h3 className="font-display text-xl font-bold text-navy">Next moves</h3>
+          <p className="mt-1 text-sm text-ink-soft">Picked from your plan and progress.</p>
+          {moves.length ? (
+            <ul className="mt-3 space-y-2.5">
+              {moves.map((m) => (
+                <li key={m.text} className="flex gap-2.5 text-sm">
+                  <span aria-hidden="true" className="mt-0.5 font-bold text-brand-text">→</span>
+                  <a href={m.href} className="text-navy hover:underline">
+                    {m.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm">You're on top of your plan. Keep logging progress each week.</p>
+          )}
+          {aiCoach && (
+            <a
+              href={`/ai-coach?q=${encodeURIComponent(`Help me plan my next moves this week. ${summary} My suggested next moves: ${moves.map((m) => m.text).join(" ")}`.slice(0, 500))}`}
+              className="mt-4 inline-block rounded-pill border-2 border-navy px-4 py-2 text-sm font-bold text-navy hover:bg-navy/5"
+            >
+              Plan these with your AI coach
+            </a>
+          )}
+        </div>
+      </div>
 
       <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">

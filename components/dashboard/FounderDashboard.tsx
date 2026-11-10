@@ -1,5 +1,5 @@
 import { TrajectorySection } from "./Trajectory";
-import type { Trajectory } from "@/lib/live-score";
+import { inShort, nextMoves, type Trajectory } from "@/lib/live-score";
 import { EXTRAS, unlocked, type ExtraKey } from "@/lib/dashboard";
 import { actionStats, allActions, LIKELIHOOD, type StrategicPlan } from "@/lib/plan";
 import { formatAmount, goalProgress, GOAL_STATUS_LABELS, kpis, runwayMonths, periodOf, type Checkin, type GoalStatus, type MonthlyUpdate } from "@/lib/progress";
@@ -199,7 +199,7 @@ export function FounderDashboard(d: DashboardData) {
         )}
       </section>
 
-      {d.trajectory && <TrajectorySection t={d.trajectory} today={d.today} canReassess={d.access.member} />}
+      {d.trajectory && <TrajectorySection t={d.trajectory} today={d.today} canReassess={d.access.member} summary={inShort(d.trajectory)} moves={nextMoves(d.trajectory, d.plan, d.today)} aiCoach={d.access.member} />}
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         {/* 2. Goals: target vs actual */}

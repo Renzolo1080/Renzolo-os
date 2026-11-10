@@ -86,3 +86,16 @@ import("../lib/accountability").then(({ weeklyDigest, weekOf, digestDay, digestK
   assert(msg.subject === "Your plan this week: 1 overdue, 1 due this week" && msg.html.includes("live Total Readiness Score is <strong>63</strong>") && msg.html.includes("Unsubscribe") && !msg.html.includes("<Ama>"), "email: subject, live score, unsubscribe, escaped name", msg.subject);
   assert(msg.html.includes("/dashboard?utm_source=email&amp;utm_medium=email&amp;utm_campaign=weekly_plan#coming-up") || msg.html.includes("weekly_plan#coming-up"), "links go straight to the right place");
 });
+
+// --- plain-English summary and next moves ------------------------------------------------
+import("../lib/live-score").then(({ inShort, nextMoves }) => {
+  const s = inShort(t);
+  assert(s.startsWith("Your score is ") && s.includes("from where you started") && s.includes("75 by 12 May"), "in short: score, change from the start, pace to the target", s);
+  assert(inShort({ ...t, status: "no_target", target: null }).includes("Set a target score"), "in short asks for a target when there isn't one");
+  const p = planWith();
+  p.areas.revenueStreams!.actions[0].due = "2027-02-20";
+  const moves = nextMoves(trajectory({ ...base, plan: p }), p, "2027-03-05");
+  assert(moves.length >= 2 && moves.length <= 4 && moves[0].text.includes("New price list") && moves[0].text.includes("overdue"), "next moves: overdue work first, at most four", moves);
+  assert(moves.some((m) => m.text.startsWith("Add evidence to 1 finished action")), "next moves: add evidence for full credit", moves);
+  assert(moves.every((m) => m.href.startsWith("/")), "each move links to where it gets done");
+});

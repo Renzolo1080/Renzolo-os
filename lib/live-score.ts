@@ -282,3 +282,55 @@ export function statusLine(t: Trajectory): string {
   if (t.status === "on_track") return "On track";
   return `Behind · live score ${d} point${d === 1 ? "" : "s"} below your path`;
 }
+
+/** One plain-English sentence for the top of "Target vs actual", so a
+ * founder can read where they stand and decide what to do in seconds. */
+export function inShort(t: Trajectory): string {
+  if (!t.start || t.live === null || !t.latest) return "";
+  const live = Math.round(t.live);
+  const up = Math.round(t.live - t.start.total);
+  const lead = up > 0 ? `Your score is ${live}, up ${up} from where you started.` : `Your score is ${live}, the same as where you started.`;
+  const path =
+    t.status === "no_target"
+      ? " Set a target score in your plan to see whether you're on pace."
+      : t.status === "behind"
+        ? ` You're behind the pace you set for ${t.target!.score} by ${fmtLong(t.target!.date)}.`
+        : ` You're on pace for ${t.target!.score} by ${fmtLong(t.target!.date)}.`;
+  const goals =
+    t.goals.percent !== null && t.goals.timeUsed !== null
+      ? t.goals.percent >= t.goals.timeUsed
+        ? ` Your goals are ${t.goals.percent}% of the way there, ahead of the ${t.goals.timeUsed}% of time used.`
+        : ` Your goals are ${t.goals.percent}% of the way there with ${t.goals.timeUsed}% of the time used, so they need a push.`
+      : "";
+  return lead + path + goals;
+}
+
+const fmtLong = (d: string) => new Date(`${d.slice(0, 10)}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
+
+export interface NextMove {
+  text: string;
+  href: string;
+}
+
+/** Three or four next moves, most useful first, from the founder's own
+ * plan and progress. Each links to where it gets done. */
+export function nextMoves(t: Trajectory, plan: StrategicPlan | null, today: string): NextMove[] {
+  const out: NextMove[] = [];
+  const day = dayNum(today);
+  if (t.reassessDue && t.nextReassessment) out.push({ text: "Re-assess now to confirm your live score and reset your starting point.", href: "/assessment/details" });
+  const open = plan ? allActions(plan).filter((a) => a.status !== "done") : [];
+  const overdue = open.filter((a) => a.due && dayNum(a.due) < day).sort((a, b) => a.due.localeCompare(b.due));
+  if (overdue.length) out.push({ text: `Finish "${overdue[0].text}" first: it's overdue${overdue.length > 1 ? `, with ${overdue.length - 1} more behind it` : ""}.`, href: "/dashboard#coming-up" });
+  const weakest = t.drivers.filter((d) => d.left > 0).sort((a, b) => a.done - b.done || b.share - a.share)[0];
+  if (weakest) {
+    const nextAction = open.find((a) => a.area === weakest.key && !(overdue[0] && a.id === overdue[0].id));
+    out.push({ text: nextAction ? `Move ${weakest.label} forward: "${nextAction.text}". It's ${weakest.share}% of your plan and only ${weakest.done}% done.` : `Add an action for ${weakest.label}: it's ${weakest.share}% of your plan and only ${weakest.done}% done.`, href: "/plan" });
+  }
+  const noProof = plan ? allActions(plan).filter((a) => a.status === "done" && !a.evidence.trim() && a.doneOn && t.latest && dayNum(a.doneOn) >= dayNum(t.latest.date)) : [];
+  if (noProof.length) out.push({ text: `Add evidence to ${noProof.length} finished action${noProof.length === 1 ? "" : "s"} for full credit on your live score.`, href: "/plan" });
+  if (t.goals.percent !== null && t.goals.timeUsed !== null && t.goals.percent < t.goals.timeUsed) out.push({ text: "Log a goal check-in this week, even a small win: it keeps your progress chart honest.", href: "/dashboard#goals" });
+  if (t.status === "no_target") out.push({ text: "Set a target score and date in your plan so you can see whether you're on pace.", href: "/plan" });
+  if (t.flags.length) out.push({ text: `${t.flags[0].label}: talk it through with your coach before it affects your plan.`, href: "/coaching" });
+  if (out.length < 3 && plan && !plan.goals.length) out.push({ text: "Add up to three goals with a starting number, a target and a date.", href: "/plan" });
+  return out.slice(0, 4);
+}
