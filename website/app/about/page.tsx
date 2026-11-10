@@ -32,7 +32,8 @@ export default function AboutPage() {
 
         <section className={`${WRAP} pt-20 md:pt-24`}>
           <p className={EYEBROW}>Our purpose</p>
-          <h2 className="mt-3 max-w-[860px] font-display text-[32px] font-bold leading-[1.12] md:text-[46px]">Talented founders shouldn&apos;t lose opportunities because nobody showed them what ready looks like.</h2>
+          <h2 className="mt-3 max-w-[860px] font-display text-[32px] font-bold leading-[1.12] md:text-[46px]">Helping founders and CEOs get ready to grow and scale their businesses.</h2>
+          <p className="mt-5 max-w-[760px] text-lg leading-relaxed text-ink-muted md:text-[21px]">Talented founders shouldn&apos;t lose opportunities because nobody showed them what ready looks like.</p>
           <div className="mt-12 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))]">
             <Card label="Our mission" text="To get founders and CEOs ready to win contracts, capital and investment, and connect them to the people who can say yes." />
             <Card label="Our vision" text="A world where every capable founder, wherever they start, is ready when opportunity arrives." />
@@ -67,9 +68,9 @@ export default function AboutPage() {
 
         <section className={`${WRAP} pb-20`}>
           <p className={EYEBROW}>Leadership</p>
-          <div className="mt-6 flex max-w-[760px] items-center gap-6 rounded-[24px] border border-line bg-white p-7">
+          <div className="mt-6 flex max-w-[760px] flex-col items-start gap-6 rounded-[24px] sm:flex-row sm:items-center border border-line bg-white p-7">
             {FOUNDER.photo ? (
-              <img src={FOUNDER.photo} alt={FOUNDER.name} className="h-[88px] w-[88px] shrink-0 rounded-full object-cover" />
+              <img src={FOUNDER.photo} alt={FOUNDER.name} className="h-[170px] w-[170px] shrink-0 rounded-full bg-black object-cover md:h-[210px] md:w-[210px]" />
             ) : (
               <span aria-hidden="true" className="flex h-[88px] w-[88px] shrink-0 items-center justify-center rounded-full bg-ink font-display text-2xl font-bold text-white">
                 LB
@@ -78,7 +79,7 @@ export default function AboutPage() {
             <div className="min-w-0">
               <p className="text-[22px] font-bold">Lorenzo Bell Jr.</p>
               <p className="mt-0.5 text-base font-bold text-brand-text">Founder &amp; CEO</p>
-              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">25+ years developing suppliers and founders for global buyers, lenders and investors. U.S. Navy veteran.</p>
+              <p className="mt-2 text-[17px] leading-relaxed text-ink-muted">Lorenzo is a former corporate executive and strategist with 25+ years of experience leading global supplier development and growth programs for Fortune 500 organizations. His work has trained 7,000+ suppliers and increased access to contract opportunities and investors for 4,000+ founders across 30+ countries. A U.S. Navy veteran, he helps founders build the confidence, discipline and systems to win customers, new markets and capital.</p>
             </div>
           </div>
         </section>

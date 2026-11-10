@@ -15,7 +15,7 @@
 export const FOUNDER = {
   name: "Lorenzo Bell Jr.",
   title: "Founder & CEO, RENZOLO™",
-  photo: undefined as string | undefined,
+  photo: "/img/lorenzo-bell.jpg" as string | undefined,
   pullQuote:
     "Talented founders lose opportunities not because their business is weak, but because nobody showed them what ready looks like to a buyer, a lender or an investor.",
   short:
