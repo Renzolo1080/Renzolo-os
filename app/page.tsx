@@ -1,6 +1,6 @@
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { QUICK_QUESTIONS, STAGES } from "@/lib/quickcheck";
-import { Button, Eyebrow, Glow } from "@/components/brand/Visuals";
+import { Button, Eyebrow } from "@/components/brand/Visuals";
 import { OutcomeFlipCards, ReadinessTicker } from "@/components/brand/BrandClient";
 
 /** Why founders choose RENZOLO (brand book: never name competitors; contrast
@@ -45,7 +45,6 @@ export default function HomePage() {
       <main>
         {/* Hero (light, per the brand book: the website and app landing stay light) */}
         <section id="hero" className="relative overflow-hidden">
-          <Glow />
           <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1.1fr_1fr]">
             <div className="hero-in">
               <Eyebrow>Venture Readiness Assessment and Development Support</Eyebrow>
