@@ -51,7 +51,9 @@ export function AiCoachChat({
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState(initialRemaining);
   const endRef = useRef<HTMLDivElement>(null);
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [messages.length, busy]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length, busy]);
 
   async function send(opts: { message?: string; checkin?: boolean; insights?: boolean }) {
     const text = (opts.message ?? "").trim();
