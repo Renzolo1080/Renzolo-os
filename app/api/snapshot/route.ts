@@ -6,6 +6,8 @@ import { scoreSnapshot, snapshotOverview } from "@/lib/snapshot";
 import { readAttribution, createShareToken, publicAppUrl } from "@/lib/growth-server";
 import { sendOnce } from "@/lib/email-flow";
 import { getAppUrl } from "@/lib/app-url";
+import { bookingLink } from "@/lib/coaching";
+import { getOneOffPrice, getMembershipPrice, formatPrice } from "@/lib/pricing";
 
 /** POST /api/snapshot — the free, public Readiness Snapshot (no account).
  * Body: { contact: { fullName, companyName, email }, profile,
@@ -81,5 +83,18 @@ export async function POST(req: NextRequest) {
     lead.id
   ).catch(() => false);
 
-  return NextResponse.json({ overview, shareUrl });
+  // The next step's price, from the live settings, and (for an established
+  // business) the coach's booking page if one is set.
+  const fmt = (p: ReturnType<typeof getOneOffPrice>) => (p ? formatPrice(p) : null);
+  const nextStepOffer = {
+    price:
+      overview.nextStep === "elevate"
+        ? fmt(getMembershipPrice("elevate", "quarterly"))
+        : overview.nextStep === "essentials"
+          ? fmt(getMembershipPrice("essentials", "quarterly"))
+          : fmt(getOneOffPrice("assessment", false)),
+    bookingUrl: overview.nextStep === "elevate" ? bookingLink(process.env, { name: c.fullName, email: c.email }) : null,
+  };
+
+  return NextResponse.json({ overview, shareUrl, nextStepOffer });
 }

@@ -60,9 +60,15 @@ assert(!parseQuickCheck({ answers: { ...allAt(2), channels: "2" } }).ok, "an ans
 const ev = parseQuickCheck({ answers: allAt(1), evidence: ["revenueStreams", "revenueStreams", "notAnArea", 5] });
 assert(ev.ok && JSON.stringify(ev.value.evidence) === '["revenueStreams"]', "evidence keeps only real areas, once each");
 assert(parseProfile(goodProfile).ok, "a complete profile is accepted");
-for (const field of ["ventureStage", "industry", "country", "annualRevenue", "primaryGoal", "fundingNeed", "registration"]) {
+for (const field of ["ventureStage", "industry", "country", "annualRevenue", "primaryGoal", "timeHorizon", "fundingNeed"]) {
   const r = parseProfile({ ...goodProfile, [field]: "" });
   assert(!r.ok, `a missing ${field} is refused with a message`);
+}
+{
+  const lean = parseProfile({ ...goodProfile, businessType: "", yearsInBusiness: "", teamSize: "", registration: "" });
+  assert(lean.ok && lean.value.businessType === "" && lean.value.registration === "", "the Snapshot no longer needs business type, years, team size or registration");
+  const bad = parseProfile({ ...goodProfile, teamSize: "a million" });
+  assert(bad.ok && bad.value.teamSize === "", "an unknown team size is dropped, not stored");
 }
 assert(!parseProfile({ ...goodProfile, country: "Atlantis" }).ok, "a value that isn't one of the choices is refused");
 assert(!parseProfile({ ...goodProfile, challenges: [] }).ok, "at least one challenge is required");
@@ -162,4 +168,18 @@ assert(rec.includes("get your first paying customers") && !/\bmy\b/.test(rec), "
   const keys = QC.QUICK_QUESTIONS.map((q) => q.key);
   assert(keys.indexOf("costStructure") === 7 && keys.indexOf("keyPartnerships") === 8, "question 8 is costs, 9 is partners");
   assert(site.join("|") === QC.COUNTRIES.join("|"), "the website's country list matches the app's");
+}
+
+// Snapshot next step (routing from answers already asked)
+import { snapshotNextStep } from "../lib/snapshot";
+{
+  const base = { annualRevenue: "$250k-$1M", timeHorizon: "12 months", fundingNeed: "No", primaryGoal: "Grow revenue" };
+  const check = (ok: boolean, msg: string) => { if (!ok) { console.error("  ✗", msg); process.exitCode = 1; } else console.log("  ✓", msg); };
+  check(snapshotNextStep({ ...base, timeHorizon: "3 months" }) === "elevate", "established + wants results within 6 months → Elevate");
+  check(snapshotNextStep({ ...base, fundingNeed: "Yes" }) === "elevate", "established + needs funding → Elevate");
+  check(snapshotNextStep({ ...base, primaryGoal: "Win corporate or government contracts" }) === "elevate", "established + contracts goal → Elevate");
+  check(snapshotNextStep(base) === "assessment", "established, no urgency → assessment");
+  check(snapshotNextStep({ ...base, annualRevenue: "Pre-revenue", fundingNeed: "Yes" }) === "essentials", "pre-revenue → Essentials even when seeking funding");
+  check(snapshotNextStep({ ...base, annualRevenue: "$50k-$250k", primaryGoal: "Get my first paying customers" }) === "essentials", "first-customers goal → Essentials");
+  check(snapshotNextStep({ ...base, annualRevenue: "$50k-$250k", timeHorizon: "3 months" }) === "assessment", "smaller business with urgency → assessment, not Elevate");
 }
