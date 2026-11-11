@@ -16,9 +16,13 @@ create table if not exists document_extractions (
 create index if not exists document_extractions_founder_idx on document_extractions (founder_id, created_at desc);
 alter table document_extractions enable row level security;
 grant select, insert, update, delete on document_extractions to service_role;
-grant select, insert, delete on document_extractions to authenticated;
+-- Founders read and delete their own results. Only the server saves them
+-- (after the AI has read the document), so nobody can write a "passed"
+-- check for themselves. Supabase gives signed-in users every right on new
+-- tables by default, so take them back first.
+revoke all on document_extractions from authenticated;
+grant select, delete on document_extractions to authenticated;
 revoke all on document_extractions from anon;
-revoke update on document_extractions from authenticated;
 do $$ begin
   create policy "document_extractions: own or staff read" on document_extractions for select using (founder_id = auth.uid() or is_staff());
 exception when duplicate_object then null; end $$;
@@ -75,11 +79,12 @@ alter table partner_cohorts enable row level security;
 alter table cohort_members enable row level security;
 
 grant select, insert, update, delete on partners, partner_users, partner_cohorts, cohort_members to service_role;
+-- Joining is done by the server after it checks the cohort's code, so
+-- founders only read and leave (delete) their memberships.
+revoke all on partners, partner_users, partner_cohorts, cohort_members from authenticated;
 grant select on partners, partner_users, partner_cohorts to authenticated;
-grant select, insert, delete on cohort_members to authenticated;
+grant select, delete on cohort_members to authenticated;
 revoke all on partners, partner_users, partner_cohorts, cohort_members from anon;
-revoke insert, update, delete on partners, partner_users, partner_cohorts from authenticated;
-revoke update on cohort_members from authenticated;
 
 -- Partner staff see their own partner and cohorts; RENZOLO staff see all.
 do $$ begin

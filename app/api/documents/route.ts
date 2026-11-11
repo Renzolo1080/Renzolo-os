@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { loadMembership } from "@/lib/membership-server";
 import { entitlements } from "@/lib/membership";
 import { readDocument } from "@/lib/anthropic";
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   if (!result) return NextResponse.json({ error: "We couldn't make sense of that document. Try a clearer copy or the original PDF." }, { status: 422 });
 
   const fileName = (f!.name || "document").replace(/[^\w.\- ]+/g, "").slice(0, 80) || "document";
-  const { data, error } = await supabase
+  const { data, error } = await createAdminClient()
     .from("document_extractions")
     .insert({ founder_id: user.id, doc_type: docType, file_name: fileName, result })
     .select("id, doc_type, file_name, result, created_at")

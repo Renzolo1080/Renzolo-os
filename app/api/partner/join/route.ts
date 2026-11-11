@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   const { data: cohort } = await admin.from("partner_cohorts").select("id, open").eq("join_code", code).maybeSingle();
   if (!cohort || !cohort.open) return NextResponse.json({ error: "We couldn't find an open programme with that code." }, { status: 404 });
   const r = await currentReadiness(supabase, user.id);
-  const { error } = await supabase
+  const { error } = await admin
     .from("cohort_members")
     .upsert({ cohort_id: cohort.id, founder_id: user.id, consent_version: CONSENT_VERSION, baseline_score: r.score }, { onConflict: "cohort_id,founder_id", ignoreDuplicates: true });
   if (error) return NextResponse.json({ error: "Couldn't join just now. Please try again." }, { status: 500 });
