@@ -6,7 +6,9 @@ import { TIER_FEATURES, TIER_TAGLINES, MEMBERSHIP_POLICIES } from "@/lib/tier-fe
 import { buildCurrencyBlocks } from "@/lib/membership-view";
 import { loadMembership, countElevateMembers } from "@/lib/membership-server";
 import { entitlements, upcomingTier, elevateSeatLimit } from "@/lib/membership";
-import { getOneOffPrice, oneOffCurrenciesFor, formatPrice, coachingBuyerLevel, TIER_NAMES, INTERVAL_NAMES, isBillingInterval } from "@/lib/pricing";
+import { getOneOffPrice, oneOffCurrenciesFor, formatPrice, coachingBuyerLevel, TIER_NAMES, INTERVAL_NAMES, isBillingInterval, getMembershipPrice, mainCurrency, TIERS, TIER_INTERVALS } from "@/lib/pricing";
+import { CurrencyEstimate } from "@/components/CurrencyEstimate";
+import { displayCurrencyFor, fetchUsdRates, estimate } from "@/lib/fx";
 
 export const dynamic = "force-dynamic";
 
@@ -36,8 +38,7 @@ export default async function MembershipPage() {
 
   const blocks = buildCurrencyBlocks(profile?.country, m.current, m.tier);
   const member = !!m.tier;
-  const { data: pastCoaching } = await supabase.from("payments").select("id").eq("product", "coaching").eq("status", "successful").limit(1);
-  const level = coachingBuyerLevel({ member, boughtAssessment: m.purchases.length > 0, hadCoaching: (pastCoaching ?? []).length > 0 });
+  const level = coachingBuyerLevel({ tier: m.tier });
   const oneOffCurrencies = Array.from(
     new Set([...oneOffCurrenciesFor("assessment", false, profile?.country), ...oneOffCurrenciesFor("coaching_single", level, profile?.country)])
   );
@@ -49,6 +50,22 @@ export default async function MembershipPage() {
     const p = getOneOffPrice(item, false);
     return p ? formatPrice(p) : null;
   };
+
+  // Approximate amounts in the founder's own currency (estimate only).
+  const fxFor = mainCurrency() === "USD" ? displayCurrencyFor(profile?.country) : null;
+  const fx = fxFor ? await fetchUsdRates() : null;
+  const fxRate = fxFor && fx ? fx.rates[fxFor.currency] : undefined;
+  const fxRows: { label: string; usd: string; local: string }[] = [];
+  if (fxFor && fxRate) {
+    const add = (label: string, p: ReturnType<typeof getOneOffPrice>) => {
+      const local = p ? estimate(p.amount, fxRate, fxFor.currency) : null;
+      if (p && local) fxRows.push({ label, usd: formatPrice(p), local });
+    };
+    if (!ent.fullReport) add("Readiness Assessment", getOneOffPrice("assessment", false));
+    for (const t of TIERS) for (const i of TIER_INTERVALS[t]) add(`${TIER_NAMES[t]} · ${INTERVAL_NAMES[i]}`, getMembershipPrice(t, i));
+    add("Coaching session", getOneOffPrice("coaching_single", level));
+    add("Coaching, 3 sessions", getOneOffPrice("coaching_pack3", level));
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -87,6 +104,16 @@ export default async function MembershipPage() {
           {m.purchases.length > 0 ? " Your Readiness Assessment carries into your membership." : ""}
         </p>
       )}
+
+      {fxFor && fxRate ? (
+        <CurrencyEstimate
+          currency={fxFor.currency}
+          name={fxFor.name}
+          rate={estimate(1, fxRate, fxFor.currency) ?? ""}
+          updated={fx?.updated ?? null}
+          rows={fxRows}
+        />
+      ) : null}
 
       <div className="mt-8">
         <MembershipPlans

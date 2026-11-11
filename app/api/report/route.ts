@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   // Who may have a report, and which kind (lib/membership.ts):
   //  - Growth and Elevate members: the full report;
   //  - Essentials members: the summary report;
-  //  - anyone with an unused one-time Readiness Assessment ($79): one full
+  //  - anyone with an unused one-time Readiness Assessment ($60): one full
   //    report, which stays readable without a membership.
   const m = await loadMembership(supabase, user.id);
   const ent = entitlements(m.tier);

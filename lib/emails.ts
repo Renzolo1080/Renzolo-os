@@ -3,7 +3,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 /** The emails RENZOLO sends after a free Readiness Snapshot:
  *   results   — straight away: their scores and recommendation (asked for).
  *   day2      — what their weakest area means, with practical tips.
- *   day5      — turning the Snapshot into a plan (membership / $79 assessment).
+ *   day5      — turning the Snapshot into a plan (membership / $60 assessment).
  *   day10     — cohorts and the Readiness Clinic.
  * The three follow-ups go only to founders who ticked "email me tips",
  * stop once they create an account, and always carry an unsubscribe link.
@@ -57,27 +57,27 @@ export interface EmailContext {
   postalAddress?: string | null;
 }
 
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+export const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-function layout(title: string, bodyHtml: string, ctx: EmailContext, cta?: { label: string; href: string }): string {
-  return `<!doctype html><html><body style="margin:0;background:#F7F4EE;font-family:Arial,Helvetica,sans-serif;color:#111111">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F4EE;padding:24px 0"><tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden">
-<tr><td style="background:#071727;padding:20px 28px;color:#ffffff;font-size:18px;font-weight:bold">Founder Trajectory&trade;<div style="font-size:11px;font-weight:normal;color:#cfd6dc">Powered by RENZOLO OS&trade;</div></td></tr>
+export function layout(title: string, bodyHtml: string, ctx: EmailContext, cta?: { label: string; href: string }): string {
+  return `<!doctype html><html><body style="margin:0;background:#F3F5F8;font-family:'Source Sans 3',Arial,Helvetica,sans-serif;color:#071727">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3F5F8;padding:24px 0"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #E3E7ED">
+<tr><td style="padding:18px 28px;border-bottom:1px solid #E3E7ED"><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="padding-right:12px"><img src="${esc(ctx.appUrl)}/img/rz-logo.png" width="48" height="40" alt="RZ" style="display:block;border:0"></td><td style="font-size:19px;font-weight:bold;letter-spacing:2px;color:#071727">RENZOLO&trade;</td></tr></table></td></tr>
 <tr><td style="padding:28px">
-<h1 style="margin:0 0 16px;font-size:22px;color:#071727">${esc(title)}</h1>
+<h1 style="margin:0 0 16px;font-family:'Libre Caslon Text',Georgia,serif;font-size:24px;line-height:1.25;color:#071727">${esc(title)}</h1>
 ${bodyHtml}
-${cta ? `<p style="margin:28px 0 8px"><a href="${esc(cta.href)}" style="background:#C18B2C;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:bold;display:inline-block">${esc(cta.label)}</a></p>` : ""}
+${cta ? `<p style="margin:28px 0 8px"><a href="${esc(cta.href)}" style="background:#FF5A1F;color:#071727;text-decoration:none;padding:13px 24px;border-radius:999px;font-weight:bold;display:inline-block">${esc(cta.label)}</a></p>` : ""}
 </td></tr>
-<tr><td style="padding:16px 28px;font-size:11px;color:#68737D;border-top:1px solid #eeeeee">Renzolo Enterprises LLC${ctx.postalAddress ? `, ${esc(ctx.postalAddress)}` : ""} &middot; <a href="${esc(ctx.appUrl)}/privacy" style="color:#68737D">Privacy</a>${ctx.unsubscribeUrl ? ` &middot; <a href="${esc(ctx.unsubscribeUrl)}" style="color:#68737D">Unsubscribe</a>` : ""}</td></tr>
+<tr><td style="padding:16px 28px;font-size:11px;color:#68737D;border-top:1px solid #eeeeee">RENZOLO&trade; &middot; Founder Trajectory&trade; &middot; RENZOLO OS&trade;<br>Renzolo Enterprises LLC${ctx.postalAddress ? `, ${esc(ctx.postalAddress)}` : ""} &middot; <a href="${esc(ctx.appUrl)}/privacy" style="color:#68737D">Privacy</a>${ctx.unsubscribeUrl ? ` &middot; <a href="${esc(ctx.unsubscribeUrl)}" style="color:#68737D">Unsubscribe</a>` : ""}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
-function textFooter(ctx: EmailContext) {
-  return `\n\n--\nFounder Trajectory(TM), powered by RENZOLO OS(TM)\nRenzolo Enterprises LLC${ctx.postalAddress ? `, ${ctx.postalAddress}` : ""}\nPrivacy: ${ctx.appUrl}/privacy${ctx.unsubscribeUrl ? `\nUnsubscribe: ${ctx.unsubscribeUrl}` : ""}`;
+export function textFooter(ctx: EmailContext) {
+  return `\n\n--\nRENZOLO(TM) · Founder Trajectory(TM) · RENZOLO OS(TM)\nRenzolo Enterprises LLC${ctx.postalAddress ? `, ${ctx.postalAddress}` : ""}\nPrivacy: ${ctx.appUrl}/privacy${ctx.unsubscribeUrl ? `\nUnsubscribe: ${ctx.unsubscribeUrl}` : ""}`;
 }
 
-const p = (t: string) => `<p style="margin:0 0 14px;line-height:1.55;font-size:15px">${t}</p>`;
+export const p = (t: string) => `<p style="margin:0 0 14px;line-height:1.55;font-size:15px">${t}</p>`;
 const link = (ctx: EmailContext, path: string, campaign: string) => `${ctx.appUrl}${path}${path.includes("?") ? "&" : "?"}utm_source=email&utm_medium=email&utm_campaign=${campaign}`;
 
 export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: string; html: string; text: string } {
@@ -92,7 +92,7 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
         (ctx.weakest.length ? p(`<strong>The areas holding you back most:</strong><br>${ctx.weakest.map((w, i) => `${i + 1}. ${esc(w)}`).join("<br>")}`) : "") +
         p(`<strong>Our recommendation:</strong> ${esc(ctx.recommendation)}`) +
         p(`Create your account with this email address and your Snapshot will be waiting for you.`) +
-        (ctx.shareUrl ? p(`Know another founder who should check their readiness? <a href="${esc(ctx.shareUrl)}" style="color:#087F77">Share your score</a>.`) : ""),
+        (ctx.shareUrl ? p(`Know another founder who should check their readiness? <a href="${esc(ctx.shareUrl)}" style="color:#C4400F">Share your score</a>.`) : ""),
       ctx,
       { label: "Continue your Founder Trajectory", href: signup }
     );
@@ -122,12 +122,12 @@ export function buildEmail(kind: EmailKind, ctx: EmailContext): { subject: strin
     const html = layout(
       `${hi}your score is a starting point`,
       p(`A Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you actually carry out.`) +
-        p(`With a Founder Trajectory&trade; membership you get your full Readiness Assessment and report, a growth and readiness plan of 90 days to 36 months, a dashboard with goals and reminders, and coaching to keep you on track. Memberships start at $15 a month.`) +
-        p(`Prefer a one-time answer? The <strong>Readiness Assessment</strong> ($79) gives you the full report, a valuation range, an AI market insight for your industry and country, and a recommendation of the membership that fits you.`),
+        p(`With a Founder Trajectory&trade; membership you get your full Readiness Assessment and report, a growth and readiness plan of 90 days to 36 months, a dashboard with goals and reminders, and coaching to keep you on track. Memberships start at $60 a quarter, assessment and coaching included.`) +
+        p(`Prefer a one-time answer? The <strong>Readiness Assessment</strong> ($60) gives you the full report, a valuation range, an AI market insight for your industry and country, and a recommendation of the membership that fits you.`),
       ctx,
       { label: "See membership options", href: pricing }
     );
-    const text = `${hi}a Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you carry out.\n\nMemberships start at $15 a month and include your full Readiness Assessment, a growth and readiness plan (90 days to 36 months), a dashboard and coaching. Or get the one-time Readiness Assessment for $79.\n\nSee the options: ${pricing}${textFooter(ctx)}`;
+    const text = `${hi}a Total Readiness Score of ${ctx.score} tells you where you stand. What moves it is a plan you carry out.\n\nMemberships start at $60 a quarter and include your full Readiness Assessment, a growth and readiness plan (90 days to 36 months), a dashboard and coaching sessions. Or get the one-time Readiness Assessment for $60.\n\nSee the options: ${pricing}${textFooter(ctx)}`;
     return { subject, html, text };
   }
   const programs = link(ctx, "/programs", "day10");

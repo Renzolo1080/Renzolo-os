@@ -395,11 +395,11 @@ export function ReadinessSnapshotForm({ mode }: { mode: "public" | "member" }) {
             Back
           </button>
           {screen < TOTAL - 1 ? (
-            <button type="button" className="rounded-lg bg-navy px-6 py-2 text-white font-semibold disabled:opacity-40" disabled={!canContinue} onClick={() => go(1)}>
+            <button type="button" className="rounded-pill bg-brand px-6 py-2 font-bold text-on-brand disabled:opacity-40" disabled={!canContinue} onClick={() => go(1)}>
               Next
             </button>
           ) : (
-            <button type="button" className="rounded-lg bg-brand px-6 py-3 text-on-brand font-semibold disabled:opacity-50" disabled={!canContinue || submitting} onClick={submit}>
+            <button type="button" className="rounded-pill bg-brand px-6 py-3 text-on-brand font-semibold disabled:opacity-50" disabled={!canContinue || submitting} onClick={submit}>
               {submitting ? "Scoring…" : "See my results"}
             </button>
           )}

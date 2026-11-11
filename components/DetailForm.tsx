@@ -174,7 +174,7 @@ export function DetailForm({
                 <button type="button" className="rounded-lg border border-navy px-5 py-2.5 font-semibold text-navy disabled:opacity-40" disabled={!answerComplete(current) || busy !== null} onClick={() => saveArea("stay")}>
                   Save, finish later
                 </button>
-                <button type="button" className="rounded-lg bg-navy px-6 py-2.5 font-semibold text-white disabled:opacity-40" disabled={!answerComplete(current) || busy !== null} onClick={() => saveArea(step + 1)}>
+                <button type="button" className="rounded-pill bg-brand px-6 py-2.5 font-bold text-on-brand disabled:opacity-40" disabled={!answerComplete(current) || busy !== null} onClick={() => saveArea(step + 1)}>
                   {busy === "save" ? "Saving…" : step === areas.length - 1 ? "Save and finish" : "Save and next area"}
                 </button>
               </div>
@@ -228,7 +228,7 @@ export function DetailForm({
                   {error}
                 </p>
               )}
-              <button type="button" className="mt-5 rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand disabled:opacity-50" disabled={doneCount < required || !detailsDone || busy !== null} onClick={finish}>
+              <button type="button" className="mt-5 rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand disabled:opacity-50" disabled={doneCount < required || !detailsDone || busy !== null} onClick={finish}>
                 {busy === "finish" ? "Updating your score…" : "Update my score"}
               </button>
             </div>

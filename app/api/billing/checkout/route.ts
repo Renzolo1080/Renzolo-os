@@ -27,7 +27,7 @@ import { getAppUrl } from "@/lib/app-url";
  *
  * Body, one of:
  *   { kind: "membership", tier, interval, currency?, autoRenew? }
- *   { kind: "assessment", currency? }                       the $79 one-time assessment
+ *   { kind: "assessment", currency? }                       the $60 one-time assessment
  *   { kind: "coaching", item: "coaching_single" | "coaching_pack3", currency? }
  *
  * Every amount is worked out here on the server from lib/pricing.ts and
@@ -112,8 +112,7 @@ export async function POST(req: NextRequest) {
   } else if (kind === "coaching") {
     const item = body?.item;
     if (!isOneOffItem(item) || item === "assessment") return NextResponse.json({ error: "Choose one session or three." }, { status: 400 });
-    const { data: pastCoaching } = await supabase.from("payments").select("id").eq("founder_id", user.id).eq("product", "coaching").eq("status", "successful").limit(1);
-    const level = coachingBuyerLevel({ member: !!m.tier, boughtAssessment: m.purchases.length > 0, hadCoaching: (pastCoaching ?? []).length > 0 });
+    const level = coachingBuyerLevel({ tier: m.tier });
     const currencies = oneOffCurrenciesFor(item, level, profile?.country);
     const currency = requested ?? currencies[currencies.length - 1];
     const p = currencies.includes(currency) ? getOneOffPrice(item, level, currency) : null;

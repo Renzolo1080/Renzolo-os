@@ -21,7 +21,7 @@ export default function PricingPage() {
             Every membership starts with your full Readiness Assessment and a growth and readiness plan. Not sure which fits? Start with the free
             Readiness Snapshot.
           </p>
-          <a href="/snapshot" className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand">
+          <a href="/snapshot" className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand">
             Take the free Snapshot first
           </a>
         </div>
@@ -57,23 +57,34 @@ export default function PricingPage() {
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-teal">No minimum</p>
           <p className="mt-1 text-xl font-bold text-navy">One-on-one coaching</p>
-          <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-lg bg-cream p-3">
-              <p className="text-ink-soft">1 session</p>
-              <p className="text-2xl font-bold text-navy">{f(getOneOffPrice("coaching_single", false))}</p>
-              <p className="text-ink-soft">Members {f(getOneOffPrice("coaching_single", true))}</p>
-              <p className="text-ink-soft">Starting with coaching {f(getOneOffPrice("coaching_single", "starter"))}</p>
-            </div>
-            <div className="rounded-lg bg-cream p-3">
-              <p className="text-ink-soft">3 sessions</p>
-              <p className="text-2xl font-bold text-navy">{f(getOneOffPrice("coaching_pack3", false))}</p>
-              <p className="text-ink-soft">Members {f(getOneOffPrice("coaching_pack3", true))}</p>
-              <p className="text-ink-soft">Starting with coaching {f(getOneOffPrice("coaching_pack3", "starter"))}</p>
-            </div>
-          </div>
+          <table className="mt-3 w-full text-left text-sm">
+            <thead>
+              <tr className="text-xs uppercase tracking-wide text-ink-soft">
+                <th className="py-1 font-semibold">60-minute sessions</th>
+                <th className="py-1 font-semibold">1 session</th>
+                <th className="py-1 font-semibold">3 sessions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(
+                [
+                  ["none", "Not a member"],
+                  ["essentials", "Essentials members"],
+                  ["growth", "Growth members"],
+                  ["elevate", "Elevate members"],
+                ] as const
+              ).map(([lvl, label]) => (
+                <tr key={lvl} className="border-t border-navy/10">
+                  <td className="py-1.5 text-navy">{label}</td>
+                  <td className="py-1.5 font-semibold text-navy">{f(getOneOffPrice("coaching_single", lvl))}</td>
+                  <td className="py-1.5 font-semibold text-navy">{f(getOneOffPrice("coaching_pack3", lvl))}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <p className="mt-3 text-sm text-ink-soft">
-            Standard prices are for assessment and cohort clients. Starting with coaching includes an intake review and session plan on your first purchase.
-            Growth and Elevate include coaching sessions every period.
+            Every membership includes coaching: Essentials 1 basic 30-minute session a quarter, Growth 2 30-minute sessions a quarter, Elevate one
+            60-minute session a month. These prices are for extra sessions. A first session for non-members includes an intake review and session plan.
           </p>
         </div>
       </section>

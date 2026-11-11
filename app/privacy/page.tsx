@@ -1,15 +1,21 @@
 import { LegalPage, H, UL, contactEmail } from "@/components/LegalPage";
+import { INFORMATION_OFFICER, PRIVACY_UPDATED, RESPONSE_DAYS } from "@/lib/privacy";
 
 export const metadata = { title: "Privacy policy · Founder Trajectory™" };
 
 export default function PrivacyPage() {
   const email = contactEmail();
   return (
-    <LegalPage title="Privacy policy" updated="13 October 2026">
+    <LegalPage title="Privacy policy" updated={PRIVACY_UPDATED}>
       <p>
         This policy explains how Renzolo Enterprises LLC, a Wisconsin limited liability company in the United States ("we", "us"), collects and uses
         personal information through Founder Trajectory™, powered by RENZOLO OS™ (the "Service"), including our website and app. We are the
         controller (or "responsible party") of this information.
+      </p>
+      <p>
+        We treat information about your business (for example revenue, costs, plans and assessment answers) as personal information, because it
+        is linked to you. In South Africa, POPIA also protects information about companies and other juristic persons, and we apply the same care
+        to it.
       </p>
 
       <H>What we collect</H>
@@ -29,7 +35,7 @@ export default function PrivacyPage() {
         items={[
           "To provide the Service: score your answers, create your reports and plans, run your dashboard and reminders, and arrange coaching.",
           "To take payments and keep membership records, including meeting tax and accounting obligations.",
-          "To email you your Snapshot results, account and payment messages, and, if you agreed, practical tips and follow-ups. You can unsubscribe from tips at any time.",
+          "To email you your Snapshot results, account and payment messages, and, if you agreed, practical tips and follow-ups. We send marketing by email, SMS or WhatsApp only if you opted in, and you can unsubscribe at any time.",
           "To see which channels and pages help founders, and to improve the Service.",
           "To keep the Service secure and prevent misuse.",
         ]}
@@ -53,7 +59,10 @@ export default function PrivacyPage() {
       </p>
 
       <H>Who we share it with</H>
-      <p>We do not sell your personal information. We share it only with service providers who help us run the Service:</p>
+      <p>
+        We do not sell your personal information. We share it with the service providers below, who may use it only to run the Service for us
+        under written data processing terms:
+      </p>
       <UL
         items={[
           "Supabase (database and sign-in), hosted in the United States",
@@ -66,12 +75,33 @@ export default function PrivacyPage() {
           "Our coaches and advisors, for the sessions and reviews you use",
         ]}
       />
+      <p>
+        <strong>RENZOLO Network™ Matching (optional add-on):</strong> if you subscribe, we share your profile and readiness scores with a buyer,
+        lender, grant maker, investor or partner only after you agree to that specific introduction. You can withdraw consent at any time.
+      </p>
       <p>We may also disclose information if the law requires it, or to protect our rights or someone's safety.</p>
 
       <H>International transfers</H>
       <p>
-        We are based in the United States and our providers mainly store data there. If you are in Kenya, South Africa or elsewhere, your information
-        is transferred to the United States. We rely on our providers' contractual safeguards for these transfers.
+        We are based in the United States and store your information with Supabase in the United States (US East). If you are in Africa, the
+        Caribbean, the United Kingdom, the European Union or elsewhere, your information is transferred to the United States, and some providers
+        may process it in other countries. You acknowledge this when you create an account.
+      </p>
+      <p>
+        We protect these transfers with data processing agreements with each provider, including standard contractual clauses where your
+        country's law calls for them (for example the clauses published by Kenya's Data Protection Commissioner, and the EU and UK clauses once we
+        serve those markets). Ask us for a copy of the safeguards that apply to you.
+      </p>
+
+      <H id="scores">How your score is made, and your right to a human review</H>
+      <p>
+        Your Total Readiness Score and its five component scores (Strategic, Growth, Customer, Capital and Investment) are calculated by fixed
+        rules from your answers, evidence and plan. The Strategic score can include an AI review of your plan. Scores are guidance for you, not a
+        decision about you: RENZOLO OS™ does not approve or refuse any loan, contract, investment or other opportunity.
+      </p>
+      <p>
+        You can see how scores are made on your dashboard, correct your answers at any time, and ask a person to review any score from the{" "}
+        <a href="/account/data#review" className="underline">Your data</a> page.
       </p>
 
       <H>How long we keep it</H>
@@ -95,10 +125,32 @@ export default function PrivacyPage() {
 
       <H>Your rights</H>
       <p>
-        Depending on where you live (including under Kenya's Data Protection Act, 2019, and South Africa's Protection of Personal Information Act),
-        you can ask to access, correct or delete your information, object to or restrict how we use it, withdraw consent, and ask for a copy of it.
-        Email us at {email}. We will respond within the time the law requires. You can also complain to your data protection authority, such as
-        Kenya's Office of the Data Protection Commissioner or South Africa's Information Regulator.
+        Wherever you live, you can ask to access, download, correct or delete your information, object to or restrict how we use it, withdraw
+        consent, and ask a person to review your scores. Use the <a href="/account/data" className="underline">Your data</a> page or email {email}.
+        We answer within {RESPONSE_DAYS} days.
+      </p>
+      <p>You can also complain to your data protection authority, for example:</p>
+      <UL
+        items={[
+          "South Africa: the Information Regulator",
+          "Kenya: the Office of the Data Protection Commissioner",
+          "Nigeria: the Nigeria Data Protection Commission",
+          "Jamaica: the Office of the Information Commissioner",
+          "Other countries: your national data protection authority",
+          "United States: residents of states with privacy laws (such as California) have similar rights; contact us to use them",
+        ]}
+      />
+
+      <H>Privacy contact and Information Officer</H>
+      <p>
+        Our Information Officer, who handles privacy requests and complaints, is {INFORMATION_OFFICER.name}, {INFORMATION_OFFICER.role}. Contact{" "}
+        {email}. Our South African PAIA manual is at <a href="/paia" className="underline">/paia</a>.
+      </p>
+
+      <H>If something goes wrong</H>
+      <p>
+        If a security breach puts your information at risk, we will tell the regulators that require it (in most of our markets within 72 hours)
+        and tell you without undue delay, with what happened and what you can do.
       </p>
 
       <H>Security</H>

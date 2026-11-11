@@ -136,9 +136,9 @@ A prioritized list of 3-5 bullets (most important first). Each bullet must be a 
   if (options.tierRecommendation) {
     sections.push(`## Recommended Membership
 Recommend ONE Founder Trajectory membership tier and explain why in 3-4 sentences, using this founder's gaps, goals, stage and funding plans:
-- Essentials ($15/month): full assessment, AI insights, growth and readiness plan, dashboard and tools. Best for founders who will work the plan themselves.
-- Growth ($39/month, billed quarterly): adds valuation, market insight, advisor review, AI coaching and 2 one-on-one coaching sessions a quarter. Best for founders actively executing who want regular coaching.
-- Elevate ($149/month, billed quarterly): adds 2 one-on-one sessions a month, pitch and investor readiness review and priority support. Best for founders preparing to raise, scale fast or win large contracts.
+- Essentials ($60/quarter): full assessment, AI insights, growth and readiness plan, dashboard and tools, and 1 basic 30-minute coaching session a quarter. Best for early-stage businesses (idea to early revenue) that will work the plan themselves.
+- Growth ($147/quarter): adds valuation, market insight, advisor review, AI coaching and 2 one-on-one 30-minute sessions a quarter. Best for operating businesses executing the plan and closing readiness gaps.
+- Elevate ($699/quarter): adds a one-on-one 60-minute session every month, pitch and investor readiness review and priority support. Best for businesses close to meeting the readiness requirements, preparing to raise capital or win large contracts.
 Be honest: recommend Essentials when that is what fits.`);
   }
 
@@ -273,4 +273,23 @@ export async function generateDiagnosticReport(input: ReportInput, options: Repo
     .join("\n\n");
   if (!text.trim()) throw new Error("The report came back empty.");
   return text;
+}
+
+/** Reads one uploaded document (PDF or image) with a prompt and returns
+ * the reply text. The file is sent once and not kept anywhere by RENZOLO
+ * (lib/doc-intake.ts). */
+export async function readDocument(prompt: string, file: { mediaType: string; base64: string }, maxTokens = 1500): Promise<string> {
+  const block =
+    file.mediaType === "application/pdf"
+      ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: file.base64 } }
+      : { type: "image", source: { type: "base64", media_type: file.mediaType, data: file.base64 } };
+  const response = await getClient().messages.create({
+    model: "claude-sonnet-4-5",
+    max_tokens: maxTokens,
+    messages: [{ role: "user", content: [block as any, { type: "text", text: prompt }] }],
+  });
+  return response.content
+    .filter((b: any) => b.type === "text")
+    .map((b: any) => b.text)
+    .join("");
 }

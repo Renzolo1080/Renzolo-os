@@ -19,7 +19,7 @@ function num(v: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function BreakevenCalculator() {
+export function BreakevenCalculator() {
   const [fixedCosts, setFixedCosts] = useState("");
   const [price, setPrice] = useState("");
   const [variableCost, setVariableCost] = useState("");

@@ -8,9 +8,9 @@ import { OfferTabs } from "@/components/OfferTabs";
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
 const TIERS = [
-  { name: "Essentials", start: HOW_TO_START.essentials, price: "$15 a month", for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools"] },
-  { name: "Growth", start: HOW_TO_START.growth, price: "$39 a month, billed quarterly", for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "Full, downloadable report with valuation range and market insight", "Advisor review of your report", "Two one-on-one coaching sessions a quarter"] },
-  { name: "Elevate", start: HOW_TO_START.elevate, price: "$149 a month, billed quarterly", for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "Two one-on-one coaching sessions a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
+  { name: "Essentials", start: HOW_TO_START.essentials, price: "$60 a quarter", for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools", "One basic 30-minute coaching session a quarter"] },
+  { name: "Growth", start: HOW_TO_START.growth, price: "$147 a quarter", for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "Full, downloadable report with valuation range and market insight", "Advisor review of your report", "Two 30-minute one-on-one sessions a quarter"] },
+  { name: "Elevate", start: HOW_TO_START.elevate, price: "$699 a quarter", for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "One 60-minute one-on-one session a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
 ];
 
 export default function FounderTrajectoryPage() {
@@ -74,8 +74,8 @@ export default function FounderTrajectoryPage() {
               ))}
             </div>
             <p className="mt-8 max-w-3xl text-muted">
-              Prefer a one-time answer? The Readiness Assessment ($79) gives you the full report, a valuation range, an AI market insight and a
-              recommendation of the plan that fits you, with no membership. Coaching sessions are from $59 for members.
+              Prefer a one-time answer? The Readiness Assessment ($60) gives you the full report, a valuation range, an AI market insight and a
+              recommendation of the plan that fits you, with no membership. Extra coaching sessions start at $75 for members.
             </p>
             <a href={appLink("/pricing", "ft_tiers")} className="mt-6 inline-block rounded-full border-2 border-navy px-6 py-3 font-semibold text-navy hover:bg-navy hover:text-white">
               See full pricing
@@ -92,7 +92,7 @@ export default function FounderTrajectoryPage() {
             </div>
             <div className="rounded-card border border-line bg-surface-tint p-7">
               <p className="font-display text-xl font-bold">Live sessions with a Founder Coach</p>
-              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Two sessions a quarter on Growth, two a month on Elevate, or from $59 a session for members.</p>
+              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month; extra sessions start at $75 for members.</p>
             </div>
           </div>
         </section>

@@ -151,7 +151,7 @@ export function MembershipPlans({
               <p className={`mt-1 text-sm ${featured ? "text-cream/80" : "text-ink-soft"}`}>{taglines[tier]}</p>
 
               {cells.length > 1 && (
-                <div className={`mt-4 inline-flex rounded-lg p-1 ${featured ? "bg-navy-panel" : "bg-cream"}`} role="group" aria-label={`${NAMES[tier]} billing period`}>
+                <div className={`mt-4 inline-flex rounded-lg p-1 ${featured ? "bg-navy-panel" : "bg-surface-tint"}`} role="group" aria-label={`${NAMES[tier]} billing period`}>
                   {cells.map((c) => (
                     <button
                       key={c.interval}
@@ -192,7 +192,7 @@ export function MembershipPlans({
 
               <div className="mt-auto pt-5">
                 {mode === "public" ? (
-                  <a href={signupHref} className={`block rounded-lg px-5 py-3 text-center font-semibold ${featured ? "bg-brand text-on-brand" : "bg-navy text-on-brand"}`}>
+                  <a href={signupHref} className={`block rounded-lg px-5 py-3 text-center font-semibold ${featured ? "bg-brand text-on-brand" : "bg-navy text-white"}`}>
                     Get started
                   </a>
                 ) : full ? (
@@ -210,7 +210,7 @@ export function MembershipPlans({
                     type="button"
                     onClick={() => checkout(tier, cell)}
                     disabled={busy !== null}
-                    className={`w-full rounded-lg px-5 py-3 font-semibold disabled:opacity-50 ${featured ? "bg-brand text-on-brand" : "bg-navy text-on-brand"}`}
+                    className={`w-full rounded-lg px-5 py-3 font-semibold disabled:opacity-50 ${featured ? "bg-brand text-on-brand" : "bg-navy text-white"}`}
                   >
                     {busy === tier ? "Taking you to payment…" : actionLabel(tier, cell)}
                   </button>

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { loadMembership } from "@/lib/membership-server";
 import { entitlements } from "@/lib/membership";
-import { sanitizePlan, planCompleteness } from "@/lib/plan";
-import { loadLatestAssessment } from "@/lib/plan-server";
+import { sanitizePlan, planCompleteness, stampDoneDates } from "@/lib/plan";
+import { loadLatestAssessment, loadPlan } from "@/lib/plan-server";
 
 /** PUT /api/plan { plan }
  * Saves the founder's strategic plan from the Plan Builder. The plan is
@@ -26,7 +26,7 @@ export async function PUT(req: NextRequest) {
   if (!body?.plan || typeof body.plan !== "object") return NextResponse.json({ error: "Missing plan" }, { status: 400 });
   if (JSON.stringify(body.plan).length > 100_000) return NextResponse.json({ error: "That plan is too long to save." }, { status: 413 });
 
-  const plan = sanitizePlan(body.plan);
+  const plan = stampDoneDates((await loadPlan(supabase, user.id))?.data ?? null, sanitizePlan(body.plan));
   const latest = await loadLatestAssessment(supabase, user.id);
   const completeness = planCompleteness(plan, latest?.gapKeys ?? []);
   const now = new Date().toISOString();

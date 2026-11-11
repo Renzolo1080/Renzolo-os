@@ -171,3 +171,17 @@ export function ScoreRing({ value, size = 64, label }: { value: number; size?: n
     </svg>
   );
 }
+
+/** The colour burst on a navy panel (approved website look): sits behind
+ * the panel's content on the right, fading out. Give the panel `relative
+ * overflow-hidden` and its content `relative`. Decorative. */
+export function Burst({ className = "" }: { className?: string }) {
+  return (
+    <img
+      src="/img/burst-bright.jpg"
+      alt=""
+      aria-hidden="true"
+      className={`pointer-events-none absolute -right-24 top-1/2 h-[420px] w-[420px] max-w-none -translate-y-1/2 object-cover opacity-80 [mask-image:radial-gradient(circle,#000_30%,transparent_68%)] ${className}`}
+    />
+  );
+}

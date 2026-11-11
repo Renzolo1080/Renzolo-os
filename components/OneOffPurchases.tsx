@@ -15,7 +15,7 @@ export function OneOffPurchases({
   prices,
   showAssessment,
   member,
-  level = member ? "member" : "client",
+  level = "none",
   coachingAvailable,
   nextCoachingFrom,
   standardSingle,
@@ -25,7 +25,7 @@ export function OneOffPurchases({
   showAssessment: boolean;
   member: boolean;
   /** Coaching price level: member, client, or starting with coaching. */
-  level?: "member" | "client" | "starter";
+  level?: "none" | "essentials" | "growth" | "elevate";
   coachingAvailable: number;
   nextCoachingFrom: string | null;
   standardSingle: string | null;
@@ -99,18 +99,18 @@ export function OneOffPurchases({
         )}
 
         <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-teal">{level === "member" ? "Member prices" : level === "starter" ? "Starting with coaching" : "No minimum"}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal">{level && level !== "none" ? `${level[0].toUpperCase()}${level.slice(1)} member prices` : "No minimum"}</p>
           <p className="mt-1 text-xl font-bold text-navy">One-on-one coaching</p>
-          {level === "starter" && (
+          {(!level || level === "none") && (
             <p className="mt-1 rounded-lg bg-cream p-2 text-xs">
-              Your first coaching purchase includes an intake review and a session plan. Take the free{" "}
+              Your first session includes an intake review and a session plan. Take the free{" "}
               <a href="/assessment" className="font-semibold text-teal underline">
                 Readiness Snapshot
               </a>{" "}
-              first so your coach can prepare. After that, sessions are at the standard price, and members pay less.
+              first so your coach can prepare. Members pay less: from $75 a session.
             </p>
           )}
-          <p className="mt-1 text-sm text-ink-soft">With a Founder Trajectory™ coach. Sessions are valid for a year; we arrange the time with you by email.</p>
+          <p className="mt-1 text-sm text-ink-soft">With a Founder Trajectory™ coach. 60-minute sessions, valid for a year; we arrange the time with you by email.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
               { key: "coaching_single", label: "1 session", price: p.single, standard: standardSingle },
@@ -139,7 +139,7 @@ export function OneOffPurchases({
                 <p className="font-semibold text-navy">
                   You have {coachingAvailable} coaching session{coachingAvailable > 1 ? "s" : ""} to book.
                 </p>
-                <a href="/coaching" className="mt-2 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
+                <a href="/coaching" className="mt-2 inline-block rounded-pill bg-brand px-4 py-2 font-semibold text-on-brand">
                   Book a session
                 </a>
               </>

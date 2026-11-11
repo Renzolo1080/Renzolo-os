@@ -43,7 +43,7 @@ export default async function SharedScorePage({ params: paramsPromise }: { param
             </div>
           </div>
           <p className="mx-auto mt-8 max-w-xl text-lg text-cream/85">What's your Total Readiness Score? Take the free Readiness Snapshot: 5 minutes or less, no account needed.</p>
-          <a href={href} className="mt-6 inline-block rounded-lg bg-brand px-7 py-4 text-lg font-semibold text-on-brand">
+          <a href={href} className="mt-6 inline-block rounded-pill bg-brand px-7 py-4 text-lg font-semibold text-on-brand">
             Get my Total Readiness Score
           </a>
         </div>
