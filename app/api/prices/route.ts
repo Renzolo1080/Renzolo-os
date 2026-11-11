@@ -27,3 +27,8 @@ export async function GET(req: NextRequest) {
   res.headers.set("Vary", "x-vercel-ip-country");
   return res;
 }
+
+/** Lets browsers on the website ask for prices (CORS preflight). */
+export function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET", "Access-Control-Allow-Headers": "*" } });
+}
