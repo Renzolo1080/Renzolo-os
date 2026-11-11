@@ -112,8 +112,8 @@ export function DetailForm({
           <p className="text-2xl font-bold">
             {doneCount} of {areas.length} areas
           </p>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-navy-panel" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Areas done">
-            <div className="h-2 bg-teal" style={{ width: `${pct}%` }} />
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/15" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Areas done">
+            <div className="h-2 bg-brand" style={{ width: `${pct}%` }} />
           </div>
           <p className="mt-2 text-xs text-cream/70">{doneCount >= required ? "Enough for your report. Each extra area sharpens it." : `${required - doneCount} more for your report.`}</p>
         </div>
