@@ -20,6 +20,14 @@ export const TIER_FEATURES: { label: string; values: Record<Tier, boolean | stri
   { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Launch", growth: "Launch and Build", elevate: "Launch, Build and Scale" } },
 ];
 
+/** The short benefit list under each membership card (website and app),
+ * approved Nov 11 2026. Keep in step with TIER_FEATURES. */
+export const TIER_HIGHLIGHTS: Record<Tier, string[]> = {
+  essentials: ["Full Readiness Assessment and report", "Valuation range and AI market insight", "Growth plan, dashboard and reminders", "One 30-minute coaching session a quarter"],
+  growth: ["Everything in Essentials", "AI coach any time, with weekly check-ins", "Plan review, Market Intelligence and advisor review", "Two 30-minute coaching sessions a quarter"],
+  elevate: ["Everything in Growth", "One 60-minute coaching session a month", "Pitch and investor readiness review", "Priority support · limited places"],
+};
+
 export const TIER_TAGLINES: Record<Tier, string> = {
   essentials: "Know where you stand and work your plan.",
   growth: "Go deeper, with coaching to carry out your plan.",

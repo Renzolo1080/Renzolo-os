@@ -10,9 +10,9 @@ import { OfferTabs } from "@/components/OfferTabs";
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
 const TIERS = [
-  { name: "Essentials", start: HOW_TO_START.essentials, price: <><Price k="essentials.quarterly" /> a quarter</>, for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Full report with valuation range and AI market insight", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools", "One basic 30-minute coaching session a quarter"] },
-  { name: "Growth", start: HOW_TO_START.growth, price: <><Price k="growth.quarterly" /> a quarter</>, for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "AI coach any time and monthly Market Intelligence", "Advisor review of your report", "Two 30-minute one-on-one sessions a quarter"] },
-  { name: "Elevate", start: HOW_TO_START.elevate, price: <><Price k="elevate.quarterly" /> a quarter</>, for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "One 60-minute one-on-one session a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
+  { name: "Essentials", start: HOW_TO_START.essentials, price: <><Price k="essentials.quarterly" /> a quarter</>, for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment and report", "Valuation range and AI market insight", "Growth plan, dashboard and reminders", "One 30-minute coaching session a quarter"] },
+  { name: "Growth", start: HOW_TO_START.growth, price: <><Price k="growth.quarterly" /> a quarter</>, for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "AI coach any time, with weekly check-ins", "Plan review, Market Intelligence and advisor review", "Two 30-minute coaching sessions a quarter"] },
+  { name: "Elevate", start: HOW_TO_START.elevate, price: <><Price k="elevate.quarterly" /> a quarter</>, for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "One 60-minute coaching session a month", "Pitch and investor readiness review", "Priority support · limited places"] },
 ];
 
 export default function FounderTrajectoryPage() {

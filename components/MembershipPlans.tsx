@@ -1,4 +1,5 @@
 "use client";
+import { TIER_HIGHLIGHTS } from "@/lib/tier-features";
 import { useState } from "react";
 import { TierCheck } from "./TierCheck";
 import { track } from "@/lib/track";
@@ -174,6 +175,15 @@ export function MembershipPlans({
               </p>
               <p className={`text-sm ${featured ? "text-cream/70" : "text-ink-soft"}`}>{cell.perMonth ? `${cell.price} ${cell.per}` : " "}</p>
               <p className={`mt-1 min-h-[1.25rem] text-sm font-semibold ${featured ? "text-gold" : "text-brand-text"}`}>{cell.note ?? ""}</p>
+
+              <ul className="mt-4 space-y-2 text-sm">
+                {TIER_HIGHLIGHTS[tier].map((h) => (
+                  <li key={h} className="flex gap-2">
+                    <span aria-hidden="true" className="font-bold text-brand">✓</span>
+                    <span className={featured ? "text-cream/90" : "text-ink"}>{h}</span>
+                  </li>
+                ))}
+              </ul>
 
               {cell.quote && cell.quote.kind === "upgrade" && cell.quote.credit && (
                 <p className={`mt-2 text-xs ${featured ? "text-cream/80" : "text-ink-soft"}`}>

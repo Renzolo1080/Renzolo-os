@@ -36,9 +36,9 @@ const JOURNEY: [string, string, string][] = [
 
 type Plan = { name: string; who: string; price: React.ReactNode; per: React.ReactNode; items: string[]; color: string; featured?: boolean };
 const PLANS: Plan[] = [
-  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: <Price k="essentials.quarterly" />, per: <>a quarter · or <Price k="essentials.annual" /> a year</>, color: "#FF5A1F", items: ["Full Readiness Assessment and report included", "Valuation range and AI market insight", "Strategic growth plan and dashboard", "One 30-minute coaching session a quarter"] },
-  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: <Price k="growth.quarterly" />, per: <>a quarter · or <Price k="growth.annual" /> a year</>, color: "#E6197F", featured: true, items: ["Everything in Essentials", "AI coach any time", "Advisor review of your report", "Two 30-minute coaching sessions a quarter"] },
-  { name: "Elevate", who: "For businesses ready to get in front of buyers and funders.", price: <Price k="elevate.quarterly" />, per: <>a quarter · or <Price k="elevate.annual" /> a year</>, color: "#3B1694", items: ["Everything in Growth", "One 60-minute coaching session a month", "Advanced coaching process", "Buyer and investor matching (readiness requirements apply)"] },
+  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: <Price k="essentials.quarterly" />, per: <>a quarter · or <Price k="essentials.annual" /> a year</>, color: "#FF5A1F", items: ["Full Readiness Assessment and report", "Valuation range and AI market insight", "Growth plan, dashboard and reminders", "One 30-minute coaching session a quarter"] },
+  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: <Price k="growth.quarterly" />, per: <>a quarter · or <Price k="growth.annual" /> a year</>, color: "#E6197F", featured: true, items: ["Everything in Essentials", "AI coach any time, with weekly check-ins", "Plan review, Market Intelligence and advisor review", "Two 30-minute coaching sessions a quarter"] },
+  { name: "Elevate", who: "For businesses ready to get in front of buyers and funders.", price: <Price k="elevate.quarterly" />, per: <>a quarter · or <Price k="elevate.annual" /> a year</>, color: "#3B1694", items: ["Everything in Growth", "One 60-minute coaching session a month", "Pitch and investor readiness review", "Priority support · limited places"] },
 ];
 
 const INSIDE: [string, string, string, string][] = [
