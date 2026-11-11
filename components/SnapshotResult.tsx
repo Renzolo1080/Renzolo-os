@@ -11,12 +11,14 @@ export function SnapshotResult({
   companyName,
   email,
   shareUrl = null,
+  offer = null,
 }: {
   overview: SnapshotOverview;
   fullName: string;
   companyName: string;
   email: string;
   shareUrl?: string | null;
+  offer?: { price: string | null; bookingUrl: string | null } | null;
 }) {
   const first = fullName.trim().split(/\s+/)[0];
   const registerHref = `/register?email=${encodeURIComponent(email.trim())}&name=${encodeURIComponent(fullName.trim())}`;
@@ -84,20 +86,64 @@ export function SnapshotResult({
         </div>
       )}
 
-      <div className="relative overflow-hidden rounded-2xl bg-navy p-6 text-white sm:p-8">
-        <Burst className="hidden sm:block" />
-        <div className="relative">
-        <p className="text-xl font-bold">Continue your Founder Trajectory™</p>
-        <p className="mt-1 text-sm text-cream/80">Your Snapshot shows where the gaps are. A membership starts with your full Readiness Assessment, shows why the gaps are there and what to do about them, and supports you as you close them.</p>
-        <div className="mt-5">
-          <SubscriptionFeatures dark />
+      {overview.nextStep === "elevate" ? (
+        <div className="relative overflow-hidden rounded-2xl bg-navy p-6 text-white sm:p-8">
+          <Burst className="hidden sm:block" />
+          <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gold">Your next step</p>
+          <p className="mt-1 text-xl font-bold">Your business may be ready for Elevate</p>
+          <p className="mt-1 text-sm text-cream/80">
+            From your answers, you're an established business with a near-term goal. Elevate includes your full Readiness Assessment, a 60-minute coaching
+            session with Lorenzo every month, pitch review, and matching to buyers and funders once you meet the readiness requirements.
+            {offer?.price ? ` ${offer.price} a quarter.` : ""} Seats are limited to 50.
+          </p>
+          <div className="mt-5">
+            <SubscriptionFeatures dark />
+          </div>
+          <a href={offer?.bookingUrl ?? "/pricing"} className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-bold text-on-brand">
+            {offer?.bookingUrl ? "Book a conversation about Elevate" : "See Elevate and the other memberships"}
+          </a>
+          <p className="mt-3 text-sm text-cream/80">
+            Prefer to start smaller?{" "}
+            <a href={registerHref} className="underline">
+              Create your account
+            </a>{" "}
+            and choose any membership. Sign up with {email.trim() || "the same email"} and this Snapshot will be waiting in your account.
+          </p>
+          </div>
         </div>
-        <a href={registerHref} className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-bold text-on-brand">
-          Create my account and become a member
-        </a>
-        <p className="mt-3 text-xs text-cream/70">Sign up with {email.trim() || "the same email"} and this Snapshot will be waiting in your account.</p>
+      ) : (
+        <div className="relative overflow-hidden rounded-2xl bg-navy p-6 text-white sm:p-8">
+          <Burst className="hidden sm:block" />
+          <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gold">Your next step</p>
+          {overview.nextStep === "essentials" ? (
+            <>
+              <p className="mt-1 text-xl font-bold">Start with Essentials{offer?.price ? `: ${offer.price} a quarter` : ""}</p>
+              <p className="mt-1 text-sm text-cream/80">
+                Built for early-stage businesses. It includes your full Readiness Assessment, a plan for closing your gaps, your dashboard and tools, and a
+                30-minute coaching session every quarter.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="mt-1 text-xl font-bold">Get your full Readiness Assessment{offer?.price ? `: ${offer.price}` : ""}</p>
+              <p className="mt-1 text-sm text-cream/80">
+                Your Snapshot shows where the gaps are. The full assessment shows why they're there and what to fix first, with an AI market insight for your
+                industry and country. It's included in every membership, and members also get a valuation range.
+              </p>
+            </>
+          )}
+          <div className="mt-5">
+            <SubscriptionFeatures dark />
+          </div>
+          <a href={registerHref} className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-bold text-on-brand">
+            Create my account
+          </a>
+          <p className="mt-3 text-xs text-cream/70">Sign up with {email.trim() || "the same email"} and this Snapshot will be waiting in your account.</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
