@@ -60,9 +60,15 @@ assert(!parseQuickCheck({ answers: { ...allAt(2), channels: "2" } }).ok, "an ans
 const ev = parseQuickCheck({ answers: allAt(1), evidence: ["revenueStreams", "revenueStreams", "notAnArea", 5] });
 assert(ev.ok && JSON.stringify(ev.value.evidence) === '["revenueStreams"]', "evidence keeps only real areas, once each");
 assert(parseProfile(goodProfile).ok, "a complete profile is accepted");
-for (const field of ["ventureStage", "industry", "country", "annualRevenue", "primaryGoal", "fundingNeed", "registration"]) {
+for (const field of ["ventureStage", "industry", "country", "annualRevenue", "primaryGoal", "timeHorizon", "fundingNeed"]) {
   const r = parseProfile({ ...goodProfile, [field]: "" });
   assert(!r.ok, `a missing ${field} is refused with a message`);
+}
+{
+  const lean = parseProfile({ ...goodProfile, businessType: "", yearsInBusiness: "", teamSize: "", registration: "" });
+  assert(lean.ok && lean.value.businessType === "" && lean.value.registration === "", "the Snapshot no longer needs business type, years, team size or registration");
+  const bad = parseProfile({ ...goodProfile, teamSize: "a million" });
+  assert(bad.ok && bad.value.teamSize === "", "an unknown team size is dropped, not stored");
 }
 assert(!parseProfile({ ...goodProfile, country: "Atlantis" }).ok, "a value that isn't one of the choices is refused");
 assert(!parseProfile({ ...goodProfile, challenges: [] }).ok, "at least one challenge is required");

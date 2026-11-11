@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { loadMembership } from "@/lib/membership-server";
 import { entitlements } from "@/lib/membership";
 import { BLOCK_PROMPTS, MEASURE_CHOICES, areasWeakestFirst, levelFor } from "@/lib/blocks";
-import { DETAIL_AREAS_REQUIRED, TIME_HORIZONS, normalizeHorizon } from "@/lib/quickcheck";
+import { DETAIL_AREAS_REQUIRED, TIME_HORIZONS, normalizeHorizon, BUSINESS_TYPES, YEARS_IN_BUSINESS, TEAM_SIZES, REGISTRATION_STATUSES } from "@/lib/quickcheck";
 import { DetailForm, type DetailArea } from "@/components/DetailForm";
 import type { MeasureKey } from "@/components/BlockStep";
 
@@ -26,7 +26,7 @@ export default async function DetailsPage() {
 
   const { data: latestScore } = await supabase
     .from("scores")
-    .select("assessment_id, gaps, block_scores, assessments!inner(founder_id, extra, time_horizon)")
+    .select("assessment_id, gaps, block_scores, assessments!inner(founder_id, extra, time_horizon, business_type, years_in_business, employee_count)")
     .eq("assessments.founder_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -85,9 +85,21 @@ export default async function DetailsPage() {
         planLengths={[...TIME_HORIZONS]}
         initialPlanLength={initialPlanLength((latestScore as any).assessments)}
         planHref={ent.planBuilder ? "/plan" : null}
+        detailFields={[
+          ["businessType", "Business type", [...BUSINESS_TYPES]],
+          ["yearsInBusiness", "Years in business", [...YEARS_IN_BUSINESS]],
+          ["teamSize", "Team size", [...TEAM_SIZES]],
+          ["registration", "Registered with the government and tax authority?", [...REGISTRATION_STATUSES]],
+        ]}
+        initialDetails={initialDetails((latestScore as any).assessments)}
       />
     </main>
   );
+}
+
+function initialDetails(a: any) {
+  const v = (x: unknown) => (typeof x === "string" ? x : "");
+  return { businessType: v(a?.business_type), yearsInBusiness: v(a?.years_in_business), teamSize: v(a?.employee_count), registration: v(a?.extra?.registration) };
 }
 
 function initialPlanLength(a: any): string {
