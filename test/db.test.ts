@@ -701,10 +701,14 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   assert(r.ok && r.rows.length === 1, "admin reads the guide list", r);
   // Document intake: founders keep their own results private
   // ------------------------------------------------------------------
-  r = await U(A, `insert into document_extractions (founder_id, doc_type, file_name, result) values ('${A}','bank_statement','s.pdf','{}') returning id`);
-  assert(r.ok, "founder saves own document results", r);
-  r = await U(A, `insert into document_extractions (founder_id, doc_type, file_name, result) values ('${B}','bank_statement','s.pdf','{}')`);
-  assert(!r.ok, "founders cannot save results as someone else", r);
+  r = await U(A, `insert into document_extractions (founder_id, doc_type, file_name, result) values ('${A}','bank_statement','s.pdf','{"ok":true}')`);
+  assert(!r.ok, "founders cannot write their own document results (only the server saves what the AI read)", r);
+  r = await SRV(`insert into document_extractions (founder_id, doc_type, file_name, result) values ('${A}','bank_statement','s.pdf','{}')`);
+  assert(r.ok, "the server saves a founder's document results", r);
+  r = await U(A, `select id from document_extractions`);
+  assert(r.ok && r.rows.length === 1, "founder sees own results", r);
+  r = await U(A, `truncate document_extractions`);
+  assert(!r.ok, "signed-in users cannot wipe the table", r);
   r = await U(B, `select id from document_extractions`);
   assert(r.ok && r.rows.length === 0, "another founder cannot see them", r);
   r = await U(A, `update document_extractions set file_name='x.pdf'`);
@@ -724,9 +728,9 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   r = await U(A, `insert into partners (name, kind) values ('Fake','other')`);
   assert(!r.ok, "founders cannot create partners", r);
   r = await U(A, `insert into cohort_members (cohort_id, founder_id, consent_version) values ('88888888-8888-8888-8888-888888888888','${A}','1.0')`);
-  assert(r.ok, "founder joins a cohort with consent", r);
-  r = await U(A, `insert into cohort_members (cohort_id, founder_id, consent_version) values ('88888888-8888-8888-8888-888888888888','${B}','1.0')`);
-  assert(!r.ok, "nobody can sign someone else up", r);
+  assert(!r.ok, "founders cannot join a cohort directly (the server checks the code first)", r);
+  r = await SRV(`insert into cohort_members (cohort_id, founder_id, consent_version) values ('88888888-8888-8888-8888-888888888888','${A}','1.0')`);
+  assert(r.ok, "the server joins a founder who gave the code and consent", r);
   r = await U(B, `select founder_id from cohort_members`);
   assert(r.ok && r.rows.length === 0, "other founders cannot see who joined", r);
   r = await U(A, `delete from cohort_members where founder_id='${A}'`);
