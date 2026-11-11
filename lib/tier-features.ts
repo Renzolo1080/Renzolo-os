@@ -16,7 +16,7 @@ export const TIER_FEATURES: { label: string; values: Record<Tier, boolean | stri
   { label: "One-on-one coaching included", values: { essentials: "1 × 30 min a quarter", growth: "2 × 30 min a quarter", elevate: "1 × 60 min a month" } },
   { label: "Pitch and investor readiness review", values: { essentials: false, growth: false, elevate: true } },
   { label: "Priority support", values: { essentials: false, growth: false, elevate: true } },
-  { label: "Extra coaching sessions (60 min) at member prices", values: { essentials: "$75", growth: "$105", elevate: "$120" } },
+  { label: "Expert Advisory Sessions (60 min) at member prices", values: { essentials: "$75", growth: "$105", elevate: "$120" } },
   { label: "Priority when applying to cohorts (separate fee)", values: { essentials: "Launch", growth: "Launch and Build", elevate: "Launch, Build and Scale" } },
 ];
 

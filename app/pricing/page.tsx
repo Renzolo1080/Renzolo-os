@@ -77,8 +77,9 @@ export default async function PricingPage() {
 
       <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-6">
         <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wide text-teal">No minimum</p>
-          <p className="mt-1 text-xl font-bold text-navy">One-on-one coaching</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-teal">For founders who want specific insight · no minimum</p>
+          <p className="mt-1 text-xl font-bold text-navy">Expert Advisory Sessions</p>
+          <p className="mt-1 text-sm text-ink-soft">One-on-one sessions with industry and market experts and experienced founders: advice specific to your industry, your market and your customers. Not general coaching: each session starts from a brief built on your assessment and plan, and agreed actions go straight into your plan.</p>
           <table className="mt-3 w-full text-left text-sm">
             <thead>
               <tr className="text-xs uppercase tracking-wide text-ink-soft">
@@ -106,7 +107,7 @@ export default async function PricingPage() {
           </table>
           <p className="mt-3 text-sm text-ink-soft">
             Every membership includes coaching: Essentials 1 basic 30-minute session a quarter, Growth 2 30-minute sessions a quarter, Elevate one
-            60-minute session a month. These prices are for extra sessions. A first session for non-members includes an intake review and session plan.
+            60-minute session a month. Expert Advisory Sessions are on top of those, at the prices above. A first session for non-members includes an intake review and session plan.
           </p>
         </div>
       </section>

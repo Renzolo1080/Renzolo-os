@@ -170,7 +170,7 @@ export default function Home() {
           </div>
           <p className="mt-7 text-[17px]">
             <a href={`${APP_URL}/pricing`} className="font-bold text-ink underline underline-offset-4">
-              Compare all features and extra coaching on the pricing page →
+              Compare all features and Expert Advisory Sessions on the pricing page →
             </a>
           </p>
         </section>

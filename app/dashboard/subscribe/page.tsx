@@ -66,8 +66,8 @@ export default async function MembershipPage() {
     };
     if (!ent.fullReport) add("Readiness Assessment", getOneOffPrice("assessment", false));
     for (const t of TIERS) for (const i of TIER_INTERVALS[t]) add(`${TIER_NAMES[t]} · ${INTERVAL_NAMES[i]}`, getMembershipPrice(t, i));
-    add("Coaching session", getOneOffPrice("coaching_single", level));
-    add("Coaching, 3 sessions", getOneOffPrice("coaching_pack3", level));
+    add("Expert Advisory Session", getOneOffPrice("coaching_single", level));
+    add("Expert Advisory Sessions, 3", getOneOffPrice("coaching_pack3", level));
   }
 
   return (

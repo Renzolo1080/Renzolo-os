@@ -94,7 +94,11 @@ export default function FounderTrajectoryPage() {
             </div>
             <div className="rounded-card border border-line bg-surface-tint p-7">
               <p className="font-display text-xl font-bold">Live sessions with a Founder Coach</p>
-              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month; members pay less for extra sessions.</p>
+              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month.</p>
+            </div>
+            <div className="rounded-card border border-line bg-surface-tint p-7 md:col-span-2">
+              <p className="font-display text-xl font-bold">Expert Advisory Sessions</p>
+              <p className="mt-2 text-muted">For founders who want more specific insight. One-on-one sessions with industry and market experts and experienced founders: advice specific to your industry, your market and your customers. Not general coaching: each session starts from a brief built on your assessment and plan, and members pay less.</p>
             </div>
           </div>
         </section>

@@ -124,8 +124,8 @@ export async function POST(req: NextRequest) {
     product = "coaching";
     price = p;
     const n = COACHING_QUANTITY[item];
-    title = `Founder Trajectory™ coaching (${n} session${n > 1 ? "s" : ""})`;
-    description = `${n} one-on-one coaching session${n > 1 ? "s" : ""}, valid for a year`;
+    title = `Expert Advisory Session${n > 1 ? "s" : ""} (${n})`;
+    description = `${n} one-on-one Expert Advisory Session${n > 1 ? "s" : ""}, valid for a year`;
     row = { quantity: n };
   } else {
     return NextResponse.json({ error: "Unknown purchase." }, { status: 400 });
