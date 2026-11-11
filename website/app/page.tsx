@@ -29,14 +29,14 @@ const SERVICES: [string, string][] = [
 
 const JOURNEY: [string, string, string][] = [
   ["Start free", "Readiness Snapshot: your score and three biggest gaps.", "#FF5A1F"],
-  ["Get the full picture", "Readiness Assessment, $60 on its own, included in every membership.", "#E6197F"],
+  ["Get the full picture", "Readiness Assessment, one time, or included in every membership.", "#E6197F"],
   ["Work the plan, coached", "Choose the membership that fits where you're going.", "#3B1694"],
 ];
 
 type Plan = { name: string; who: string; price: string; per: string; items: string[]; color: string; featured?: boolean };
 const PLANS: Plan[] = [
-  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: "$60", per: "a quarter · or $200 a year", color: "#FF5A1F", items: ["Full Readiness Assessment included", "Strategic growth plan and dashboard", "AI coach any time", "One 30-minute coaching session a quarter"] },
-  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: "$147", per: "a quarter · or $490 a year", color: "#E6197F", featured: true, items: ["Everything in Essentials", "Two 30-minute coaching sessions a quarter", "Extra 60-minute coaching at the member rate, $105"] },
+  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: "$60", per: "a quarter · or $200 a year", color: "#FF5A1F", items: ["Full Readiness Assessment and report included", "Valuation range and AI market insight", "Strategic growth plan and dashboard", "One 30-minute coaching session a quarter"] },
+  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: "$147", per: "a quarter · or $490 a year", color: "#E6197F", featured: true, items: ["Everything in Essentials", "AI coach any time", "Advisor review of your report", "Two 30-minute coaching sessions a quarter"] },
   { name: "Elevate", who: "For businesses ready to get in front of buyers and funders.", price: "$699", per: "a quarter · or $2,490 a year", color: "#3B1694", items: ["Everything in Growth", "One 60-minute coaching session a month", "Advanced coaching process", "Buyer and investor matching (readiness requirements apply)"] },
 ];
 
@@ -49,8 +49,8 @@ const INSIDE: [string, string, string, string][] = [
 
 const FAQ: [string, string][] = [
   ["What does the free Snapshot give me?", "Your Total Readiness Score, your three biggest gaps and your best next move, in about five minutes."],
-  ["What's the difference between the $60 assessment and a membership?", "The assessment is a one-time full report. A membership keeps you moving with your plan, dashboard, tools and one-on-one coaching."],
-  ["How does coaching work?", "Your AI coach answers any time from your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter, and Elevate one 60-minute session a month."],
+  ["What's the difference between the one-time assessment and a membership?", "The assessment is a one-time readiness report with an AI market insight. A membership adds your valuation range and keeps you moving with your plan, dashboard, tools and one-on-one coaching."],
+  ["How does coaching work?", "With Growth and Elevate, your AI coach answers any time from your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter, and Elevate one 60-minute session a month."],
   ["Who is it for, and where?", "Early- and growth-stage founders and CEOs, wherever they are. We're starting in Africa, the United States and the United Kingdom. Prices are in US dollars; pay by card, or mobile money where available."],
   ["Is my business information safe?", "We never sell it. You can download or delete your data any time, and we share your profile only with your permission."],
 ];
@@ -124,7 +124,7 @@ export default function Home() {
         <section id="memberships" className={`${WRAP} scroll-mt-24 pb-20 md:pb-24`}>
           <p className={EYEBROW}>Memberships</p>
           <h2 className={`${H2} mt-3`}>Choose how far you want to go.</h2>
-          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Start with the $60 Readiness Assessment on its own, or choose a membership: every membership includes it. One price in every region; your local-currency estimate shows at checkout.</p>
+          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Start with the Readiness Assessment on its own, or choose a membership: every membership includes it. One price in every region; your local-currency estimate shows at checkout.</p>
           <AssessmentOffer campaign="home_assessment" className="mt-9" />
           <ol className="mt-9 flex flex-wrap gap-6 rounded-[20px] bg-[#F3F5F8] p-7">
             {JOURNEY.map(([title, text, color], i) => (

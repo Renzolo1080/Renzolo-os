@@ -26,7 +26,7 @@ export interface StepInput {
   review: { overall: number } | null;
   marketDate: string | null;
   report: { exists: boolean; current: boolean };
-  access: { member: boolean; growth: boolean };
+  access: { member: boolean; growth: boolean; valuation?: boolean };
 }
 
 export function founderSteps(d: StepInput): Step[] {

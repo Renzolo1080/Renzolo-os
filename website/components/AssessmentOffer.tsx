@@ -10,16 +10,16 @@ export function AssessmentOffer({ campaign, className = "" }: { campaign: string
         <p className="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-text">One-time · no membership needed</p>
         <h3 className="mt-2 font-sans text-[26px] font-bold leading-tight md:text-[30px]">Readiness Assessment</h3>
         <p className="mt-2 text-base leading-relaxed text-ink-muted md:text-[17px]">
-          Your full assessment and downloadable AI Readiness Report: readiness scores, a valuation range, an AI market insight for your industry
+          Your full assessment and downloadable AI Readiness Report: readiness scores, an AI market insight for your industry
           and country, and the membership that fits you. Join within 30 days and it carries straight into your membership.
         </p>
       </div>
       <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
         <p className="font-display text-[52px] font-bold leading-none">
-          $60 <span className="font-sans text-base font-normal text-ink-muted">one time</span>
+          $40 <span className="font-sans text-base font-normal text-ink-muted">one time</span>
         </p>
         <a href={appLink("/register", campaign)} className="inline-flex min-h-[48px] items-center rounded-pill bg-brand px-7 py-3.5 text-[17px] font-bold text-on-brand hover:bg-brand/90">
-          Buy the assessment · $60
+          Buy the assessment · $40
         </a>
       </div>
     </div>

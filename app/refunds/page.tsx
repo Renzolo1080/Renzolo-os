@@ -16,7 +16,7 @@ export default function RefundsPage() {
         ]}
       />
 
-      <H>One-time Readiness Assessment ($60)</H>
+      <H>One-time Readiness Assessment</H>
       <p>Refundable in full if you ask before your Readiness Report has been created. Once the report has been created, it is not refundable.</p>
 
       <H>Coaching sessions</H>

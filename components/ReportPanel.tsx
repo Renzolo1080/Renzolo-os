@@ -103,11 +103,11 @@ export function ReportPanel({ assessmentId, scoreId, initialReport = null, canUp
             <>
               <p className="font-semibold">Want the full picture?</p>
               <p className="mt-1 text-sm text-cream/80">
-                Growth adds the full, downloadable report with an AI market insight, your valuation range, readiness scores and 2 coaching sessions
-                a quarter.
+                Every membership includes the full, downloadable report with your valuation range, readiness scores and an AI market insight, plus
+                your plan, dashboard and coaching.
               </p>
               <a href="/dashboard/subscribe" className="mt-4 inline-block rounded-pill bg-brand px-5 py-3 font-semibold text-on-brand">
-                See Growth
+                See memberships
               </a>
             </>
           )}

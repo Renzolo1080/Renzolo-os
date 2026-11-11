@@ -33,7 +33,7 @@ export type ExtraKey =
 /** What a view needs: "member" (any membership or the one-time
  * assessment), "growth" (Growth, Elevate or the one-time assessment) or
  * nothing. A locked view shows what it would add, so it isn't hidden. */
-export type Need = "none" | "member" | "growth";
+export type Need = "none" | "member" | "valuation" | "growth";
 
 export interface ExtraDef {
   key: ExtraKey;
@@ -46,8 +46,8 @@ export interface ExtraDef {
 export const EXTRAS: ExtraDef[] = [
   { key: "goalCharts", label: "Goal charts", description: "Each goal's expected path against your actual check-ins.", kind: "Chart", need: "member" },
   { key: "kpiTrends", label: "Revenue, customers and cash trends", description: "Your monthly numbers over the last 12 months, with cash runway.", kind: "Chart", need: "member" },
-  { key: "readiness", label: "Market, Customer and Investor readiness", description: "The three scores partners, customers and investors look at.", kind: "Numbers", need: "growth" },
-  { key: "valuation", label: "Estimated business value", description: "A directional valuation range and how it's worked out.", kind: "Numbers", need: "growth" },
+  { key: "readiness", label: "Market, Customer and Investor readiness", description: "The three scores partners, customers and investors look at.", kind: "Numbers", need: "member" },
+  { key: "valuation", label: "Estimated business value", description: "A directional valuation range and how it's worked out.", kind: "Numbers", need: "valuation" },
   { key: "areas", label: "Nine business areas", description: "A score for each part of your business model, weakest first.", kind: "Chart", need: "none" },
   { key: "gaps", label: "Weakest areas", description: "The three areas holding your score back most.", kind: "List", need: "none" },
   { key: "history", label: "Readiness over time", description: "Your Total Readiness Score at each assessment.", kind: "Chart", need: "none" },
@@ -101,8 +101,9 @@ export function validExtras(raw: unknown): ExtraKey[] | null {
   return raw as ExtraKey[];
 }
 
-export function unlocked(key: ExtraKey, access: { member: boolean; growth: boolean }): boolean {
+export function unlocked(key: ExtraKey, access: { member: boolean; growth: boolean; valuation?: boolean }): boolean {
   const need = EXTRAS.find((e) => e.key === key)?.need ?? "none";
+  if (need === "valuation") return !!access.valuation;
   return need === "none" || (need === "member" ? access.member : access.growth);
 }
 

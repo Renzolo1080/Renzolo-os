@@ -13,7 +13,7 @@ import { COMPONENTS, COMPONENT_HELP, COMPONENT_LABELS, type ReadinessResult } fr
 import { founderSteps, reminderNote, stepProgress } from "@/lib/next-steps";
 
 export interface DashboardData {
-  access: { member: boolean; growth: boolean };
+  access: { member: boolean; growth: boolean; valuation?: boolean };
   extras: ExtraKey[];
   score: any;
   /** Total Readiness Score and its five components (lib/readiness.ts). */
@@ -346,7 +346,7 @@ function Extra({ k, d, goals, kpiList, runway }: { k: ExtraKey; d: DashboardData
       <Panel title={def.label}>
         <p className="text-sm text-ink-soft">{def.description}</p>
         <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
-          Included with Growth
+          {def.need === "growth" ? "Included with Growth" : "Included with every membership"}
         </a>
       </Panel>
     );

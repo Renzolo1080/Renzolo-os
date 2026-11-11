@@ -81,7 +81,7 @@ export function OneOffPurchases({
             <ul className="mt-4 space-y-1.5 text-sm">
               {[
                 "Full assessment and detailed AI Readiness Report, downloadable",
-                "Valuation range and Market, Customer and Investor readiness scores",
+                "Market, Customer and Investor readiness scores (the valuation range comes with every membership)",
                 "AI market insight for your industry and country",
                 "A recommendation of the membership tier that fits you",
                 "Join within 30 days and your assessment carries straight into your membership",

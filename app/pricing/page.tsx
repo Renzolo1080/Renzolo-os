@@ -18,7 +18,7 @@ export default function PricingPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">Founder Trajectory™ membership</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-bold leading-tight">Choose the support that fits where you want to be.</h1>
           <p className="mt-4 max-w-2xl text-cream/85">
-            Start with the $60 Readiness Assessment on its own, or choose a membership: every membership includes it, plus a growth and readiness plan.
+            Start with the Readiness Assessment on its own, or choose a membership: every membership includes it, plus a growth and readiness plan.
             Not sure yet? Take the free Readiness Snapshot.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -38,7 +38,7 @@ export default function PricingPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-teal">One-time · no membership needed</p>
             <p className="mt-1 text-2xl font-bold text-navy">Readiness Assessment</p>
             <p className="mt-2 text-ink-soft">
-              The full assessment and detailed, downloadable AI Readiness Report, with your valuation range, readiness scores, an AI market insight
+              The full assessment and detailed, downloadable AI Readiness Report, with your readiness scores, an AI market insight
               for your industry and country, and a recommendation of the membership tier that fits you. Join within 30 days and it carries straight
               into your membership.
             </p>

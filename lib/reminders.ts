@@ -4,7 +4,7 @@ import { DETAIL_AREAS_REQUIRED } from "./quickcheck";
 /** Reminders for paying founders who have an unfinished step.
  *
  * Two steps are nudged, one at a time, in this order:
- *   assessment — they paid (membership or the $60 assessment) but haven't
+ *   assessment — they paid (membership or the one-time assessment) but haven't
  *                answered enough areas of the full assessment to unlock
  *                their Readiness Report (DETAIL_AREAS_REQUIRED, as on the
  *                dashboard's next-steps card);

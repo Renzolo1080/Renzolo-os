@@ -2,7 +2,7 @@
  * setting in Vercel (plus a redeploy), never a code change.
  *
  * FOUNDER TRAJECTORY(TM) MEMBERSHIP — three tiers (Nov 1 2026). Every
- * membership includes the Readiness Assessment (valued at $60 inside a
+ * membership includes the Readiness Assessment (valued at $40 inside a
  * membership). Billed quarterly or annually, never monthly:
  *
  *   Essentials  $60 quarterly · $200 annual   1 x 30-min basic session a quarter
@@ -11,7 +11,7 @@
  *
  * ONE-TIME PURCHASES
  *   Readiness Assessment (full report, valuation, market insight, tier
- *   recommendation)                         $60
+ *   recommendation; no valuation)           $40 (Nov 11 2026)
  *   Extra coaching (60 min), priced by membership level:
  *     not a member (first session includes intake) $150 · $399 for three
  *     Essentials                             $75 · $199
@@ -76,7 +76,7 @@ export type BuyerLevel = "none" | Tier;
 export const BUYER_LEVELS: BuyerLevel[] = ["none", "essentials", "growth", "elevate"];
 
 const DEFAULT_ONE_OFF: Record<OneOffItem, Record<BuyerLevel, number>> = {
-  assessment: { none: 60, essentials: 60, growth: 60, elevate: 60 },
+  assessment: { none: 40, essentials: 40, growth: 40, elevate: 40 },
   coaching_single: { none: 150, essentials: 75, growth: 105, elevate: 120 },
   coaching_pack3: { none: 399, essentials: 199, growth: 279, elevate: 319 },
 };

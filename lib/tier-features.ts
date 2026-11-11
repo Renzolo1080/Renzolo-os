@@ -6,11 +6,11 @@ import type { Tier } from "./pricing";
  * shown as written. */
 export const TIER_FEATURES: { label: string; values: Record<Tier, boolean | string> }[] = [
   { label: "Full Readiness Assessment with AI insights", values: { essentials: true, growth: true, elevate: true } },
-  { label: "Readiness Report", values: { essentials: "Summary", growth: "Full, downloadable", elevate: "Full, downloadable" } },
+  { label: "Readiness Report", values: { essentials: "Full, downloadable", growth: "Full, downloadable", elevate: "Full, downloadable" } },
   { label: "90+ day growth and readiness plan (up to 36 months)", values: { essentials: true, growth: true, elevate: true } },
   { label: "Dashboard, goals, reminders and founder tools", values: { essentials: true, growth: true, elevate: true } },
-  { label: "Valuation range and Market, Customer and Investor readiness scores", values: { essentials: false, growth: true, elevate: true } },
-  { label: "AI market insight for your industry and country", values: { essentials: false, growth: true, elevate: true } },
+  { label: "Valuation range and Market, Customer and Investor readiness scores", values: { essentials: true, growth: true, elevate: true } },
+  { label: "AI market insight for your industry and country", values: { essentials: true, growth: true, elevate: true } },
   { label: "Advisor review of your report", values: { essentials: false, growth: true, elevate: true } },
   { label: "Lorenzo · AI: coaching any time and weekly check-ins", values: { essentials: false, growth: true, elevate: true } },
   { label: "One-on-one coaching included", values: { essentials: "1 × 30 min a quarter", growth: "2 × 30 min a quarter", elevate: "1 × 60 min a month" } },

@@ -2,7 +2,9 @@
 
 Read this at the start of every session. When anything here conflicts with chat history or older code comments, this file and Lorenzo's latest master documents win.
 
-**Checkpoint (Nov 9, 2026):** launch on **November 16, 2026**. In review (PR "Hubflo enhancements"): member reminders, next-steps progress, free loan readiness check, plan templates, AI document intake, partner portal and impact report (migration `2026-11-10_documents_and_partners.sql` not applied yet). The Founder Trajectory™ book starts in January 2027, after launch. Live on master: $60 assessment, Nov 1 membership and coaching prices, local prices for Kenya, Nigeria, South Africa and Ghana in Vercel, local-currency estimate at checkout, privacy launch (consent, Your data page, PAIA manual), refund policy, Google Workspace email and email settings in Vercel. Open blockers: Flutterwave account and keys, Resend (`RESEND_API_KEY`), `EMAIL_POSTAL_ADDRESS`, `COACHING_BOOKING_URL`, `CRON_SECRET`, `EMAIL_LINK_SECRET`, end-to-end test purchases. In review: Readiness Snapshot landing page, Snapshot qualifier questions.
+**Checkpoint (Nov 11, 2026):** Approved Nov 11: $40 assessment (no valuation; members get the full report with valuation), assessment shown beside memberships, regional pricing for the assessment and memberships (two zones: Africa local currency; US/UK/EU higher) with an Elevate monthly option in Africa ($249 × 12) — regional build goes to a preview for approval first. documents_and_partners migration applied live (server-only writes). PRs 19, 24, 25 merged.
+
+**Earlier checkpoint (Nov 9, 2026):** launch on **November 16, 2026**. In review (PR "Hubflo enhancements"): member reminders, next-steps progress, free loan readiness check, plan templates, AI document intake, partner portal and impact report (migration `2026-11-10_documents_and_partners.sql` not applied yet). The Founder Trajectory™ book starts in January 2027, after launch. Live on master: $60 assessment, Nov 1 membership and coaching prices, local prices for Kenya, Nigeria, South Africa and Ghana in Vercel, local-currency estimate at checkout, privacy launch (consent, Your data page, PAIA manual), refund policy, Google Workspace email and email settings in Vercel. Open blockers: Flutterwave account and keys, Resend (`RESEND_API_KEY`), `EMAIL_POSTAL_ADDRESS`, `COACHING_BOOKING_URL`, `CRON_SECRET`, `EMAIL_LINK_SECRET`, end-to-end test purchases. In review: Readiness Snapshot landing page, Snapshot qualifier questions.
 
 ## How to use this file
 
@@ -66,9 +68,9 @@ Founder Trajectory™ is powered by RENZOLO OS™: a founder takes the free Snap
 | Product | Price | Notes |
 | --- | --- | --- |
 | Readiness Snapshot | Free | 5 minutes or less; carries into the account on signup |
-| Readiness Assessment | $60 one-time | Full report, valuation, market insight, tier recommendation. Included in every membership (valued at $60) |
-| Essentials (early stage) | $60/quarter · $200/year | 1 × 30-min basic coaching session a quarter. No monthly option |
-| Growth | $147/quarter · $490/year | 2 × 30-min sessions a quarter, valuation, market insight, advisor review |
+| Readiness Assessment | $40 one-time (Nov 11, 2026) | Readiness report, scores, AI market insight, tier recommendation, Plan Builder. No valuation. Included in every membership. Regional prices approved (Africa ~$40 in local currency; US $79, UK £59, EU €69) but not built yet |
+| Essentials (early stage) | $60/quarter · $200/year | Full report with valuation range and AI market insight (Nov 11, 2026). 1 × 30-min basic coaching session a quarter. No monthly option |
+| Growth | $147/quarter · $490/year | 2 × 30-min sessions a quarter, AI coach, plan review, Market Intelligence, advisor review |
 | Elevate | $699/quarter · $2,490/year | 1 × 60-min session a month, pitch review, priority support, matching (readiness requirements apply). Capped at 50 + waitlist |
 | Extra coaching (60 min) | Non-member $150 / $399 for 3 · Essentials $75 / $199 · Growth $105 / $279 · Elevate $120 / $319 | First non-member session includes intake |
 | Build cohort | $449 | 12 weeks, matching membership included, instalments |

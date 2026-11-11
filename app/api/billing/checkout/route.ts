@@ -27,7 +27,7 @@ import { getAppUrl } from "@/lib/app-url";
  *
  * Body, one of:
  *   { kind: "membership", tier, interval, currency?, autoRenew? }
- *   { kind: "assessment", currency? }                       the $60 one-time assessment
+ *   { kind: "assessment", currency? }                       the one-time assessment
  *   { kind: "coaching", item: "coaching_single" | "coaching_pack3", currency? }
  *
  * Every amount is worked out here on the server from lib/pricing.ts and
