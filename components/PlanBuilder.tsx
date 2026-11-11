@@ -119,8 +119,8 @@ export function PlanBuilder({
         <div className="rounded-2xl bg-navy p-4 text-white">
           <p className="text-sm text-cream/80">Plan complete</p>
           <p className="text-2xl font-bold">{pct}%</p>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-navy-panel" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Plan complete">
-            <div className="h-2 bg-teal" style={{ width: `${pct}%` }} />
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/15" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Plan complete">
+            <div className="h-2 bg-brand" style={{ width: `${pct}%` }} />
           </div>
           <p className="mt-2 text-xs text-cream/70">{saving ? "Saving…" : dirty ? "Unsaved changes" : savedAt ? `Saved ${new Date(savedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "Not saved yet"}</p>
         </div>
