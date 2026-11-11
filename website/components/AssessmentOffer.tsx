@@ -1,4 +1,5 @@
 import { appLink } from "@/lib/site";
+import { Price } from "@/components/RegionPrice";
 
 /** The one-time Readiness Assessment, shown beside the memberships so it is
  * a first choice, not an afterthought (approved Nov 10, 2026: sell paid
@@ -16,10 +17,10 @@ export function AssessmentOffer({ campaign, className = "" }: { campaign: string
       </div>
       <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
         <p className="font-display text-[52px] font-bold leading-none">
-          $40 <span className="font-sans text-base font-normal text-ink-muted">one time</span>
+          <Price k="assessment" /> <span className="font-sans text-base font-normal text-ink-muted">one time</span>
         </p>
         <a href={appLink("/register", campaign)} className="inline-flex min-h-[48px] items-center rounded-pill bg-brand px-7 py-3.5 text-[17px] font-bold text-on-brand hover:bg-brand/90">
-          Buy the assessment · $40
+          Buy the assessment · <Price k="assessment" />
         </a>
       </div>
     </div>

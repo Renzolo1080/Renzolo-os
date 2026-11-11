@@ -21,6 +21,7 @@ import {
 import { planChange, entitlements, elevateSeatLimit } from "@/lib/membership";
 import { loadMembership, countElevateMembers } from "@/lib/membership-server";
 import { getAppUrl } from "@/lib/app-url";
+import { ipCountryFrom, regionFor } from "@/lib/region";
 
 /** POST /api/billing/checkout — starts a Flutterwave checkout and returns
  * { link }, the hosted payment page to send the founder to.
@@ -48,6 +49,9 @@ export async function POST(req: NextRequest) {
   const m = await loadMembership(supabase, user.id);
   const admin = createAdminClient();
   const requested = typeof body?.currency === "string" ? body.currency.trim().toUpperCase() : null;
+  // The price region: profile country and connection country, higher price
+  // wins (lib/region.ts). Worked out here, never taken from the browser.
+  const region = regionFor(profile?.country, ipCountryFrom(req.headers));
 
   let product: FlutterwaveProduct;
   let price: Price;
@@ -62,10 +66,10 @@ export async function POST(req: NextRequest) {
     if (!isTier(tier) || !isBillingInterval(interval) || !tierOffersInterval(tier, interval)) {
       return NextResponse.json({ error: "That plan isn't available." }, { status: 400 });
     }
-    const currencies = membershipCurrenciesFor(profile?.country);
+    const currencies = membershipCurrenciesFor(profile?.country, process.env, region);
     const currency = requested ?? currencies[currencies.length - 1];
     if (!currencies.includes(currency)) return NextResponse.json({ error: "That currency isn't available for your account." }, { status: 400 });
-    const listPrice = getMembershipPrice(tier, interval, currency);
+    const listPrice = getMembershipPrice(tier, interval, currency, process.env, region);
     if (!listPrice) return NextResponse.json({ error: "That currency isn't available for your account." }, { status: 400 });
 
     if (tier === "elevate" && m.tier !== "elevate") {
@@ -76,13 +80,13 @@ export async function POST(req: NextRequest) {
     }
 
     const currentList =
-      m.tier && m.current.lastPayment ? getMembershipPrice(m.tier, m.current.lastPayment.interval, currency) : null;
+      m.tier && m.current.lastPayment ? getMembershipPrice(m.tier, m.current.lastPayment.interval, currency, process.env, region) : null;
     const change = planChange(m.current, { tier, interval, listPrice }, new Date(), currentList);
     if (!change.ok) return NextResponse.json({ error: change.reason }, { status: 409 });
 
     const plan = paymentPlanId(tier, interval);
     const autoRenew =
-      body?.autoRenew === true && !!plan && listPrice.currency === mainCurrency() && (change.kind === "new" || change.kind === "renewal") && change.credit === 0;
+      body?.autoRenew === true && region.zone === "africa" && !!plan && listPrice.currency === mainCurrency() && (change.kind === "new" || change.kind === "renewal") && change.credit === 0;
     if (autoRenew) planId = plan!;
 
     product = "subscription";
@@ -101,9 +105,9 @@ export async function POST(req: NextRequest) {
     if (entitlements(m.tier).fullReport) {
       return NextResponse.json({ error: "Your membership already includes the full Readiness Assessment." }, { status: 409 });
     }
-    const currencies = oneOffCurrenciesFor("assessment", false, profile?.country);
+    const currencies = oneOffCurrenciesFor("assessment", false, profile?.country, process.env, region);
     const currency = requested ?? currencies[currencies.length - 1];
-    const p = currencies.includes(currency) ? getOneOffPrice("assessment", false, currency) : null;
+    const p = currencies.includes(currency) ? getOneOffPrice("assessment", false, currency, process.env, region) : null;
     if (!p) return NextResponse.json({ error: "That currency isn't available for your account." }, { status: 400 });
     product = "assessment";
     price = p;
@@ -113,7 +117,7 @@ export async function POST(req: NextRequest) {
     const item = body?.item;
     if (!isOneOffItem(item) || item === "assessment") return NextResponse.json({ error: "Choose one session or three." }, { status: 400 });
     const level = coachingBuyerLevel({ tier: m.tier });
-    const currencies = oneOffCurrenciesFor(item, level, profile?.country);
+    const currencies = oneOffCurrenciesFor(item, level, profile?.country, process.env, region);
     const currency = requested ?? currencies[currencies.length - 1];
     const p = currencies.includes(currency) ? getOneOffPrice(item, level, currency) : null;
     if (!p) return NextResponse.json({ error: "That currency isn't available for your account." }, { status: 400 });
@@ -130,7 +134,7 @@ export async function POST(req: NextRequest) {
   const txRef = buildTxRef(product, user.id);
   const { data: payment, error: insertError } = await admin
     .from("payments")
-    .insert({ tx_ref: txRef, founder_id: user.id, product, amount: price.amount, currency: price.currency, ...row })
+    .insert({ tx_ref: txRef, founder_id: user.id, product, amount: price.amount, currency: price.currency, note: `price region: ${region.zone}`, ...row })
     .select("id")
     .single();
   if (insertError || !payment) {

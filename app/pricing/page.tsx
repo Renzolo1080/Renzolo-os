@@ -2,14 +2,21 @@ import { MembershipPlans } from "@/components/MembershipPlans";
 import { TIER_FEATURES, TIER_TAGLINES, MEMBERSHIP_POLICIES } from "@/lib/tier-features";
 import { buildCurrencyBlocks } from "@/lib/membership-view";
 import { getOneOffPrice, formatPrice } from "@/lib/pricing";
+import { requestRegion } from "@/lib/region-server";
+import { ipCountryFrom, REGION_NOTE } from "@/lib/region";
+import { headers } from "next/headers";
 
 export const metadata = { title: "Membership and pricing · Founder Trajectory™" };
 
 /** Public pricing: the three tiers, the one-time assessment and coaching.
  * Buttons lead to sign-up; the exact amount for an existing member is
  * worked out on the membership page once they're signed in. */
-export default function PricingPage() {
-  const blocks = buildCurrencyBlocks(null, null, null);
+export default async function PricingPage() {
+  // Each visitor sees only the prices for their region (lib/region.ts).
+  const region = await requestRegion(null);
+  const ip = ipCountryFrom(await headers());
+  const blocks = buildCurrencyBlocks(ip, null, null, new Date(), region);
+  const assessment = getOneOffPrice("assessment", false, blocks[0]?.currency === "USD" || region.zone === "intl" ? undefined : blocks[0]?.currency, process.env, region) ?? getOneOffPrice("assessment", false, undefined, process.env, region);
   const f = (p: ReturnType<typeof getOneOffPrice>) => (p ? formatPrice(p) : "");
   return (
     <main>
@@ -23,7 +30,7 @@ export default function PricingPage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href="#assessment" className="inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand">
-              Buy the assessment · {f(getOneOffPrice("assessment", false))}
+              Buy the assessment · {f(assessment)}
             </a>
             <a href="/snapshot" className="inline-block rounded-pill border-2 border-white/70 px-6 py-3 font-semibold text-white hover:bg-white/10">
               Take the free Snapshot first
@@ -45,10 +52,10 @@ export default function PricingPage() {
           </div>
           <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
             <p className="text-5xl font-bold text-navy">
-              {f(getOneOffPrice("assessment", false))} <span className="text-base font-normal text-ink-soft">one time</span>
+              {f(assessment)} <span className="text-base font-normal text-ink-soft">one time</span>
             </p>
             <a href="/register" className="inline-block rounded-pill bg-brand px-6 py-3 font-semibold text-on-brand hover:bg-brand/90">
-              Buy the assessment · {f(getOneOffPrice("assessment", false))}
+              Buy the assessment · {f(assessment)}
             </a>
           </div>
         </div>
@@ -65,6 +72,7 @@ export default function PricingPage() {
           taglines={TIER_TAGLINES}
           signupHref="/register"
         />
+        <p className="mt-4 text-sm text-ink-soft">{REGION_NOTE}</p>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-6">

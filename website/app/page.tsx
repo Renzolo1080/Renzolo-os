@@ -3,6 +3,7 @@ import { HeroZoom } from "@/components/HeroZoom";
 import { ProofPanel } from "@/components/Proof";
 import { APP_URL, appLink } from "@/lib/site";
 import { AssessmentOffer } from "@/components/AssessmentOffer";
+import { Price } from "@/components/RegionPrice";
 
 /* Home page, v6 "global firm" (approved Nov 9, 2026): zooming hero, the
    Founder Trajectory™ method, who we are, services, track record,
@@ -33,11 +34,11 @@ const JOURNEY: [string, string, string][] = [
   ["Work the plan, coached", "Choose the membership that fits where you're going.", "#3B1694"],
 ];
 
-type Plan = { name: string; who: string; price: string; per: string; items: string[]; color: string; featured?: boolean };
+type Plan = { name: string; who: string; price: React.ReactNode; per: React.ReactNode; items: string[]; color: string; featured?: boolean };
 const PLANS: Plan[] = [
-  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: "$60", per: "a quarter · or $200 a year", color: "#FF5A1F", items: ["Full Readiness Assessment and report included", "Valuation range and AI market insight", "Strategic growth plan and dashboard", "One 30-minute coaching session a quarter"] },
-  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: "$147", per: "a quarter · or $490 a year", color: "#E6197F", featured: true, items: ["Everything in Essentials", "AI coach any time", "Advisor review of your report", "Two 30-minute coaching sessions a quarter"] },
-  { name: "Elevate", who: "For businesses ready to get in front of buyers and funders.", price: "$699", per: "a quarter · or $2,490 a year", color: "#3B1694", items: ["Everything in Growth", "One 60-minute coaching session a month", "Advanced coaching process", "Buyer and investor matching (readiness requirements apply)"] },
+  { name: "Essentials", who: "For early-stage founders getting the basics right.", price: <Price k="essentials.quarterly" />, per: <>a quarter · or <Price k="essentials.annual" /> a year</>, color: "#FF5A1F", items: ["Full Readiness Assessment and report included", "Valuation range and AI market insight", "Strategic growth plan and dashboard", "One 30-minute coaching session a quarter"] },
+  { name: "Growth", who: "For growing businesses closing their readiness gaps.", price: <Price k="growth.quarterly" />, per: <>a quarter · or <Price k="growth.annual" /> a year</>, color: "#E6197F", featured: true, items: ["Everything in Essentials", "AI coach any time", "Advisor review of your report", "Two 30-minute coaching sessions a quarter"] },
+  { name: "Elevate", who: "For businesses ready to get in front of buyers and funders.", price: <Price k="elevate.quarterly" />, per: <>a quarter · or <Price k="elevate.annual" /> a year</>, color: "#3B1694", items: ["Everything in Growth", "One 60-minute coaching session a month", "Advanced coaching process", "Buyer and investor matching (readiness requirements apply)"] },
 ];
 
 const INSIDE: [string, string, string, string][] = [
@@ -124,7 +125,7 @@ export default function Home() {
         <section id="memberships" className={`${WRAP} scroll-mt-24 pb-20 md:pb-24`}>
           <p className={EYEBROW}>Memberships</p>
           <h2 className={`${H2} mt-3`}>Choose how far you want to go.</h2>
-          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Start with the Readiness Assessment on its own, or choose a membership: every membership includes it. One price in every region; your local-currency estimate shows at checkout.</p>
+          <p className="mt-4 max-w-[680px] text-lg leading-relaxed text-ink-muted md:text-[19px]">Start with the Readiness Assessment on its own, or choose a membership: every membership includes it. Prices are set for each region and shown in your local currency.</p>
           <AssessmentOffer campaign="home_assessment" className="mt-9" />
           <ol className="mt-9 flex flex-wrap gap-6 rounded-[20px] bg-[#F3F5F8] p-7">
             {JOURNEY.map(([title, text, color], i) => (

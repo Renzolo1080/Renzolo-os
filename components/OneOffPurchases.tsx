@@ -107,7 +107,7 @@ export function OneOffPurchases({
               <a href="/assessment" className="font-semibold text-teal underline">
                 Readiness Snapshot
               </a>{" "}
-              first so your coach can prepare. Members pay less: from $75 a session.
+              first so your coach can prepare. Members pay less for extra sessions.
             </p>
           )}
           <p className="mt-1 text-sm text-ink-soft">With a Founder Trajectory™ coach. 60-minute sessions, valid for a year; we arrange the time with you by email.</p>

@@ -8,6 +8,7 @@ import { sendOnce } from "@/lib/email-flow";
 import { getAppUrl } from "@/lib/app-url";
 import { bookingLink } from "@/lib/coaching";
 import { getOneOffPrice, getMembershipPrice, formatPrice } from "@/lib/pricing";
+import { ipCountryFrom, regionFor } from "@/lib/region";
 
 /** POST /api/snapshot — the free, public Readiness Snapshot (no account).
  * Body: { contact: { fullName, companyName, email }, profile,
@@ -86,13 +87,14 @@ export async function POST(req: NextRequest) {
   // The next step's price, from the live settings, and (for an established
   // business) the coach's booking page if one is set.
   const fmt = (p: ReturnType<typeof getOneOffPrice>) => (p ? formatPrice(p) : null);
+  const region = regionFor(null, ipCountryFrom(req.headers));
   const nextStepOffer = {
     price:
       overview.nextStep === "elevate"
-        ? fmt(getMembershipPrice("elevate", "quarterly"))
+        ? fmt(getMembershipPrice("elevate", "quarterly", undefined, process.env, region))
         : overview.nextStep === "essentials"
-          ? fmt(getMembershipPrice("essentials", "quarterly"))
-          : fmt(getOneOffPrice("assessment", false)),
+          ? fmt(getMembershipPrice("essentials", "quarterly", undefined, process.env, region))
+          : fmt(getOneOffPrice("assessment", false, undefined, process.env, region)),
     bookingUrl: overview.nextStep === "elevate" ? bookingLink(process.env, { name: c.fullName, email: c.email }) : null,
   };
 

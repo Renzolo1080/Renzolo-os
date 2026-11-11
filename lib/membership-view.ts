@@ -12,6 +12,7 @@ import {
   type Tier,
 } from "./pricing";
 import { planChange, type CurrentMembership } from "./membership";
+import type { Region } from "./region";
 import type { CurrencyBlock, PlanCell } from "@/components/MembershipPlans";
 
 /** What can be used to pay, per currency — from Flutterwave's published
@@ -22,6 +23,10 @@ export function methodsFor(currency: string): string {
       return "US dollar payments are by card or US bank account. Mobile money such as M-Pesa is only offered when paying in local currency.";
     case "KES":
       return "Kenyan shilling payments can be made by M-Pesa or card.";
+    case "GBP":
+      return "Pound payments are by card, Apple Pay or Google Pay.";
+    case "EUR":
+      return "Euro payments are by card, Apple Pay or Google Pay.";
     case "ZAR":
       return "South African rand payments can be made by card, bank account or 1Voucher.";
     default:
@@ -32,18 +37,18 @@ export function methodsFor(currency: string): string {
 /** The tier cards' data for each currency the founder can pay in. With
  * `current` (a signed-in founder), each option carries the exact amount
  * and start date the checkout will use. */
-export function buildCurrencyBlocks(country: string | null | undefined, current: CurrentMembership | null, currentTier: Tier | null, now = new Date()): CurrencyBlock[] {
-  return membershipCurrenciesFor(country).map((currency) => {
+export function buildCurrencyBlocks(country: string | null | undefined, current: CurrentMembership | null, currentTier: Tier | null, now = new Date(), region?: Region | null): CurrencyBlock[] {
+  return membershipCurrenciesFor(country, process.env, region).map((currency) => {
     const tiers = {} as Record<Tier, PlanCell[]>;
     for (const tier of TIERS) {
       tiers[tier] = TIER_INTERVALS[tier].flatMap((interval) => {
-        const price = getMembershipPrice(tier, interval, currency);
+        const price = getMembershipPrice(tier, interval, currency, process.env, region);
         if (!price) return [];
         // Only claim a saving that is true for the prices currently set.
         let note: string | null = null;
         if (interval === "annual") {
           const shortest = TIER_INTERVALS[tier][0];
-          const base = getMembershipPrice(tier, shortest, currency);
+          const base = getMembershipPrice(tier, shortest, currency, process.env, region);
           if (base) {
             const monthly = base.amount / INTERVAL_MONTHS[shortest];
             const free = (monthly * 12 - price.amount) / monthly;
@@ -53,7 +58,7 @@ export function buildCurrencyBlocks(country: string | null | undefined, current:
         let quote: PlanCell["quote"] = null;
         let blocked: string | null = null;
         if (current) {
-          const currentList = currentTier && current.lastPayment ? getMembershipPrice(currentTier, current.lastPayment.interval, currency) : null;
+          const currentList = currentTier && current.lastPayment ? getMembershipPrice(currentTier, current.lastPayment.interval, currency, process.env, region) : null;
           const c = planChange(current, { tier, interval, listPrice: price }, now, currentList);
           if (c.ok) {
             quote = {
@@ -75,7 +80,7 @@ export function buildCurrencyBlocks(country: string | null | undefined, current:
             note,
             quote,
             blocked,
-            autoRenewAvailable: currency === mainCurrency() && !!paymentPlanId(tier, interval),
+            autoRenewAvailable: region?.zone !== "intl" && currency === mainCurrency() && !!paymentPlanId(tier, interval),
           },
         ];
       });

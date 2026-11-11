@@ -2,6 +2,7 @@ import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
 import { AssessmentOffer } from "@/components/AssessmentOffer";
+import { Price } from "@/components/RegionPrice";
 import { Faq } from "@/components/Faq";
 import { HOW_TO_START, HowToStart, PageEndCta } from "@/components/Flow";
 import { OfferTabs } from "@/components/OfferTabs";
@@ -9,9 +10,9 @@ import { OfferTabs } from "@/components/OfferTabs";
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
 const TIERS = [
-  { name: "Essentials", start: HOW_TO_START.essentials, price: "$60 a quarter", for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Full report with valuation range and AI market insight", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools", "One basic 30-minute coaching session a quarter"] },
-  { name: "Growth", start: HOW_TO_START.growth, price: "$147 a quarter", for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "AI coach any time and monthly Market Intelligence", "Advisor review of your report", "Two 30-minute one-on-one sessions a quarter"] },
-  { name: "Elevate", start: HOW_TO_START.elevate, price: "$699 a quarter", for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "One 60-minute one-on-one session a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
+  { name: "Essentials", start: HOW_TO_START.essentials, price: <><Price k="essentials.quarterly" /> a quarter</>, for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Full report with valuation range and AI market insight", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools", "One basic 30-minute coaching session a quarter"] },
+  { name: "Growth", start: HOW_TO_START.growth, price: <><Price k="growth.quarterly" /> a quarter</>, for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "AI coach any time and monthly Market Intelligence", "Advisor review of your report", "Two 30-minute one-on-one sessions a quarter"] },
+  { name: "Elevate", start: HOW_TO_START.elevate, price: <><Price k="elevate.quarterly" /> a quarter</>, for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "One 60-minute one-on-one session a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
 ];
 
 export default function FounderTrajectoryPage() {
@@ -76,7 +77,7 @@ export default function FounderTrajectoryPage() {
               ))}
             </div>
             <p className="mt-8 max-w-3xl text-muted">
-              Every membership includes the Readiness Assessment. Extra coaching sessions start at $75 for members.
+              Every membership includes the Readiness Assessment. Prices are set for each region and shown in your local currency.
             </p>
             <a href={appLink("/pricing", "ft_tiers")} className="mt-6 inline-block rounded-full border-2 border-navy px-6 py-3 font-semibold text-navy hover:bg-navy hover:text-white">
               See full pricing
@@ -93,7 +94,7 @@ export default function FounderTrajectoryPage() {
             </div>
             <div className="rounded-card border border-line bg-surface-tint p-7">
               <p className="font-display text-xl font-bold">Live sessions with a Founder Coach</p>
-              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month; extra sessions start at $75 for members.</p>
+              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month; members pay less for extra sessions.</p>
             </div>
           </div>
         </section>
