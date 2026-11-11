@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { loadMembership } from "@/lib/membership-server";
 import { entitlements } from "@/lib/membership";
-import { ACTION_STATUSES, MAX_ACTIONS, planCompleteness, sanitizePlan, type PlanAction } from "@/lib/plan";
+import { ACTION_STATUSES, MAX_ACTIONS, planCompleteness, sanitizePlan, stampDoneDates, type PlanAction, type StrategicPlan } from "@/lib/plan";
 import { loadLatestAssessment, loadPlan, planOrStarter } from "@/lib/plan-server";
 import { BLOCK_KEYS, type BlockKey } from "@/lib/scoring";
 
@@ -34,32 +34,35 @@ export async function POST(req: NextRequest) {
   if (!isArea(body?.area) || !text) return NextResponse.json({ error: "Choose a business area and describe the action." }, { status: 400 });
 
   const latest = await loadLatestAssessment(supabase, user.id);
-  const { plan } = planOrStarter(await loadPlan(supabase, user.id), latest);
+  const row = await loadPlan(supabase, user.id);
+  const { plan } = planOrStarter(row, latest);
   const area = plan.areas[body!.area as BlockKey] ?? { current: "", desired: "", actions: [] };
   if (area.actions.some((a) => a.text.toLowerCase() === text.toLowerCase())) return NextResponse.json({ ok: true, duplicate: true });
   if (area.actions.length >= MAX_ACTIONS) return NextResponse.json({ error: `That area already has ${MAX_ACTIONS} actions. Finish or remove one in the Plan Builder first.` }, { status: 400 });
-  const action: PlanAction = { id: `m${Date.now().toString(36)}`, text, owner: "", due: typeof body?.due === "string" ? body.due : "", status: "not_started" };
+  const action: PlanAction = { id: `m${Date.now().toString(36)}`, text, owner: "", due: typeof body?.due === "string" ? body.due : "", status: "not_started", doneOn: "", evidence: "" };
   area.actions.push(action);
   plan.areas[body!.area as BlockKey] = area;
-  return save(supabase, user.id, plan, latest);
+  return save(supabase, user.id, plan, latest, row?.data ?? null);
 }
 
 export async function PATCH(req: NextRequest) {
   const g = await guard();
   if ("error" in g) return g.error;
   const { supabase, user } = g;
-  const body = (await req.json().catch(() => null)) as { area?: unknown; id?: unknown; status?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { area?: unknown; id?: unknown; status?: unknown; evidence?: unknown } | null;
   const status = ACTION_STATUSES.find((s) => s.value === body?.status)?.value;
   if (!isArea(body?.area) || typeof body?.id !== "string" || !status) return NextResponse.json({ error: "Missing action" }, { status: 400 });
   const row = await loadPlan(supabase, user.id);
   const action = row?.data.areas[body!.area as BlockKey]?.actions.find((a) => a.id === body!.id);
   if (!row || !action) return NextResponse.json({ error: "Action not found" }, { status: 404 });
+  const prev = sanitizePlan(JSON.parse(JSON.stringify(row.data)));
   action.status = status;
-  return save(supabase, user.id, row.data, await loadLatestAssessment(supabase, user.id));
+  if (typeof body?.evidence === "string") action.evidence = body.evidence.trim().slice(0, 300);
+  return save(supabase, user.id, row.data, await loadLatestAssessment(supabase, user.id), prev);
 }
 
-async function save(supabase: any, founderId: string, raw: unknown, latest: Awaited<ReturnType<typeof loadLatestAssessment>>) {
-  const plan = sanitizePlan(raw);
+async function save(supabase: any, founderId: string, raw: unknown, latest: Awaited<ReturnType<typeof loadLatestAssessment>>, prev: StrategicPlan | null) {
+  const plan = stampDoneDates(prev, sanitizePlan(raw));
   const completeness = planCompleteness(plan, latest?.gapKeys ?? []);
   const { error } = await supabase
     .from("strategic_plans")

@@ -274,3 +274,22 @@ export async function generateDiagnosticReport(input: ReportInput, options: Repo
   if (!text.trim()) throw new Error("The report came back empty.");
   return text;
 }
+
+/** Reads one uploaded document (PDF or image) with a prompt and returns
+ * the reply text. The file is sent once and not kept anywhere by RENZOLO
+ * (lib/doc-intake.ts). */
+export async function readDocument(prompt: string, file: { mediaType: string; base64: string }, maxTokens = 1500): Promise<string> {
+  const block =
+    file.mediaType === "application/pdf"
+      ? { type: "document", source: { type: "base64", media_type: "application/pdf", data: file.base64 } }
+      : { type: "image", source: { type: "base64", media_type: file.mediaType, data: file.base64 } };
+  const response = await getClient().messages.create({
+    model: "claude-sonnet-4-5",
+    max_tokens: maxTokens,
+    messages: [{ role: "user", content: [block as any, { type: "text", text: prompt }] }],
+  });
+  return response.content
+    .filter((b: any) => b.type === "text")
+    .map((b: any) => b.text)
+    .join("");
+}

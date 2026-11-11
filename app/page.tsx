@@ -1,6 +1,6 @@
 import { SubscriptionFeatures } from "@/components/SubscriptionFeatures";
 import { QUICK_QUESTIONS, STAGES } from "@/lib/quickcheck";
-import { Button, Eyebrow, Glow } from "@/components/brand/Visuals";
+import { Button, Eyebrow } from "@/components/brand/Visuals";
 import { OutcomeFlipCards, ReadinessTicker } from "@/components/brand/BrandClient";
 
 /** Why founders choose RENZOLO (brand book: never name competitors; contrast
@@ -8,7 +8,7 @@ import { OutcomeFlipCards, ReadinessTicker } from "@/components/brand/BrandClien
 const WHY = [
   {
     title: "Built around the outcome you need",
-    text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it. The approach behind 800+ founders trained in 19 African countries.",
+    text: "Pick your goal: win customers, qualify for capital or attract investors. Your assessment, plan, market brief and coaching all work toward it. The approach behind 7,000+ suppliers and entrepreneurs trained in 30+ countries.",
   },
   {
     title: "Built from the buyer's side of the table",
@@ -45,7 +45,6 @@ export default function HomePage() {
       <main>
         {/* Hero (light, per the brand book: the website and app landing stay light) */}
         <section id="hero" className="relative overflow-hidden">
-          <Glow />
           <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1.1fr_1fr]">
             <div className="hero-in">
               <Eyebrow>Venture Readiness Assessment and Development Support</Eyebrow>
@@ -58,7 +57,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col gap-3 pt-8 sm:flex-row sm:items-center">
                 <Button href="/snapshot" className="sm:whitespace-nowrap">Start your free Readiness Snapshot</Button>
-                <span className="text-sm text-ink-muted sm:ml-2">5 to 7 minutes · no account needed</span>
+                <span className="text-sm text-ink-muted sm:ml-2">5 minutes or less · no account needed</span>
               </div>
               <p className="pt-6 text-sm text-ink-muted">
                 Already a member?{" "}
@@ -178,7 +177,7 @@ export default function HomePage() {
               <SubscriptionFeatures dark />
             </div>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a href="/snapshot" className="rounded-lg bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
+              <a href="/snapshot" className="rounded-pill bg-brand px-7 py-4 text-center text-lg font-semibold text-on-brand">
                 Start with the free Snapshot
               </a>
               <a href="/pricing" className="rounded-lg border border-cream/40 px-7 py-4 text-center text-lg font-semibold text-white">

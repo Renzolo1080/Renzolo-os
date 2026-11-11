@@ -7,14 +7,44 @@
 @import "@fontsource/dm-sans/700.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/libre-caslon-text/700.css";
+@import "@fontsource/source-sans-3/400.css";
+@import "@fontsource/source-sans-3/600.css";
+@import "@fontsource/source-sans-3/700.css";
 @import "./brand-tokens.css";
+
+/* RENZOLO OS™ in the website look (approved Nov 9, 2026), so the app and
+   renzoloenterprises.com feel like one firm: serif headlines, Source Sans
+   body, white pages, cool grey lines and tints, 32px rounded panels. */
+:root {
+  --font-display: "Libre Caslon Text", Georgia, serif;
+  --font-sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Pages are white; "surface" (also the legacy cream) is the light cool grey
+     for panels, form areas and alternating sections. */
+  --page: #ffffff;
+  --surface: #f3f5f8;
+  --surface-rgb: 243 245 248;
+  --surface-tint: #f3f5f8;
+  --surface-tint-rgb: 243 245 248;
+  --line: #e3e7ed;
+  --line-rgb: 227 231 237;
+  /* No teal: links, labels and progress are navy; orange stays for buttons
+     and highlights. */
+  --teal: #071727;
+  --teal-rgb: 7 23 39;
+  --teal-text: #071727;
+  --teal-text-rgb: 7 23 39;
+  --gold: #ffc83d;
+  --gold-rgb: 255 200 61;
+  --radius-lg: 32px;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   color: var(--ink);
-  background: var(--surface);
+  background: var(--page, #fff);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }

@@ -1340,6 +1340,177 @@ grant select on guide_leads to authenticated;
 revoke all on guide_leads from anon;
 revoke insert, update, delete on guide_leads from anon, authenticated;
 
+-- ===== 2026-11-10: documents and partners (same as supabase/migrations/2026-11-10_documents_and_partners.sql) =====
+
+-- ===== Document intake =====
+-- Only the figures and checks the AI pulled from a founder's document are
+-- kept (lib/doc-intake.ts). The file itself is never stored.
+create table if not exists document_extractions (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  doc_type text not null check (doc_type in ('bank_statement', 'financial_statements', 'registration', 'tax_clearance')),
+  file_name text not null check (length(file_name) between 1 and 80),
+  result jsonb not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists document_extractions_founder_idx on document_extractions (founder_id, created_at desc);
+alter table document_extractions enable row level security;
+grant select, insert, update, delete on document_extractions to service_role;
+-- Founders read and delete their own results. Only the server saves them
+-- (after the AI has read the document), so nobody can write a "passed"
+-- check for themselves. Supabase gives signed-in users every right on new
+-- tables by default, so take them back first.
+revoke all on document_extractions from authenticated;
+grant select, delete on document_extractions to authenticated;
+revoke all on document_extractions from anon;
+do $$ begin
+  create policy "document_extractions: own or staff read" on document_extractions for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "document_extractions: own insert" on document_extractions for insert with check (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "document_extractions: own delete" on document_extractions for delete using (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+
+-- ===== Partner portal =====
+-- A partner (buyer, government agency, lender or investor, foundation)
+-- sponsors cohorts. Founders join a cohort with its code and explicitly
+-- agree to share their readiness progress with that partner; they can stop
+-- sharing at any time. Partners never see assessment answers, documents or
+-- coaching notes: the partner pages read only scores, progress and counts,
+-- through the server (lib/partner-server.ts). Staff set partners up.
+create table if not exists partners (
+  id uuid primary key default gen_random_uuid(),
+  name text not null check (length(name) between 2 and 120),
+  kind text not null check (kind in ('buyer', 'government', 'lender_investor', 'foundation', 'other')),
+  created_at timestamptz not null default now()
+);
+create table if not exists partner_users (
+  partner_id uuid not null references partners(id) on delete cascade,
+  user_id uuid not null references profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (partner_id, user_id)
+);
+create table if not exists partner_cohorts (
+  id uuid primary key default gen_random_uuid(),
+  partner_id uuid not null references partners(id) on delete cascade,
+  name text not null check (length(name) between 2 and 120),
+  join_code text not null unique check (join_code ~ '^[A-Z0-9]{6,12}$'),
+  open boolean not null default true,
+  starts_on date,
+  ends_on date,
+  created_at timestamptz not null default now()
+);
+create table if not exists cohort_members (
+  cohort_id uuid not null references partner_cohorts(id) on delete cascade,
+  founder_id uuid not null references profiles(id) on delete cascade,
+  consent_version text not null check (length(consent_version) between 1 and 20),
+  consented_at timestamptz not null default now(),
+  -- Total Readiness Score when they joined, for "progress since joining".
+  baseline_score integer check (baseline_score between 0 and 100),
+  primary key (cohort_id, founder_id)
+);
+create index if not exists cohort_members_founder_idx on cohort_members (founder_id);
+
+alter table partners enable row level security;
+alter table partner_users enable row level security;
+alter table partner_cohorts enable row level security;
+alter table cohort_members enable row level security;
+
+grant select, insert, update, delete on partners, partner_users, partner_cohorts, cohort_members to service_role;
+-- Joining is done by the server after it checks the cohort's code, so
+-- founders only read and leave (delete) their memberships.
+revoke all on partners, partner_users, partner_cohorts, cohort_members from authenticated;
+grant select on partners, partner_users, partner_cohorts to authenticated;
+grant select, delete on cohort_members to authenticated;
+revoke all on partners, partner_users, partner_cohorts, cohort_members from anon;
+
+-- Partner staff see their own partner and cohorts; RENZOLO staff see all.
+do $$ begin
+  create policy "partners: own partner or staff" on partners for select
+    using (is_staff() or exists (select 1 from partner_users pu where pu.partner_id = partners.id and pu.user_id = auth.uid()));
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "partner_users: self or staff" on partner_users for select using (user_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "partner_cohorts: own partner or staff" on partner_cohorts for select
+    using (is_staff() or exists (select 1 from partner_users pu where pu.partner_id = partner_cohorts.partner_id and pu.user_id = auth.uid()));
+exception when duplicate_object then null; end $$;
+-- Founders see, join and leave their own memberships. Joining by code is
+-- done by the server after checking the code, so founders can't browse
+-- other partners' cohorts.
+do $$ begin
+  create policy "cohort_members: own or staff read" on cohort_members for select using (founder_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "cohort_members: own insert" on cohort_members for insert with check (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "cohort_members: own delete" on cohort_members for delete using (founder_id = auth.uid());
+exception when duplicate_object then null; end $$;
+
+-- Setting up a partner (run by RENZOLO staff in the SQL editor):
+--   insert into partners (name, kind) values ('Example Agency', 'government') returning id;
+--   insert into partner_cohorts (partner_id, name, join_code) values ('<partner id>', 'Q1 2027 supplier cohort', 'EXAMPLE27');
+--   insert into partner_users (partner_id, user_id) values ('<partner id>', '<their RENZOLO user id>');
+
 -- End of the tables this script creates: from here on, new tables in
 -- "public" get no automatic access (Supabase's behaviour from 30 Oct 2026).
 alter default privileges in schema public revoke all on tables from anon, authenticated, service_role;
+
+-- ===== 2026-11-10 coach access (supabase/migrations/2026-11-10_coach_access.sql) =====
+-- Coach access with the founder's permission (approved Nov 10, 2026).
+-- A founder shares their plan, actions and dashboard with ONE assigned
+-- coach at a time, and can stop sharing whenever they like. Rows are never
+-- deleted: each grant and each revocation is kept as a record. Coaches can
+-- read only the grants made to them; the coach pages (service role) load a
+-- founder's plan, goals and updates only while a grant is active.
+-- Safe to run more than once.
+
+create table if not exists coach_access (
+  id uuid primary key default gen_random_uuid(),
+  founder_id uuid not null references profiles(id) on delete cascade,
+  coach_id uuid not null references profiles(id) on delete cascade,
+  consent_version text not null check (length(consent_version) between 1 and 10),
+  granted_at timestamptz not null default now(),
+  revoked_at timestamptz,
+  check (founder_id <> coach_id),
+  check (revoked_at is null or revoked_at >= granted_at)
+);
+create unique index if not exists coach_access_one_active on coach_access (founder_id) where revoked_at is null;
+create index if not exists coach_access_coach_idx on coach_access (coach_id) where revoked_at is null;
+
+-- True when a user is a coach (advisor) or admin. Security definer, so a
+-- founder's insert can check the role without reading other profiles.
+create or replace function is_coach_user(uid uuid) returns boolean
+  language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles p where p.id = uid and p.role in ('advisor','admin'));
+$$;
+revoke execute on function is_coach_user(uuid) from public, anon;
+grant execute on function is_coach_user(uuid) to authenticated, service_role;
+
+alter table coach_access enable row level security;
+grant select, insert, update on coach_access to service_role;
+-- Supabase gives signed-in users every right on new tables by default, so
+-- take them all back and grant only what founders need: read their rows,
+-- create a grant (three columns) and stop sharing (revoked_at only).
+revoke insert, update, delete, truncate, references, trigger on coach_access from authenticated;
+grant select on coach_access to authenticated;
+grant insert (founder_id, coach_id, consent_version) on coach_access to authenticated;
+grant update (revoked_at) on coach_access to authenticated;
+revoke all on coach_access from anon;
+
+do $$ begin
+  create policy "coach_access: founder, their coach or staff read" on coach_access for select
+    using (founder_id = auth.uid() or coach_id = auth.uid() or is_staff());
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "coach_access: founder grants to a coach" on coach_access for insert
+    with check (founder_id = auth.uid() and revoked_at is null and is_coach_user(coach_id));
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "coach_access: founder revokes own" on coach_access for update
+    using (founder_id = auth.uid()) with check (founder_id = auth.uid() and revoked_at is not null);
+exception when duplicate_object then null; end $$;

@@ -1,6 +1,6 @@
 const QUESTIONS: [string, string][] = [
   ["Who is Founder Trajectory™ for?", "Founders and suppliers at any stage, from first idea to exit, in any country. We're launching first in Kenya, South Africa and the United States."],
-  ["How long does the free Snapshot take?", "About five to seven minutes, with no account needed. You see your results straight away."],
+  ["How long does the free Snapshot take?", "Five minutes or less, with no account needed. You see your results straight away."],
   ["Do I need a registered business?", "No. If you haven't registered yet, the assessment shows what formalising would change and builds it into your plan."],
   ["How do I pay?", "By card in US dollars today. Paying in local currency, including M-Pesa in Kenya, is being set up."],
   ["Is the valuation an official valuation?", "No. It's a directional range for your own planning, not a formal valuation or financial advice."],

@@ -61,6 +61,11 @@ export default async function ToolsPage() {
         Quick calculators and a milestone planner to turn your assessment goals into concrete next steps.
       </p>
 
+      <a href="/assessment/documents" className="mb-8 block rounded-2xl border border-gold bg-cream p-5 hover:border-navy">
+        <span className="block font-semibold text-navy">Are your documents lender-ready? →</span>
+        <span className="mt-1 block text-sm text-ink-soft">Upload a bank statement, financial statements, registration or tax clearance. Our AI pulls out the figures lenders look at and flags what to fix.</span>
+      </a>
+
       <h2 className="text-xl font-bold text-navy mb-4">Calculators</h2>
       <FinancialCalculators />
 

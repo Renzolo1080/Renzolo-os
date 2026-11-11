@@ -1,51 +1,26 @@
 import { ScrollShadow } from "@/components/BrandClient";
 import { APP_URL, appLink, WHATSAPP_URL } from "@/lib/site";
 
-/** Header links, per the brand book's page flow. */
+/** Header links (approved v6 mockup, Nov 2026). */
 const NAV = [
-  ["Founder Trajectory™", "/founder-trajectory/"],
+  ["What we do", "/#services"],
+  ["Memberships", "/#memberships"],
+  ["Pricing", `${APP_URL}/pricing`],
   ["Academy", "/academy/"],
-  ["Pricing", "/#pricing"],
+  ["About us", "/about/"],
+  ["Partners", "/partners/"],
 ];
-
-/** "Track record" menu: the proof, gathered in one place. */
-const TRACK = [
-  ["Lorenzo's experience", "/about/#proof", "20+ years, 800+ founders, 19 countries"],
-  ["Expertise", "/about/#expertise", "What every assessment draws on"],
-  ["Why RENZOLO", "/#why", "Five reasons, each with its proof"],
-  ["Founder story", "/about/", "Why Lorenzo built RENZOLO"],
-];
-
-function TrackRecordMenu() {
-  return (
-    <div className="group relative">
-      <a href="/about/#proof" className="inline-flex items-center gap-1 text-ink-muted hover:text-ink group-focus-within:text-ink" aria-haspopup="true">
-        Track record
-        <svg aria-hidden="true" viewBox="0 0 12 12" className="h-3 w-3 transition-transform group-hover:rotate-180 group-focus-within:rotate-180"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
-      </a>
-      <div className="invisible absolute left-1/2 top-full z-40 w-72 -translate-x-1/2 pt-3 opacity-0 transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-        <ul className="rounded-card border border-line bg-surface p-2 shadow-soft">
-          {TRACK.map(([label, href, note]) => (
-            <li key={href}>
-              <a href={href} className="block rounded-[12px] px-3 py-2.5 hover:bg-surface-tint">
-                <span className="block text-[15px] font-semibold text-ink">{label}</span>
-                <span className="block text-xs text-ink-muted">{note}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
 
 export function Header({ campaign = "header" }: { campaign?: string }) {
   return (
     <header id="site-header" className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur transition-shadow">
       <ScrollShadow />
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4 md:px-8">
-        <a href="/" className="font-display text-xl font-extrabold tracking-[-0.01em] text-ink">
-          RENZOLO<sup className="ml-0.5 text-[0.55em] font-extrabold text-black">™</sup>
+        <a href="/" className="inline-flex shrink-0 items-center gap-2 font-sans text-xl font-bold tracking-[0.06em] text-ink md:gap-3 md:text-2xl md:tracking-[0.08em]">
+          <img src="/img/rz-logo.png" alt="" aria-hidden="true" width={43} height={36} className="h-8 w-auto md:h-9" />
+          <span>
+            RENZOLO<sup className="ml-0.5 text-[0.5em] font-bold">™</sup>
+          </span>
         </a>
         <nav aria-label="Main" className="hidden items-center gap-7 text-[15px] font-medium lg:flex">
           {NAV.map(([label, href]) => (
@@ -53,13 +28,13 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
               {label}
             </a>
           ))}
-          <TrackRecordMenu />
           <a href={`${APP_URL}/login`} className="text-ink-muted hover:text-ink">
             Log in
           </a>
         </nav>
-        <a href={appLink("/snapshot", campaign)} className="rounded-pill bg-ink px-5 py-2.5 text-sm font-semibold text-surface transition-colors hover:bg-ink/85">
-          Start your assessment
+        <a href={appLink("/snapshot", campaign)} className="shrink-0 rounded-pill bg-brand px-4 py-2.5 text-sm font-bold text-on-brand transition-colors hover:bg-brand/90 md:px-5 md:text-[15px]">
+          <span className="sm:hidden">Free Snapshot</span>
+          <span className="hidden sm:inline">Start the free Snapshot</span>
         </a>
       </div>
       <nav aria-label="Main (mobile)" className="flex gap-5 overflow-x-auto px-4 pb-3 text-sm font-medium lg:hidden">
@@ -68,9 +43,6 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
             {label}
           </a>
         ))}
-        <a href="/about/#proof" className="shrink-0 text-ink-muted">
-          Track record
-        </a>
         <a href={`${APP_URL}/login`} className="shrink-0 text-ink-muted">
           Log in
         </a>
@@ -79,37 +51,47 @@ export function Header({ campaign = "header" }: { campaign?: string }) {
   );
 }
 
+const FOOT: [string, [string, string][]][] = [
+  ["What we do", [["Readiness Assessment", "/#services"], ["Growth planning", "/founder-trajectory/"], ["Founder coaching", "/founder-trajectory/"], ["Buyer and investor matching", "/partners/"]]],
+  ["Company", [["About us", "/about/"], ["Partners", "/partners/"], ["Memberships", "/#memberships"], ["Pricing", `${APP_URL}/pricing`], ["Academy", "/academy/"]]],
+  ["Get started", [["Free Readiness Snapshot", "/readiness-snapshot/"], ["Log in", `${APP_URL}/login`], ["Talk to our team", "/contact/"]]],
+];
+
 export function Footer() {
   return (
     <>
-      <footer data-theme="dark" className="bg-night text-ink-muted">
-        <div className="mx-auto grid max-w-[1200px] gap-8 px-4 py-16 text-sm md:grid-cols-[2fr_1fr_1fr_1fr] md:px-8">
-          <div>
-            <p className="font-display text-lg font-extrabold text-ink">RENZOLO™</p>
-            <p className="mt-2 max-w-sm">
-              Customer, capital and investor readiness for founders across Africa, starting in South Africa and Kenya. Home of Founder Trajectory™, powered by RENZOLO OS™.
+      <footer className="border-t border-line bg-[#F3F5F8] text-ink-muted">
+        <div className="mx-auto flex max-w-[1240px] flex-wrap gap-10 px-4 pb-8 pt-16 md:px-8">
+          <div className="min-w-0 flex-[2_1_320px]">
+            <p className="inline-flex items-center gap-3 font-sans text-[22px] font-bold tracking-[0.08em] text-ink">
+              <img src="/img/rz-logo.png" alt="" aria-hidden="true" width={48} height={40} className="h-10 w-auto" />
+              RENZOLO™
+            </p>
+            <p className="mt-4 max-w-[360px] text-base leading-relaxed">A global venture development and capital infrastructure firm, helping founders and CEOs get ready to win.</p>
+            <p className="mt-4 text-base">
+              <a href="/contact/" className="font-bold text-ink underline underline-offset-4">Talk to our team</a>
             </p>
           </div>
-          <div className="flex flex-col gap-2">
-            <a href="/founder-trajectory/" className="hover:text-ink">Founder Trajectory™</a>
-            <a href="/#os" className="hover:text-ink">RENZOLO OS™</a>
-            <a href="/academy/" className="hover:text-ink">Academy</a>
-            <a href="/#pricing" className="hover:text-ink">Pricing</a>
-            <a href="/about/" className="hover:text-ink">About</a>
-          </div>
-          <div className="flex flex-col gap-2">
-            <a href="/contact/" className="hover:text-ink">Contact us</a>
-            {WHATSAPP_URL && <a href={WHATSAPP_URL} className="hover:text-ink">WhatsApp</a>}
-            <a href={`${APP_URL}/login`} className="hover:text-ink">Log in</a>
-          </div>
-          <div className="flex flex-col gap-2">
-            <a href={`${APP_URL}/privacy`} className="hover:text-ink">Privacy policy</a>
-            <a href={`${APP_URL}/terms`} className="hover:text-ink">Terms of service</a>
-            <a href={`${APP_URL}/refunds`} className="hover:text-ink">Refunds</a>
-          </div>
+          {FOOT.map(([title, links]) => (
+            <div key={title} className="flex min-w-0 flex-[1_1_180px] flex-col gap-2.5">
+              <p className="mb-1.5 text-sm font-bold uppercase tracking-[0.14em] text-ink">{title}</p>
+              {links.map(([label, href]) => (
+                <a key={label} href={href} className="text-base hover:text-ink">
+                  {label}
+                </a>
+              ))}
+            </div>
+          ))}
         </div>
-        <div className="border-t border-line">
-          <p className="mx-auto max-w-[1200px] px-4 py-5 text-xs md:px-8">© {new Date().getFullYear()} Renzolo Enterprises LLC, Wisconsin, United States.</p>
+        <div className="mx-auto flex max-w-[1240px] flex-wrap justify-between gap-4 border-t border-line px-4 py-6 text-sm md:px-8">
+          <span>RENZOLO™ · Founder Trajectory™ · RENZOLO OS™</span>
+          <span className="flex flex-wrap gap-4">
+            <a href={`${APP_URL}/privacy`} className="hover:text-ink">Privacy</a>
+            <a href={`${APP_URL}/terms`} className="hover:text-ink">Terms</a>
+            <a href={`${APP_URL}/refunds`} className="hover:text-ink">Refunds</a>
+            {WHATSAPP_URL && <a href={WHATSAPP_URL} className="hover:text-ink">WhatsApp</a>}
+          </span>
+          <span>© {new Date().getFullYear()} Renzolo Enterprises LLC</span>
         </div>
       </footer>
       {WHATSAPP_URL && (

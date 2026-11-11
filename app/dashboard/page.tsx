@@ -1,3 +1,4 @@
+import { Burst } from "@/components/brand/Visuals";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReportPanel } from "@/components/ReportPanel";
@@ -24,6 +25,10 @@ import { verifyTransaction, verifyTransactionByReference } from "@/lib/flutterwa
 import { readinessFromRows } from "@/lib/readiness";
 import { ScoreExplainer } from "@/components/ScoreExplainer";
 import { ensureMatchingAcknowledgment } from "@/lib/acknowledgment-server";
+import { loadStepState } from "@/lib/reminders-server";
+import { nextReminderDate, reminderStep } from "@/lib/reminders";
+import { trajectory } from "@/lib/live-score";
+import { lenderChecks } from "@/lib/doc-intake";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
@@ -181,18 +186,39 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
         .map((r: any) => ({ id: r.id, source: r.source, title: r.title }));
       milestones = (msRows ?? []).slice().sort((a: any, b: any) => (a.target_date ?? "9999").localeCompare(b.target_date ?? "9999")).slice(0, 3);
     }
-    let scoreHistory: { date: string; score: number }[] = [];
-    if (extras.includes("history")) {
-      const { data: historyRows } = await supabase
-        .from("scores")
-        .select("*, assessments!inner(founder_id, extra)")
-        .eq("assessments.founder_id", user.id)
-        .order("created_at", { ascending: true });
-      scoreHistory = (historyRows ?? []).map((r: any) => ({
-        date: r.created_at,
-        score: readinessFromRows(r, { completeness: null, review: null }, typeof r.assessments?.extra?.planScore === "number" ? r.assessments.extra.planScore : null).total,
-      }));
-    }
+    // Every scored assessment: the first is the starting point, the rest
+    // are re-assessments that confirm the score (lib/live-score.ts).
+    const { data: historyRows } = await supabase
+      .from("scores")
+      .select("*, assessments!inner(founder_id, extra)")
+      .eq("assessments.founder_id", user.id)
+      .order("created_at", { ascending: true });
+    const headline = readinessFromRows(latestScore, { completeness: planRow?.completeness ?? null, review: review?.overall ?? null }, planScore);
+    const confirmed = (historyRows ?? []).map((r: any) => ({
+      date: r.created_at as string,
+      total: r.id === latestScore.id ? headline.total : readinessFromRows(r, { completeness: null, review: null }, typeof r.assessments?.extra?.planScore === "number" ? r.assessments.extra.planScore : null).total,
+    }));
+    const scoreHistory: { date: string; score: number }[] = extras.includes("history") ? confirmed.map((c) => ({ date: c.date, score: c.total })) : [];
+    // Document checks (PR 28); the table may not exist yet, which is fine.
+    const { data: docRows } = await supabase.from("document_extractions").select("doc_type, created_at, result").order("created_at", { ascending: true }).limit(50);
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const progress = trajectory({
+      plan: planRow?.data ?? null,
+      confirmed,
+      checkins: (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })),
+      documents: (docRows ?? []).map((d: any) => {
+        let ok = false;
+        try {
+          ok = !!d.result && !lenderChecks(d.result, todayIso).some((c) => c.level === "fix");
+        } catch {
+          ok = false;
+        }
+        return { doc_type: d.doc_type, created_at: d.created_at, ok };
+      }),
+      updates: (updates ?? []).map((u: any) => ({ ...u, revenue: u.revenue === null ? null : Number(u.revenue), cash: u.cash === null ? null : Number(u.cash) })),
+      startBlocks: ((historyRows ?? [])[0] as any)?.block_scores ?? null,
+      today: todayIso,
+    });
 
     if (existingReport) {
       if (existingReport.score_id !== latestScore.id) reportOutdated = "Your score has changed since this report was written.";
@@ -200,11 +226,29 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
       else if (reviewRow && new Date(reviewRow.created_at) > new Date(existingReport.created_at)) reportOutdated = "Your plan has been reviewed since this report was written.";
     }
 
+    // When the next reminder email for an unfinished step goes out, for
+    // the "We'll remind you on…" note (lib/reminders.ts).
+    let nextReminder: { date: string; step: "assessment" | "coaching" } | null = null;
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY && user.email) {
+      try {
+        const admin = createAdminClient();
+        const current = reminderStep(await loadStepState(admin, user.id));
+        if (current) {
+          const { data: log } = await admin.from("email_log").select("kind").eq("email", user.email.toLowerCase()).like("kind", "remind:%");
+          const date = nextReminderDate(current.step, current.since, (log ?? []).map((l: any) => l.kind));
+          nextReminder = date ? { date, step: current.step } : null;
+        }
+      } catch {
+        nextReminder = null;
+      }
+    }
+
     dashboard = {
       access,
       extras,
       score: latestScore,
-      readiness: readinessFromRows(latestScore, { completeness: planRow?.completeness ?? null, review: review?.overall ?? null }, planScore),
+      readiness: headline,
+      trajectory: progress,
       plan: planRow?.data ?? null,
       planCompleteness: planRow?.completeness ?? null,
       checkins: (checkins ?? []).map((c: any) => ({ ...c, value: Number(c.value) })),
@@ -221,6 +265,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
       commitments: openCommitments((coachRows ?? []) as any[]).map((c) => ({ id: c.id, sessionId: c.sessionId, text: c.text, due: c.due })),
       invite: referralCode ? <InviteCard inviteUrl={`${publicAppUrl()}/?ref=${referralCode}&utm_source=referral&utm_medium=member`} rewardsEarned={(rewards ?? []).length} /> : null,
       today: new Date().toISOString().slice(0, 10),
+      nextReminder,
     };
   }
 
@@ -247,7 +292,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
       {!latestScore ? (
         <div>
           <p className="mb-1 font-semibold text-navy">Start with your free Readiness Snapshot</p>
-          <p className="mb-4 text-ink-soft">5 to 7 minutes, mostly dropdowns and taps. You'll get your Total Readiness Score, your Strategic Plan Readiness and the three areas holding you back.</p>
+          <p className="mb-4 text-ink-soft">5 minutes or less, mostly dropdowns and taps. You'll get your Total Readiness Score, your Strategic Plan Readiness and the three areas holding you back.</p>
           <a href="/assessment" className="rounded bg-navy px-5 py-3 text-white font-semibold inline-block">
             Start the Snapshot
           </a>
@@ -274,7 +319,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
                   ? `Join a membership within ${carryDaysLeft} day${carryDaysLeft === 1 ? "" : "s"} and this assessment carries straight into it.`
                   : "Join a membership to keep building on this assessment with a plan, tools and coaching."}
               </p>
-              <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
+              <a href="/dashboard/subscribe" className="mt-3 inline-block rounded-pill bg-brand px-4 py-2 font-semibold text-on-brand">
                 See membership options
               </a>
             </div>
@@ -324,7 +369,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
                 <span className="font-semibold text-navy">Lorenzo · AI: </span>
                 coaching from Lorenzo&apos;s playbook any time, built on your plan, plus your weekly check-in.
               </p>
-              <a href="/ai-coach" className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
+              <a href="/ai-coach" className="rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand">
                 Talk to Lorenzo · AI
               </a>
             </div>
@@ -392,7 +437,9 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
         </div>
       )}
 
-      <div className="rounded border p-6 bg-navy text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-navy p-6 text-white sm:p-8">
+        <Burst className="hidden sm:block" />
+        <div className="relative">
         <p className="text-lg font-semibold">
           {lapsed ? "Your membership has ended" : "Continue your Founder Trajectory™"}
         </p>
@@ -400,7 +447,7 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
           <SubscriptionFeatures dark />
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href="/dashboard/subscribe" className="inline-block rounded bg-brand px-6 py-3 text-center font-semibold text-on-brand">
+          <a href="/dashboard/subscribe" className="inline-block rounded-pill bg-brand px-6 py-3 text-center font-bold text-on-brand">
             {lapsed ? "Renew my membership" : "Become a member"}
           </a>
           {!lapsed && (
@@ -409,9 +456,10 @@ function FreeResult({ score, tier, planScore, gaps, lapsed }: { score: number; t
             </a>
           )}
         </div>
+        </div>
       </div>
 
-      <a href="/tools" className="block text-center rounded border border-navy text-navy px-5 py-3 font-semibold">
+      <a href="/tools" className="block rounded-pill border-2 border-navy px-5 py-3 text-center font-semibold text-navy">
         Open Founder Tools (free calculators)
       </a>
     </div>

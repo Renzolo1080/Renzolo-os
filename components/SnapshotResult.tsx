@@ -1,3 +1,4 @@
+import { Burst } from "@/components/brand/Visuals";
 import type { SnapshotOverview } from "@/lib/snapshot";
 import { SubscriptionFeatures } from "./SubscriptionFeatures";
 import { ShareButtons } from "./ShareButtons";
@@ -86,7 +87,9 @@ export function SnapshotResult({
       )}
 
       {overview.nextStep === "elevate" ? (
-        <div className="rounded-2xl bg-navy p-6 text-white sm:p-8">
+        <div className="relative overflow-hidden rounded-2xl bg-navy p-6 text-white sm:p-8">
+          <Burst className="hidden sm:block" />
+          <div className="relative">
           <p className="text-xs font-semibold uppercase tracking-wide text-gold">Your next step</p>
           <p className="mt-1 text-xl font-bold">Your business may be ready for Elevate</p>
           <p className="mt-1 text-sm text-cream/80">
@@ -97,7 +100,7 @@ export function SnapshotResult({
           <div className="mt-5">
             <SubscriptionFeatures dark />
           </div>
-          <a href={offer?.bookingUrl ?? "/pricing"} className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand">
+          <a href={offer?.bookingUrl ?? "/pricing"} className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-bold text-on-brand">
             {offer?.bookingUrl ? "Book a conversation about Elevate" : "See Elevate and the other memberships"}
           </a>
           <p className="mt-3 text-sm text-cream/80">
@@ -107,9 +110,12 @@ export function SnapshotResult({
             </a>{" "}
             and choose any membership. Sign up with {email.trim() || "the same email"} and this Snapshot will be waiting in your account.
           </p>
+          </div>
         </div>
       ) : (
-        <div className="rounded-2xl bg-navy p-6 text-white sm:p-8">
+        <div className="relative overflow-hidden rounded-2xl bg-navy p-6 text-white sm:p-8">
+          <Burst className="hidden sm:block" />
+          <div className="relative">
           <p className="text-xs font-semibold uppercase tracking-wide text-gold">Your next step</p>
           {overview.nextStep === "essentials" ? (
             <>
@@ -123,18 +129,19 @@ export function SnapshotResult({
             <>
               <p className="mt-1 text-xl font-bold">Get your full Readiness Assessment{offer?.price ? `: ${offer.price}` : ""}</p>
               <p className="mt-1 text-sm text-cream/80">
-                Your Snapshot shows where the gaps are. The full assessment shows why they're there and what to fix first, with your valuation and market
-                insight. It's included in every membership.
+                Your Snapshot shows where the gaps are. The full assessment shows why they're there and what to fix first, with an AI market insight for your
+                industry and country. It's included in every membership, and members also get a valuation range.
               </p>
             </>
           )}
           <div className="mt-5">
             <SubscriptionFeatures dark />
           </div>
-          <a href={registerHref} className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-on-brand">
+          <a href={registerHref} className="mt-6 inline-block rounded-pill bg-brand px-6 py-3 font-bold text-on-brand">
             Create my account
           </a>
           <p className="mt-3 text-xs text-cream/70">Sign up with {email.trim() || "the same email"} and this Snapshot will be waiting in your account.</p>
+          </div>
         </div>
       )}
     </div>

@@ -139,7 +139,7 @@ export function OneOffPurchases({
                 <p className="font-semibold text-navy">
                   You have {coachingAvailable} coaching session{coachingAvailable > 1 ? "s" : ""} to book.
                 </p>
-                <a href="/coaching" className="mt-2 inline-block rounded-lg bg-brand px-4 py-2 font-semibold text-on-brand">
+                <a href="/coaching" className="mt-2 inline-block rounded-pill bg-brand px-4 py-2 font-semibold text-on-brand">
                   Book a session
                 </a>
               </>

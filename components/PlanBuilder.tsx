@@ -12,6 +12,7 @@ import {
   MAX_GOALS,
   MAX_RISKS,
   PLAN_STEPS,
+  REASSESS_EVERY,
   planChecks,
   planCompleteness,
   readyForReview,
@@ -32,6 +33,7 @@ export interface AreaContext {
 }
 
 const input = "mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2";
+import { PLAN_TEMPLATES, applyTemplate, type TemplateKey } from "@/lib/plan-templates";
 const newId = (p: string) => `${p}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4).toString(36)}`;
 
 /** The guided Plan Builder. Founders build their plan here rather than
@@ -182,7 +184,7 @@ export function PlanBuilder({
               {saving ? "Saving…" : "Save"}
             </button>
             {idx < PLAN_STEPS.length - 1 && (
-              <button type="button" className="rounded-lg bg-navy px-6 py-2.5 font-semibold text-white disabled:opacity-40" disabled={saving} onClick={() => go(PLAN_STEPS[idx + 1].key)}>
+              <button type="button" className="rounded-pill bg-brand px-6 py-2.5 font-bold text-on-brand disabled:opacity-40" disabled={saving} onClick={() => go(PLAN_STEPS[idx + 1].key)}>
                 Save and continue
               </button>
             )}
@@ -282,8 +284,31 @@ function Vision({ plan, update, horizons }: SectionProps & { horizons: string[] 
 
 function Goals({ plan, update }: SectionProps) {
   const setGoal = (i: number, patch: Partial<PlanGoal>) => update((p) => ((p.goals[i] = { ...p.goals[i], ...patch }), p));
+  const [templateNote, setTemplateNote] = useState<string | null>(null);
+  const applyStarter = (key: TemplateKey) => {
+    const r = applyTemplate(plan, key, new Date().toISOString().slice(0, 10), () => newId("t"));
+    update(() => r.plan);
+    setTemplateNote(
+      r.added.goals + r.added.actions + r.added.risks === 0
+        ? "Your plan already has room filled; nothing was added."
+        : `Added ${r.added.goals} goal${r.added.goals === 1 ? "" : "s"}, ${r.added.actions} action${r.added.actions === 1 ? "" : "s"} and ${r.added.risks} risk${r.added.risks === 1 ? "" : "s"}. Nothing you'd written was changed. Set your own starting numbers and targets below, then review the actions under Business areas.`
+    );
+  };
   return (
     <Section title="Goals" intro={`Up to ${MAX_GOALS} goals that tell you whether the plan is working. Each needs a number: where it stands now, the target and the date. You'll log progress against them on your dashboard.`}>
+      <Card>
+        <p className="font-semibold text-navy">Start from a template (optional)</p>
+        <p className="text-sm text-ink-soft">Pick the outcome you're getting ready for. We'll add suggested goals, actions and a risk to fill in; you can edit or remove anything.</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {PLAN_TEMPLATES.map((t) => (
+            <button key={t.key} type="button" onClick={() => applyStarter(t.key)} className="rounded-xl border border-gray-200 p-3 text-left hover:border-navy">
+              <span className="block font-semibold text-navy">{t.label}</span>
+              <span className="mt-1 block text-xs text-ink-soft">{t.description}</span>
+            </button>
+          ))}
+        </div>
+        {templateNote && <p className="rounded-lg bg-cream p-3 text-sm text-navy" role="status">{templateNote}</p>}
+      </Card>
       {plan.goals.map((g, i) => (
         <Card key={g.id}>
           <div className="flex items-center justify-between">
@@ -335,6 +360,33 @@ function Goals({ plan, update }: SectionProps) {
           + Add a goal
         </button>
       )}
+      <Card>
+        <p className="font-semibold text-navy">Your readiness target and check-ups</p>
+        <p className="text-sm text-ink-soft">
+          Your starting point is your full assessment. Set the Total Readiness Score you're aiming for and when you'll re-assess to confirm progress. Between re-assessments your dashboard shows a live score that moves as you finish actions and log progress.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <NumberField label="Target Total Readiness Score (out of 100)" value={plan.tracking.targetScore} onChange={(v) => update((p) => ((p.tracking.targetScore = v === null ? null : Math.max(1, Math.min(100, Math.round(v)))), p))} />
+          <label className="block text-sm">
+            <span className="font-medium">Reach it by</span>
+            <input type="date" className={input} value={plan.tracking.targetDate} onChange={(e) => update((p) => ((p.tracking.targetDate = e.target.value), p))} />
+          </label>
+          <label className="block text-sm">
+            <span className="font-medium">Re-assess every</span>
+            <select className={input} value={plan.tracking.reassessEvery} onChange={(e) => update((p) => ((p.tracking.reassessEvery = Number(e.target.value)), p))}>
+              {REASSESS_EVERY.map((d) => (
+                <option key={d} value={d}>
+                  {d} days{d === 90 ? " (recommended)" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            <span className="font-medium">Or on this date (optional)</span>
+            <input type="date" className={input} value={plan.tracking.reassessOn} onChange={(e) => update((p) => ((p.tracking.reassessOn = e.target.value), p))} />
+          </label>
+        </div>
+      </Card>
     </Section>
   );
 }
@@ -420,11 +472,20 @@ function Areas({ plan, update, gapKeys, context }: SectionProps & { gapKeys: str
                     <button type="button" className="justify-self-end text-sm text-red-600" aria-label="Remove action" onClick={() => setArea(k, (y) => (y.actions = y.actions.filter((_, j) => j !== i)))}>
                       ✕
                     </button>
+                    {x.status === "done" && (
+                      <input
+                        className="col-span-2 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm xl:col-span-5"
+                        aria-label="Evidence"
+                        placeholder="Evidence it's done: a short note or a link (earns full credit on your live score)"
+                        value={x.evidence}
+                        onChange={(e) => setArea(k, (y) => (y.actions[i].evidence = e.target.value))}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
               {a.actions.length < MAX_ACTIONS && (
-                <button type="button" className="mt-2 text-sm font-semibold text-teal" onClick={() => setArea(k, (y) => y.actions.push({ id: newId("a"), text: "", owner: "", due: "", status: "not_started" }))}>
+                <button type="button" className="mt-2 text-sm font-semibold text-teal" onClick={() => setArea(k, (y) => y.actions.push({ id: newId("a"), text: "", owner: "", due: "", status: "not_started", doneOn: "", evidence: "" }))}>
                   + Add an action
                 </button>
               )}

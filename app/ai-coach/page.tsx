@@ -11,7 +11,7 @@ import { cloneConfig, SESSION_SECONDS, sessionLimit, sessionsLeft } from "@/lib/
 export const dynamic = "force-dynamic";
 
 /** The AI coach: conversations and weekly check-ins. */
-export default async function AiCoachPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<{ t?: string }> }) {
+export default async function AiCoachPage({ searchParams: searchParamsPromise }: { searchParams?: Promise<{ t?: string; q?: string }> }) {
   const searchParams = await searchParamsPromise;
   const supabase = await createClient();
   const {
@@ -36,7 +36,7 @@ export default async function AiCoachPage({ searchParams: searchParamsPromise }:
             <li>A weekly check-in on your goals, overdue actions and the one thing that matters most</li>
             <li>Suggested actions you can add to your plan in one tap</li>
           </ul>
-          <a href="/dashboard/subscribe" className="mt-5 inline-block rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand">
+          <a href="/dashboard/subscribe" className="mt-5 inline-block rounded-pill bg-brand px-5 py-3 font-semibold text-on-brand">
             See Growth
           </a>
           <p className="mt-3 text-xs text-cream/70">Included with Growth, Elevate and the Launch programme.</p>
@@ -102,6 +102,7 @@ export default async function AiCoachPage({ searchParams: searchParamsPromise }:
           remaining={remaining}
           hasPlan={hasPlan}
           checkinDue={checkinDue}
+          initialDraft={!current && typeof searchParams?.q === "string" ? searchParams.q.slice(0, 500) : ""}
         />
       </div>
     </main>

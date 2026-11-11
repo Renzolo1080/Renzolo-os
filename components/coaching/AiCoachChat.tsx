@@ -33,7 +33,9 @@ export function AiCoachChat({
   remaining: initialRemaining,
   hasPlan,
   checkinDue,
+  initialDraft = "",
 }: {
+  initialDraft?: string;
   threadId: string | null;
   initialMessages: ChatMessage[];
   starters: string[];
@@ -44,7 +46,7 @@ export function AiCoachChat({
   const router = useRouter();
   const [threadId, setThreadId] = useState(initialThread);
   const [messages, setMessages] = useState(initialMessages);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(initialDraft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [remaining, setRemaining] = useState(initialRemaining);
@@ -94,7 +96,7 @@ export function AiCoachChat({
                 <span className="text-sm">
                   <span className="font-semibold">Your weekly check-in is ready.</span> Two minutes: how you're tracking and the one thing that matters this week.
                 </span>
-                <button type="button" disabled={busy || remaining <= 0} onClick={() => send({ checkin: true })} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-on-brand disabled:opacity-50">
+                <button type="button" disabled={busy || remaining <= 0} onClick={() => send({ checkin: true })} className="rounded-pill bg-brand px-4 py-2 text-sm font-semibold text-on-brand disabled:opacity-50">
                   Start check-in
                 </button>
               </div>
@@ -196,7 +198,7 @@ export function AiCoachChat({
             disabled={busy || remaining <= 0}
             aria-label="Message Lorenzo · AI"
           />
-          <button type="submit" disabled={busy || !draft.trim() || remaining <= 0} className="self-end rounded-lg bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
+          <button type="submit" disabled={busy || !draft.trim() || remaining <= 0} className="self-end rounded-pill bg-brand px-5 py-3 font-semibold text-on-brand disabled:opacity-50">
             Send
           </button>
         </div>

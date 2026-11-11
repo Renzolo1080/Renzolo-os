@@ -518,14 +518,10 @@ export function parseProfile(body: unknown): { ok: true; value: QuickProfile } |
     ["ventureStage", STAGES, "your stage"],
     ["industry", INDUSTRIES, "your industry"],
     ["country", [...COUNTRIES, "Other African country"], "your country"],
-    ["businessType", BUSINESS_TYPES, "your business type"],
-    ["yearsInBusiness", YEARS_IN_BUSINESS, "years in business"],
-    ["teamSize", TEAM_SIZES, "your team size"],
     ["annualRevenue", [...REVENUE_BANDS, "$1M+"], "your annual revenue"],
     ["primaryGoal", PRIMARY_GOALS, "your main goal"],
     ["timeHorizon", TIME_HORIZONS, "your timeframe"],
     ["fundingNeed", FUNDING_NEEDS, "your funding plans"],
-    ["registration", REGISTRATION_STATUSES, "your registration status"],
   ];
   const out: Partial<QuickProfile> = {};
   for (const [key, list, label] of required) {
@@ -533,6 +529,12 @@ export function parseProfile(body: unknown): { ok: true; value: QuickProfile } |
     if (!v) return { ok: false, error: `Please choose ${label}.` };
     (out as Record<string, unknown>)[key] = v;
   }
+  // Asked in the full Readiness Assessment, not the Snapshot; older
+  // Snapshots (and the assessment) may still send them.
+  out.businessType = pick(BUSINESS_TYPES, b.businessType) ?? "";
+  out.yearsInBusiness = pick(YEARS_IN_BUSINESS, b.yearsInBusiness) ?? "";
+  out.teamSize = pick(TEAM_SIZES, b.teamSize) ?? "";
+  out.registration = pick(REGISTRATION_STATUSES, b.registration) ?? "";
   const challengesRaw = Array.isArray(b.challenges) ? b.challenges : [];
   const challenges = Array.from(new Set(challengesRaw.filter((c): c is string => pick(CHALLENGES, c) !== null))).slice(0, MAX_CHALLENGES);
   if (challenges.length === 0) return { ok: false, error: "Please choose your biggest challenge." };
