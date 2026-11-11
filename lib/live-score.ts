@@ -275,11 +275,18 @@ const DOC_LABELS: Record<string, string> = {
 };
 
 /** "Score 2 points behind the path", "On track", … for the status pill. */
+/** Goals are behind when less of the way there than the share of time used. */
+export function goalsBehind(t: Trajectory): boolean {
+  return t.goals.percent !== null && t.goals.timeUsed !== null && t.goals.percent < t.goals.timeUsed;
+}
+
 export function statusLine(t: Trajectory): string {
   if (t.status === "no_target" || t.live === null || t.neededToday === null) return "Set a target score to see your path";
   const d = Math.round(Math.abs(t.live - t.neededToday));
-  if (t.status === "ahead") return `Ahead · live score ${d} point${d === 1 ? "" : "s"} above your path`;
-  if (t.status === "on_track") return "On track";
+  // The badge and the "In short" sentence must agree: when the score is on
+  // pace but the goals aren't, say both (approved Nov 11 2026).
+  if (t.status === "ahead") return goalsBehind(t) ? `Score ahead · goals behind` : `Ahead · live score ${d} point${d === 1 ? "" : "s"} above your path`;
+  if (t.status === "on_track") return goalsBehind(t) ? "Score on track · goals behind" : "On track";
   return `Behind · live score ${d} point${d === 1 ? "" : "s"} below your path`;
 }
 
