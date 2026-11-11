@@ -80,7 +80,7 @@ function demoData(): DashboardData {
   } as any);
 
   return {
-    access: { member: true, growth: true },
+    access: { member: true, growth: true, valuation: true },
     extras: ["goalCharts", "kpiTrends", "valuation", "areas", "gaps"],
     score,
     readiness,
