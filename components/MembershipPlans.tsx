@@ -273,7 +273,7 @@ function FeatureComparison({ features }: { features: TierFeature[] }) {
               type="button"
               aria-pressed={all === v}
               onClick={() => setAll(v as boolean)}
-              className={`rounded-pill px-4 py-2 text-sm font-semibold ${all === v ? "bg-navy text-white" : "text-navy"}`}
+              className={`rounded-pill px-4 py-2 text-sm font-semibold ${all === v ? "bg-brand text-on-brand" : "text-navy"}`}
             >
               {label as string}
             </button>
@@ -282,7 +282,7 @@ function FeatureComparison({ features }: { features: TierFeature[] }) {
       </div>
       <div className="mt-4 flex gap-2 sm:hidden" role="group" aria-label="Plan to show">
         {TIER_ORDER.map((t) => (
-          <button key={t} type="button" aria-pressed={pick === t} onClick={() => setPick(t)} className={`flex-1 rounded-pill border px-3 py-2 text-sm font-semibold ${pick === t ? "border-navy bg-navy text-white" : "border-gray-200 text-navy"}`}>
+          <button key={t} type="button" aria-pressed={pick === t} onClick={() => setPick(t)} className={`flex-1 rounded-pill border px-3 py-2 text-sm font-semibold ${pick === t ? "border-brand bg-brand text-on-brand" : "border-gray-200 bg-white text-navy"}`}>
             {NAMES[t]}
           </button>
         ))}
@@ -291,12 +291,12 @@ function FeatureComparison({ features }: { features: TierFeature[] }) {
         <table className="w-full text-left text-sm sm:min-w-[640px]">
           <caption className="sr-only">What each membership includes</caption>
           <thead>
-            <tr className="border-b border-gray-200">
-              <th scope="col" className="p-4 font-semibold text-navy">
+            <tr className="bg-navy text-white">
+              <th scope="col" className="p-4 font-semibold">
                 What&apos;s included
               </th>
               {TIER_ORDER.map((t) => (
-                <th key={t} scope="col" className={`p-4 text-center font-semibold text-navy ${hide(t)}`}>
+                <th key={t} scope="col" className={`p-4 text-center font-semibold ${hide(t)}`}>
                   {NAMES[t]}
                 </th>
               ))}

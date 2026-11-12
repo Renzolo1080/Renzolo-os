@@ -55,7 +55,7 @@ export function CompareTable() {
         </div>
         <div className="inline-flex rounded-pill bg-[#F3F5F8] p-1" role="group" aria-label="How much to show">
           {([[false, "Key features"], [true, "All features"]] as const).map(([v, label]) => (
-            <button key={label} type="button" aria-pressed={all === v} onClick={() => setAll(v)} className={`rounded-pill px-4 py-2 text-sm font-semibold ${all === v ? "bg-ink text-white" : "text-ink"}`}>
+            <button key={label} type="button" aria-pressed={all === v} onClick={() => setAll(v)} className={`rounded-pill px-4 py-2 text-sm font-semibold ${all === v ? "bg-brand text-on-brand" : "text-ink"}`}>
               {label}
             </button>
           ))}
@@ -63,7 +63,7 @@ export function CompareTable() {
       </div>
       <div className="mt-4 flex gap-2 sm:hidden" role="group" aria-label="Plan to show">
         {TIERS.map(([k, n]) => (
-          <button key={k} type="button" aria-pressed={pick === k} onClick={() => setPick(k)} className={`flex-1 rounded-pill border px-3 py-2 text-sm font-semibold ${pick === k ? "border-ink bg-ink text-white" : "border-line text-ink"}`}>
+          <button key={k} type="button" aria-pressed={pick === k} onClick={() => setPick(k)} className={`flex-1 rounded-pill border px-3 py-2 text-sm font-semibold ${pick === k ? "border-brand bg-brand text-on-brand" : "border-line bg-white text-ink"}`}>
             {n}
           </button>
         ))}
@@ -71,7 +71,7 @@ export function CompareTable() {
       <div className="mt-5 overflow-x-auto rounded-[20px] border border-line bg-white">
         <table className="w-full text-left text-[15px] sm:min-w-[640px]">
           <thead>
-            <tr className="border-b border-line">
+            <tr className="bg-ink text-white">
               <th scope="col" className="p-4 font-bold">What&apos;s included</th>
               {TIERS.map(([k, n]) => (
                 <th key={k} scope="col" className={`p-4 text-center font-bold ${hide(k)}`}>{n}</th>

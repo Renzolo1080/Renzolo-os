@@ -113,7 +113,7 @@ export default async function PricingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-2xl bg-surface-tint p-6">
           <h2 className="text-lg font-bold text-navy">Which plan is right for me?</h2>
           <dl className="mt-3 space-y-3 text-sm">
             <div><dt className="font-semibold text-navy">Readiness Assessment</dt><dd className="text-ink-soft">You want a clear, one-time picture of where your business stands and what to fix first.</dd></div>
