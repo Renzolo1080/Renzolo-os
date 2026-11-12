@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     price = p;
     const n = COACHING_QUANTITY[item];
     title = `Expert Advisory Session${n > 1 ? "s" : ""} (${n})`;
-    description = `${n} one-on-one Expert Advisory Session${n > 1 ? "s" : ""}, valid for a year`;
+    description = `${n} one-on-one Expert Advisory Session${n > 1 ? "s" : ""}, to use within 60 days (rescheduling allowed)`;
     row = { quantity: n };
   } else {
     return NextResponse.json({ error: "Unknown purchase." }, { status: 400 });

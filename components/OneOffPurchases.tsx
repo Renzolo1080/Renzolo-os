@@ -110,7 +110,7 @@ export function OneOffPurchases({
               first so your adviser can prepare. Members pay less.
             </p>
           )}
-          <p className="mt-1 text-sm text-ink-soft">One-on-one sessions with industry and market experts and experienced founders: advice specific to your industry, your market and your customers. 60-minute sessions, valid for a year; we match you with an adviser and arrange the time by email.</p>
+          <p className="mt-1 text-sm text-ink-soft">One-on-one sessions with industry and market experts and experienced founders: advice specific to your industry, your market and your customers. 60-minute sessions to use within 60 days of purchase, with rescheduling; we match you with an adviser and arrange the time by email.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
               { key: "coaching_single", label: "1 session", price: p.single, standard: standardSingle },

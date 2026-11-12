@@ -142,7 +142,8 @@ export function MembershipPlans({
           return (
             <div
               key={tier}
-              className={`relative flex flex-col rounded-2xl p-6 shadow-sm ${featured ? "bg-navy text-white ring-2 ring-gold" : "bg-white"}`}
+              id={`plan-${tier}`}
+              className={`relative flex scroll-mt-6 flex-col rounded-2xl p-6 shadow-sm ${featured ? "bg-navy text-white ring-2 ring-gold" : "bg-white"}`}
             >
               {featured && <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-on-brand">Most popular</span>}
               <div className="flex items-center justify-between">
@@ -244,14 +245,14 @@ export function MembershipPlans({
       )}
       <p className="mt-3 text-sm text-ink-soft">{block.methods}</p>
 
-      <FeatureComparison features={features} />
+      <FeatureComparison features={features} mode={mode} signupHref={signupHref} />
     </div>
   );
 }
 
 /** The full comparison, grouped, with a "Key features / All features"
  * switch (Nov 12 2026). Opens on the key rows so it reads well on a phone. */
-function FeatureComparison({ features }: { features: TierFeature[] }) {
+function FeatureComparison({ features, mode, signupHref }: { features: TierFeature[]; mode: "public" | "member"; signupHref: string }) {
   const [all, setAll] = useState(false);
   const [pick, setPick] = useState<Tier>("growth");
   const shown = all ? features : features.filter((f) => f.key);
@@ -287,17 +288,18 @@ function FeatureComparison({ features }: { features: TierFeature[] }) {
           </button>
         ))}
       </div>
-      <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm">
+      <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm sm:overflow-visible">
         <table className="w-full text-left text-sm sm:min-w-[640px]">
           <caption className="sr-only">What each membership includes</caption>
           <thead>
-            <tr className="bg-navy text-white">
-              <th scope="col" className="p-4 font-semibold">
+            <tr className="text-white">
+              <th scope="col" className="sticky top-0 z-10 rounded-tl-2xl bg-navy p-4 font-semibold">
                 What&apos;s included
               </th>
               {TIER_ORDER.map((t) => (
-                <th key={t} scope="col" className={`p-4 text-center font-semibold ${hide(t)}`}>
+                <th key={t} scope="col" className={`sticky top-0 z-10 bg-navy p-4 text-center font-semibold last:rounded-tr-2xl ${hide(t)}`}>
                   {NAMES[t]}
+                  {t === "growth" && <span className="ml-2 rounded-pill bg-brand px-2 py-0.5 align-middle text-[11px] font-bold text-on-brand">Most popular</span>}
                 </th>
               ))}
             </tr>
@@ -318,7 +320,7 @@ function FeatureComparison({ features }: { features: TierFeature[] }) {
                       {f.label}
                     </th>
                     {TIER_ORDER.map((t) => (
-                      <td key={t} className={`p-4 text-center ${hide(t)}`}>
+                      <td key={t} className={`p-4 text-center ${t === "growth" ? "bg-brand/5" : ""} ${hide(t)}`}>
                         <TierCheck value={f.values[t]} />
                       </td>
                     ))}
@@ -327,6 +329,21 @@ function FeatureComparison({ features }: { features: TierFeature[] }) {
               </tbody>
             );
           })}
+          <tfoot>
+            <tr>
+              <td className="p-4" />
+              {TIER_ORDER.map((t) => (
+                <td key={t} className={`p-4 text-center ${t === "growth" ? "bg-brand/5" : ""} ${hide(t)}`}>
+                  <a
+                    href={mode === "public" ? signupHref : `#plan-${t}`}
+                    className={`inline-block rounded-pill px-5 py-2.5 text-sm font-bold ${t === "growth" ? "bg-brand text-on-brand" : "bg-navy text-white"}`}
+                  >
+                    Choose {NAMES[t]}
+                  </a>
+                </td>
+              ))}
+            </tr>
+          </tfoot>
         </table>
       </div>
       {!all && (

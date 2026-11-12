@@ -168,6 +168,15 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <div className="mt-8 grid gap-4 rounded-[20px] bg-[#F3F5F8] p-6 text-base sm:grid-cols-2">
+            <p>
+              <b>Cancel any time.</b> <span className="text-ink-muted">You keep access until the end of what you paid for. The one-time assessment is refundable until your report is created. In the UK and EU you can also cancel within 14 days.</span>
+            </p>
+            <p>
+              <b>Missed a goal while working your plan?</b> <span className="text-ink-muted">We&apos;ll re-assess with you and may add coaching time.</span>{" "}
+              <a href={`${APP_URL}/refunds#progress-review`} className="font-bold text-brand-text underline">How it works</a>
+            </p>
+          </div>
           <p className="mt-7 text-[17px]">
             <a href={`${APP_URL}/pricing`} className="font-bold text-ink underline underline-offset-4">
               Compare all features and Expert Advisory Sessions on the pricing page →

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { appLink } from "@/lib/site";
 
 /* The full feature comparison (same rows as the app's lib/tier-features.ts;
    keep them in step). Grouped, opening on the key rows. */
@@ -46,8 +47,19 @@ export function CompareTable() {
   const [pick, setPick] = useState<Tier>("growth");
   const shown = all ? TIER_FEATURES : TIER_FEATURES.filter((f) => f.key);
   const hide = (k: Tier) => (k === pick ? "" : "hidden sm:table-cell");
+  // Plan names stay in view under the site's sticky header and offer tabs.
+  const wrap = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const set = () => {
+      const h = (document.getElementById("site-header")?.offsetHeight ?? 0) + ((document.querySelector('nav[aria-label="Our offers"]') as HTMLElement | null)?.offsetHeight ?? 0);
+      wrap.current?.style.setProperty("--compare-top", `${h}px`);
+    };
+    set();
+    window.addEventListener("resize", set);
+    return () => window.removeEventListener("resize", set);
+  }, []);
   return (
-    <div>
+    <div ref={wrap}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-text">Compare plans</p>
@@ -68,13 +80,16 @@ export function CompareTable() {
           </button>
         ))}
       </div>
-      <div className="mt-5 overflow-x-auto rounded-[20px] border border-line bg-white">
+      <div className="mt-5 overflow-x-auto rounded-[20px] border border-line bg-white sm:overflow-visible">
         <table className="w-full text-left text-[15px] sm:min-w-[640px]">
           <thead>
-            <tr className="bg-ink text-white">
-              <th scope="col" className="p-4 font-bold">What&apos;s included</th>
+            <tr className="text-white">
+              <th scope="col" className="sticky top-[var(--compare-top,0px)] z-10 rounded-tl-[20px] bg-ink p-4 font-bold">What&apos;s included</th>
               {TIERS.map(([k, n]) => (
-                <th key={k} scope="col" className={`p-4 text-center font-bold ${hide(k)}`}>{n}</th>
+                <th key={k} scope="col" className={`sticky top-[var(--compare-top,0px)] z-10 bg-ink p-4 text-center font-bold last:rounded-tr-[20px] ${hide(k)}`}>
+                  {n}
+                  {k === "growth" && <span className="ml-2 rounded-pill bg-brand px-2 py-0.5 align-middle text-[11px] font-bold text-on-brand">Most popular</span>}
+                </th>
               ))}
             </tr>
           </thead>
@@ -90,13 +105,25 @@ export function CompareTable() {
                   <tr key={f.label} className="border-b border-line/60 last:border-0">
                     <th scope="row" className="p-4 font-normal">{f.label}</th>
                     {TIERS.map(([k]) => (
-                      <td key={k} className={`p-4 text-center ${hide(k)}`}><Cell v={f.values[k]} /></td>
+                      <td key={k} className={`p-4 text-center ${k === "growth" ? "bg-brand/5" : ""} ${hide(k)}`}><Cell v={f.values[k]} /></td>
                     ))}
                   </tr>
                 ))}
               </tbody>
             );
           })}
+          <tfoot>
+            <tr>
+              <td className="p-4" />
+              {TIERS.map(([k, n]) => (
+                <td key={k} className={`p-4 text-center ${k === "growth" ? "bg-brand/5" : ""} ${hide(k)}`}>
+                  <a href={appLink("/pricing", `ft_compare_${k}`)} className={`inline-block rounded-pill px-5 py-2.5 text-sm font-bold ${k === "growth" ? "bg-brand text-on-brand" : "bg-ink text-white"}`}>
+                    Choose {n}
+                  </a>
+                </td>
+              ))}
+            </tr>
+          </tfoot>
         </table>
       </div>
       {!all && (

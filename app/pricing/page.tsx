@@ -73,6 +73,15 @@ export default async function PricingPage() {
           signupHref="/register"
         />
         <p className="mt-4 text-sm text-ink-soft">{REGION_NOTE}</p>
+        <div className="mt-6 grid gap-4 rounded-2xl bg-surface-tint p-5 text-sm sm:grid-cols-2">
+          <p>
+            <b className="text-navy">Cancel any time.</b> <span className="text-ink-soft">You keep access until the end of what you paid for. The one-time assessment is refundable until your report is created. In the UK and EU you can also cancel within 14 days.</span>
+          </p>
+          <p>
+            <b className="text-navy">Missed a goal while working your plan?</b> <span className="text-ink-soft">We&apos;ll re-assess with you and may add coaching time.</span>{" "}
+            <a href="/refunds#progress-review" className="font-semibold text-brand-text underline">How the progress review works</a>
+          </p>
+        </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-6">
