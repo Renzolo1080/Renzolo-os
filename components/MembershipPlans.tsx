@@ -1,5 +1,5 @@
 "use client";
-import { TIER_HIGHLIGHTS } from "@/lib/tier-features";
+import { TIER_HIGHLIGHTS, FEATURE_GROUPS, type TierFeature } from "@/lib/tier-features";
 import { useState } from "react";
 import { TierCheck } from "./TierCheck";
 import { track } from "@/lib/track";
@@ -58,7 +58,7 @@ export function MembershipPlans({
   currentTier: Tier | null;
   elevateFull: boolean;
   onWaitlist: boolean;
-  features: { label: string; values: Record<Tier, boolean | string> }[];
+  features: TierFeature[];
   taglines: Record<Tier, string>;
   signupHref?: string;
 }) {
@@ -244,37 +244,96 @@ export function MembershipPlans({
       )}
       <p className="mt-3 text-sm text-ink-soft">{block.methods}</p>
 
-      <div className="mt-10 overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="w-full min-w-[640px] text-left text-sm">
+      <FeatureComparison features={features} />
+    </div>
+  );
+}
+
+/** The full comparison, grouped, with a "Key features / All features"
+ * switch (Nov 12 2026). Opens on the key rows so it reads well on a phone. */
+function FeatureComparison({ features }: { features: TierFeature[] }) {
+  const [all, setAll] = useState(false);
+  const [pick, setPick] = useState<Tier>("growth");
+  const shown = all ? features : features.filter((f) => f.key);
+  const hide = (k: Tier) => (k === pick ? "" : "hidden sm:table-cell");
+  return (
+    <section className="mt-10" aria-labelledby="compare-plans">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-text">Compare plans</p>
+          <h2 id="compare-plans" className="mt-1 text-2xl font-bold text-navy">Full feature comparison</h2>
+        </div>
+        <div className="inline-flex rounded-pill bg-surface-tint p-1" role="group" aria-label="How much to show">
+          {[
+            [false, "Key features"],
+            [true, "All features"],
+          ].map(([v, label]) => (
+            <button
+              key={String(label)}
+              type="button"
+              aria-pressed={all === v}
+              onClick={() => setAll(v as boolean)}
+              className={`rounded-pill px-4 py-2 text-sm font-semibold ${all === v ? "bg-navy text-white" : "text-navy"}`}
+            >
+              {label as string}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="mt-4 flex gap-2 sm:hidden" role="group" aria-label="Plan to show">
+        {TIER_ORDER.map((t) => (
+          <button key={t} type="button" aria-pressed={pick === t} onClick={() => setPick(t)} className={`flex-1 rounded-pill border px-3 py-2 text-sm font-semibold ${pick === t ? "border-navy bg-navy text-white" : "border-gray-200 text-navy"}`}>
+            {NAMES[t]}
+          </button>
+        ))}
+      </div>
+      <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm">
+        <table className="w-full text-left text-sm sm:min-w-[640px]">
           <caption className="sr-only">What each membership includes</caption>
           <thead>
             <tr className="border-b border-gray-200">
               <th scope="col" className="p-4 font-semibold text-navy">
-                What's included
+                What&apos;s included
               </th>
               {TIER_ORDER.map((t) => (
-                <th key={t} scope="col" className="p-4 text-center font-semibold text-navy">
+                <th key={t} scope="col" className={`p-4 text-center font-semibold text-navy ${hide(t)}`}>
                   {NAMES[t]}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {features.map((f) => (
-              <tr key={f.label} className="border-b border-gray-100 last:border-0">
-                <th scope="row" className="p-4 font-normal">
-                  {f.label}
-                </th>
-                {TIER_ORDER.map((t) => (
-                  <td key={t} className="p-4 text-center">
-                    <TierCheck value={f.values[t]} />
-                  </td>
+          {FEATURE_GROUPS.map((g) => {
+            const rows = shown.filter((f) => f.group === g);
+            if (!rows.length) return null;
+            return (
+              <tbody key={g}>
+                <tr className="bg-surface-tint">
+                  <th scope="rowgroup" colSpan={4} className="px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-navy">
+                    {g}
+                  </th>
+                </tr>
+                {rows.map((f) => (
+                  <tr key={f.label} className="border-b border-gray-100 last:border-0">
+                    <th scope="row" className="p-4 font-normal">
+                      {f.label}
+                    </th>
+                    {TIER_ORDER.map((t) => (
+                      <td key={t} className={`p-4 text-center ${hide(t)}`}>
+                        <TierCheck value={f.values[t]} />
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
+              </tbody>
+            );
+          })}
         </table>
       </div>
-    </div>
+      {!all && (
+        <button type="button" onClick={() => setAll(true)} className="mt-3 text-sm font-semibold text-brand-text hover:underline">
+          Show all {features.length} features →
+        </button>
+      )}
+    </section>
   );
 }

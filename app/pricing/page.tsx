@@ -113,6 +113,18 @@ export default async function PricingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+        <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-navy">Which plan is right for me?</h2>
+          <dl className="mt-3 space-y-3 text-sm">
+            <div><dt className="font-semibold text-navy">Readiness Assessment</dt><dd className="text-ink-soft">You want a clear, one-time picture of where your business stands and what to fix first.</dd></div>
+            <div><dt className="font-semibold text-navy">Essentials</dt><dd className="text-ink-soft">You're early stage and will work your plan yourself, with a coaching check-in each quarter.</dd></div>
+            <div><dt className="font-semibold text-navy">Growth</dt><dd className="text-ink-soft">You're operating and closing readiness gaps, and want an AI coach any time plus more live coaching.</dd></div>
+            <div><dt className="font-semibold text-navy">Elevate</dt><dd className="text-ink-soft">You're preparing to raise capital or win large contracts and want hands-on support every month.</dd></div>
+          </dl>
+          <p className="mt-4 text-sm text-ink-soft">
+            <b className="text-navy">Start small, move up any time.</b> Upgrading starts straight away and unused time on your current plan comes off the price.
+          </p>
+        </div>
         <div className="rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold text-navy">How membership works</h2>
           <ul className="mt-3 space-y-2 text-sm text-ink-soft">

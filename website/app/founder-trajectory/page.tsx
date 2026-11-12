@@ -3,6 +3,7 @@ import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
 import { AssessmentOffer } from "@/components/AssessmentOffer";
 import { Price } from "@/components/RegionPrice";
+import { CompareTable } from "@/components/CompareTable";
 import { Faq } from "@/components/Faq";
 import { HOW_TO_START, HowToStart, PageEndCta } from "@/components/Flow";
 import { OfferTabs } from "@/components/OfferTabs";
@@ -83,6 +84,10 @@ export default function FounderTrajectoryPage() {
               See full pricing
             </a>
           </div>
+        </section>
+
+        <section id="compare" className="mx-auto max-w-6xl scroll-mt-36 px-5 pb-4">
+          <CompareTable />
         </section>
 
         <section id="coaching" className="mx-auto max-w-6xl scroll-mt-36 px-5 pt-16 md:pt-24">
