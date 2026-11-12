@@ -1,4 +1,4 @@
-import { statusLine, type NextMove, type Trajectory } from "@/lib/live-score";
+import { goalsBehind, statusLine, type NextMove, type Trajectory } from "@/lib/live-score";
 import { Burst } from "@/components/brand/Visuals";
 
 /** "Target vs actual" on the founder dashboard (approved Nov 10, 2026):
@@ -332,7 +332,7 @@ export function TrajectorySection({ t, today, canReassess, summary, moves, aiCoa
             <h3 className="font-display text-xl font-bold text-navy">Your trajectory</h3>
             <p className="mt-1 text-sm text-ink-soft">Where you are against the path you set, measured from your full assessment.</p>
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-bold ${STATUS_PILL[t.status]}`}>{statusLine(t)}</span>
+          <span className={`rounded-full px-3 py-1 text-xs font-bold ${goalsBehind(t) && t.status !== "no_target" ? STATUS_PILL.behind : STATUS_PILL[t.status]}`}>{statusLine(t)}</span>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded-full bg-surface px-3 py-1 font-semibold text-navy">
@@ -345,7 +345,8 @@ export function TrajectorySection({ t, today, canReassess, summary, moves, aiCoa
           )}
           {canReassess && (
             <a href="/assessment/details" className="font-bold text-brand-text hover:underline">
-              Re-assess now
+              {/* "now" only when it's due; otherwise it's an early, optional re-assessment (Nov 11 2026). */}
+              {t.reassessDue ? "Re-assess now" : "Re-assess early"}
             </a>
           )}
           {!t.target && (

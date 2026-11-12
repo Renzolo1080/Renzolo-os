@@ -99,3 +99,11 @@ import("../lib/live-score").then(({ inShort, nextMoves }) => {
   assert(moves.some((m) => m.text.startsWith("Add evidence to 1 finished action")), "next moves: add evidence for full credit", moves);
   assert(moves.every((m) => m.href.startsWith("/")), "each move links to where it gets done");
 });
+
+// --- the badge agrees with "In short" (Nov 11 2026) ---------------------------------
+import("../lib/live-score").then(({ statusLine, goalsBehind }) => {
+  const mixed = { ...t, status: "on_track" as const, goals: { ...t.goals, percent: 40, timeUsed: 60 } };
+  assert(goalsBehind(mixed) && statusLine(mixed) === "Score on track · goals behind", "score on pace but goals behind: the badge says both");
+  const fine = { ...t, status: "on_track" as const, goals: { ...t.goals, percent: 70, timeUsed: 60 } };
+  assert(!goalsBehind(fine) && statusLine(fine) === "On track", "both on pace: On track");
+});
