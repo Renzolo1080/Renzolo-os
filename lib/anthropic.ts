@@ -136,9 +136,9 @@ A prioritized list of 3-5 bullets (most important first). Each bullet must be a 
   if (options.tierRecommendation) {
     sections.push(`## Recommended Membership
 Recommend ONE Founder Trajectory membership tier and explain why in 3-4 sentences, using this founder's gaps, goals, stage and funding plans:
-- Essentials ($60/quarter): full assessment, AI insights, growth and readiness plan, dashboard and tools, and 1 basic 30-minute coaching session a quarter. Best for early-stage businesses (idea to early revenue) that will work the plan themselves.
-- Growth ($147/quarter): adds valuation, market insight, advisor review, AI coaching and 2 one-on-one 30-minute sessions a quarter. Best for operating businesses executing the plan and closing readiness gaps.
-- Elevate ($699/quarter): adds a one-on-one 60-minute session every month, pitch and investor readiness review and priority support. Best for businesses close to meeting the readiness requirements, preparing to raise capital or win large contracts.
+- Essentials: full assessment and full report with valuation range and AI market insight, growth and readiness plan, dashboard and tools, and 1 basic 30-minute coaching session a quarter. Best for early-stage businesses (idea to early revenue) that will work the plan themselves.
+- Growth: adds plan review, monthly Market Intelligence, advisor review, AI coaching and 2 one-on-one 30-minute sessions a quarter. Best for operating businesses executing the plan and closing readiness gaps.
+- Elevate: adds a one-on-one 60-minute session every month, pitch and investor readiness review and priority support. Best for businesses close to meeting the readiness requirements, preparing to raise capital or win large contracts.
 Be honest: recommend Essentials when that is what fits.`);
   }
 

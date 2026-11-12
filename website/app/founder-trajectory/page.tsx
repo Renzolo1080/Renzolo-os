@@ -1,6 +1,9 @@
 import { Header, Footer } from "@/components/Chrome";
 import { PageHero } from "@/components/PageHero";
 import { appLink } from "@/lib/site";
+import { AssessmentOffer } from "@/components/AssessmentOffer";
+import { Price } from "@/components/RegionPrice";
+import { CompareTable } from "@/components/CompareTable";
 import { Faq } from "@/components/Faq";
 import { HOW_TO_START, HowToStart, PageEndCta } from "@/components/Flow";
 import { OfferTabs } from "@/components/OfferTabs";
@@ -8,9 +11,9 @@ import { OfferTabs } from "@/components/OfferTabs";
 export const metadata = { title: "Founder Trajectory™", description: "Membership that turns a readiness assessment into a plan, a dashboard and coaching. Powered by RENZOLO OS™." };
 
 const TIERS = [
-  { name: "Essentials", start: HOW_TO_START.essentials, price: "$60 a quarter", for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment with AI insights", "Readiness Report (summary)", "Growth and readiness plan, 90 days to 36 months", "Dashboard, goals, reminders and tools", "One basic 30-minute coaching session a quarter"] },
-  { name: "Growth", start: HOW_TO_START.growth, price: "$147 a quarter", for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "Full, downloadable report with valuation range and market insight", "Advisor review of your report", "Two 30-minute one-on-one sessions a quarter"] },
-  { name: "Elevate", start: HOW_TO_START.elevate, price: "$699 a quarter", for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "One 60-minute one-on-one session a month", "Pitch and investor readiness review", "Priority support. Limited places"] },
+  { name: "Essentials", start: HOW_TO_START.essentials, price: <><Price k="essentials.quarterly" /> a quarter</>, for: "Know where you stand and work your plan.", gets: ["Full Readiness Assessment and report", "Valuation range and AI market insight", "Growth plan, dashboard and reminders", "One 30-minute coaching session a quarter"] },
+  { name: "Growth", start: HOW_TO_START.growth, price: <><Price k="growth.quarterly" /> a quarter</>, for: "Go deeper, with coaching to carry out your plan.", gets: ["Everything in Essentials", "AI coach any time, with weekly check-ins", "Plan review, Market Intelligence and advisor review", "Two 30-minute coaching sessions a quarter"] },
+  { name: "Elevate", start: HOW_TO_START.elevate, price: <><Price k="elevate.quarterly" /> a quarter</>, for: "Hands-on support to raise, scale or win big contracts.", gets: ["Everything in Growth", "One 60-minute coaching session a month", "Pitch and investor readiness review", "Priority support · limited places"] },
 ];
 
 export default function FounderTrajectoryPage() {
@@ -54,7 +57,8 @@ export default function FounderTrajectoryPage() {
 
         <section id="membership" className="scroll-mt-36 bg-white">
           <div className="mx-auto max-w-6xl px-5 py-16 md:py-24">
-            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Three levels of support</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">The assessment and three levels of support</h2>
+            <AssessmentOffer campaign="ft_assessment" className="mt-8" />
             <div className="mt-10 grid gap-6 lg:grid-cols-3">
               {TIERS.map((t, i) => (
                 <div key={t.name} className={`rounded-3xl p-7 ${i === 1 ? "bg-navy text-white" : "bg-paper"}`}>
@@ -74,13 +78,16 @@ export default function FounderTrajectoryPage() {
               ))}
             </div>
             <p className="mt-8 max-w-3xl text-muted">
-              Prefer a one-time answer? The Readiness Assessment ($60) gives you the full report, a valuation range, an AI market insight and a
-              recommendation of the plan that fits you, with no membership. Extra coaching sessions start at $75 for members.
+              Every membership includes the Readiness Assessment. Prices are set for each region and shown in your local currency.
             </p>
             <a href={appLink("/pricing", "ft_tiers")} className="mt-6 inline-block rounded-full border-2 border-navy px-6 py-3 font-semibold text-navy hover:bg-navy hover:text-white">
               See full pricing
             </a>
           </div>
+        </section>
+
+        <section id="compare" className="mx-auto max-w-6xl scroll-mt-36 px-5 pb-4">
+          <CompareTable />
         </section>
 
         <section id="coaching" className="mx-auto max-w-6xl scroll-mt-36 px-5 pt-16 md:pt-24">
@@ -92,7 +99,11 @@ export default function FounderTrajectoryPage() {
             </div>
             <div className="rounded-card border border-line bg-surface-tint p-7">
               <p className="font-display text-xl font-bold">Live sessions with a Founder Coach</p>
-              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month; extra sessions start at $75 for members.</p>
+              <p className="mt-2 text-muted">You prepare a short brief, book a time on your coach&apos;s calendar and meet for 30 to 60 minutes. Agreed actions go straight into your plan. Essentials includes one 30-minute session a quarter, Growth two 30-minute sessions a quarter and Elevate one 60-minute session a month.</p>
+            </div>
+            <div className="rounded-card border border-line bg-surface-tint p-7 md:col-span-2">
+              <p className="font-display text-xl font-bold">Expert Advisory Sessions</p>
+              <p className="mt-2 text-muted">For founders who want more specific insight. One-on-one sessions with industry and market experts and experienced founders: advice specific to your industry, your market and your customers. Not general coaching: each session starts from a brief built on your assessment and plan, and members pay less.</p>
             </div>
           </div>
         </section>

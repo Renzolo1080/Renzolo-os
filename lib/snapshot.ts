@@ -49,7 +49,7 @@ export interface SnapshotOverview {
  *   a conversation about Elevate and matching.
  * - "essentials": an early-stage business (pre-revenue or under US$10k, or
  *   still getting first customers or registering) — pointed to Essentials.
- * - "assessment": everyone else — the $60 Readiness Assessment first. */
+ * - "assessment": everyone else — the one-time Readiness Assessment first. */
 export type SnapshotNextStep = "elevate" | "assessment" | "essentials";
 
 const ESTABLISHED_BANDS = ["$250k-$1M", "$1M-$5M", "$5M-$10M", "$10M-$50M", "$50M-$100M+"];

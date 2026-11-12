@@ -30,7 +30,7 @@ assert(full.includes("## Market Insight") && full.includes("directional") && ful
 for (const p of [summary, full]) {
   assert(p.includes("## Growth and Readiness Plan") && p.includes("### First 90 days") && p.includes("## Recommended Next Steps"), "both levels: plan with a detailed first 90 days and the Recommended Next Steps section the product parses");
 }
-assert(full.includes("## Recommended Membership") && full.includes("$147/quarter") && !summary.includes("## Recommended Membership"), "tier recommendation only when asked for (the one-time assessment)");
+assert(full.includes("## Recommended Membership") && full.includes("- Growth: adds plan review") && !full.includes("$147") && !summary.includes("## Recommended Membership"), "tier recommendation only when asked for (the one-time assessment)");
 assert(full.includes("covering 36 months") && summary.includes("covering 6 months"), "the plan length the founder chose is used");
 assert(full.includes("Owusu Farms") && full.includes("Strategic Plan Readiness 30/100") && full.includes("Written but out of date") === false && full.includes("mostly in the founder's head"), "company and strategic plan answers reach the prompt");
 assert(planPhasing("3 months").includes("whole plan") && planPhasing("90 days").includes("whole plan"), "3-month plan (and the old 90 days): all detail");

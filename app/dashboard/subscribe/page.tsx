@@ -9,6 +9,8 @@ import { entitlements, upcomingTier, elevateSeatLimit } from "@/lib/membership";
 import { getOneOffPrice, oneOffCurrenciesFor, formatPrice, coachingBuyerLevel, TIER_NAMES, INTERVAL_NAMES, isBillingInterval, getMembershipPrice, mainCurrency, TIERS, TIER_INTERVALS } from "@/lib/pricing";
 import { CurrencyEstimate } from "@/components/CurrencyEstimate";
 import { displayCurrencyFor, fetchUsdRates, estimate } from "@/lib/fx";
+import { requestRegion } from "@/lib/region-server";
+import { REGION_NOTE } from "@/lib/region";
 
 export const dynamic = "force-dynamic";
 
@@ -36,15 +38,16 @@ export default async function MembershipPage() {
   const upcoming = upcomingTier(sub);
   const elevateFull = process.env.SUPABASE_SERVICE_ROLE_KEY ? (await countElevateMembers(createAdminClient())) >= elevateSeatLimit() : false;
 
-  const blocks = buildCurrencyBlocks(profile?.country, m.current, m.tier);
+  const region = await requestRegion(profile?.country);
+  const blocks = buildCurrencyBlocks(profile?.country, m.current, m.tier, new Date(), region);
   const member = !!m.tier;
   const level = coachingBuyerLevel({ tier: m.tier });
   const oneOffCurrencies = Array.from(
-    new Set([...oneOffCurrenciesFor("assessment", false, profile?.country), ...oneOffCurrenciesFor("coaching_single", level, profile?.country)])
+    new Set([...oneOffCurrenciesFor("assessment", false, profile?.country, process.env, region), ...oneOffCurrenciesFor("coaching_single", level, profile?.country, process.env, region)])
   );
   const prices: OneOffPrices[] = oneOffCurrencies.map((c) => {
     const f = (p: ReturnType<typeof getOneOffPrice>) => (p ? formatPrice(p) : null);
-    return { currency: c, assessment: f(getOneOffPrice("assessment", false, c)), single: f(getOneOffPrice("coaching_single", level, c)), pack: f(getOneOffPrice("coaching_pack3", level, c)) };
+    return { currency: c, assessment: f(getOneOffPrice("assessment", false, c, process.env, region)), single: f(getOneOffPrice("coaching_single", level, c)), pack: f(getOneOffPrice("coaching_pack3", level, c)) };
   });
   const std = (item: "coaching_single" | "coaching_pack3") => {
     const p = getOneOffPrice(item, false);
@@ -52,7 +55,7 @@ export default async function MembershipPage() {
   };
 
   // Approximate amounts in the founder's own currency (estimate only).
-  const fxFor = mainCurrency() === "USD" ? displayCurrencyFor(profile?.country) : null;
+  const fxFor = region.zone === "africa" && mainCurrency() === "USD" ? displayCurrencyFor(profile?.country) : null;
   const fx = fxFor ? await fetchUsdRates() : null;
   const fxRate = fxFor && fx ? fx.rates[fxFor.currency] : undefined;
   const fxRows: { label: string; usd: string; local: string }[] = [];
@@ -63,8 +66,8 @@ export default async function MembershipPage() {
     };
     if (!ent.fullReport) add("Readiness Assessment", getOneOffPrice("assessment", false));
     for (const t of TIERS) for (const i of TIER_INTERVALS[t]) add(`${TIER_NAMES[t]} · ${INTERVAL_NAMES[i]}`, getMembershipPrice(t, i));
-    add("Coaching session", getOneOffPrice("coaching_single", level));
-    add("Coaching, 3 sessions", getOneOffPrice("coaching_pack3", level));
+    add("Expert Advisory Session", getOneOffPrice("coaching_single", level));
+    add("Expert Advisory Sessions, 3", getOneOffPrice("coaching_pack3", level));
   }
 
   return (
@@ -125,6 +128,7 @@ export default async function MembershipPage() {
           features={TIER_FEATURES}
           taglines={TIER_TAGLINES}
         />
+        <p className="mt-4 text-sm text-ink-soft">{REGION_NOTE}</p>
       </div>
 
       <section className="mt-12" id="one-time">

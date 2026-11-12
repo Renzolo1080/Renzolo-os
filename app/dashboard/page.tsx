@@ -161,7 +161,7 @@ export default async function DashboardPage({ searchParams: searchParamsPromise 
   let dashboard: React.ComponentProps<typeof FounderDashboard> | null = null;
   let reportOutdated: string | null = null;
   if (hasAccess && latestScore) {
-    const access = { member: ent.planBuilder, growth: ent.planReview };
+    const access = { member: ent.planBuilder, growth: ent.planReview, valuation: ent.valuation };
     const [planRow, { data: checkins }, { data: updates }, { data: reviewRow }, { data: briefRow }, { data: coachRows }] = await Promise.all([
       loadPlan(supabase, user.id),
       supabase.from("goal_checkins").select("goal_id, value, note, checked_on").order("checked_on", { ascending: true }).limit(500),

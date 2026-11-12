@@ -2,7 +2,7 @@
  * setting in Vercel (plus a redeploy), never a code change.
  *
  * FOUNDER TRAJECTORY(TM) MEMBERSHIP — three tiers (Nov 1 2026). Every
- * membership includes the Readiness Assessment (valued at $60 inside a
+ * membership includes the Readiness Assessment (valued at $40 inside a
  * membership). Billed quarterly or annually, never monthly:
  *
  *   Essentials  $60 quarterly · $200 annual   1 x 30-min basic session a quarter
@@ -11,7 +11,7 @@
  *
  * ONE-TIME PURCHASES
  *   Readiness Assessment (full report, valuation, market insight, tier
- *   recommendation)                         $60
+ *   recommendation; no valuation)           $40 (Nov 11 2026)
  *   Extra coaching (60 min), priced by membership level:
  *     not a member (first session includes intake) $150 · $399 for three
  *     Essentials                             $75 · $199
@@ -38,6 +38,8 @@
  * A local currency is only offered for something when its price is set;
  * nothing is ever converted automatically, because an exchange rate is a
  * pricing decision. */
+
+import type { Region } from "./region";
 
 export type Tier = "essentials" | "growth" | "elevate";
 export type BillingInterval = "monthly" | "quarterly" | "annual";
@@ -70,13 +72,25 @@ const DEFAULT_MEMBERSHIP: Record<Tier, Partial<Record<BillingInterval, number>>>
   elevate: { quarterly: 699, annual: 2490 },
 };
 
+/** International prices (US, UK and EU), approved Nov 11 2026. Each can be
+ * changed in Vercel with PRICE_INTL_<ITEM>_<CURRENCY>, e.g.
+ * PRICE_INTL_ASSESSMENT_GBP=59 or PRICE_INTL_GROWTH_QUARTERLY_USD=249.
+ * Coaching for international founders is priced in US dollars. */
+const INTL_MEMBERSHIP: Record<"USD" | "GBP" | "EUR", Record<Tier, Partial<Record<BillingInterval, number>>>> = {
+  USD: { essentials: { quarterly: 99, annual: 339 }, growth: { quarterly: 249, annual: 849 }, elevate: { quarterly: 1199, annual: 3990 } },
+  GBP: { essentials: { quarterly: 79, annual: 269 }, growth: { quarterly: 199, annual: 679 }, elevate: { quarterly: 949, annual: 3190 } },
+  EUR: { essentials: { quarterly: 89, annual: 299 }, growth: { quarterly: 229, annual: 779 }, elevate: { quarterly: 1099, annual: 3690 } },
+};
+const INTL_ASSESSMENT: Record<"USD" | "GBP" | "EUR", number> = { USD: 79, GBP: 59, EUR: 69 };
+const isIntlCurrency = (c: string): c is "USD" | "GBP" | "EUR" => c === "USD" || c === "GBP" || c === "EUR";
+
 /** Who is buying, for coaching prices: their membership tier, or "none"
  * for someone who isn't a member. */
 export type BuyerLevel = "none" | Tier;
 export const BUYER_LEVELS: BuyerLevel[] = ["none", "essentials", "growth", "elevate"];
 
 const DEFAULT_ONE_OFF: Record<OneOffItem, Record<BuyerLevel, number>> = {
-  assessment: { none: 60, essentials: 60, growth: 60, elevate: 60 },
+  assessment: { none: 40, essentials: 40, growth: 40, elevate: 40 },
   coaching_single: { none: 150, essentials: 75, growth: 105, elevate: 120 },
   coaching_pack3: { none: 399, essentials: 199, growth: 279, elevate: 319 },
 };
@@ -120,9 +134,12 @@ const LOCAL_CURRENCIES: { match: string[]; currency: string }[] = [
   { match: ["tanzania"], currency: "TZS" },
 ];
 
+const LOCAL_BY_CODE: Record<string, string> = { KE: "KES", ZA: "ZAR", NG: "NGN", GH: "GHS", UG: "UGX", RW: "RWF", TZ: "TZS" };
+
 export function currencyForCountry(country: string | null | undefined): string | null {
   const c = (country ?? "").trim().toLowerCase();
   if (!c) return null;
+  if (/^[a-z]{2}$/.test(c)) return LOCAL_BY_CODE[c.toUpperCase()] ?? null;
   return LOCAL_CURRENCIES.find((l) => l.match.some((m) => c.includes(m)))?.currency ?? null;
 }
 
@@ -148,8 +165,14 @@ export function mainCurrency(env: Env = process.env): string {
 /** The price of a tier for a billing period, in the main currency or in
  * another currency if a price has been set for it. Null if the tier isn't
  * sold for that period, or no price is set in that currency. */
-export function getMembershipPrice(tier: Tier, interval: BillingInterval, currency?: unknown, env: Env = process.env): Price | null {
+export function getMembershipPrice(tier: Tier, interval: BillingInterval, currency?: unknown, env: Env = process.env, region?: Region | null): Price | null {
   if (!tierOffersInterval(tier, interval)) return null;
+  if (region?.zone === "intl") {
+    const c = currency === undefined ? region.intlCurrency : cleanCurrency(currency);
+    if (!c || !isIntlCurrency(c)) return null;
+    const amount = readAmount(env[`PRICE_INTL_${tier.toUpperCase()}_${interval.toUpperCase()}_${c}`]) ?? INTL_MEMBERSHIP[c][tier][interval] ?? null;
+    return amount === null ? null : { amount, currency: c };
+  }
   const main = mainCurrency(env);
   const wanted = currency === undefined ? main : cleanCurrency(currency);
   if (!wanted) return null;
@@ -163,7 +186,12 @@ export function getMembershipPrice(tier: Tier, interval: BillingInterval, curren
 
 /** The price of a one-time purchase. Coaching depends on the buyer's
  * membership level; the assessment is the same for everyone. */
-export function getOneOffPrice(item: OneOffItem, who: boolean | BuyerLevel | null, currency?: unknown, env: Env = process.env): Price | null {
+export function getOneOffPrice(item: OneOffItem, who: boolean | BuyerLevel | null, currency?: unknown, env: Env = process.env, region?: Region | null): Price | null {
+  if (region?.zone === "intl" && item === "assessment") {
+    const c = currency === undefined ? region.intlCurrency : cleanCurrency(currency);
+    if (!c || !isIntlCurrency(c)) return null;
+    return { amount: readAmount(env[`PRICE_INTL_ASSESSMENT_${c}`]) ?? INTL_ASSESSMENT[c], currency: c };
+  }
   const main = mainCurrency(env);
   const wanted = currency === undefined ? main : cleanCurrency(currency);
   if (!wanted) return null;
@@ -179,7 +207,8 @@ export function getOneOffPrice(item: OneOffItem, who: boolean | BuyerLevel | nul
 /** Currencies a founder in this country can pay in for membership: their
  * local currency first, but only when EVERY membership price is set in
  * it (so the tier table never mixes currencies), then the main currency. */
-export function membershipCurrenciesFor(country: string | null | undefined, env: Env = process.env): string[] {
+export function membershipCurrenciesFor(country: string | null | undefined, env: Env = process.env, region?: Region | null): string[] {
+  if (region?.zone === "intl") return [region.intlCurrency];
   const main = mainCurrency(env);
   const local = currencyForCountry(country);
   const offered: string[] = [];
@@ -192,7 +221,8 @@ export function membershipCurrenciesFor(country: string | null | undefined, env:
 }
 
 /** Currencies a founder can pay in for a one-time purchase. */
-export function oneOffCurrenciesFor(item: OneOffItem, member: boolean | BuyerLevel | null, country: string | null | undefined, env: Env = process.env): string[] {
+export function oneOffCurrenciesFor(item: OneOffItem, member: boolean | BuyerLevel | null, country: string | null | undefined, env: Env = process.env, region?: Region | null): string[] {
+  if (region?.zone === "intl") return item === "assessment" ? [region.intlCurrency] : [mainCurrency(env)];
   const main = mainCurrency(env);
   const local = currencyForCountry(country);
   const offered: string[] = [];
@@ -222,7 +252,10 @@ export function formatPrice(price: Price): string {
   const amount = Number.isInteger(price.amount)
     ? price.amount.toLocaleString("en-US")
     : price.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return price.currency === "USD" ? `$${amount}` : `${price.currency} ${amount}`;
+  if (price.currency === "USD") return `$${amount}`;
+  if (price.currency === "GBP") return `£${amount}`;
+  if (price.currency === "EUR") return `€${amount}`;
+  return `${price.currency} ${amount}`;
 }
 
 /** "$39/month" style figure for a quarterly or annual price. */

@@ -128,7 +128,7 @@ export const CREDENTIALS: { figure?: string; title: string; text: string }[] = [
 export const WHY_PROOF = {
   outcome: "Proof: the customer and investor readiness approach Lorenzo used to train 7,000+ suppliers and entrepreneurs in 30+ countries.",
   buyer: "Proof: 20+ years developing suppliers for global buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean.",
-  price: "Proof: the kind of support EIP values at $25,000 per founder, now from $60 a quarter.",
+  price: "Proof: the kind of support EIP values at $25,000 per founder, now in an affordable membership.",
 };
 
 /** Results strip (brand book: Measurable outcomes). Until RENZOLO has its

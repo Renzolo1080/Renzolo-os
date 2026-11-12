@@ -70,24 +70,28 @@ export interface Entitlements {
   includedCoaching: string | null;
 }
 
-/** What a founder can use. `purchasedAssessment` is the one-time $60
- * Readiness Assessment: it unlocks the full report, valuation, scores and
- * market insight for the assessment it was bought for, but not the
- * membership tools. */
+/** What a founder can use (Nov 11 2026):
+ *  - the one-time $40 Readiness Assessment (`purchasedAssessment`): the
+ *    full readiness report, scores, AI market insight and the Plan Builder,
+ *    but no valuation and none of the membership tools;
+ *  - every membership, Essentials included: the full report with the
+ *    valuation range, scores and market insight, plus the tools;
+ *  - Growth and Elevate add the plan review, Market Intelligence, the AI
+ *    coach and the advisor review. */
 export function entitlements(tier: Tier | null, purchasedAssessment = false): Entitlements {
   const rank = tier ? TIER_RANK[tier] : 0;
   const growthUp = rank >= TIER_RANK.growth;
   return {
     member: rank > 0,
     tier,
-    fullReport: growthUp || purchasedAssessment,
+    fullReport: rank > 0 || purchasedAssessment,
     summaryReport: rank > 0,
-    valuation: growthUp || purchasedAssessment,
-    marketInsight: growthUp || purchasedAssessment,
-    readinessScores: growthUp || purchasedAssessment,
+    valuation: rank > 0,
+    marketInsight: rank > 0 || purchasedAssessment,
+    readinessScores: rank > 0 || purchasedAssessment,
     planBuilder: rank > 0 || purchasedAssessment,
-    planReview: growthUp || purchasedAssessment,
-    marketIntel: growthUp || purchasedAssessment,
+    planReview: growthUp,
+    marketIntel: growthUp,
     aiCoaching: growthUp,
     advisorReview: growthUp,
     tools: rank > 0,
@@ -204,6 +208,6 @@ export function elevateSeatLimit(env: Record<string, string | undefined> = proce
   return Number.isInteger(n) && n > 0 ? n : 50;
 }
 
-/** How long after buying the $60 assessment it carries straight into a
+/** How long after buying the $40 assessment it carries straight into a
  * membership without starting a fresh assessment. */
 export const ASSESSMENT_CARRY_DAYS = 30;

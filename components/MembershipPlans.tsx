@@ -1,4 +1,5 @@
 "use client";
+import { TIER_HIGHLIGHTS, FEATURE_GROUPS, type TierFeature } from "@/lib/tier-features";
 import { useState } from "react";
 import { TierCheck } from "./TierCheck";
 import { track } from "@/lib/track";
@@ -57,7 +58,7 @@ export function MembershipPlans({
   currentTier: Tier | null;
   elevateFull: boolean;
   onWaitlist: boolean;
-  features: { label: string; values: Record<Tier, boolean | string> }[];
+  features: TierFeature[];
   taglines: Record<Tier, string>;
   signupHref?: string;
 }) {
@@ -141,7 +142,8 @@ export function MembershipPlans({
           return (
             <div
               key={tier}
-              className={`relative flex flex-col rounded-2xl p-6 shadow-sm ${featured ? "bg-navy text-white ring-2 ring-gold" : "bg-white"}`}
+              id={`plan-${tier}`}
+              className={`relative flex scroll-mt-6 flex-col rounded-2xl p-6 shadow-sm ${featured ? "bg-navy text-white ring-2 ring-gold" : "bg-white"}`}
             >
               {featured && <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-on-brand">Most popular</span>}
               <div className="flex items-center justify-between">
@@ -174,6 +176,15 @@ export function MembershipPlans({
               </p>
               <p className={`text-sm ${featured ? "text-cream/70" : "text-ink-soft"}`}>{cell.perMonth ? `${cell.price} ${cell.per}` : " "}</p>
               <p className={`mt-1 min-h-[1.25rem] text-sm font-semibold ${featured ? "text-gold" : "text-brand-text"}`}>{cell.note ?? ""}</p>
+
+              <ul className="mt-4 space-y-2 text-sm">
+                {TIER_HIGHLIGHTS[tier].map((h) => (
+                  <li key={h} className="flex gap-2">
+                    <span aria-hidden="true" className="font-bold text-brand">✓</span>
+                    <span className={featured ? "text-cream/90" : "text-ink"}>{h}</span>
+                  </li>
+                ))}
+              </ul>
 
               {cell.quote && cell.quote.kind === "upgrade" && cell.quote.credit && (
                 <p className={`mt-2 text-xs ${featured ? "text-cream/80" : "text-ink-soft"}`}>
@@ -234,37 +245,112 @@ export function MembershipPlans({
       )}
       <p className="mt-3 text-sm text-ink-soft">{block.methods}</p>
 
-      <div className="mt-10 overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="w-full min-w-[640px] text-left text-sm">
+      <FeatureComparison features={features} mode={mode} signupHref={signupHref} />
+    </div>
+  );
+}
+
+/** The full comparison, grouped, with a "Key features / All features"
+ * switch (Nov 12 2026). Opens on the key rows so it reads well on a phone. */
+function FeatureComparison({ features, mode, signupHref }: { features: TierFeature[]; mode: "public" | "member"; signupHref: string }) {
+  const [all, setAll] = useState(false);
+  const [pick, setPick] = useState<Tier>("growth");
+  const shown = all ? features : features.filter((f) => f.key);
+  const hide = (k: Tier) => (k === pick ? "" : "hidden sm:table-cell");
+  return (
+    <section className="mt-10" aria-labelledby="compare-plans">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-text">Compare plans</p>
+          <h2 id="compare-plans" className="mt-1 text-2xl font-bold text-navy">Full feature comparison</h2>
+        </div>
+        <div className="inline-flex rounded-pill bg-surface-tint p-1" role="group" aria-label="How much to show">
+          {[
+            [false, "Key features"],
+            [true, "All features"],
+          ].map(([v, label]) => (
+            <button
+              key={String(label)}
+              type="button"
+              aria-pressed={all === v}
+              onClick={() => setAll(v as boolean)}
+              className={`rounded-pill px-4 py-2 text-sm font-semibold ${all === v ? "bg-brand text-on-brand" : "text-navy"}`}
+            >
+              {label as string}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="mt-4 flex gap-2 sm:hidden" role="group" aria-label="Plan to show">
+        {TIER_ORDER.map((t) => (
+          <button key={t} type="button" aria-pressed={pick === t} onClick={() => setPick(t)} className={`flex-1 rounded-pill border px-3 py-2 text-sm font-semibold ${pick === t ? "border-brand bg-brand text-on-brand" : "border-gray-200 bg-white text-navy"}`}>
+            {NAMES[t]}
+          </button>
+        ))}
+      </div>
+      <div className="mt-4 overflow-x-auto rounded-2xl bg-white shadow-sm sm:overflow-visible">
+        <table className="w-full text-left text-sm sm:min-w-[640px]">
           <caption className="sr-only">What each membership includes</caption>
           <thead>
-            <tr className="border-b border-gray-200">
-              <th scope="col" className="p-4 font-semibold text-navy">
-                What's included
+            <tr className="text-white">
+              <th scope="col" className="sticky top-0 z-10 rounded-tl-2xl bg-navy p-4 font-semibold">
+                What&apos;s included
               </th>
               {TIER_ORDER.map((t) => (
-                <th key={t} scope="col" className="p-4 text-center font-semibold text-navy">
+                <th key={t} scope="col" className={`sticky top-0 z-10 bg-navy p-4 text-center font-semibold last:rounded-tr-2xl ${hide(t)}`}>
                   {NAMES[t]}
+                  {t === "growth" && <span className="ml-2 rounded-pill bg-brand px-2 py-0.5 align-middle text-[11px] font-bold text-on-brand">Most popular</span>}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {features.map((f) => (
-              <tr key={f.label} className="border-b border-gray-100 last:border-0">
-                <th scope="row" className="p-4 font-normal">
-                  {f.label}
-                </th>
-                {TIER_ORDER.map((t) => (
-                  <td key={t} className="p-4 text-center">
-                    <TierCheck value={f.values[t]} />
-                  </td>
+          {FEATURE_GROUPS.map((g) => {
+            const rows = shown.filter((f) => f.group === g);
+            if (!rows.length) return null;
+            return (
+              <tbody key={g}>
+                <tr className="bg-surface-tint">
+                  <th scope="rowgroup" colSpan={4} className="px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-navy">
+                    {g}
+                  </th>
+                </tr>
+                {rows.map((f) => (
+                  <tr key={f.label} className="border-b border-gray-100 last:border-0">
+                    <th scope="row" className="p-4 font-normal">
+                      {f.label}
+                    </th>
+                    {TIER_ORDER.map((t) => (
+                      <td key={t} className={`p-4 text-center ${t === "growth" ? "bg-brand/5" : ""} ${hide(t)}`}>
+                        <TierCheck value={f.values[t]} />
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
+              </tbody>
+            );
+          })}
+          <tfoot>
+            <tr>
+              <td className="p-4" />
+              {TIER_ORDER.map((t) => (
+                <td key={t} className={`p-4 text-center ${t === "growth" ? "bg-brand/5" : ""} ${hide(t)}`}>
+                  <a
+                    href={mode === "public" ? signupHref : `#plan-${t}`}
+                    className={`inline-block rounded-pill px-5 py-2.5 text-sm font-bold ${t === "growth" ? "bg-brand text-on-brand" : "bg-navy text-white"}`}
+                  >
+                    Choose {NAMES[t]}
+                  </a>
+                </td>
+              ))}
+            </tr>
+          </tfoot>
         </table>
       </div>
-    </div>
+      {!all && (
+        <button type="button" onClick={() => setAll(true)} className="mt-3 text-sm font-semibold text-brand-text hover:underline">
+          Show all {features.length} features →
+        </button>
+      )}
+    </section>
   );
 }

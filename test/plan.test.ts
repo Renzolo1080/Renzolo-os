@@ -132,7 +132,8 @@ assert(normalizeExtras(null).length === MIN_EXTRAS && normalizeExtras(["areas", 
 assert(normalizeExtras(["areas", "gaps", "history", "health", "risks", "market", "coaching"]).length === MAX_EXTRAS, "never more than 5 views");
 assert(validExtras(["areas", "gaps"]) === null && validExtras(["areas", "gaps", "gaps"]) === null && validExtras(["areas", "gaps", "nope"]) === null, "saving needs 3-5 different known views");
 assert(validExtras(["areas", "gaps", "history"])?.length === 3, "a valid choice saves");
-assert(!unlocked("valuation", { member: true, growth: false }) && unlocked("valuation", { member: true, growth: true }) && unlocked("areas", { member: false, growth: false }), "Growth views locked for Essentials");
+assert(!unlocked("planReview", { member: true, growth: false }) && unlocked("planReview", { member: true, growth: true }) && unlocked("areas", { member: false, growth: false }), "Growth views locked for Essentials");
+assert(unlocked("valuation", { member: true, growth: false, valuation: true }) && !unlocked("valuation", { member: true, growth: true, valuation: false }), "the valuation view follows the valuation right (every membership, not the one-time assessment)");
 assert(STARTER_SETS.every((s) => s.extras.length >= MIN_EXTRAS && s.extras.length <= MAX_EXTRAS && validExtras(s.extras)), "starter sets are valid choices");
 assert(setFor(STARTER_SETS[0].extras) === STARTER_SETS[0].key && setFor(["areas", "gaps", "history"]) === "custom", "starter set recognised");
 
@@ -170,7 +171,7 @@ const buyer = entitlements(null, true);
 const none = entitlements(null);
 assert(ess.planBuilder && !ess.planReview && !ess.marketIntel, "Essentials: Plan Builder, no AI review or market intel");
 assert(grow.planBuilder && grow.planReview && grow.marketIntel, "Growth: all three");
-assert(buyer.planBuilder && buyer.planReview && buyer.marketIntel, "one-time assessment: all three");
+assert(buyer.planBuilder && !buyer.planReview && !buyer.marketIntel, "one-time assessment: Plan Builder only (review and Market Intelligence come with Growth)");
 assert(!none.planBuilder && !none.planReview && !none.marketIntel, "no access without membership or purchase");
 
 // ---------------- Report uses the plan ----------------
