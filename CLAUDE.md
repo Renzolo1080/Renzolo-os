@@ -26,6 +26,7 @@ RENZOLO™ is a venture development and capital infrastructure platform, not a c
 
 **Approved names only:** RENZOLO™, RENZOLO Ventures™, RENZOLO Studio™, RENZOLO Network™, RENZOLO Capital™, RENZOLO OS™, Founder Trajectory™, Founder Trajectory™ Academy.
 
+- Lurinzu Media (approved Nov 19, 2026): the production company for online videos, courses, the podcast, programs and events; a trade name of Renzolo Enterprises LLC. Lorenzo is filing the LURINZU trademark; use "Lurinzu Media" in plain text (™ only once Lorenzo confirms the filing). RENZOLO Studio™ stays the venture co-building arm, not media.
 - "The VOLT method of Founder Trajectory™" may be used as a teaching acronym in courses (Vision, Opportunity and Obstacle, Lever, Thrust). No ™ on VOLT alone. Credit the research ("builds on published motivation research on mental contrasting and if-then planning"); never use the name WOOP.
 
 - Do not use: Renzcelerator, Founder Velocity, Founder Pathways, Capital Alignment Engine, Venture Score, Founder OS.
