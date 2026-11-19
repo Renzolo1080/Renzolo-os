@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
   const status = (params.get("status") ?? "").toLowerCase();
 
   const done = (payment: string, product?: string | null) => {
-    const url = new URL("/dashboard", base);
+    // Course buyers go straight to their courses.
+    const url = new URL(product === "course" ? "/academy/mine" : "/dashboard", base);
     url.searchParams.set("payment", payment);
     if (product) url.searchParams.set("product", product);
     return NextResponse.redirect(url, 303);

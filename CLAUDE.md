@@ -2,7 +2,9 @@
 
 Read this at the start of every session. When anything here conflicts with chat history or older code comments, this file and Lorenzo's latest master documents win.
 
-**Checkpoint (Nov 11, 2026):** Approved Nov 11: $40 assessment (no valuation; members get the full report with valuation), assessment shown beside memberships, regional pricing for the assessment and memberships (two zones: Africa local currency; US/UK/EU higher) with an Elevate monthly option in Africa ($249 × 12) — regional build goes to a preview for approval first. documents_and_partners migration applied live (server-only writes). PRs 19, 24, 25 merged.
+**Checkpoint (Nov 19, 2026):** Approved Nov 19: Founder Trajectory™ Academy recorded courses, sold as a separate one-time product (never included in a membership). Three readiness courses (Customer, Capital, Investor Readiness; working titles), $49 each / $119 for all three in Africa, $149 / $349 in the US, UK and EU, in US dollars; members of any tier get 20% off (approved exception to "no discounts at launch"). Courses use the VOLT method of Founder Trajectory™ (Vision, Opportunity and Obstacle, Lever, Thrust) in place of WOOP; VOLT is a teaching acronym, no ™ on it until a trademark attorney clears it. Built on branch `feat/academy-courses` (PR open): catalog `/academy`, course pages, lesson player with VOLT card, `/academy/mine`, admin `/academy/admin`; migrations `2026-11-19_courses_enums.sql` then `2026-11-19_courses.sql` written but NOT applied live. Open: course refund terms, Bunny Stream settings (`BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_TOKEN_KEY`), payment provider for courses (built on the existing checkout; Lorenzo chose Stripe-first on Nov 17, not yet built), course videos.
+
+**Earlier checkpoint (Nov 11, 2026):** Approved Nov 11: $40 assessment (no valuation; members get the full report with valuation), assessment shown beside memberships, regional pricing for the assessment and memberships (two zones: Africa local currency; US/UK/EU higher) with an Elevate monthly option in Africa ($249 × 12) — regional build goes to a preview for approval first. documents_and_partners migration applied live (server-only writes). PRs 19, 24, 25 merged.
 
 **Earlier checkpoint (Nov 9, 2026):** launch on **November 16, 2026**. In review (PR "Hubflo enhancements"): member reminders, next-steps progress, free loan readiness check, plan templates, AI document intake, partner portal and impact report (migration `2026-11-10_documents_and_partners.sql` not applied yet). The Founder Trajectory™ book starts in January 2027, after launch. Live on master: $60 assessment, Nov 1 membership and coaching prices, local prices for Kenya, Nigeria, South Africa and Ghana in Vercel, local-currency estimate at checkout, privacy launch (consent, Your data page, PAIA manual), refund policy, Google Workspace email and email settings in Vercel. Open blockers: Flutterwave account and keys, Resend (`RESEND_API_KEY`), `EMAIL_POSTAL_ADDRESS`, `COACHING_BOOKING_URL`, `CRON_SECRET`, `EMAIL_LINK_SECRET`, end-to-end test purchases. In review: Readiness Snapshot landing page, Snapshot qualifier questions.
 
@@ -23,6 +25,8 @@ RENZOLO™ is a venture development and capital infrastructure platform, not a c
 - **Positioning:** the step after the accelerator. Accelerators teach; RENZOLO gets businesses ready and in front of customers and investors.
 
 **Approved names only:** RENZOLO™, RENZOLO Ventures™, RENZOLO Studio™, RENZOLO Network™, RENZOLO Capital™, RENZOLO OS™, Founder Trajectory™, Founder Trajectory™ Academy.
+
+- "The VOLT method of Founder Trajectory™" may be used as a teaching acronym in courses (Vision, Opportunity and Obstacle, Lever, Thrust). No ™ on VOLT alone. Credit the research ("builds on published motivation research on mental contrasting and if-then planning"); never use the name WOOP.
 
 - Do not use: Renzcelerator, Founder Velocity, Founder Pathways, Capital Alignment Engine, Venture Score, Founder OS.
 - Do not invent new public product names; describe new features plainly until Lorenzo clears a name.
@@ -49,6 +53,7 @@ RENZOLO™ is a venture development and capital infrastructure platform, not a c
 | Payments | Flutterwave (cards and mobile money). Test keys in Preview only; live keys in Production only. Every payment verified by ID; webhook checked with the secret hash |
 | Prices | All in `lib/pricing.ts`, overridable by Vercel settings. Local prices (KES, NGN, ZAR, GHS) are Vercel settings |
 | AI coaching | Anthropic API (Lorenzo · AI text) and Tavus (video) |
+| Course video | Bunny Stream with signed, expiring player links (`BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_TOKEN_KEY`); video IDs set on `/academy/admin` |
 | Email | Google Workspace: lorenzo@ with aliases hello@, support@, privacy@, coach@ (renzoloenterprises.com). App email via Resend from no-reply@ |
 | Held | Next.js 16 upgrade branch until after launch |
 
@@ -76,6 +81,8 @@ Founder Trajectory™ is powered by RENZOLO OS™: a founder takes the free Snap
 | Build cohort | $449 | 12 weeks, matching membership included, instalments |
 | Scale cohort | $1,950 | Hidden at launch; revisit in December |
 | Launch cohort | To confirm | 8 weeks, self-paced, AI coaching + one 30-min 1:1 |
+| Academy course (each) | Africa $49 · US/UK/EU $149 (USD) | Recorded, lifetime access. Not in any membership; members get 20% off (Nov 19, 2026). `lib/courses.ts` |
+| All three courses | Africa $119 · US/UK/EU $349 (USD) | Same member discount |
 
 Members who joined before Nov 1 keep their price (there were none at the change).
 
@@ -85,7 +92,7 @@ Members who joined before Nov 1 keep their price (there were none at the change)
 - Progress guarantee: if a founder misses their goal, reassess and add coaching time. Word it plainly and match the fine print.
 - Matching is provided only to founders who meet the readiness requirements (score thresholds, documents, coach sign-off) and who acknowledge the matching statement at purchase.
 - Clients belong to RENZOLO, not to individual coaches.
-- No discounts at launch.
+- No discounts at launch, except the 20% member discount on Academy courses (approved Nov 19, 2026).
 
 ## Workstreams
 

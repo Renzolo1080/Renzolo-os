@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 
-const MEMBER_AREAS = ["/partner", "/dashboard", "/assessment", "/tools", "/advisor", "/report", "/plan", "/market", "/coaching", "/coach", "/ai-coach"];
+const MEMBER_AREAS = ["/partner", "/dashboard", "/assessment", "/tools", "/advisor", "/report", "/plan", "/market", "/coaching", "/coach", "/ai-coach", "/academy"];
 
 /** Top bar on every page. Signed-in areas get Dashboard / Tools / Log out;
  * public pages get Log in and the free Snapshot. */
@@ -10,6 +10,7 @@ const MEMBER_NAV: [string, string, string[]][] = [
   ["Plan", "/plan", ["/plan"]],
   ["Market", "/market", ["/market"]],
   ["Coaching", "/coaching", ["/coaching", "/coach", "/ai-coach", "/advisor"]],
+  ["Academy", "/academy", ["/academy"]],
   ["Tools", "/tools", ["/tools", "/assessment"]],
   ["Membership", "/dashboard/subscribe", ["/dashboard/subscribe"]],
 ];

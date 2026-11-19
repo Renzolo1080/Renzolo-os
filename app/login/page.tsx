@@ -22,7 +22,9 @@ export default function LoginPage() {
         setError(error.message);
         return;
       }
-      router.push("/dashboard");
+      // Only a path on this site (e.g. /academy/customer-readiness), never another site.
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next && /^\/(?!\/)[\w\-/]*$/.test(next) ? next : "/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
       setError(

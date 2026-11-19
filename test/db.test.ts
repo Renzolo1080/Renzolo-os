@@ -790,6 +790,49 @@ async function suite(label: string, files: string[], opts: { automaticTableGrant
   assert(!r.ok || r.n === 0, "an acknowledgment can't be deleted from the browser", r);
   assert((await one(`select count(*)::int as n from acknowledgments where founder_id='${A}' and version='1.0'`))?.n === 1, "the acknowledgment is still there, unchanged");
 
+  // ------------------------------------------------------------------
+  // Academy courses (2026-11-19)
+  // ------------------------------------------------------------------
+  const enrolled = async (uid: string) =>
+    (await SRV(`select course_slug from course_enrollments where founder_id='${uid}' order by course_slug`)).rows.map((x: any) => x.course_slug);
+  r = await U(F, `insert into course_lesson_progress (founder_id,course_slug,lesson_key,completed_at) values ('${F}','customer-readiness','l01',now())`);
+  assert(!r.ok, "founder cannot save course progress before buying the course");
+  r = await U(F, `insert into course_enrollments (founder_id,course_slug) values ('${F}','customer-readiness')`);
+  assert(!r.ok, "founder cannot give themselves a course from the browser");
+
+  const subsBefore = (await one(`select count(*)::int as n from subscriptions where founder_id='${F}'`))?.n;
+  const coursePay = (await SRV(`insert into payments (tx_ref,founder_id,product,course_slug,amount,currency) values ('renzolo-course-f-1','${F}','course','customer-readiness',39.2,'USD') returning id`)).rows[0].id;
+  r = await SRV(`select fulfil_payment('${coursePay}','9001',39.2,'f@x',null)`);
+  assert(r.ok && r.rows[0].fulfil_payment === "fulfilled", "a course payment is fulfilled", r);
+  assert(JSON.stringify(await enrolled(F)) === JSON.stringify(["customer-readiness"]), "the course payment grants that one course", await enrolled(F));
+  r = await SRV(`select fulfil_payment('${coursePay}','9001',39.2,'f@x',null)`);
+  assert(r.ok && r.rows[0].fulfil_payment === "already_fulfilled", "a course payment is granted only once", r);
+
+  r = await U(F, `insert into course_lesson_progress (founder_id,course_slug,lesson_key,completed_at,volt,energy) values ('${F}','customer-readiness','l01',now(),'{"vision":"Signed contract"}',7)`);
+  assert(r.ok, "enrolled founder saves progress and a VOLT card", r);
+  r = await U(F, `insert into course_lesson_progress (founder_id,course_slug,lesson_key) values ('${F}','capital-readiness','l01')`);
+  assert(!r.ok, "founder cannot save progress for a course they don't own");
+  r = await U(B, `select * from course_lesson_progress`);
+  assert(r.ok && r.rows.length === 0, "another founder cannot read someone's VOLT cards", r);
+  r = await U(B, `select * from course_enrollments`);
+  assert(r.ok && r.rows.length === 0, "another founder cannot see someone's courses", r);
+  r = await U(M, `select founder_id from course_enrollments where founder_id='${F}'`);
+  assert(r.ok && r.rows.length === 1, "admin can see enrollments", r);
+
+  await SRV(`insert into course_lesson_media (course_slug,lesson_key,video_id) values ('customer-readiness','l01','11111111-2222-3333-4444-555555555555')`);
+  r = await U(F, `select video_id from course_lesson_media`);
+  assert(!r.ok || r.rows.length === 0, "video IDs are never readable from the browser, even by a buyer", r);
+
+  const bundlePay = (await SRV(`insert into payments (tx_ref,founder_id,product,course_slug,amount,currency) values ('renzolo-course-f-2','${F}','course','readiness-bundle',95.2,'USD') returning id`)).rows[0].id;
+  r = await SRV(`select fulfil_payment('${bundlePay}','9002',95.2,'f@x',null)`);
+  assert(r.ok && r.rows[0].fulfil_payment === "fulfilled", "a bundle payment is fulfilled", r);
+  assert(
+    JSON.stringify(await enrolled(F)) === JSON.stringify(["capital-readiness", "customer-readiness", "investor-readiness"]),
+    "the bundle grants all three courses, keeping the one already owned",
+    await enrolled(F)
+  );
+  assert((await one(`select count(*)::int as n from subscriptions where founder_id='${F}'`))?.n === subsBefore, "buying a course does not create or change a membership");
+
   await db.close();
 }
 
@@ -839,6 +882,10 @@ async function main() {
     "supabase/migrations/2026-11-10_documents_and_partners.sql",
     "supabase/migrations/2026-11-10_coach_access.sql",
     "supabase/migrations/2026-11-10_coach_access.sql",
+    "supabase/migrations/2026-11-19_courses_enums.sql",
+    "supabase/migrations/2026-11-19_courses_enums.sql",
+    "supabase/migrations/2026-11-19_courses.sql",
+    "supabase/migrations/2026-11-19_courses.sql",
   ]);
   console.log(`\nDatabase tests completed: ${passes} passed, ${failures} failed.`);
 }

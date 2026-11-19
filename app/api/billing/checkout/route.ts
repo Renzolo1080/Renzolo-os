@@ -22,6 +22,7 @@ import { planChange, entitlements, elevateSeatLimit } from "@/lib/membership";
 import { loadMembership, countElevateMembers } from "@/lib/membership-server";
 import { getAppUrl } from "@/lib/app-url";
 import { ipCountryFrom, regionFor } from "@/lib/region";
+import { courseQuote, isPurchasableCourse, alreadyOwnsAll, purchaseTitle, coursesInPurchase } from "@/lib/courses";
 
 /** POST /api/billing/checkout — starts a Flutterwave checkout and returns
  * { link }, the hosted payment page to send the founder to.
@@ -30,6 +31,10 @@ import { ipCountryFrom, regionFor } from "@/lib/region";
  *   { kind: "membership", tier, interval, currency?, autoRenew? }
  *   { kind: "assessment", currency? }                       the one-time assessment
  *   { kind: "coaching", item: "coaching_single" | "coaching_pack3", currency? }
+ *   { kind: "course", course: "<course slug>" | "readiness-bundle" }
+ *     a recorded Founder Trajectory(TM) Academy course, in US dollars;
+ *     members of any tier pay 20% less (lib/courses.ts). A course is never
+ *     part of a membership.
  *
  * Every amount is worked out here on the server from lib/pricing.ts and
  * lib/membership.ts (upgrade credit, downgrade timing), recorded in the
@@ -127,6 +132,21 @@ export async function POST(req: NextRequest) {
     title = `Expert Advisory Session${n > 1 ? "s" : ""} (${n})`;
     description = `${n} one-on-one Expert Advisory Session${n > 1 ? "s" : ""}, to use within 60 days (rescheduling allowed)`;
     row = { quantity: n };
+  } else if (kind === "course") {
+    const item = body?.course;
+    if (!isPurchasableCourse(item)) return NextResponse.json({ error: "That course isn't available." }, { status: 400 });
+    const { data: owned } = await supabase.from("course_enrollments").select("course_slug").eq("founder_id", user.id);
+    const ownedSlugs = (owned ?? []).map((o: { course_slug: string }) => o.course_slug);
+    if (alreadyOwnsAll(item, ownedSlugs)) {
+      return NextResponse.json({ error: "You already have this course. Open it from My courses." }, { status: 409 });
+    }
+    const quote = courseQuote(item, m.tier, region);
+    product = "course";
+    price = quote.charge;
+    title = `Founder Trajectory™ Academy: ${purchaseTitle(item)}`;
+    const n = coursesInPurchase(item).length;
+    description = `${n > 1 ? `${n} recorded courses` : "Recorded course"}, lifetime access${quote.percent ? ` (member price, ${quote.percent}% off)` : ""}`;
+    row = { course_slug: item };
   } else {
     return NextResponse.json({ error: "Unknown purchase." }, { status: 400 });
   }
