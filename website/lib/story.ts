@@ -19,10 +19,10 @@ export const FOUNDER = {
   pullQuote:
     "Talented founders lose opportunities not because their business is weak, but because nobody showed them what ready looks like to a buyer, a lender or an investor.",
   short:
-    "For more than 20 years Lorenzo has developed suppliers and founders for large buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. He has trained 7,000+ suppliers and entrepreneurs in 30+ countries to become customer and investor ready, including six years founding and leading EY Africa's Enterprise Impact Program, and 4,000+ founders have benefited from his work. RENZOLO puts that playbook in every founder's hands.",
+    "For more than 20 years Lorenzo has developed suppliers and founders for large buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. His programs have given 10,000+ small businesses technical assistance across 54 countries, including six years founding and leading EY Africa's Enterprise Impact Program, which trained and coached 4,800+ founders. RENZOLO puts that playbook in every founder's hands.",
   story: [
     "For more than 20 years I sat on the buyer's side of the table. I assessed suppliers for global companies, developed them until they were ready, and connected them to contracts worth winning, across Africa, the UK, Europe, the US, India, Latin America and the Caribbean. I saw the same thing again and again: talented founders lost opportunities not because their business was weak, but because nobody had shown them what “ready” looks like to a buyer, a lender or an investor.",
-    "At EY I led inclusive and sustainable procurement strategy, and founded and led the EY Africa Enterprise Impact Program: a six-month accelerator. Over six years we trained entrepreneurs across Africa to become customer and investor ready, 60% of them women. Across my career I've trained 7,000+ suppliers and entrepreneurs in 30+ countries, and 4,000+ founders have benefited from my work. I trained and coached those founders myself, and I've coached founders through EY's Ignite advisor programme and the Green Bay Packers Mentor-Protégé Program.",
+    "At EY I led inclusive and sustainable procurement strategy, and founded and led the EY Africa Enterprise Impact Program: a six-month accelerator. Over six years we trained entrepreneurs across Africa to become customer and investor ready, 60% of them women. Across my career my programs have given 10,000+ small businesses technical assistance across 54 countries, and the EY Africa program alone trained and coached 4,800+ founders. I trained and coached those founders myself, and I've coached founders through EY's Ignite advisor programme and the Green Bay Packers Mentor-Protégé Program.",
     "I built RENZOLO so every founder can get that support, not just the few who win a place in a cohort. Founder Trajectory™ turns what procurement teams, credit committees and investors check into an assessment, a plan and coaching any founder can use, at a price early-stage founders in Africa can afford.",
     "I learned discipline and mission in the U.S. Navy. Today I also advise the Girls STEAM Institute on building the next generation of supplier-ready entrepreneurs. The lesson is the same everywhere: no single generation builds the future alone.",
   ],
@@ -34,10 +34,10 @@ export const FOUNDER = {
 /** Headline proof figures. */
 export const PROOF_STATS: { figure: string; label: string }[] = [
   { figure: "25+", label: "years developing founders and suppliers" },
-  { figure: "7,000+", label: "suppliers and entrepreneurs trained" },
-  { figure: "4,000+", label: "founders benefited across 30+ countries" },
-  { figure: "$10M", label: "raised for founder development and investment" },
-  { figure: "$4.2B", label: "in customer contracts matched to founders" },
+  { figure: "10,000+", label: "small businesses given technical assistance" },
+  { figure: "4,800+", label: "founders trained and coached" },
+  { figure: "$6M", label: "raised for small business development" },
+  { figure: "$16.5B", label: "in contracts won by founders" },
 ];
 
 /** The approved proof statement (Nov 2026). Firm voice, no footnote. */
@@ -55,7 +55,7 @@ export const AFFILIATION_NOTE =
 export const CAREER_STORY: string[] = [
   "Lorenzo's career has been about one thing: getting good businesses ready for the opportunities in front of them. For more than 20 years he has worked from the buyer's side of the table, assessing suppliers for global companies, developing them until they met the standard, and connecting them to customers, lenders and investors across Africa, the UK, Europe, the US, India, Latin America and the Caribbean.",
   "He has built and led accelerators and supplier development programmes for global companies, including the EY Africa Enterprise Impact Program, which he founded and where he trained and coached the founders himself. As a board leader in supplier development and mentor-protégé programmes, he has raised money for founder development and held programmes to their results.",
-  "Across that work, 4,000+ founders in 30+ countries have benefited, $10M has been raised for founder development and investment, and founders have been matched with $4.2B in customer contracts.",
+  "Across that work, $6M has been raised for small business development, 10,000+ small businesses have received technical assistance across 54 countries, and founders have won $16.5B in contracts.",
   "He still coaches founders one to one, including through the Green Bay Packers Mentor-Protégé Program, and advises the Girls STEAM Institute. A U.S. Navy veteran, he built RENZOLO so every founder can use the same playbook, not just the few who win a place in a cohort.",
 ];
 
@@ -106,9 +106,9 @@ export const CREDENTIALS: { figure?: string; title: string; text: string }[] = [
     text: "Connecting ready suppliers to contract opportunities with large buyers and their supply chains, across seven regions of the world.",
   },
   {
-    figure: "7,000+",
+    figure: "10,000+",
     title: "Customer and investor readiness",
-    text: "Suppliers and entrepreneurs trained to become customer and investor ready across 30+ countries, including six years leading the EY Africa Enterprise Impact Program.",
+    text: "Small businesses given technical assistance to become customer and investor ready across 54 countries, including six years leading the EY Africa Enterprise Impact Program.",
   },
   {
     title: "Coaching founders",
@@ -126,7 +126,7 @@ export const CREDENTIALS: { figure?: string; title: string; text: string }[] = [
 
 /** Each "why" claim, tied to the proof behind it (home page). */
 export const WHY_PROOF = {
-  outcome: "Proof: the customer and investor readiness approach Lorenzo used to train 7,000+ suppliers and entrepreneurs in 30+ countries.",
+  outcome: "Proof: the customer and investor readiness approach behind 10,000+ small businesses supported across 54 countries.",
   buyer: "Proof: 20+ years developing suppliers for global buyers across Africa, the UK, Europe, the US, India, Latin America and the Caribbean.",
   price: "Proof: the kind of support EIP values at $25,000 per founder, now in an affordable membership.",
 };
@@ -138,10 +138,10 @@ export const RESULTS = {
   label: "Lorenzo's track record, before RENZOLO",
   stats: [
     { figure: "20+", label: "years developing suppliers and founders" },
-    { figure: "7,000+", label: "suppliers and entrepreneurs trained to become customer and investor ready" },
-    { figure: "4,000+", label: "founders benefited across 30+ countries" },
-    { figure: "$10M", label: "raised for founder development and investment" },
-    { figure: "$4.2B", label: "in customer contracts matched to founders" },
+    { figure: "10,000+", label: "suppliers and entrepreneurs trained to become customer and investor ready" },
+    { figure: "4,800+", label: "founders trained and coached" },
+    { figure: "$6M", label: "raised for small business development" },
+    { figure: "$16.5B", label: "in contracts won by founders" },
   ],
   base: "Figures cover Lorenzo's career before RENZOLO, including six years leading the EY Africa Enterprise Impact Program (2021–2026).",
 };
