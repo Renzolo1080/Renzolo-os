@@ -22,7 +22,7 @@ import { planChange, entitlements, elevateSeatLimit } from "@/lib/membership";
 import { loadMembership, countElevateMembers } from "@/lib/membership-server";
 import { getAppUrl } from "@/lib/app-url";
 import { ipCountryFrom, regionFor } from "@/lib/region";
-import { courseQuote, isPurchasableCourse, alreadyOwnsAll, purchaseTitle, coursesInPurchase } from "@/lib/courses";
+import { courseQuote, isPurchasableCourse, alreadyOwnsAll, purchaseTitle, coursesInPurchase, courseSalesEnabled } from "@/lib/courses";
 
 /** POST /api/billing/checkout — starts a Flutterwave checkout and returns
  * { link }, the hosted payment page to send the founder to.
@@ -133,6 +133,7 @@ export async function POST(req: NextRequest) {
     description = `${n} one-on-one Expert Advisory Session${n > 1 ? "s" : ""}, to use within 60 days (rescheduling allowed)`;
     row = { quantity: n };
   } else if (kind === "course") {
+    if (!courseSalesEnabled()) return NextResponse.json({ error: "Course enrolment isn't open yet." }, { status: 403 });
     const item = body?.course;
     if (!isPurchasableCourse(item)) return NextResponse.json({ error: "That course isn't available." }, { status: 400 });
     const { data: owned } = await supabase.from("course_enrollments").select("course_slug").eq("founder_id", user.id);

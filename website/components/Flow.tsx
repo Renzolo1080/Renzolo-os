@@ -11,10 +11,10 @@ const WRAP = "mx-auto max-w-[1200px] px-4 md:px-8";
 /** Short labels for the band; the full labels stay on the About page. */
 const SHORT: Record<string, string> = {
   "25+": "years developing founders and suppliers",
-  "7,000+": "suppliers and entrepreneurs trained",
-  "4,000+": "founders benefited across 30+ countries",
-  "$10M": "raised for founder development and investment",
-  "$4.2B": "in customer contracts matched to founders",
+  "10,000+": "small businesses given technical assistance",
+  "4,800+": "founders trained and coached",
+  "$6M": "raised for small business development",
+  "$16.5B": "in contracts won by founders",
 };
 
 /** 1. One proof band, straight after the hero. */

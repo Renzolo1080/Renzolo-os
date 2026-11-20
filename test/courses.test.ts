@@ -10,6 +10,7 @@ import {
   isPurchasableCourse,
   lessonCount,
   memberDiscountPercent,
+  courseSalesEnabled,
   sanitizeEnergy,
   sanitizeVolt,
 } from "../lib/courses";
@@ -92,5 +93,10 @@ const token = createHash("sha256").update("secret-key" + id + expires).digest("h
 assert(url.startsWith(`https://iframe.mediadelivery.net/embed/12345/${id}?`) && url.includes(`token=${token}`) && url.includes(`expires=${expires}`), "video links are signed and expire", url);
 assert(!url.includes("secret-key"), "the token key never appears in the link");
 assert(signedEmbedUrl("not-an-id", env, now) === null, "a bad video ID never produces a link");
+
+// Course sales stay off until pricing is approved
+assert(courseSalesEnabled({}) === false, "course sales are off by default");
+assert(courseSalesEnabled({ COURSE_SALES_ENABLED: "yes" }) === false, "only an explicit true turns sales on");
+assert(courseSalesEnabled({ COURSE_SALES_ENABLED: "true" }) === true, "COURSE_SALES_ENABLED=true turns sales on");
 
 console.log(failures ? `\n${failures} course test(s) failed.` : "\nAll course tests passed.");

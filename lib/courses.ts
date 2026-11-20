@@ -268,6 +268,13 @@ function readAmount(raw: string | undefined): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/** Course sales are paused until Lorenzo approves course pricing (Nov 19,
+ * 2026). Pages, previews and owned courses still work; prices, the member
+ * discount and the buy buttons only appear when COURSE_SALES_ENABLED=true. */
+export function courseSalesEnabled(env: Env = process.env): boolean {
+  return (env.COURSE_SALES_ENABLED ?? "").trim().toLowerCase() === "true";
+}
+
 /** Member discount on courses, as a percentage (default 20). A setting
  * outside 0–90 is ignored, so a typo can never make a course free. */
 export function memberDiscountPercent(env: Env = process.env): number {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { loadAcademyViewer } from "@/lib/courses-server";
-import { BUNDLE_SLUG, COURSES, courseQuote, lessonCount, memberDiscountPercent, alreadyOwnsAll } from "@/lib/courses";
+import { BUNDLE_SLUG, COURSES, courseQuote, lessonCount, memberDiscountPercent, alreadyOwnsAll, courseSalesEnabled } from "@/lib/courses";
 import { formatPrice } from "@/lib/pricing";
 import { REGION_NOTE } from "@/lib/region";
 import { BuyCourseButton } from "@/components/academy/AcademyClient";
@@ -23,6 +23,7 @@ const VOLT = [
 export default async function AcademyPage() {
   const v = await loadAcademyViewer(await createClient());
   const pct = memberDiscountPercent();
+  const sales = courseSalesEnabled();
   const bundle = courseQuote(BUNDLE_SLUG, v.tier, v.region);
   const bundleList = courseQuote(BUNDLE_SLUG, "growth", v.region);
 
@@ -64,6 +65,8 @@ export default async function AcademyPage() {
                 </p>
                 {owned ? (
                   <p className="font-semibold text-navy">You own this course.</p>
+                ) : !sales ? (
+                  <p className="font-semibold text-navy">Enrolment opens soon.</p>
                 ) : (
                   <p className="flex items-baseline gap-3">
                     <span className="text-3xl font-bold text-navy">{formatPrice(q.charge)}</span>
@@ -86,7 +89,7 @@ export default async function AcademyPage() {
         })}
       </section>
 
-      {!alreadyOwnsAll(BUNDLE_SLUG, v.owned) && (
+      {sales && !alreadyOwnsAll(BUNDLE_SLUG, v.owned) && (
         <section aria-label="Bundle" className="mt-6 flex flex-wrap items-center justify-between gap-5 rounded-3xl bg-navy px-8 py-7 text-white">
           <div>
             <h2 className="text-2xl text-white">All three readiness courses</h2>
@@ -101,7 +104,7 @@ export default async function AcademyPage() {
           </div>
         </section>
       )}
-      <p className="mt-3 text-sm text-ink-soft">Course prices are in US dollars. {REGION_NOTE}</p>
+      {sales && <p className="mt-3 text-sm text-ink-soft">Course prices are in US dollars. {REGION_NOTE}</p>}
 
       <section className="mt-16 space-y-4">
         <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand-text">How every course works</p>

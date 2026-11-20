@@ -135,7 +135,7 @@ export default async function LessonPage({ params }: { params: Promise<{ course:
               <h2 className="text-2xl text-navy">Like this lesson?</h2>
               <p className="text-ink-soft">Buy the course to unlock every lesson, the worksheets and your VOLT practice.</p>
               <a href={`/academy/${course.slug}`} className="btn-pop inline-flex min-h-[48px] items-center rounded-pill border-2 border-ink bg-brand px-6 font-semibold text-on-brand">
-                See the course and price
+                See the course
               </a>
             </section>
           )}

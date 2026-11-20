@@ -2,7 +2,11 @@
 
 Read this at the start of every session. When anything here conflicts with chat history or older code comments, this file and Lorenzo's latest master documents win.
 
-**Checkpoint (Nov 19, 2026):** Approved Nov 19: Founder Trajectory™ Academy recorded courses, sold as a separate one-time product (never included in a membership). Three readiness courses (Customer, Capital, Investor Readiness; working titles), $49 each / $119 for all three in Africa, $149 / $349 in the US, UK and EU, in US dollars; members of any tier get 20% off (approved exception to "no discounts at launch"). Courses use the VOLT method of Founder Trajectory™ (Vision, Opportunity and Obstacle, Lever, Thrust) in place of WOOP; VOLT is a teaching acronym, no ™ on it until a trademark attorney clears it. Built on branch `feat/academy-courses` (PR open): catalog `/academy`, course pages, lesson player with VOLT card, `/academy/mine`, admin `/academy/admin`; migrations `2026-11-19_courses_enums.sql` then `2026-11-19_courses.sql` written but NOT applied live. Open: course refund terms, Bunny Stream settings (`BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_TOKEN_KEY`), payment provider for courses (built on the existing checkout; Lorenzo chose Stripe-first on Nov 17, not yet built), course videos.
+**Checkpoint (Nov 19, 2026, decisions):** Lorenzo approved on Nov 19: (1) **Stripe first** for payments (US LLC, Stripe Tax); Flutterwave later only for M-Pesa in Kenya; Paddle ruled out. (2) **Keep the live membership prices** (quarterly and annual by region); no switch to $15/$39/$149 a month. (4) **Digital workbooks approved, prices to be set**; masterclass, partner license and Founding Annual Pass **paused**; develop **corporate subscriptions** (benefits and pricing) for approval. (5) **Build the courses but pause course pricing and the member discount**: course pages are live without prices or a buy button (`COURSE_SALES_ENABLED` off) until Lorenzo approves pricing. (6) **Keep the current market sequence**. (7) South Africa VAT threshold (R1M vs R2.3M) to confirm with a tax practitioner. (8) **Lurinzu Media** approved as the production name (trade name of Renzolo Enterprises LLC; Lurinzu™ once the trademark is filed, ® after registration) and **VOLT** approved as a teaching acronym (no ™). Merged: PR 39 (Nov 12 checkpoint), PR 41 (proof figures: 10,000+ small businesses, 4,800+ founders, $6M raised, $16.5B in contracts, 54 countries), PR 40 (courses). Open: Elevate cap (15 vs 50), Next.js security upgrade PR, Stripe build.
+
+**Earlier checkpoint (Nov 19, 2026, courses):** Approved Nov 19: Founder Trajectory™ Academy recorded courses, sold as a separate one-time product (never included in a membership). Three readiness courses (Customer, Capital, Investor Readiness; working titles), proposed prices $49 each / $119 for all three in Africa and $149 / $349 in the US, UK and EU with 20% off for members, now paused pending approval. Courses use the VOLT method of Founder Trajectory™ (Vision, Opportunity and Obstacle, Lever, Thrust) in place of WOOP; VOLT is a teaching acronym, no ™ on it until a trademark attorney clears it. Built on branch `feat/academy-courses` (PR open): catalog `/academy`, course pages, lesson player with VOLT card, `/academy/mine`, admin `/academy/admin`; migrations `2026-11-19_courses_enums.sql` then `2026-11-19_courses.sql` written but NOT applied live. Open: course refund terms, Bunny Stream settings (`BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_TOKEN_KEY`), payment provider for courses (built on the existing checkout; Lorenzo chose Stripe-first on Nov 17, not yet built), course videos.
+
+**Earlier checkpoint (Nov 12, 2026):** Merged Nov 12: regional pricing (PR 36: Africa zone vs US/UK/EU, $40 assessment, international prices US $79 / UK £59 / EU €69 and higher membership prices; each founder sees only their zone), benefit lists under each membership, Expert Advisory Sessions (60 days to use, with rescheduling; adviser list not published), full feature comparison table (Growth highlighted, buy buttons, sticky plan names), UK/EU 14-day right to cancel and Progress review fine print on the refund page (not called a guarantee; lawyer review recommended), and the dashboard badge/re-assess fix (PR 38). Next: Lorenzo confirms Vercel `PRICE_ASSESSMENT=40` and local Africa prices; Elevate monthly in Africa (needs Flutterwave recurring); card-country check; UK/EU checkout consent; proof section later.
 
 **Earlier checkpoint (Nov 11, 2026):** Approved Nov 11: $40 assessment (no valuation; members get the full report with valuation), assessment shown beside memberships, regional pricing for the assessment and memberships (two zones: Africa local currency; US/UK/EU higher) with an Elevate monthly option in Africa ($249 × 12) — regional build goes to a preview for approval first. documents_and_partners migration applied live (server-only writes). PRs 19, 24, 25 merged.
 
@@ -24,7 +28,7 @@ RENZOLO™ is a venture development and capital infrastructure platform, not a c
 - **Revenue:** from founders and program funders, not U.S. corporate supplier-diversity budgets.
 - **Positioning:** the step after the accelerator. Accelerators teach; RENZOLO gets businesses ready and in front of customers and investors.
 
-**Approved names only:** RENZOLO™, RENZOLO Ventures™, RENZOLO Studio™, RENZOLO Network™, RENZOLO Capital™, RENZOLO OS™, Founder Trajectory™, Founder Trajectory™ Academy.
+**Approved names only:** RENZOLO™, RENZOLO Ventures™, RENZOLO Studio™, RENZOLO Network™, RENZOLO Capital™, RENZOLO OS™, Founder Trajectory™, Founder Trajectory™ Academy, Lurinzu Media (production name; trade name of Renzolo Enterprises LLC; add ™ only once the trademark is filed). VOLT (Vision, Opportunity and Obstacle, Lever, Thrust) is an approved teaching acronym, used without ™.
 
 - Lurinzu Media (approved Nov 19, 2026): the production company for online videos, courses, the podcast, programs and events; a trade name of Renzolo Enterprises LLC. Lorenzo is filing the LURINZU trademark; use "Lurinzu Media" in plain text (™ only once Lorenzo confirms the filing). RENZOLO Studio™ stays the venture co-building arm, not media.
 - "The VOLT method of Founder Trajectory™" may be used as a teaching acronym in courses (Vision, Opportunity and Obstacle, Lever, Thrust). No ™ on VOLT alone. Credit the research ("builds on published motivation research on mental contrasting and if-then planning"); never use the name WOOP.
@@ -51,7 +55,7 @@ RENZOLO™ is a venture development and capital infrastructure platform, not a c
 | App address | app.renzoloenterprises.com (GoDaddy CNAME "app" to Vercel) — not connected yet |
 | Domains | renzoloenterprises.com (primary), renzoloenterprises.net |
 | Database and auth | Supabase, RENZOLO OS project (Pro plan, leaked-password protection on) |
-| Payments | Flutterwave (cards and mobile money). Test keys in Preview only; live keys in Production only. Every payment verified by ID; webhook checked with the secret hash |
+| Payments | Stripe first (decided Nov 19, 2026; not built yet), with Flutterwave later for M-Pesa in Kenya. Current code uses Flutterwave (cards and mobile money). Test keys in Preview only; live keys in Production only. Every payment verified by ID; webhook checked with the secret hash |
 | Prices | All in `lib/pricing.ts`, overridable by Vercel settings. Local prices (KES, NGN, ZAR, GHS) are Vercel settings |
 | AI coaching | Anthropic API (Lorenzo · AI text) and Tavus (video) |
 | Course video | Bunny Stream with signed, expiring player links (`BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_TOKEN_KEY`); video IDs set on `/academy/admin` |
@@ -74,7 +78,7 @@ Founder Trajectory™ is powered by RENZOLO OS™: a founder takes the free Snap
 | Product | Price | Notes |
 | --- | --- | --- |
 | Readiness Snapshot | Free | 5 minutes or less; carries into the account on signup |
-| Readiness Assessment | $40 one-time (Nov 11, 2026) | Readiness report, scores, AI market insight, tier recommendation, Plan Builder. No valuation. Included in every membership. Regional prices approved (Africa ~$40 in local currency; US $79, UK £59, EU €69) but not built yet |
+| Readiness Assessment | $40 one-time in Africa (Nov 11, 2026) | Readiness report, scores, AI market insight, tier recommendation, Plan Builder. No valuation. Included in every membership. Regional prices live Nov 12: Africa ~$40 in local currency; US $79, UK £59, EU €69 |
 | Essentials (early stage) | $60/quarter · $200/year | Full report with valuation range and AI market insight (Nov 11, 2026). 1 × 30-min basic coaching session a quarter. No monthly option |
 | Growth | $147/quarter · $490/year | 2 × 30-min sessions a quarter, AI coach, plan review, Market Intelligence, advisor review |
 | Elevate | $699/quarter · $2,490/year | 1 × 60-min session a month, pitch review, priority support, matching (readiness requirements apply). Capped at 50 + waitlist |
@@ -82,8 +86,8 @@ Founder Trajectory™ is powered by RENZOLO OS™: a founder takes the free Snap
 | Build cohort | $449 | 12 weeks, matching membership included, instalments |
 | Scale cohort | $1,950 | Hidden at launch; revisit in December |
 | Launch cohort | To confirm | 8 weeks, self-paced, AI coaching + one 30-min 1:1 |
-| Academy course (each) | Africa $49 · US/UK/EU $149 (USD) | Recorded, lifetime access. Not in any membership; members get 20% off (Nov 19, 2026). `lib/courses.ts` |
-| All three courses | Africa $119 · US/UK/EU $349 (USD) | Same member discount |
+| Academy course (each) | Paused (proposed: Africa $49 · US/UK/EU $149, USD) | Recorded, lifetime access. Not in any membership. Pricing and the proposed 20% member discount are paused until Lorenzo approves (Nov 19, 2026); sales stay off until `COURSE_SALES_ENABLED=true`. `lib/courses.ts` |
+| All three courses | Paused (proposed: Africa $119 · US/UK/EU $349) | Same as above |
 
 Members who joined before Nov 1 keep their price (there were none at the change).
 
@@ -93,7 +97,7 @@ Members who joined before Nov 1 keep their price (there were none at the change)
 - Progress guarantee: if a founder misses their goal, reassess and add coaching time. Word it plainly and match the fine print.
 - Matching is provided only to founders who meet the readiness requirements (score thresholds, documents, coach sign-off) and who acknowledge the matching statement at purchase.
 - Clients belong to RENZOLO, not to individual coaches.
-- No discounts at launch, except the 20% member discount on Academy courses (approved Nov 19, 2026).
+- No discounts at launch. A 20% member discount on Academy courses is proposed but paused (Nov 19, 2026).
 
 ## Workstreams
 

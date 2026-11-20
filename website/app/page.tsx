@@ -118,7 +118,7 @@ export default function Home() {
 
         {/* Track record */}
         <section id="proof" className={`${WRAP} pb-20 md:pb-24`}>
-          <ProofPanel title="25+ years of getting businesses ready, across 30+ countries." regions />
+          <ProofPanel title="25+ years of getting businesses ready, across 54 countries." regions />
         </section>
 
         {/* Memberships */}

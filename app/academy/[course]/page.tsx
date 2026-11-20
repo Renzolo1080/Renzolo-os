@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { loadAcademyViewer, loadProgress } from "@/lib/courses-server";
-import { FORMAT_LABELS, allLessons, courseQuote, getCourse, lessonCount, memberDiscountPercent } from "@/lib/courses";
+import { FORMAT_LABELS, allLessons, courseQuote, getCourse, lessonCount, memberDiscountPercent, courseSalesEnabled } from "@/lib/courses";
 import { formatPrice } from "@/lib/pricing";
 import { BuyCourseButton } from "@/components/academy/AcademyClient";
 
@@ -33,6 +33,7 @@ export default async function CoursePage({ params }: { params: Promise<{ course:
   const lessons = allLessons(course);
   const next = lessons.find((l) => !done.has(l.key)) ?? lessons[0];
   const pct = memberDiscountPercent();
+  const sales = courseSalesEnabled();
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-8">
@@ -101,7 +102,7 @@ export default async function CoursePage({ params }: { params: Promise<{ course:
           </section>
         </div>
 
-        <aside aria-label={owned ? "Your course" : "Buy this course"} className="min-w-0 flex-[1_1_320px] space-y-4 rounded-panel border border-line bg-white p-7">
+        <aside aria-label={owned ? "Your course" : sales ? "Buy this course" : "Enrolment"} className="min-w-0 flex-[1_1_320px] space-y-4 rounded-panel border border-line bg-white p-7">
           {owned ? (
             <>
               <p className="text-xl font-semibold text-navy">You own this course.</p>
@@ -110,6 +111,14 @@ export default async function CoursePage({ params }: { params: Promise<{ course:
               </p>
               <a href={`/academy/${course.slug}/${next.key}`} className="btn-pop inline-flex min-h-[48px] w-full items-center justify-center rounded-pill border-2 border-ink bg-brand px-6 font-semibold text-on-brand">
                 {done.size ? `Continue lesson ${Number(next.key.slice(1))}` : "Start lesson 1"}
+              </a>
+            </>
+          ) : !sales ? (
+            <>
+              <p className="text-xl font-semibold text-navy">Enrolment opens soon.</p>
+              <p className="text-ink-soft">Watch the free preview lesson now. We will share course access details when enrolment opens.</p>
+              <a href={`/academy/${course.slug}/l01`} className="btn-pop inline-flex min-h-[48px] w-full items-center justify-center rounded-pill border-2 border-ink bg-brand px-6 font-semibold text-on-brand">
+                Watch the free preview
               </a>
             </>
           ) : (
