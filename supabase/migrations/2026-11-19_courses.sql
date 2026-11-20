@@ -123,3 +123,12 @@ $$;
 
 revoke all on function fulfil_payment(uuid, text, numeric, text, text, timestamptz) from public, anon, authenticated;
 grant execute on function fulfil_payment(uuid, text, numeric, text, text, timestamptz) to service_role;
+
+-- Added when applied live (Nov 20, 2026): new tables in this project inherit
+-- broad default grants, so pin the founder-facing grants to exactly what the
+-- policies above allow.
+revoke all on public.course_enrollments from anon, authenticated;
+grant select on public.course_enrollments to authenticated;
+revoke all on public.course_lesson_progress from anon, authenticated;
+grant select, insert, update on public.course_lesson_progress to authenticated;
+revoke all on public.course_lesson_media from anon, authenticated;
