@@ -38,16 +38,18 @@ export default async function AcademyPage() {
         </p>
       </section>
 
-      <section aria-label="Member pricing" className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold/60 bg-[#fff8e1] px-6 py-4">
-        <p>
-          <strong>Members save {pct}% on every course.</strong> Courses are sold separately and are not included in any membership.
-        </p>
-        {!v.tier && (
-          <a href="/pricing" className="font-semibold text-navy underline">
-            Compare memberships
-          </a>
-        )}
-      </section>
+      {sales && (
+        <section aria-label="Member pricing" className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold/60 bg-[#fff8e1] px-6 py-4">
+          <p>
+            <strong>Members save {pct}% on every course.</strong> Courses are sold separately and are not included in any membership.
+          </p>
+          {!v.tier && (
+            <a href="/pricing" className="font-semibold text-navy underline">
+              Compare memberships
+            </a>
+          )}
+        </section>
+      )}
 
       <section aria-label="Courses" className="mt-8 grid gap-6 md:grid-cols-3">
         {COURSES.map((c) => {
