@@ -33,7 +33,7 @@ export default function TermsPage() {
           "Moving up a tier starts straight away, with a credit for unused time on your current plan. Moving down takes effect when your current paid period ends.",
           "If you turned on automatic card renewal, you can cancel it at any time using the link in the reminder email Flutterwave sends before each charge.",
           "We may change prices for future periods. A change never affects a period you have already paid for.",
-          "Elevate places are limited. When they're full, you can join a waitlist.",
+          "Elevate places depend on coach availability. When they're full, you can join a waitlist.",
         ]}
       />
       <p>

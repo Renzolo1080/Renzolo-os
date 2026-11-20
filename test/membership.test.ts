@@ -108,7 +108,7 @@ assert(!auto.ok && /automatic/.test((auto as any).reason), "auto-renewing card m
 const lapsed = pc({ status: "active", current_period_end: future(-2), tier: "elevate" }, null, "essentials", "quarterly");
 assert(lapsed.ok && lapsed.kind === "new" && lapsed.startsAt === now.toISOString(), "lapsed membership: any tier starts fresh now");
 
-assert(elevateSeatLimit({}) === 50 && elevateSeatLimit({ ELEVATE_SEAT_LIMIT: "40" }) === 40 && elevateSeatLimit({ ELEVATE_SEAT_LIMIT: "lots" }) === 50, "Elevate seat limit: 50 by default, settable");
+assert(elevateSeatLimit({}) === Number.POSITIVE_INFINITY && elevateSeatLimit({ ELEVATE_SEAT_LIMIT: "40" }) === 40 && elevateSeatLimit({ ELEVATE_SEAT_LIMIT: "lots" }) === Number.POSITIVE_INFINITY, "Elevate seat limit: none by default, settable from coach capacity");
 
 console.log("\nAll membership and pricing tests completed.");
 
