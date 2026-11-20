@@ -54,5 +54,5 @@ export const MEMBERSHIP_POLICIES = [
   "Moving down a tier takes effect when your current paid period ends.",
   "Cancelling simply means not renewing: you keep access to the end of the period you paid for. There are no partial refunds.",
   "Included coaching sessions don't roll over past the period they belong to. Sessions you buy are used within 60 days of purchase; we'll work with you to reschedule within that time.",
-  "Elevate seats are limited. When they're full you can join the waitlist.",
+  "Elevate places depend on coach availability. When they're full you can join the waitlist.",
 ];

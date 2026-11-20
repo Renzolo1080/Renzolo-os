@@ -202,10 +202,12 @@ export function planChange(
   return { ok: true, kind: "upgrade", charge, listPrice: target.listPrice, credit: applied, extraDays, startsAt: nowIso };
 }
 
-/** Elevate is limited by coaching hours (2 one-on-ones a month each). */
+/** Elevate has no fixed cap (Lorenzo, Nov 20 2026): the limit is set from
+ * coaching capacity and the number of coaches. Set ELEVATE_SEAT_LIMIT in
+ * Vercel when a limit is needed; without it there is no limit. */
 export function elevateSeatLimit(env: Record<string, string | undefined> = process.env): number {
   const n = Number(env.ELEVATE_SEAT_LIMIT);
-  return Number.isInteger(n) && n > 0 ? n : 50;
+  return Number.isInteger(n) && n > 0 ? n : Number.POSITIVE_INFINITY;
 }
 
 /** How long after buying the $40 assessment it carries straight into a
