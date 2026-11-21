@@ -61,7 +61,7 @@ export default function Home() {
     <>
       <Header campaign="home_header" />
       <main>
-        <HeroZoom eyebrow="Venture development & capital infrastructure" title="Get ready to win." intro="We help founders and CEOs get ready to win contracts, access capital and attract investment.">
+        <HeroZoom eyebrow="Venture development & capital infrastructure" title="Getting founders ready to win." intro="We help founders and CEOs get ready to win contracts, access capital and attract investment.">
           <div className="mt-9 flex flex-wrap justify-center gap-4">
             <a href={appLink("/snapshot", "home_hero")} className={CTA}>
               Start the free Snapshot
