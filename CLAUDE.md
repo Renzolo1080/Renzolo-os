@@ -37,7 +37,9 @@ RENZOLO™ is a venture development and capital infrastructure platform, not a c
 - Do not invent new public product names; describe new features plainly until Lorenzo clears a name.
 - Use only logos and brand assets Lorenzo has approved. No competitor names in public copy. Only claim what is live. No AI-generated people as testimonials. Do not name past employers or partner organisations in public copy without Lorenzo's approval.
 
-**Email signatures (approved Nov 20, 2026):** two RENZOLO Enterprises signatures live in `design/email-signatures/`. The long version (the RENZOLO Enterprises signature) is: Lorenzo Bell Jr. · Founder & CEO, Renzolo Enterprises LLC · Venture Development & Capital Infrastructure · Founder Trajectory™ | RENZOLO OS™ · +1 414-534-0488 · lorenzo@renzoloenterprises.com · renzoloenterprises.com, with the RZ logo on the left and a purple divider. The short version drops the Founder Trajectory™ | RENZOLO OS™ line. No tagline until Lorenzo approves one.
+**Tagline (approved Nov 21, 2026):** *Getting founders ready to win™* (lowercase "founders"; use ™ until registered). Never shorten it to "Founder Ready" or "Founders Ready", which are close to another company's name in the founder-readiness space. A first trademark screen on Nov 21, 2026 found no conflicting mark or user; run the official USPTO search (Classes 35, 41, 42) and an attorney check, including the UK register, before filing. Positioning line to go with it: RENZOLO helps founders assess their business, build a growth trajectory plan and get ready to win deals with customers and investors.
+
+**Email signatures (approved Nov 20, 2026):** two RENZOLO Enterprises signatures live in `design/email-signatures/`. The long version (the RENZOLO Enterprises signature) is: Lorenzo Bell Jr. · Founder & CEO, Renzolo Enterprises LLC · Venture Development & Capital Infrastructure · Founder Trajectory™ | RENZOLO OS™ · +1 414-534-0488 · lorenzo@renzoloenterprises.com · renzoloenterprises.com, with the RZ logo on the left and a purple divider. The short version drops the Founder Trajectory™ | RENZOLO OS™ line.
 
 ## Sources of truth (newest wins)
 

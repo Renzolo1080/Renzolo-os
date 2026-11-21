@@ -24,7 +24,7 @@ The short version is the same without the Founder Trajectory™ | RENZOLO OS™ 
 - RZ logo on the left (58 × 48 px), a 3 px purple (#6B3FD4) divider, text on the right in Arial.
 - Colours: navy #0B1F3A for name and title lines, purple #6B3FD4 for the descriptor, grey #5A6472 for contact lines.
 - One contact item per line, so nothing wraps on a phone. Phone, email and website are tappable links.
-- No tagline until one is approved.
+- Tagline approved Nov 21, 2026: Getting founders ready to win™. Whether to add it to the signatures is a separate decision.
 - The logo loads from `https://renzolo-os.vercel.app/img/rz-logo.png`. Switch it to the renzoloenterprises.com address once the website is hosted there.
 
 ## Install in Gmail
