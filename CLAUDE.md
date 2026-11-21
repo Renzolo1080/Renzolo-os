@@ -37,6 +37,8 @@ RENZOLO™ is a venture development and capital infrastructure platform, not a c
 - Do not invent new public product names; describe new features plainly until Lorenzo clears a name.
 - Use only logos and brand assets Lorenzo has approved. No competitor names in public copy. Only claim what is live. No AI-generated people as testimonials. Do not name past employers or partner organisations in public copy without Lorenzo's approval.
 
+**Email signatures (approved Nov 20, 2026):** two RENZOLO Enterprises signatures live in `design/email-signatures/`. The long version (the RENZOLO Enterprises signature) is: Lorenzo Bell Jr. · Founder & CEO, Renzolo Enterprises LLC · Venture Development & Capital Infrastructure · Founder Trajectory™ | RENZOLO OS™ · +1 414-534-0488 · lorenzo@renzoloenterprises.com · renzoloenterprises.com, with the RZ logo on the left and a purple divider. The short version drops the Founder Trajectory™ | RENZOLO OS™ line. Use the long version on client letters, client responses and founder email. No tagline until Lorenzo approves one.
+
 ## Sources of truth (newest wins)
 
 - RENZOLO Venture Strategic Plan, latest "Enhanced" revision
