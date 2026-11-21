@@ -2,7 +2,7 @@
 
 Approved by Lorenzo on November 20, 2026. Use only these two signatures for RENZOLO email.
 
-| Version | File | Use for |
+| Version | File | Suggested use (not yet decided) |
 | --- | --- | --- |
 | Long (RENZOLO Enterprises signature) | `renzolo-enterprises-signature-long.html` | Founder, client and partner email, and client responses |
 | Short | `renzolo-enterprises-signature-short.html` | General business email |
